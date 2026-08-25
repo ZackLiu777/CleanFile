@@ -30,6 +30,17 @@ struct StorageView: View {
                             if !viewModel.largestFiles.isEmpty {
                                 largestFilesCard
                             }
+
+                            if !viewModel.files.isEmpty {
+                                NavigationLink {
+                                    ScannedFilesView(viewModel: viewModel)
+                                } label: {
+                                    Label("Review and Delete Files", systemImage: "trash")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(AppTheme.accentPrimary)
+                            }
                         }
                     }
                     .padding()
@@ -210,7 +221,7 @@ struct StorageView: View {
         .storageCard()
     }
 
-    private func metric(title: String, value: String) -> some View {
+    private func metric(title: LocalizedStringKey, value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.caption)
@@ -237,6 +248,163 @@ struct StorageView: View {
 
     private func byteCountText(_ byteCount: Int64) -> String {
         ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
+    }
+}
+
+private struct ScannedFilesView: View {
+    @ObservedObject var viewModel: FileScannerViewModel
+    @State private var selectedURLs = Set<URL>()
+    @State private var isDeleteConfirmationPresented = false
+
+    var body: some View {
+        Group {
+            if viewModel.files.isEmpty {
+                ContentUnavailableView(
+                    "No Files",
+                    systemImage: "folder",
+                    description: Text("No scanned files are available.")
+                )
+            } else {
+                List(viewModel.files) { file in
+                    Button {
+                        if selectedURLs.contains(file.url) {
+                            selectedURLs.remove(file.url)
+                        } else {
+                            selectedURLs.insert(file.url)
+                        }
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: selectedURLs.contains(file.url)
+                                ? "checkmark.circle.fill"
+                                : "circle")
+                                .foregroundStyle(
+                                    selectedURLs.contains(file.url)
+                                        ? AppTheme.accentPrimary
+                                        : .secondary
+                                )
+                            Image(systemName: "doc")
+                                .foregroundStyle(AppTheme.fileCategoryColor(file.category))
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(file.name)
+                                    .lineLimit(1)
+                                Text(file.relativePathComponents.dropLast().joined(separator: "/"))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                            Spacer()
+                            Text(ByteCountFormatter.string(
+                                fromByteCount: file.byteCount,
+                                countStyle: .file
+                            ))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .navigationTitle("Scanned Files")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(selectedURLs.count == viewModel.files.count ? "Deselect All" : "Select All") {
+                    if selectedURLs.count == viewModel.files.count {
+                        selectedURLs.removeAll()
+                    } else {
+                        selectedURLs = Set(viewModel.files.map(\.url))
+                    }
+                }
+                .disabled(viewModel.files.isEmpty || viewModel.deletionState.isDeleting)
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(selectedURLs.count) selected")
+                        .font(.subheadline.weight(.semibold))
+                    Text(selectedFileSizeText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer(minLength: 8)
+
+                Button(role: .destructive) {
+                    isDeleteConfirmationPresented = true
+                } label: {
+                    if viewModel.deletionState.isDeleting {
+                        ProgressView()
+                    } else {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+                .buttonStyle(.glass)
+                .foregroundStyle(.red)
+                .disabled(selectedURLs.isEmpty || viewModel.deletionState.isDeleting)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+        }
+        .alert("Permanently delete selected files?", isPresented: $isDeleteConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                let urls = selectedURLs
+                Task {
+                    await viewModel.deleteFiles(withURLs: urls)
+                    selectedURLs.formIntersection(Set(viewModel.files.map(\.url)))
+                }
+            }
+        } message: {
+            Text("These \(selectedURLs.count) file(s) may not be recoverable. This action cannot be undone in CleanMyIPhone.")
+        }
+        .alert(
+            deletionResultTitle ?? "",
+            isPresented: Binding(
+                get: { deletionResultTitle != nil },
+                set: { if !$0 { viewModel.clearDeletionResult() } }
+            )
+        ) {
+            Button("OK") { viewModel.clearDeletionResult() }
+        } message: {
+            Text(deletionResultMessage)
+        }
+    }
+
+    private var deletionResultTitle: String? {
+        switch viewModel.deletionState {
+        case .success: String(localized: "Deletion Complete")
+        case .partialFailure: String(localized: "Deletion Partly Completed")
+        case .failure: String(localized: "Deletion Failed")
+        default: nil
+        }
+    }
+
+    private var selectedFileSizeText: String {
+        let byteCount = viewModel.files.reduce(Int64.zero) { total, file in
+            selectedURLs.contains(file.url) && file.hasKnownByteCount
+                ? total + file.byteCount
+                : total
+        }
+        return ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
+    }
+
+    private var deletionResultMessage: String {
+        switch viewModel.deletionState {
+        case .success(let count):
+            String.localizedStringWithFormat(String(localized: "%lld file(s) deleted."), Int64(count))
+        case .partialFailure(let deletedCount, let failedCount):
+            String.localizedStringWithFormat(
+                String(localized: "%1$lld file(s) deleted; %2$lld could not be deleted."),
+                Int64(deletedCount),
+                Int64(failedCount)
+            )
+        case .failure(let error):
+            error.localizedDescription
+        default:
+            ""
+        }
     }
 }
 

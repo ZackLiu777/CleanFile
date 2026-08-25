@@ -5,31 +5,40 @@
 //  Created by Zane Liao on 8/18/26.
 //
 
+import ImageFormatConversionKit
 import SwiftUI
 
-private enum AppTab: Hashable {
+private enum AppTab: String, Hashable {
     case photos
     case storage
+    case conversion
     case settings
 }
 
 struct ContentView: View {
-    @StateObject private var viewModel = FileScannerViewModel()
-    @State private var selectedTab: AppTab = .photos
+    @StateObject private var mediaViewModel = PhotoLibraryViewModel()
+    @StateObject private var fileViewModel = FileScannerViewModel()
+    @AppStorage("selectedAppTab") private var selectedTab: AppTab = .photos
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            PhotosView()
+            PhotosView(viewModel: mediaViewModel)
                 .tabItem {
-                    Label("Photos", systemImage: "photo.on.rectangle")
+                    Label("Media", systemImage: "photo.on.rectangle")
                 }
                 .tag(AppTab.photos)
 
-            StorageView(viewModel: viewModel)
+            StorageView(viewModel: fileViewModel)
                 .tabItem {
                     Label("Storage", systemImage: "externaldrive")
                 }
                 .tag(AppTab.storage)
+
+            ImageConversionView()
+                .tabItem {
+                    Label("Convert", systemImage: "arrow.triangle.2.circlepath")
+                }
+                .tag(AppTab.conversion)
 
             SettingsView()
                 .tabItem {

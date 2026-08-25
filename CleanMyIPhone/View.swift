@@ -359,9 +359,6 @@ private struct SunburstChartCanvas: View {
             let slices = rootSlices()
 
             ZStack {
-                Color(red: 0.12, green: 0.13, blue: 0.16)
-                    .ignoresSafeArea()
-
                 ForEach(slices, id: \.child.id) { slice in
                     SunburstNodeView(
                         node: slice.child,
@@ -374,19 +371,16 @@ private struct SunburstChartCanvas: View {
                 }
 
                 Circle()
-                    .fill(Color(red: 0.15, green: 0.15, blue: 0.18))
+                    .fill(.clear)
                     .frame(width: geometry.centerRadius * 2, height: geometry.centerRadius * 2)
-                    .overlay(
-                        Circle().stroke(Color.white.opacity(0.15), lineWidth: 1)
-                    )
                     .overlay(
                         VStack(spacing: 2) {
                             Text(centerCapacity.value)
                                 .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                .foregroundColor(.white)
+                                .foregroundStyle(.primary)
                             Text(centerCapacity.unit)
                                 .font(.system(size: 11, weight: .regular, design: .rounded))
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.secondary)
                         }
                     )
             }

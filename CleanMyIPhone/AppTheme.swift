@@ -13,7 +13,7 @@ enum AppAppearance: String, CaseIterable, Identifiable, Sendable {
 
     var id: Self { self }
 
-    var displayName: String {
+    var displayName: LocalizedStringKey {
         switch self {
         case .light: "Light"
         case .dark: "Dark"

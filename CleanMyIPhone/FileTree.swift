@@ -46,7 +46,7 @@ struct FileTreeBuilder: Sendable {
     nonisolated static func build(rootURL: URL, files: [ScannedFile]) -> FileNode {
         let rootID = "."
         let rootName = rootURL.lastPathComponent.isEmpty
-            ? "Selected Folder"
+            ? String(localized: "Selected Folder")
             : rootURL.lastPathComponent
 
         var nodes = [

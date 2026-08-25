@@ -6,7 +6,7 @@
 import Foundation
 import UniformTypeIdentifiers
 
-enum FileCategory: String, CaseIterable, Codable, Hashable, Sendable {
+nonisolated enum FileCategory: String, CaseIterable, Codable, Hashable, Sendable {
     case video
     case image
     case audio
@@ -17,13 +17,13 @@ enum FileCategory: String, CaseIterable, Codable, Hashable, Sendable {
 
     var displayName: String {
         switch self {
-        case .video: "Videos"
-        case .image: "Images"
-        case .audio: "Audio"
-        case .document: "Documents"
-        case .pdf: "PDFs"
-        case .archive: "Archives"
-        case .other: "Other"
+        case .video: String(localized: "Videos")
+        case .image: String(localized: "Images")
+        case .audio: String(localized: "Audio")
+        case .document: String(localized: "Documents")
+        case .pdf: String(localized: "PDFs")
+        case .archive: String(localized: "Archives")
+        case .other: String(localized: "Other")
         }
     }
 
@@ -65,7 +65,7 @@ enum FileCategory: String, CaseIterable, Codable, Hashable, Sendable {
     }
 }
 
-struct ScannedFile: Identifiable, Hashable, Sendable {
+nonisolated struct ScannedFile: Identifiable, Codable, Hashable, Sendable {
     let id: URL
     let url: URL
     let name: String
@@ -229,11 +229,11 @@ enum FileScanError: LocalizedError, Equatable, Sendable {
 
     var errorDescription: String? {
         switch self {
-        case .cancelled: "扫描已取消。"
-        case .notDirectory: "请选择一个文件夹。"
-        case .unableToEnumerate: "无法读取所选文件夹。"
-        case .securityScopeUnavailable: "无法获得所选文件夹的访问权限。"
-        case .selectionFailed: "无法打开所选文件夹。"
+        case .cancelled: String(localized: "The scan was cancelled.")
+        case .notDirectory: String(localized: "Please choose a folder.")
+        case .unableToEnumerate: String(localized: "The selected folder could not be read.")
+        case .securityScopeUnavailable: String(localized: "Access to the selected folder could not be obtained.")
+        case .selectionFailed: String(localized: "The selected folder could not be opened.")
         }
     }
 }
@@ -250,5 +250,39 @@ enum ScanState: Equatable, Sendable {
     var isScanning: Bool {
         if case .scanning = self { return true }
         return false
+    }
+}
+
+struct FileDeletionResult: Equatable, Sendable {
+    let deletedURLs: Set<URL>
+    let failedFileCount: Int
+}
+
+enum FileDeletionState: Equatable, Sendable {
+    case idle
+    case deleting(itemCount: Int)
+    case success(deletedCount: Int)
+    case partialFailure(deletedCount: Int, failedCount: Int)
+    case failure(FileDeletionError)
+
+    var isDeleting: Bool {
+        if case .deleting = self { return true }
+        return false
+    }
+}
+
+enum FileDeletionError: LocalizedError, Equatable, Sendable {
+    case noItemsSelected
+    case folderAccessUnavailable
+    case invalidSelection
+    case deletionFailed
+
+    var errorDescription: String? {
+        switch self {
+        case .noItemsSelected: String(localized: "Select at least one file to delete.")
+        case .folderAccessUnavailable: String(localized: "Access to the selected folder is no longer available.")
+        case .invalidSelection: String(localized: "One or more selected files are outside the analyzed folder.")
+        case .deletionFailed: String(localized: "The selected files could not be deleted.")
+        }
     }
 }

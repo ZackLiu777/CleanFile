@@ -6,10 +6,48 @@
 //
 
 import Foundation
+import Photos
 import Testing
 @testable import CleanMyIPhone
 
 struct CleanMyIPhoneTests {
+    @Test
+    func videoMetadataCanBelongToMultipleCategories() {
+        let categories = MediaClassificationService.categories(
+            duration: 12 * 60,
+            pixelWidth: 3_840,
+            pixelHeight: 2_160,
+            mediaSubtypes: [.videoScreenRecording, .videoHighFrameRate]
+        )
+
+        #expect(categories == [.longDuration, .fourK, .screenRecording, .slowMotion])
+    }
+
+    @Test
+    func similarGroupTracksItsSuggestedKeeper() {
+        let group = SimilarImageGroup(
+            id: "group",
+            items: [
+                SimilarImageItem(
+                    id: "keeper",
+                    pixelWidth: 100,
+                    pixelHeight: 100,
+                    creationDate: nil
+                ),
+                SimilarImageItem(
+                    id: "similar",
+                    pixelWidth: 100,
+                    pixelHeight: 100,
+                    creationDate: nil
+                )
+            ],
+            suggestedKeeperID: "keeper"
+        )
+
+        #expect(group.suggestedKeeperID == "keeper")
+        #expect(group.items.count == 2)
+    }
+
     @Test
     func commonFileExtensionsAreClassified() {
         #expect(FileCategory.classify(fileExtension: "mp4") == .video)

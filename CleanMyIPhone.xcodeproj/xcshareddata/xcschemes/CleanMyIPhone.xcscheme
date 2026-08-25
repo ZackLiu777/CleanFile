@@ -17,6 +17,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "FF23C7533033FBD500B13EBA"
                BuildableName = "CleanMyIPhone.app"
+               BlueprintName = "CleanMyIPhone"
                ReferencedContainer = "container:CleanMyIPhone.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -36,6 +37,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "FF23C7623033FBD600B13EBA"
                BuildableName = "CleanMyIPhoneTests.xctest"
+               BlueprintName = "CleanMyIPhoneTests"
                ReferencedContainer = "container:CleanMyIPhone.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -46,6 +48,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "FF23C76C3033FBD600B13EBA"
                BuildableName = "CleanMyIPhoneUITests.xctest"
+               BlueprintName = "CleanMyIPhoneUITests"
                ReferencedContainer = "container:CleanMyIPhone.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -68,6 +71,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "FF23C7533033FBD500B13EBA"
             BuildableName = "CleanMyIPhone.app"
+            BlueprintName = "CleanMyIPhone"
             ReferencedContainer = "container:CleanMyIPhone.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -84,6 +88,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "FF23C7533033FBD500B13EBA"
             BuildableName = "CleanMyIPhone.app"
+            BlueprintName = "CleanMyIPhone"
             ReferencedContainer = "container:CleanMyIPhone.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

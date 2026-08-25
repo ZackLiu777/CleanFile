@@ -3,8 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 110;
+	objectVersion = 77;
 	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* ImageFormatConversionKit in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000003 /* ImageFormatConversionKit */; };
+/* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		FF23C7643033FBD600B13EBA /* PBXContainerItemProxy */ = {
@@ -50,18 +54,25 @@
 /* Begin PBXFrameworksBuildPhase section */
 		FF23C7513033FBD500B13EBA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
+				A10000000000000000000001 /* ImageFormatConversionKit in Frameworks */,
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		FF23C7603033FBD600B13EBA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		FF23C76A3033FBD600B13EBA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -99,10 +110,15 @@
 			);
 			buildRules = (
 			);
+			dependencies = (
+			);
 			fileSystemSynchronizedGroups = (
 				FF23C7563033FBD500B13EBA /* CleanMyIPhone */,
 			);
 			name = CleanMyIPhone;
+			packageProductDependencies = (
+				A10000000000000000000003 /* ImageFormatConversionKit */,
+			);
 			productName = CleanMyIPhone;
 			productReference = FF23C7543033FBD500B13EBA /* CleanMyIPhone.app */;
 			productType = "com.apple.product-type.application";
@@ -156,18 +172,18 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2700;
-				LastUpgradeCheck = 2700;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					FF23C7533033FBD500B13EBA = {
-						CreatedOnToolsVersion = 27.0;
+						CreatedOnToolsVersion = 26.0;
 					};
 					FF23C7623033FBD600B13EBA = {
-						CreatedOnToolsVersion = 27.0;
+						CreatedOnToolsVersion = 26.0;
 						TestTargetID = FF23C7533033FBD500B13EBA;
 					};
 					FF23C76C3033FBD600B13EBA = {
-						CreatedOnToolsVersion = 27.0;
+						CreatedOnToolsVersion = 26.0;
 						TestTargetID = FF23C7533033FBD500B13EBA;
 					};
 				};
@@ -178,9 +194,18 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
+				"zh-Hant",
+				es,
+				fr,
+				ja,
+				ko,
 			);
 			mainGroup = FF23C74B3033FBD500B13EBA;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A10000000000000000000002 /* XCLocalSwiftPackageReference "Packages/ImageFormatConversionKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FF23C7553033FBD500B13EBA /* Products */;
 			projectDirPath = "";
@@ -196,36 +221,48 @@
 /* Begin PBXResourcesBuildPhase section */
 		FF23C7523033FBD500B13EBA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		FF23C7613033FBD600B13EBA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		FF23C76B3033FBD600B13EBA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		FF23C7503033FBD500B13EBA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		FF23C75F3033FBD600B13EBA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		FF23C7693033FBD600B13EBA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -243,7 +280,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		FF23C7733033FBD600B13EBA /* Debug configuration for PBXProject "CleanMyIPhone" */ = {
+		FF23C7733033FBD600B13EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -296,7 +333,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -307,7 +344,7 @@
 			};
 			name = Debug;
 		};
-		FF23C7743033FBD600B13EBA /* Release configuration for PBXProject "CleanMyIPhone" */ = {
+		FF23C7743033FBD600B13EBA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -354,7 +391,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -364,7 +401,7 @@
 			};
 			name = Release;
 		};
-		FF23C7763033FBD600B13EBA /* Debug configuration for PBXNativeTarget "CleanMyIPhone" */ = {
+		FF23C7763033FBD600B13EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -380,7 +417,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -398,7 +435,7 @@
 			};
 			name = Debug;
 		};
-		FF23C7773033FBD600B13EBA /* Release configuration for PBXNativeTarget "CleanMyIPhone" */ = {
+		FF23C7773033FBD600B13EBA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -414,7 +451,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -432,7 +469,7 @@
 			};
 			name = Release;
 		};
-		FF23C7793033FBD600B13EBA /* Debug configuration for PBXNativeTarget "CleanMyIPhoneTests" */ = {
+		FF23C7793033FBD600B13EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -440,7 +477,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NL82DMN369;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ZaneLiao.CleanMyIPhoneTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -454,7 +491,7 @@
 			};
 			name = Debug;
 		};
-		FF23C77A3033FBD600B13EBA /* Release configuration for PBXNativeTarget "CleanMyIPhoneTests" */ = {
+		FF23C77A3033FBD600B13EBA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -462,7 +499,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NL82DMN369;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ZaneLiao.CleanMyIPhoneTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -476,14 +513,14 @@
 			};
 			name = Release;
 		};
-		FF23C77C3033FBD600B13EBA /* Debug configuration for PBXNativeTarget "CleanMyIPhoneUITests" */ = {
+		FF23C77C3033FBD600B13EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NL82DMN369;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ZaneLiao.CleanMyIPhoneUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -497,14 +534,14 @@
 			};
 			name = Debug;
 		};
-		FF23C77D3033FBD600B13EBA /* Release configuration for PBXNativeTarget "CleanMyIPhoneUITests" */ = {
+		FF23C77D3033FBD600B13EBA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NL82DMN369;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ZaneLiao.CleanMyIPhoneUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -524,37 +561,54 @@
 		FF23C74F3033FBD500B13EBA /* Build configuration list for PBXProject "CleanMyIPhone" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FF23C7733033FBD600B13EBA /* Debug configuration for PBXProject "CleanMyIPhone" */,
-				FF23C7743033FBD600B13EBA /* Release configuration for PBXProject "CleanMyIPhone" */,
+				FF23C7733033FBD600B13EBA /* Debug */,
+				FF23C7743033FBD600B13EBA /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		FF23C7753033FBD600B13EBA /* Build configuration list for PBXNativeTarget "CleanMyIPhone" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FF23C7763033FBD600B13EBA /* Debug configuration for PBXNativeTarget "CleanMyIPhone" */,
-				FF23C7773033FBD600B13EBA /* Release configuration for PBXNativeTarget "CleanMyIPhone" */,
+				FF23C7763033FBD600B13EBA /* Debug */,
+				FF23C7773033FBD600B13EBA /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		FF23C7783033FBD600B13EBA /* Build configuration list for PBXNativeTarget "CleanMyIPhoneTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FF23C7793033FBD600B13EBA /* Debug configuration for PBXNativeTarget "CleanMyIPhoneTests" */,
-				FF23C77A3033FBD600B13EBA /* Release configuration for PBXNativeTarget "CleanMyIPhoneTests" */,
+				FF23C7793033FBD600B13EBA /* Debug */,
+				FF23C77A3033FBD600B13EBA /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		FF23C77B3033FBD600B13EBA /* Build configuration list for PBXNativeTarget "CleanMyIPhoneUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FF23C77C3033FBD600B13EBA /* Debug configuration for PBXNativeTarget "CleanMyIPhoneUITests" */,
-				FF23C77D3033FBD600B13EBA /* Release configuration for PBXNativeTarget "CleanMyIPhoneUITests" */,
+				FF23C77C3033FBD600B13EBA /* Debug */,
+				FF23C77D3033FBD600B13EBA /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		A10000000000000000000002 /* XCLocalSwiftPackageReference "Packages/ImageFormatConversionKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/ImageFormatConversionKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A10000000000000000000003 /* ImageFormatConversionKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ImageFormatConversionKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FF23C74C3033FBD500B13EBA /* Project object */;
-	validationLevel = 1;
 }
