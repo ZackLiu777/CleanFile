@@ -22,7 +22,7 @@ struct VideoConversionView: View {
         }
         .fileImporter(
             isPresented: $importerPresented,
-            allowedContentTypes: [.movie],
+            allowedContentTypes: supportedVideoImportTypes,
             allowsMultipleSelection: true
         ) { result in
             switch result {
@@ -42,6 +42,14 @@ struct VideoConversionView: View {
                 .disabled(viewModel.isConverting)
             }
         }
+    }
+
+    private var supportedVideoImportTypes: [UTType] {
+        var types: [UTType] = [.quickTimeMovie, .mpeg4Movie]
+        if let m4v = UTType(filenameExtension: "m4v") {
+            types.append(m4v)
+        }
+        return types
     }
 
     private var importCard: some View {

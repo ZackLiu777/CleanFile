@@ -101,3 +101,38 @@ struct AppBackground: View {
             .ignoresSafeArea()
     }
 }
+
+private struct AppGlassCardModifier: ViewModifier {
+    let cornerRadius: CGFloat
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+#if os(iOS)
+        if #available(iOS 26.0, *) {
+            content.glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+        } else {
+            fallback(content)
+        }
+#else
+        fallback(content)
+#endif
+    }
+
+    private func fallback(_ content: Content) -> some View {
+        content
+            .background(
+                .ultraThinMaterial,
+                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(.white.opacity(0.12), lineWidth: 0.5)
+            }
+    }
+}
+
+extension View {
+    func appGlassCard(cornerRadius: CGFloat = 20) -> some View {
+        modifier(AppGlassCardModifier(cornerRadius: cornerRadius))
+    }
+}

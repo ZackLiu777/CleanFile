@@ -12,8 +12,12 @@ public actor ImageConversionEngine {
         ImageConversionWorker.supportedOutputFormats
     }
 
-    public static var supportedInputFileExtensions: [String] {
-        ImageConversionWorker.supportedInputFileExtensions
+    public static var supportedInputFormatNames: [String] {
+        ImageConversionWorker.supportedInputFormatNames
+    }
+
+    public static var supportedInputContentTypes: [UTType] {
+        ImageConversionWorker.supportedInputContentTypes
     }
 
     public func inspect(_ sourceURL: URL) async throws -> ImageAssetInfo {
@@ -154,13 +158,43 @@ public actor ImageConversionEngine {
 }
 
 private enum ImageConversionWorker {
-    static var supportedInputFileExtensions: [String] {
+    private static let inputDefinitions: [(name: String, type: UTType)] = [
+        ("JPEG", .jpeg),
+        ("PNG", .png),
+        ("HEIC", .heic),
+        ("HEIF", .heif),
+        ("TIFF", .tiff),
+        ("WebP", .webP),
+        ("GIF (Static)", .gif),
+        ("BMP", .bmp),
+        ("DNG / ProRAW / RAW", .rawImage)
+    ]
+
+    private static var sourceTypes: [UTType] {
         let identifiers = (CGImageSourceCopyTypeIdentifiers() as NSArray)
             .compactMap { $0 as? String }
-        let extensions = identifiers.compactMap {
-            UTType($0)?.preferredFilenameExtension?.uppercased()
+        return identifiers.compactMap(UTType.init)
+    }
+
+    static var supportedInputFormatNames: [String] {
+        inputDefinitions.compactMap { definition in
+            sourceTypes.contains(where: { $0.conforms(to: definition.type) })
+                ? definition.name
+                : nil
         }
-        return Array(Set(extensions)).sorted()
+    }
+
+    static var supportedInputContentTypes: [UTType] {
+        inputDefinitions.compactMap { definition in
+            sourceTypes.contains(where: { $0.conforms(to: definition.type) })
+                ? definition.type
+                : nil
+        }
+    }
+
+    private static func supportsInput(_ identifier: String?) -> Bool {
+        guard let identifier, let type = UTType(identifier) else { return false }
+        return inputDefinitions.contains { type.conforms(to: $0.type) }
     }
 
     static var supportedOutputFormats: [ImageOutputFormat] {
@@ -204,6 +238,9 @@ private enum ImageConversionWorker {
         let resourceValues = try? sourceURL.resourceValues(forKeys: [.fileSizeKey])
         let fileSize = Int64(resourceValues?.fileSize ?? 0)
         let typeIdentifier = CGImageSourceGetType(source).map { $0 as String }
+        guard supportsInput(typeIdentifier) else {
+            throw ImageConversionError.unsupportedInputFormat(sourceURL)
+        }
         let hasAlpha = number(properties[kCGImagePropertyHasAlpha]).boolValue
 
         return ImageAssetInfo(
@@ -256,6 +293,11 @@ private enum ImageConversionWorker {
         let sourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         guard let source = CGImageSourceCreateWithURL(sourceURL as CFURL, sourceOptions) else {
             throw ImageConversionError.cannotOpenSource(sourceURL)
+        }
+
+        let sourceTypeIdentifier = CGImageSourceGetType(source).map { $0 as String }
+        guard supportsInput(sourceTypeIdentifier) else {
+            throw ImageConversionError.unsupportedInputFormat(sourceURL)
         }
 
         let frameCount = CGImageSourceGetCount(source)

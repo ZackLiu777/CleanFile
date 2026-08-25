@@ -54,8 +54,15 @@ public final class VideoConversionViewModel {
 
     public func addFiles(_ urls: [URL]) {
         guard !isConverting else { return }
+        let allowedExtensions = Set(["mov", "mp4", "m4v"])
+        let supportedURLs = urls.filter {
+            allowedExtensions.contains($0.pathExtension.lowercased())
+        }
+        if supportedURLs.count != urls.count {
+            notice = L10n.string("video.error.unsupported_import")
+        }
         var known = Set(items.map { $0.sourceURL.standardizedFileURL })
-        for url in urls where known.insert(url.standardizedFileURL).inserted {
+        for url in supportedURLs where known.insert(url.standardizedFileURL).inserted {
             let bytes = Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
             items.append(VideoConversionItem(sourceURL: url, sourceBytes: bytes))
         }

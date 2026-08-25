@@ -412,9 +412,6 @@ private extension View {
     func storageCard() -> some View {
         padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                Color(.secondarySystemBackground).opacity(0.92),
-                in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-            )
+            .appGlassCard()
     }
 }

@@ -14,6 +14,7 @@ public struct ImageConversionView: View {
             Picker(L10n.string("converter.mode"), selection: $mode) {
                 Label(L10n.string("converter.mode.image"), systemImage: "photo").tag(ConversionMode.image)
                 Label(L10n.string("converter.mode.video"), systemImage: "film").tag(ConversionMode.video)
+                Label(L10n.string("converter.mode.audio"), systemImage: "waveform").tag(ConversionMode.audio)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 16)
@@ -26,6 +27,7 @@ public struct ImageConversionView: View {
             switch mode {
             case .image: ImageConversionContentView()
             case .video: VideoConversionView()
+            case .audio: AudioConversionView()
             }
         }
         .background(converterBackground)
@@ -39,14 +41,20 @@ public struct ImageConversionView: View {
 
     private var formatSummary: some View {
         HStack(spacing: 12) {
-            Text(mode == .image
-                ? L10n.string("formats.image.summary")
-                : L10n.string("formats.video.summary"))
+            Text(formatSummaryText)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             formatDetailsButton
+        }
+    }
+
+    private var formatSummaryText: String {
+        switch mode {
+        case .image: L10n.string("formats.image.summary")
+        case .video: L10n.string("formats.video.summary")
+        case .audio: L10n.string("formats.audio.summary")
         }
     }
 
@@ -78,6 +86,7 @@ public struct ImageConversionView: View {
 private enum ConversionMode: Hashable {
     case image
     case video
+    case audio
 }
 
 private struct SupportedFormatsSheet: View {
@@ -97,7 +106,7 @@ private struct SupportedFormatsSheet: View {
                             title: L10n.string("formats.export"),
                             formats: ImageConversionEngine.supportedOutputFormats.map(formatName)
                         )
-                    } else {
+                    } else if mode == .video {
                         FormatChipSection(
                             title: L10n.string("formats.import"),
                             formats: ["MOV", "MP4", "M4V"]
@@ -110,13 +119,20 @@ private struct SupportedFormatsSheet: View {
                             title: L10n.string("formats.codec"),
                             formats: ["H.264", "HEVC", "ProRes 422", "ProRes 4444"]
                         )
+                    } else {
+                        FormatChipSection(
+                            title: L10n.string("formats.import"),
+                            formats: ["M4A", "AAC", "MP3", "WAV", "AIFF", "CAF"]
+                        )
+                        FormatChipSection(
+                            title: L10n.string("formats.export"),
+                            formats: ["AAC · M4A", "ALAC · M4A", "WAV · PCM"]
+                        )
                     }
                 }
                 .padding(20)
             }
-            .navigationTitle(mode == .image
-                ? L10n.string("formats.image.title")
-                : L10n.string("formats.video.title"))
+            .navigationTitle(formatTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -126,18 +142,20 @@ private struct SupportedFormatsSheet: View {
         }
     }
 
+    private var formatTitle: String {
+        switch mode {
+        case .image: L10n.string("formats.image.title")
+        case .video: L10n.string("formats.video.title")
+        case .audio: L10n.string("formats.audio.title")
+        }
+    }
+
     private var imageInputFormats: [String] {
-        let preferredOrder = [
-            "JPG", "JPEG", "PNG", "HEIC", "HEIF", "WEBP", "TIFF", "TIF",
-            "GIF", "BMP", "DNG", "RAW", "CR2", "CR3", "NEF", "ARW", "RAF", "ORF", "RW2"
-        ]
-        let supported = Set(ImageConversionEngine.supportedInputFileExtensions)
-        let ordered = preferredOrder.filter(supported.contains)
-        return ordered + supported.subtracting(ordered).sorted()
+        ImageConversionEngine.supportedInputFormatNames
     }
 
     private func formatName(_ format: ImageOutputFormat) -> String {
-        format == .heic ? "HEIC" : format.rawValue.uppercased()
+        format.rawValue.uppercased()
     }
 }
 
@@ -211,7 +229,7 @@ private struct ImageConversionContentView: View {
         }
         .fileImporter(
             isPresented: $isImporterPresented,
-            allowedContentTypes: [.image, .rawImage],
+            allowedContentTypes: ImageConversionEngine.supportedInputContentTypes,
             allowsMultipleSelection: true
         ) { result in
             switch result {

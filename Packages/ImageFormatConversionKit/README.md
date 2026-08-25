@@ -6,7 +6,7 @@ unmaintained FFmpeg wrapper behind a thin UI.
 
 ## What is included
 
-- JPEG, PNG, HEIC, and TIFF output, filtered at runtime by the encoders that
+- JPEG, PNG, HEIC, HEIF, TIFF, WebP, static GIF, and BMP output, filtered at runtime by the encoders that
   ImageIO reports on the current device.
 - Batch conversion with bounded concurrency (two files by default), task
   cancellation, per-file isolation, and progress reporting.

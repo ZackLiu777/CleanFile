@@ -5,6 +5,7 @@ public enum ImageOutputFormat: String, CaseIterable, Codable, Identifiable, Send
     case jpeg
     case png
     case heic
+    case heif
     case tiff
     case webp
     case gif
@@ -17,6 +18,7 @@ public enum ImageOutputFormat: String, CaseIterable, Codable, Identifiable, Send
         case .jpeg: "jpg"
         case .png: "png"
         case .heic: "heic"
+        case .heif: "heif"
         case .tiff: "tiff"
         case .webp: "webp"
         case .gif: "gif"
@@ -29,6 +31,7 @@ public enum ImageOutputFormat: String, CaseIterable, Codable, Identifiable, Send
         case .jpeg: UTType.jpeg.identifier
         case .png: UTType.png.identifier
         case .heic: UTType.heic.identifier
+        case .heif: UTType.heif.identifier
         case .tiff: UTType.tiff.identifier
         case .webp: UTType.webP.identifier
         case .gif: UTType.gif.identifier
@@ -37,7 +40,7 @@ public enum ImageOutputFormat: String, CaseIterable, Codable, Identifiable, Send
     }
 
     public var supportsQuality: Bool {
-        self == .jpeg || self == .heic || self == .webp
+        self == .jpeg || self == .heic || self == .heif || self == .webp
     }
 
     public var requiresOpaquePixels: Bool {
@@ -184,6 +187,7 @@ public struct ImageConversionResult: Hashable, Identifiable, Sendable {
 public enum ImageConversionError: Error, Hashable, Sendable {
     case sourceNotReachable(URL)
     case cannotOpenSource(URL)
+    case unsupportedInputFormat(URL)
     case invalidImageProperties(URL)
     case animatedImageUnsupported(frameCount: Int)
     case unsupportedOutputFormat(ImageOutputFormat)
@@ -208,6 +212,8 @@ extension ImageConversionError: LocalizedError {
             L10n.format("error.source_not_reachable", url.lastPathComponent)
         case let .cannotOpenSource(url):
             L10n.format("error.cannot_open_source", url.lastPathComponent)
+        case let .unsupportedInputFormat(url):
+            L10n.format("error.unsupported_input", url.lastPathComponent)
         case let .invalidImageProperties(url):
             L10n.format("error.invalid_properties", url.lastPathComponent)
         case let .animatedImageUnsupported(frameCount):
