@@ -5,6 +5,22 @@ import Testing
 
 @Suite("Media model behavior")
 struct MediaModelTests {
+    @Test("Analysis progress limits large workloads to about one hundred updates")
+    func analysisProgressIsThrottled() {
+        let reported = (1 ... 10_000).filter {
+            MediaClassificationService.shouldReportProgress(completed: $0, total: 10_000)
+        }
+
+        #expect(reported.count == 100)
+        #expect(reported.last == 10_000)
+    }
+
+    @Test("Analysis progress always reports completion for small workloads")
+    func analysisProgressReportsFinalItem() {
+        #expect(MediaClassificationService.shouldReportProgress(completed: 3, total: 3))
+        #expect(MediaClassificationService.shouldReportProgress(completed: 0, total: 0))
+    }
+
     @Test("Media date sections and items sort newest first")
     func mediaDateSectionsSortNewestFirst() throws {
         let calendar = utcCalendar

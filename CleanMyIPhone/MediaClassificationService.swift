@@ -33,14 +33,21 @@ struct MediaClassificationService {
             .filter { $0.mediaSubtypes.contains(.photoLive) }
             .map(\.localIdentifier)
         let candidates = similarityCandidates(from: images)
-        await featureEngine.reset()
+        let assetsByIdentifier = Dictionary(
+            uniqueKeysWithValues: images.map { ($0.localIdentifier, $0) }
+        )
+        await featureEngine.retainFeatures(for: Set(candidates.map(\.id)))
 
         progress(MediaAnalysisProgress(
             phase: .generatingFeatures,
             completed: 0,
             total: candidates.count
         ))
-        let featureOutcomes = await generateFeatures(for: candidates, progress: progress)
+        let featureOutcomes = await generateFeatures(
+            for: candidates,
+            assetsByIdentifier: assetsByIdentifier,
+            progress: progress
+        )
         try Task.checkCancellation()
 
         let availableFeatures = featureOutcomes.compactMap(\.feature)
@@ -53,21 +60,19 @@ struct MediaClassificationService {
         ))
 
         var acceptedPairs: [AcceptedPair] = []
-        for (index, pair) in comparisonPairs.enumerated() {
+        let comparisonBatchSize = 128
+        for batchStart in stride(from: 0, to: comparisonPairs.count, by: comparisonBatchSize) {
             try Task.checkCancellation()
-            if let distance = try? await featureEngine.distance(
-                between: pair.firstID,
-                and: pair.secondID
-            ), distance <= maximumFeaturePrintDistance {
-                acceptedPairs.append(AcceptedPair(
-                    firstID: pair.firstID,
-                    secondID: pair.secondID,
-                    distance: distance
-                ))
+            let batchEnd = min(batchStart + comparisonBatchSize, comparisonPairs.count)
+            if let matches = try? await featureEngine.acceptedPairs(
+                from: Array(comparisonPairs[batchStart ..< batchEnd]),
+                maximumDistance: maximumFeaturePrintDistance
+            ) {
+                acceptedPairs.append(contentsOf: matches)
             }
             progress(MediaAnalysisProgress(
                 phase: .comparingImages,
-                completed: index + 1,
+                completed: batchEnd,
                 total: comparisonPairs.count
             ))
         }
@@ -141,7 +146,12 @@ struct MediaClassificationService {
                     sequenceID: sequenceID,
                     pixelWidth: asset.pixelWidth,
                     pixelHeight: asset.pixelHeight,
-                    creationDate: creationDate
+                    creationDate: creationDate,
+                    cacheKey: FeatureCacheKey(
+                        modificationDate: asset.modificationDate,
+                        pixelWidth: asset.pixelWidth,
+                        pixelHeight: asset.pixelHeight
+                    )
                 )
             }
         }
@@ -149,6 +159,7 @@ struct MediaClassificationService {
 
     private func generateFeatures(
         for candidates: [SimilarityCandidate],
+        assetsByIdentifier: [String: PHAsset],
         progress: ProgressHandler
     ) async -> [FeatureOutcome] {
         guard !candidates.isEmpty else { return [] }
@@ -159,22 +170,30 @@ struct MediaClassificationService {
             let initialCount = min(maximumConcurrentFeatureRequests, candidates.count)
             for _ in 0 ..< initialCount {
                 let candidate = candidates[nextIndex]
-                group.addTask { @MainActor in await generateFeature(for: candidate) }
+                let asset = assetsByIdentifier[candidate.id]
+                group.addTask { @MainActor in
+                    await generateFeature(for: candidate, asset: asset)
+                }
                 nextIndex += 1
             }
 
             while let outcome = await group.next() {
                 outcomes.append(outcome)
-                progress(MediaAnalysisProgress(
-                    phase: .generatingFeatures,
-                    completed: outcomes.count,
-                    total: candidates.count
-                ))
+                if Self.shouldReportProgress(completed: outcomes.count, total: candidates.count) {
+                    progress(MediaAnalysisProgress(
+                        phase: .generatingFeatures,
+                        completed: outcomes.count,
+                        total: candidates.count
+                    ))
+                }
                 if Task.isCancelled {
                     group.cancelAll()
                 } else if nextIndex < candidates.count {
                     let candidate = candidates[nextIndex]
-                    group.addTask { @MainActor in await generateFeature(for: candidate) }
+                    let asset = assetsByIdentifier[candidate.id]
+                    group.addTask { @MainActor in
+                        await generateFeature(for: candidate, asset: asset)
+                    }
                     nextIndex += 1
                 }
             }
@@ -182,18 +201,32 @@ struct MediaClassificationService {
         return outcomes
     }
 
-    private func generateFeature(for candidate: SimilarityCandidate) async -> FeatureOutcome {
-        guard !Task.isCancelled,
-              let asset = PHAsset.fetchAssets(
-                withLocalIdentifiers: [candidate.id],
-                options: nil
-              ).firstObject else {
+    private func generateFeature(
+        for candidate: SimilarityCandidate,
+        asset: PHAsset?
+    ) async -> FeatureOutcome {
+        guard !Task.isCancelled, let asset else {
             return FeatureOutcome(feature: nil)
         }
 
         do {
+            if let hash = await featureEngine.cachedHash(
+                id: candidate.id,
+                cacheKey: candidate.cacheKey
+            ) {
+                return FeatureOutcome(feature: CandidateFeature(
+                    id: candidate.id,
+                    sequenceID: candidate.sequenceID,
+                    perceptualHash: hash,
+                    creationDate: candidate.creationDate
+                ))
+            }
             let image = try await requestThumbnail(for: asset)
-            let hash = try await featureEngine.store(id: candidate.id, image: image)
+            let hash = try await featureEngine.store(
+                id: candidate.id,
+                cacheKey: candidate.cacheKey,
+                image: image
+            )
             return FeatureOutcome(feature: CandidateFeature(
                 id: candidate.id,
                 sequenceID: candidate.sequenceID,
@@ -211,17 +244,16 @@ struct MediaClassificationService {
             try await withCheckedThrowingContinuation { continuation in
                 let gate = ContinuationGate<CGImage>(continuation: continuation)
                 let options = PHImageRequestOptions()
-                options.deliveryMode = .highQualityFormat
-                options.resizeMode = .exact
+                options.deliveryMode = .fastFormat
+                options.resizeMode = .fast
                 options.isNetworkAccessAllowed = false
 
                 let requestID = imageManager.requestImage(
                     for: asset,
-                    targetSize: CGSize(width: 384, height: 384),
+                    targetSize: CGSize(width: 256, height: 256),
                     contentMode: .aspectFit,
                     options: options
                 ) { image, info in
-                    if (info?[PHImageResultIsDegradedKey] as? Bool) == true { return }
                     if let error = info?[PHImageErrorKey] as? Error {
                         gate.resume(throwing: error)
                     } else if (info?[PHImageCancelledKey] as? Bool) == true {
@@ -237,6 +269,12 @@ struct MediaClassificationService {
         } onCancel: {
             controller.cancel()
         }
+    }
+
+    nonisolated static func shouldReportProgress(completed: Int, total: Int) -> Bool {
+        guard total > 0 else { return true }
+        let interval = max(1, total / 100)
+        return completed == total || completed.isMultiple(of: interval)
     }
 
     private func candidatePairs(from features: [CandidateFeature]) -> [CandidatePair] {
@@ -326,6 +364,13 @@ private struct SimilarityCandidate: Sendable {
     let pixelWidth: Int
     let pixelHeight: Int
     let creationDate: Date
+    let cacheKey: FeatureCacheKey
+}
+
+private struct FeatureCacheKey: Hashable, Sendable {
+    let modificationDate: Date?
+    let pixelWidth: Int
+    let pixelHeight: Int
 }
 
 private struct CandidateFeature: Sendable {
@@ -340,13 +385,24 @@ private struct CandidatePair: Sendable { let firstID: String; let secondID: Stri
 private struct AcceptedPair: Sendable { let firstID: String; let secondID: String; let distance: Float }
 
 private actor VisionFeatureEngine {
-    private var observations: [String: VNFeaturePrintObservation] = [:]
-
-    func reset() {
-        observations.removeAll(keepingCapacity: true)
+    private struct CachedFeature {
+        let cacheKey: FeatureCacheKey
+        let observation: VNFeaturePrintObservation
+        let perceptualHash: UInt64
     }
 
-    func store(id: String, image: CGImage) throws -> UInt64 {
+    private var features: [String: CachedFeature] = [:]
+
+    func retainFeatures(for identifiers: Set<String>) {
+        features = features.filter { identifiers.contains($0.key) }
+    }
+
+    func cachedHash(id: String, cacheKey: FeatureCacheKey) -> UInt64? {
+        guard let feature = features[id], feature.cacheKey == cacheKey else { return nil }
+        return feature.perceptualHash
+    }
+
+    func store(id: String, cacheKey: FeatureCacheKey, image: CGImage) throws -> UInt64 {
         let request = VNGenerateImageFeaturePrintRequest()
         request.imageCropAndScaleOption = .scaleFit
         let handler = VNImageRequestHandler(cgImage: image, options: [:])
@@ -354,17 +410,38 @@ private actor VisionFeatureEngine {
         guard let observation = request.results?.first as? VNFeaturePrintObservation else {
             throw MediaAnalysisError.unexpected
         }
-        observations[id] = observation
-        return try Self.differenceHash(for: image)
+        let hash = try Self.differenceHash(for: image)
+        features[id] = CachedFeature(
+            cacheKey: cacheKey,
+            observation: observation,
+            perceptualHash: hash
+        )
+        return hash
     }
 
-    func distance(between firstID: String, and secondID: String) throws -> Float {
-        guard let first = observations[firstID], let second = observations[secondID] else {
-            throw MediaAnalysisError.unexpected
+    func acceptedPairs(
+        from pairs: [CandidatePair],
+        maximumDistance: Float
+    ) throws -> [AcceptedPair] {
+        var accepted: [AcceptedPair] = []
+        accepted.reserveCapacity(pairs.count)
+        for pair in pairs {
+            try Task.checkCancellation()
+            guard let first = features[pair.firstID]?.observation,
+                  let second = features[pair.secondID]?.observation else {
+                continue
+            }
+            var distance: Float = 0
+            try first.computeDistance(&distance, to: second)
+            if distance <= maximumDistance {
+                accepted.append(AcceptedPair(
+                    firstID: pair.firstID,
+                    secondID: pair.secondID,
+                    distance: distance
+                ))
+            }
         }
-        var distance: Float = 0
-        try first.computeDistance(&distance, to: second)
-        return distance
+        return accepted
     }
 
     private static func differenceHash(for image: CGImage) throws -> UInt64 {
