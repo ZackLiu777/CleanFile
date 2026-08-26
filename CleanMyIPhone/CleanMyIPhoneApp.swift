@@ -15,8 +15,10 @@ struct CleanMyIPhoneApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(themeSettings)
-                .preferredColorScheme(themeSettings.appearance.colorScheme)
-                .tint(AppTheme.accentPrimary)
+                .environment(\.appTheme, themeSettings.theme)
+                .preferredColorScheme(themeSettings.effectiveColorScheme)
+                .tint(themeSettings.theme.accentPrimary)
+                .foregroundStyle(themeSettings.theme.textPrimary)
         }
     }
 }

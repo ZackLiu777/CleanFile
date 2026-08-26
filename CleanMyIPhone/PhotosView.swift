@@ -8,6 +8,7 @@ import SwiftUI
 import UIKit
 
 struct PhotosView: View {
+    @Environment(\.appTheme) private var theme
     @ObservedObject var viewModel: PhotoLibraryViewModel
 
     var body: some View {
@@ -53,21 +54,26 @@ struct PhotosView: View {
                 }
             }
             .navigationTitle("Media")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    if viewModel.analysisState.isAnalyzing {
-                        Button("Cancel Analysis", role: .cancel) {
-                            viewModel.cancelAnalysis()
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        if viewModel.analysisState.isAnalyzing {
+                            Button("Cancel Analysis", systemImage: "xmark.circle", role: .cancel) {
+                                viewModel.cancelAnalysis()
+                            }
+                        } else {
+                            Button("Analyze", systemImage: "sparkle.magnifyingglass") {
+                                viewModel.startAnalysis()
+                            }
+                            .disabled(viewModel.assets.isEmpty || viewModel.isLoading)
                         }
-                    } else {
-                        Button("Analyze") {
-                            viewModel.startAnalysis()
-                        }
-                        .disabled(viewModel.assets.isEmpty || viewModel.isLoading)
-                    }
 
-                    Button("Refresh") {
-                        viewModel.refresh()
+                        Button("Refresh", systemImage: "arrow.clockwise") {
+                            viewModel.refresh()
+                        }
+                    } label: {
+                        Label("Media Actions", systemImage: "ellipsis")
                     }
                 }
             }
@@ -107,7 +113,7 @@ struct PhotosView: View {
                 viewModel.presentLimitedLibraryPicker()
             }
             .buttonStyle(.borderedProminent)
-            .tint(AppTheme.accentPrimary)
+            .tint(theme.accentPrimary)
 
             mediaContent
         }
@@ -122,7 +128,7 @@ struct PhotosView: View {
             }
             .padding()
         }
-        .scrollEdgeEffectStyle(.soft, for: .vertical)
+        .appSoftScrollEdge()
     }
 
     @ViewBuilder
@@ -141,7 +147,7 @@ struct PhotosView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(AppTheme.accentPrimary)
+                .tint(theme.accentPrimary)
             }
             .mediaAnalysisCard()
 
@@ -150,7 +156,7 @@ struct PhotosView: View {
                 Text(analysisTitle(for: progress.phase))
                     .font(.headline)
                 ProgressView(value: progress.fractionCompleted)
-                    .tint(AppTheme.accentPrimary)
+                    .tint(theme.accentPrimary)
                 Text("Analyzed \(progress.completed) of \(progress.total)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -182,13 +188,13 @@ struct PhotosView: View {
                     viewModel.startAnalysis()
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(AppTheme.accentPrimary)
+                .tint(theme.accentPrimary)
             }
             .mediaAnalysisCard()
 
         case .failure(let error):
             Label(error.localizedDescription, systemImage: "exclamationmark.triangle")
-                .foregroundStyle(.red)
+                .foregroundStyle(theme.negativeRed)
                 .mediaAnalysisCard()
         }
     }
@@ -199,7 +205,7 @@ struct PhotosView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .firstTextBaseline) {
                     Text("Device Storage")
-                        .font(.title2.bold())
+                        .font(.headline)
                     Spacer()
                     Text(
                         "\(byteCountText(storage.usedBytes)) of \(byteCountText(storage.totalBytes)) used"
@@ -209,7 +215,7 @@ struct PhotosView: View {
                 }
 
                 ProgressView(value: storage.usedFraction)
-                    .tint(AppTheme.accentPrimary)
+                    .tint(theme.accentPrimary)
 
                 HStack {
                     Label("Used", systemImage: "internaldrive.fill")
@@ -249,13 +255,14 @@ struct PhotosView: View {
             if let buttonTitle {
                 Button(buttonTitle, action: action)
                     .buttonStyle(.borderedProminent)
-                    .tint(AppTheme.accentPrimary)
+                    .tint(theme.accentPrimary)
             }
         }
     }
 }
 
 private struct MediaDashboardResultsView: View {
+    @Environment(\.appTheme) private var theme
     let result: MediaClassificationResult
     let isPartial: Bool
     @ObservedObject var viewModel: PhotoLibraryViewModel
@@ -268,42 +275,28 @@ private struct MediaDashboardResultsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
+            VStack(alignment: .leading, spacing: 6) {
                 Label("Analysis Complete", systemImage: "checkmark.circle.fill")
                     .font(.headline)
-                    .foregroundStyle(AppTheme.accentPrimary)
-                Spacer()
-                Text("Select items to delete")
-                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(theme.accentPrimary)
+                Text("Analysis never deletes media automatically.")
+                    .font(.footnote)
                     .foregroundStyle(.secondary)
             }
+            .mediaAnalysisCard()
+
+            Text("Cleanup Recommendations")
+                .font(.title2.bold())
 
             LazyVGrid(columns: columns, spacing: 10) {
-                categoryLink(
-                    title: String(localized: "Similar Photos"),
-                    detail: itemCount(result.similarImageCount),
-                    assetIDs: result.similarImageIDs,
-                    systemImage: "photo.stack"
-                )
-                categoryLink(
-                    title: String(localized: "Videos"),
-                    detail: itemCount(result.videoIDs.count),
-                    assetIDs: result.videoIDs,
-                    systemImage: "video.fill"
-                )
-                categoryLink(
-                    title: String(localized: "Screenshots"),
-                    detail: itemCount(result.screenshotIDs.count),
-                    assetIDs: result.screenshotIDs,
-                    systemImage: "iphone"
-                )
-                categoryLink(
-                    title: String(localized: "Live Photos"),
-                    detail: itemCount(result.livePhotoIDs.count),
-                    assetIDs: result.livePhotoIDs,
-                    systemImage: "livephoto"
-                )
+                ForEach(cleanupCategories) { category in
+                    categoryLink(category)
+                }
             }
+
+            Text("Media sizes are estimated without downloading original files.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
             videoBreakdown
 
@@ -316,9 +309,6 @@ private struct MediaDashboardResultsView: View {
                 .foregroundStyle(.secondary)
             }
 
-            Text("Analysis never deletes media automatically.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
         .onAppear {
             viewModel.startCachingThumbnails(
@@ -349,6 +339,31 @@ private struct MediaDashboardResultsView: View {
         return CGSize(width: pixelWidth, height: pixelWidth)
     }
 
+    private var cleanupCategories: [MediaCategorySummary] {
+        [
+            MediaCategorySummary(
+                title: String(localized: "Similar Photos"),
+                assetIDs: result.similarImageIDs,
+                systemImage: "photo.stack"
+            ),
+            MediaCategorySummary(
+                title: String(localized: "Videos"),
+                assetIDs: result.videoIDs,
+                systemImage: "video.fill"
+            ),
+            MediaCategorySummary(
+                title: String(localized: "Screenshots"),
+                assetIDs: result.screenshotIDs,
+                systemImage: "iphone"
+            ),
+            MediaCategorySummary(
+                title: String(localized: "Live Photos"),
+                assetIDs: result.livePhotoIDs,
+                systemImage: "livephoto"
+            )
+        ]
+    }
+
     private var videoBreakdown: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Video Categories")
@@ -365,50 +380,85 @@ private struct MediaDashboardResultsView: View {
                         viewModel: viewModel
                     )
                 } label: {
-                    HStack {
+                    HStack(spacing: 12) {
+                        Image(systemName: videoCategorySymbol(category))
+                            .foregroundStyle(theme.accentPrimary)
+                            .frame(width: 24)
+
                         Text(category.displayName)
                         Spacer()
-                        Text(String(ids.count))
-                            .foregroundStyle(AppTheme.accentPrimary)
+
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(itemCount(ids.count))
+                                .foregroundStyle(.primary)
+                            Text(estimatedSizeText(for: ids))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
                         Image(systemName: "chevron.right")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
                     }
                 }
                 .buttonStyle(.plain)
+                .disabled(ids.isEmpty)
+                .opacity(ids.isEmpty ? 0.55 : 1)
             }
         }
         .mediaAnalysisCard()
     }
 
-    private func categoryLink(
-        title: String,
-        detail: String,
-        assetIDs: [String],
-        systemImage: String
-    ) -> some View {
+    private func categoryLink(_ category: MediaCategorySummary) -> some View {
         NavigationLink {
             MediaCategoryDetailView(
-                title: title,
-                assetIDs: assetIDs,
+                title: category.title,
+                assetIDs: category.assetIDs,
                 viewModel: viewModel
             )
         } label: {
             MediaCategoryCard(
-                title: title,
-                detail: detail,
-                representativeAssetID: assetIDs.first,
-                systemImage: systemImage,
+                title: category.title,
+                detail: categoryDetail(category.assetIDs),
+                representativeAssetID: category.assetIDs.first,
+                systemImage: category.systemImage,
                 viewModel: viewModel
             )
         }
         .buttonStyle(.plain)
-        .disabled(assetIDs.isEmpty)
+        .disabled(category.assetIDs.isEmpty)
     }
 
     private func itemCount(_ count: Int) -> String {
         String.localizedStringWithFormat(String(localized: "%lld items"), Int64(count))
     }
+
+    private func categoryDetail(_ assetIDs: [String]) -> String {
+        "\(itemCount(assetIDs.count)) · \(estimatedSizeText(for: assetIDs))"
+    }
+
+    private func estimatedSizeText(for assetIDs: [String]) -> String {
+        let byteCount = viewModel.estimatedByteCount(for: Set(assetIDs))
+        return "~\(ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file))"
+    }
+
+    private func videoCategorySymbol(_ category: VideoCategory) -> String {
+        switch category {
+        case .longDuration: "clock"
+        case .fourK: "4k.tv"
+        case .screenRecording: "record.circle"
+        case .slowMotion: "slowmo"
+        case .timeLapse: "timelapse"
+        }
+    }
+}
+
+private struct MediaCategorySummary: Identifiable {
+    let title: String
+    let assetIDs: [String]
+    let systemImage: String
+
+    var id: String { title }
 }
 
 private struct MediaCategoryCard: View {
@@ -465,6 +515,7 @@ private struct MediaCategoryCard: View {
 }
 
 private struct MediaCategoryDetailView: View {
+    @Environment(\.appTheme) private var theme
     let title: String
     let assetIDs: [String]
     @ObservedObject var viewModel: PhotoLibraryViewModel
@@ -532,6 +583,12 @@ private struct MediaCategoryDetailView: View {
                                     .overlay(alignment: .topTrailing) {
                                         selectionIndicator(for: assetID)
                                     }
+                                    .overlay(alignment: .topLeading) {
+                                        livePhotoBadge(for: assetID)
+                                    }
+                                    .overlay(alignment: .bottomTrailing) {
+                                        videoDurationBadge(for: assetID)
+                                    }
                                     .contentShape(Rectangle())
                                     .clipped()
                             }
@@ -547,7 +604,7 @@ private struct MediaCategoryDetailView: View {
                         }
                     }
                 }
-                .scrollEdgeEffectStyle(.soft, for: .vertical)
+                .appSoftScrollEdge()
             }
         }
         .navigationTitle(title)
@@ -597,7 +654,7 @@ private struct MediaCategoryDetailView: View {
                         }
                     }
                     .buttonStyle(.glass)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(theme.negativeRed)
                     .disabled(selectedIDs.isEmpty || viewModel.deletionState.isDeleting)
                 }
                 .padding(.horizontal, 16)
@@ -675,6 +732,44 @@ private struct MediaCategoryDetailView: View {
     }
 
     @ViewBuilder
+    private func livePhotoBadge(for assetID: String) -> some View {
+        if let asset = viewModel.asset(withIdentifier: assetID),
+           asset.mediaSubtypes.contains(.photoLive) {
+            Image(systemName: "livephoto")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white)
+                .padding(6)
+                .background(.black.opacity(0.48), in: Circle())
+                .padding(6)
+                .accessibilityLabel("Live Photo")
+        }
+    }
+
+    @ViewBuilder
+    private func videoDurationBadge(for assetID: String) -> some View {
+        if let asset = viewModel.asset(withIdentifier: assetID), asset.mediaType == .video {
+            Text(videoDurationText(asset.duration))
+                .font(.caption2.monospacedDigit().weight(.semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 5)
+                .padding(.vertical, 3)
+                .background(.black.opacity(0.58), in: Capsule())
+                .padding(5)
+        }
+    }
+
+    private func videoDurationText(_ duration: TimeInterval) -> String {
+        let totalSeconds = max(Int(duration.rounded()), 0)
+        let hours = totalSeconds / 3_600
+        let minutes = (totalSeconds % 3_600) / 60
+        let seconds = totalSeconds % 60
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        }
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+
+    @ViewBuilder
     private func selectionIndicator(for assetID: String) -> some View {
         if isSelecting {
             Image(systemName: selectedIDs.contains(assetID)
@@ -683,7 +778,7 @@ private struct MediaCategoryDetailView: View {
                 .font(.title2)
                 .foregroundStyle(
                     selectedIDs.contains(assetID)
-                        ? AppTheme.accentPrimary
+                        ? theme.accentPrimary
                         : .white
                 )
                 .shadow(radius: 2)
@@ -764,6 +859,6 @@ private extension View {
     func mediaAnalysisCard() -> some View {
         padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .appGlassCard()
+            .appContentCard()
     }
 }

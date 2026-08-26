@@ -1,37 +1,51 @@
 import SwiftUI
 import PhotosUI
 import UniformTypeIdentifiers
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 @MainActor
 public struct ImageConversionView: View {
-    @State private var mode: ConversionMode = .image
+    private let theme: ConversionTheme
+    @AppStorage("conversion.selectedMode") private var mode: ConversionMode = .image
     @State private var isFormatSheetPresented = false
 
-    public init() {}
+    public init(theme: ConversionTheme = .system) {
+        self.theme = theme
+    }
 
     public var body: some View {
-        VStack(spacing: 0) {
-            Picker(L10n.string("converter.mode"), selection: $mode) {
-                Label(L10n.string("converter.mode.image"), systemImage: "photo").tag(ConversionMode.image)
-                Label(L10n.string("converter.mode.video"), systemImage: "film").tag(ConversionMode.video)
-                Label(L10n.string("converter.mode.audio"), systemImage: "waveform").tag(ConversionMode.audio)
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
-
-            formatSummary
+        NavigationStack {
+            VStack(spacing: 0) {
+                Picker(L10n.string("converter.mode"), selection: $mode) {
+                    Label(L10n.string("converter.mode.image"), systemImage: "photo").tag(ConversionMode.image)
+                    Label(L10n.string("converter.mode.video"), systemImage: "film").tag(ConversionMode.video)
+                    Label(L10n.string("converter.mode.audio"), systemImage: "waveform").tag(ConversionMode.audio)
+                }
+                .pickerStyle(.segmented)
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
 
-            switch mode {
-            case .image: ImageConversionContentView()
-            case .video: VideoConversionView()
-            case .audio: AudioConversionView()
+                privacySummary
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+
+                switch mode {
+                case .image: ImageConversionContentView()
+                case .video: VideoConversionView()
+                case .audio: AudioConversionView()
+                }
             }
+            .background(converterBackground)
+            .navigationTitle(L10n.string("converter.title"))
+            .navigationBarTitleDisplayMode(.inline)
         }
-        .background(converterBackground)
-        .navigationTitle(L10n.string("converter.title"))
+        .environment(\.conversionTheme, theme)
+        .tint(theme.accent)
+        .foregroundStyle(theme.textPrimary)
         .sheet(isPresented: $isFormatSheetPresented) {
             SupportedFormatsSheet(mode: mode)
                 .presentationDetents([.medium, .large])
@@ -39,22 +53,14 @@ public struct ImageConversionView: View {
         }
     }
 
-    private var formatSummary: some View {
+    private var privacySummary: some View {
         HStack(spacing: 12) {
-            Text(formatSummaryText)
+            Label(L10n.string("import.subtitle"), systemImage: "lock.shield")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             formatDetailsButton
-        }
-    }
-
-    private var formatSummaryText: String {
-        switch mode {
-        case .image: L10n.string("formats.image.summary")
-        case .video: L10n.string("formats.video.summary")
-        case .audio: L10n.string("formats.audio.summary")
         }
     }
 
@@ -73,17 +79,19 @@ public struct ImageConversionView: View {
         }
     }
 
+    @ViewBuilder
     private var converterBackground: some View {
-        LinearGradient(
-            colors: [Color.accentColor.opacity(0.14), Color.accentColor.opacity(0.04), .clear],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
+        switch theme.background {
+        case let .solid(color):
+            color.ignoresSafeArea()
+        case let .linearGradient(colors, startPoint, endPoint):
+            LinearGradient(colors: colors, startPoint: startPoint, endPoint: endPoint)
+                .ignoresSafeArea()
+        }
     }
 }
 
-private enum ConversionMode: Hashable {
+private enum ConversionMode: String, Hashable {
     case image
     case video
     case audio
@@ -132,6 +140,7 @@ private struct SupportedFormatsSheet: View {
                 }
                 .padding(20)
             }
+            .converterSoftScrollEdge()
             .navigationTitle(formatTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -188,6 +197,7 @@ private struct ImageConversionContentView: View {
     @State private var viewModel: ImageConversionViewModel
     @State private var isImporterPresented = false
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
+    @State private var isClearAllConfirmationPresented = false
 
     init(viewModel: ImageConversionViewModel = ImageConversionViewModel()) {
         _viewModel = State(initialValue: viewModel)
@@ -197,7 +207,6 @@ private struct ImageConversionContentView: View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 importCard
-                ImageConversionSettingsCard(viewModel: viewModel)
 
                 if let notice = viewModel.notice {
                     NoticeView(message: notice)
@@ -209,11 +218,13 @@ private struct ImageConversionContentView: View {
                     filesSection
                 }
 
+                ImageConversionSettingsCard(viewModel: viewModel)
                 conversionAction
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 20)
         }
+        .converterSoftScrollEdge()
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -244,6 +255,17 @@ private struct ImageConversionContentView: View {
                 }
             }
         }
+        .alert(
+            L10n.string("conversion.delete_all.title"),
+            isPresented: $isClearAllConfirmationPresented
+        ) {
+            Button(L10n.string("action.cancel"), role: .cancel) {}
+            Button(L10n.string("conversion.delete.action"), role: .destructive) {
+                viewModel.removeAll()
+            }
+        } message: {
+            Text(L10n.string("conversion.delete_all.message"))
+        }
         .onChange(of: selectedPhotoItems) { _, items in
             guard !items.isEmpty else { return }
             Task { await importPhotos(items) }
@@ -259,10 +281,6 @@ private struct ImageConversionContentView: View {
             VStack(spacing: 4) {
                 Text(L10n.string("import.title"))
                     .font(.headline)
-                Text(L10n.string("import.subtitle"))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
             }
 
             Button {
@@ -331,7 +349,7 @@ private struct ImageConversionContentView: View {
                         }
                     }
                     Button(L10n.string("action.clear_all"), role: .destructive) {
-                        viewModel.removeAll()
+                        isClearAllConfirmationPresented = true
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -527,6 +545,8 @@ private struct ImageConversionSettingsCard: View {
 
 @MainActor
 private struct ImageConversionFileRow: View {
+    @Environment(\.conversionTheme) private var theme
+
     let item: ImageConversionItem
     let isLocked: Bool
     let onRemove: () -> Void
@@ -583,7 +603,7 @@ private struct ImageConversionFileRow: View {
                 .foregroundStyle(.green)
         case let .failed(message):
             Label(message, systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
+                .foregroundStyle(theme.destructive)
                 .lineLimit(2)
         case .cancelled:
             Label(L10n.string("status.cancelled"), systemImage: "xmark.circle")
@@ -595,12 +615,22 @@ private struct ImageConversionFileRow: View {
     private var trailingAction: some View {
         switch item.status {
         case let .completed(outputURL):
-            ShareLink(item: outputURL) {
-                Image(systemName: "square.and.arrow.up")
-                    .frame(width: 32, height: 32)
+            HStack(spacing: 4) {
+                ShareLink(item: outputURL) {
+                    Image(systemName: "square.and.arrow.up")
+                        .frame(width: 32, height: 32)
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel(L10n.string("action.share"))
+
+                Button(role: .destructive, action: onRemove) {
+                    Image(systemName: "trash")
+                        .frame(width: 32, height: 32)
+                }
+                .buttonStyle(.borderless)
+                .disabled(isLocked)
+                .accessibilityLabel(L10n.string("conversion.delete.action"))
             }
-            .buttonStyle(.borderless)
-            .accessibilityLabel(L10n.string("action.share"))
         case .converting, .inspecting:
             ProgressView()
                 .controlSize(.small)
@@ -634,6 +664,8 @@ struct NoticeView: View {
 
 @MainActor
 struct PrimaryConversionButton: View {
+    @Environment(\.conversionTheme) private var theme
+
     let title: String
     let isEnabled: Bool
     let action: () -> Void
@@ -641,7 +673,7 @@ struct PrimaryConversionButton: View {
     var body: some View {
         Group {
 #if os(iOS)
-            if #available(iOS 26.0, *) {
+            if #available(iOS 26.0, *), theme.liquidGlassEnabled {
                 Button(action: action) {
                     Label(title, systemImage: "arrow.triangle.2.circlepath")
                         .font(.headline)
@@ -667,29 +699,19 @@ struct PrimaryConversionButton: View {
                 .padding(.vertical, 8)
         }
         .buttonStyle(.borderedProminent)
+        .tint(theme.accent)
     }
 }
 
 private struct ConverterCardModifier: ViewModifier {
-    @ViewBuilder
-    func body(content: Content) -> some View {
-#if os(iOS)
-        if #available(iOS 26.0, *) {
-            content.glassEffect(.regular, in: .rect(cornerRadius: 20))
-        } else {
-            fallback(content)
-        }
-#else
-        fallback(content)
-#endif
-    }
+    @Environment(\.conversionTheme) private var theme
 
-    private func fallback(_ content: Content) -> some View {
+    func body(content: Content) -> some View {
         content
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+            .background(theme.cardSurface, in: RoundedRectangle(cornerRadius: 20))
             .overlay {
                 RoundedRectangle(cornerRadius: 20)
-                    .strokeBorder(.white.opacity(0.12), lineWidth: 0.5)
+                    .strokeBorder(theme.divider.opacity(0.65), lineWidth: 0.5)
             }
     }
 }
@@ -697,5 +719,20 @@ private struct ConverterCardModifier: ViewModifier {
 extension View {
     func converterCard() -> some View {
         modifier(ConverterCardModifier())
+    }
+
+    func converterSoftScrollEdge() -> some View {
+        modifier(ConverterSoftScrollEdgeModifier())
+    }
+}
+
+private struct ConverterSoftScrollEdgeModifier: ViewModifier {
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, macOS 26.0, *) {
+            content.scrollEdgeEffectStyle(.soft, for: .vertical)
+        } else {
+            content
+        }
     }
 }

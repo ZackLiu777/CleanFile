@@ -17,6 +17,7 @@ public final class VideoConversionViewModel {
     public let outputDirectory: URL
 
     private let engine: VideoConversionEngine
+    private let workspace = ConversionWorkspace.shared
     @ObservationIgnored private var task: Task<Void, Never>?
 
     public init(
@@ -25,6 +26,7 @@ public final class VideoConversionViewModel {
     ) {
         self.outputDirectory = outputDirectory ?? Self.defaultOutputDirectory()
         self.engine = engine
+        Task { [weak self] in await self?.restore() }
     }
 
     public var canConvert: Bool {
@@ -54,6 +56,11 @@ public final class VideoConversionViewModel {
 
     public func addFiles(_ urls: [URL]) {
         guard !isConverting else { return }
+        Task { [weak self] in await self?.importFiles(urls) }
+    }
+
+    private func importFiles(_ urls: [URL]) async {
+        guard !isConverting else { return }
         let allowedExtensions = Set(["mov", "mp4", "m4v"])
         let supportedURLs = urls.filter {
             allowedExtensions.contains($0.pathExtension.lowercased())
@@ -61,22 +68,52 @@ public final class VideoConversionViewModel {
         if supportedURLs.count != urls.count {
             notice = L10n.string("video.error.unsupported_import")
         }
-        var known = Set(items.map { $0.sourceURL.standardizedFileURL })
-        for url in supportedURLs where known.insert(url.standardizedFileURL).inserted {
-            let bytes = Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
-            items.append(VideoConversionItem(sourceURL: url, sourceBytes: bytes))
+        var knownURLs = Set(items.map { $0.sourceURL.standardizedFileURL })
+        for url in supportedURLs where knownURLs.insert(url.standardizedFileURL).inserted {
+            let id = UUID()
+            do {
+                let (stagedURL, bytes) = try await workspace.stage(url, id: id, kind: .video)
+                items.append(VideoConversionItem(id: id, sourceURL: stagedURL, sourceBytes: bytes))
+            } catch {
+                notice = L10n.format("notice.import_failed", error.localizedDescription)
+            }
         }
+        persist()
     }
 
     public func remove(_ id: UUID) {
         guard !isConverting else { return }
-        items.removeAll { $0.id == id }
+        guard let item = items.first(where: { $0.id == id }) else { return }
+        Task {
+            let succeeded = await workspace.delete(
+                record(item), kind: .video, outputRoot: outputDirectory
+            )
+            if succeeded {
+                items.removeAll { $0.id == id }
+            } else {
+                notice = L10n.string("conversion.delete.failed")
+            }
+            persist()
+        }
     }
 
     public func removeAll() {
         guard !isConverting else { return }
-        items.removeAll()
+        let removedItems = items
         notice = nil
+        Task {
+            var deletedIDs = Set<UUID>()
+            for item in removedItems {
+                if await workspace.delete(record(item), kind: .video, outputRoot: outputDirectory) {
+                    deletedIDs.insert(item.id)
+                }
+            }
+            items.removeAll { deletedIDs.contains($0.id) }
+            if deletedIDs.count != removedItems.count {
+                notice = L10n.string("conversion.delete.failed")
+            }
+            persist()
+        }
     }
 
     public func reportImportFailure(_ message: String) {
@@ -135,6 +172,7 @@ public final class VideoConversionViewModel {
                 items[index].status = .failed(error.localizedDescription)
             }
             completed += 1
+            persist()
         }
 
         let successes = items.reduce(into: 0) { count, item in
@@ -145,6 +183,53 @@ public final class VideoConversionViewModel {
             : L10n.format("video.notice.completed", successes)
         isConverting = false
         task = nil
+        persist()
+    }
+
+    private func restore() async {
+        guard items.isEmpty, !isConverting else { return }
+        let records = await workspace.load(.video)
+        items = records.map { record in
+            let outputURL = record.outputPath.map { URL(fileURLWithPath: $0) }
+            let status: VideoConversionStatus
+            switch record.status {
+            case .completed where outputURL.map({ FileManager.default.fileExists(atPath: $0.path) }) == true:
+                status = .completed(outputURL!)
+            case .failed: status = .ready
+            case .cancelled: status = .cancelled
+            default: status = .ready
+            }
+            return VideoConversionItem(
+                id: record.id,
+                sourceURL: URL(fileURLWithPath: record.sourcePath),
+                sourceBytes: record.sourceBytes,
+                status: status
+            )
+        }
+        persist()
+    }
+
+    private func persist() {
+        let records = items.map(record)
+        Task { await workspace.save(records, kind: .video) }
+    }
+
+    private func record(_ item: VideoConversionItem) -> PersistedConversionItem {
+        let status: PersistedConversionStatus
+        let outputPath: String?
+        switch item.status {
+        case .completed(let url): status = .completed; outputPath = url.path
+        case .failed: status = .failed; outputPath = nil
+        case .cancelled: status = .cancelled; outputPath = nil
+        case .ready, .converting: status = .ready; outputPath = nil
+        }
+        return PersistedConversionItem(
+            id: item.id,
+            sourcePath: item.sourceURL.path,
+            sourceBytes: item.sourceBytes,
+            status: status,
+            outputPath: outputPath
+        )
     }
 
     private static func defaultOutputDirectory() -> URL {

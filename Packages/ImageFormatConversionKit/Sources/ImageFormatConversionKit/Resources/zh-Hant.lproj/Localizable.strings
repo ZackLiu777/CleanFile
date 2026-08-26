@@ -1,4 +1,4 @@
-"converter.title" = "圖片格式轉換";
+"converter.title" = "媒體格式轉換";
 "import.title" = "在本機轉換圖片";
 "import.subtitle" = "檔案只在此裝置上處理，不會上傳。";
 "action.add_images" = "加入圖片";
@@ -67,6 +67,17 @@
 "audio.action.add" = "加入音訊";
 "audio.import.title" = "轉換音訊";
 "audio.settings.quality" = "品質";
+"audio.format.aac" = "M4A（AAC 編碼）";
+"audio.format.aac_file" = "AAC（AAC 編碼）";
+"audio.format.alac" = "M4A（Apple 無損）";
+"audio.format.wav" = "WAV（PCM 未壓縮）";
+"audio.format.aiff" = "AIFF（PCM 未壓縮）";
+"audio.format.caf_pcm" = "CAF（PCM 未壓縮）";
+"audio.format.caf_alac" = "CAF（Apple 無損）";
+"conversion.delete_all.title" = "刪除全部轉換檔案？";
+"conversion.delete_all.message" = "這會刪除 App 內的匯入副本和轉換輸出，不會刪除照片圖庫或「檔案」中的原始檔。";
+"conversion.delete.action" = "刪除檔案";
+"conversion.delete.failed" = "部分 App 管理的檔案無法刪除，失敗項目已保留在列表中。";
 "audio.lossless" = "無損輸出會保留來源中可用的音訊品質。";
 "audio.empty.title" = "沒有音訊";
 "audio.empty.subtitle" = "選擇一個或多個音訊檔案開始轉換。";

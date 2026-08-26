@@ -135,30 +135,54 @@ public actor AudioConversionEngine {
     ) -> [String: Any] {
         let channelCount = Int(min(max(channels, 1), 2))
         switch format {
-        case .aac:
+        case .aac, .aacFile:
             return [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
                 AVSampleRateKey: sampleRate,
                 AVNumberOfChannelsKey: channelCount,
                 AVEncoderBitRateKey: bitRate.rawValue
             ]
-        case .alac:
+        case .alac, .cafALAC:
             return [
                 AVFormatIDKey: kAudioFormatAppleLossless,
                 AVSampleRateKey: sampleRate,
                 AVNumberOfChannelsKey: channelCount
             ]
         case .wav:
-            return [
-                AVFormatIDKey: kAudioFormatLinearPCM,
-                AVSampleRateKey: sampleRate,
-                AVNumberOfChannelsKey: channelCount,
-                AVLinearPCMBitDepthKey: 16,
-                AVLinearPCMIsFloatKey: false,
-                AVLinearPCMIsBigEndianKey: false,
-                AVLinearPCMIsNonInterleaved: false
-            ]
+            return pcmSettings(
+                sampleRate: sampleRate,
+                channelCount: channelCount,
+                isBigEndian: false
+            )
+        case .aiff:
+            return pcmSettings(
+                sampleRate: sampleRate,
+                channelCount: channelCount,
+                isBigEndian: true
+            )
+        case .cafPCM:
+            return pcmSettings(
+                sampleRate: sampleRate,
+                channelCount: channelCount,
+                isBigEndian: false
+            )
         }
+    }
+
+    private func pcmSettings(
+        sampleRate: Double,
+        channelCount: Int,
+        isBigEndian: Bool
+    ) -> [String: Any] {
+        [
+            AVFormatIDKey: kAudioFormatLinearPCM,
+            AVSampleRateKey: sampleRate,
+            AVNumberOfChannelsKey: channelCount,
+            AVLinearPCMBitDepthKey: 16,
+            AVLinearPCMIsFloatKey: false,
+            AVLinearPCMIsBigEndianKey: isBigEndian,
+            AVLinearPCMIsNonInterleaved: false
+        ]
     }
 
     private func uniqueDestination(source: URL, directory: URL, extension ext: String) -> URL {

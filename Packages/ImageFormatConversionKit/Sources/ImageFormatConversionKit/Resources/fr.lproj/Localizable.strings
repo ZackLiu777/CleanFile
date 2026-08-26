@@ -1,4 +1,4 @@
-"converter.title" = "Convertisseur d’images";
+"converter.title" = "Convertisseur multimédia";
 "import.title" = "Convertir des images localement";
 "import.subtitle" = "Les fichiers sont traités sur cet appareil et ne sont jamais envoyés.";
 "action.add_images" = "Ajouter des images";
@@ -67,6 +67,17 @@
 "audio.action.add" = "Ajouter un fichier audio";
 "audio.import.title" = "Convertir l’audio";
 "audio.settings.quality" = "Qualité";
+"audio.format.aac" = "M4A (encodage AAC)";
+"audio.format.aac_file" = "AAC (encodage AAC)";
+"audio.format.alac" = "M4A (Apple Lossless)";
+"audio.format.wav" = "WAV (PCM non compressé)";
+"audio.format.aiff" = "AIFF (PCM non compressé)";
+"audio.format.caf_pcm" = "CAF (PCM non compressé)";
+"audio.format.caf_alac" = "CAF (Apple Lossless)";
+"conversion.delete_all.title" = "Supprimer tous les fichiers de conversion ?";
+"conversion.delete_all.message" = "Cette action supprime les copies importées et les sorties converties de l’app. Les originaux dans Photos et Fichiers sont conservés.";
+"conversion.delete.action" = "Supprimer les fichiers";
+"conversion.delete.failed" = "Certains fichiers gérés par l’app n’ont pas pu être supprimés. Les éléments concernés restent dans la liste.";
 "audio.lossless" = "La sortie sans perte préserve la qualité audio disponible.";
 "audio.empty.title" = "Aucun audio";
 "audio.empty.subtitle" = "Choisissez un ou plusieurs fichiers audio.";

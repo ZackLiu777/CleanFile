@@ -54,6 +54,7 @@ public final class ImageConversionViewModel {
     public let outputDirectory: URL
 
     private let engine: ImageConversionEngine
+    private let workspace = ConversionWorkspace.shared
 
     private let batchConverter: ImageBatchConverter
 
@@ -70,6 +71,7 @@ public final class ImageConversionViewModel {
         self.outputDirectory = outputDirectory ?? Self.defaultOutputDirectory()
         self.engine = engine
         batchConverter = ImageBatchConverter(engine: engine)
+        Task { [weak self] in await self?.restore() }
     }
 
     public var canStartConversion: Bool {
@@ -88,8 +90,7 @@ public final class ImageConversionViewModel {
         guard !isConverting else { return }
         notice = nil
 
-        let existingURLs = Set(items.map { $0.sourceURL.standardizedFileURL })
-        var seenURLs = existingURLs
+        var seenURLs = Set(items.map { $0.sourceURL.standardizedFileURL })
         let uniqueURLs = urls.filter { url in
             seenURLs.insert(url.standardizedFileURL).inserted
         }
@@ -101,7 +102,16 @@ public final class ImageConversionViewModel {
             return
         }
 
-        let newItems = uniqueURLs.map { ImageConversionItem(sourceURL: $0) }
+        var newItems: [ImageConversionItem] = []
+        for url in uniqueURLs {
+            let id = UUID()
+            do {
+                let (stagedURL, _) = try await workspace.stage(url, id: id, kind: .image)
+                newItems.append(ImageConversionItem(id: id, sourceURL: stagedURL))
+            } catch {
+                notice = L10n.format("notice.import_failed", error.localizedDescription)
+            }
+        }
         items.append(contentsOf: newItems)
 
         await withTaskGroup(of: InspectionOutcome.self) { group in
@@ -172,25 +182,62 @@ public final class ImageConversionViewModel {
                 }
             }
         }
+        persist()
     }
 
     public func removeItem(id: UUID) {
         guard !isConverting else { return }
-        items.removeAll { $0.id == id }
+        guard let item = items.first(where: { $0.id == id }) else { return }
+        Task {
+            let succeeded = await workspace.delete(
+                record(item), kind: .image, outputRoot: outputDirectory
+            )
+            if succeeded {
+                items.removeAll { $0.id == id }
+            } else {
+                notice = L10n.string("conversion.delete.failed")
+            }
+            persist()
+        }
     }
 
     public func removeAll() {
         guard !isConverting else { return }
-        items.removeAll()
+        let removedItems = items
         notice = nil
         resetProgress()
+        Task {
+            var deletedIDs = Set<UUID>()
+            for item in removedItems {
+                if await workspace.delete(record(item), kind: .image, outputRoot: outputDirectory) {
+                    deletedIDs.insert(item.id)
+                }
+            }
+            items.removeAll { deletedIDs.contains($0.id) }
+            if deletedIDs.count != removedItems.count {
+                notice = L10n.string("conversion.delete.failed")
+            }
+            persist()
+        }
     }
 
     public func clearCompleted() {
         guard !isConverting else { return }
-        items.removeAll {
-            if case .completed = $0.status { return true }
-            return false
+        let completedItems = items.filter {
+            if case .completed = $0.status { true } else { false }
+        }
+        Task {
+            var deletedIDs = Set<UUID>()
+            for item in completedItems {
+                if await workspace.delete(record(item), kind: .image, outputRoot: outputDirectory) {
+                    deletedIDs.insert(item.id)
+                }
+            }
+            items.removeAll { deletedIDs.contains($0.id) }
+            if deletedIDs.count != completedItems.count {
+                notice = L10n.string("conversion.delete.failed")
+            }
+            persist()
         }
     }
 
@@ -285,6 +332,7 @@ public final class ImageConversionViewModel {
 
         isConverting = false
         conversionTask = nil
+        persist()
     }
 
     private func apply(progress: ImageBatchProgress) {
@@ -298,6 +346,57 @@ public final class ImageConversionViewModel {
             succeeded: 0,
             failed: 0,
             lastSourceURL: nil
+        )
+    }
+
+    private func restore() async {
+        guard items.isEmpty, !isConverting else { return }
+        let records = await workspace.load(.image)
+        for record in records {
+            let sourceURL = URL(fileURLWithPath: record.sourcePath)
+            var item = ImageConversionItem(id: record.id, sourceURL: sourceURL)
+            do {
+                let info = try await engine.inspect(sourceURL)
+                item.info = info
+                if record.status == .completed,
+                   let outputPath = record.outputPath,
+                   FileManager.default.fileExists(atPath: outputPath) {
+                    item.status = .completed(outputURL: URL(fileURLWithPath: outputPath))
+                } else if info.frameCount == 1 {
+                    item.status = record.status == .cancelled ? .cancelled : .ready
+                } else {
+                    item.status = .failed(message: ImageConversionError
+                        .animatedImageUnsupported(frameCount: info.frameCount)
+                        .localizedDescription)
+                }
+            } catch {
+                item.status = .failed(message: error.localizedDescription)
+            }
+            items.append(item)
+        }
+        persist()
+    }
+
+    private func persist() {
+        let records = items.map(record)
+        Task { await workspace.save(records, kind: .image) }
+    }
+
+    private func record(_ item: ImageConversionItem) -> PersistedConversionItem {
+        let status: PersistedConversionStatus
+        let outputPath: String?
+        switch item.status {
+        case .completed(let url): status = .completed; outputPath = url.path
+        case .failed: status = .failed; outputPath = nil
+        case .cancelled: status = .cancelled; outputPath = nil
+        case .inspecting, .ready, .converting: status = .ready; outputPath = nil
+        }
+        return PersistedConversionItem(
+            id: item.id,
+            sourcePath: item.sourceURL.path,
+            sourceBytes: item.info?.fileSizeBytes ?? 0,
+            status: status,
+            outputPath: outputPath
         )
     }
 

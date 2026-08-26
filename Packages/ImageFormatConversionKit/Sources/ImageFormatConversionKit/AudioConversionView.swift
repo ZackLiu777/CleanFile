@@ -5,19 +5,21 @@ import UniformTypeIdentifiers
 struct AudioConversionView: View {
     @State private var viewModel = AudioConversionViewModel()
     @State private var importerPresented = false
+    @State private var isClearAllConfirmationPresented = false
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 importCard
-                settingsCard
                 if let notice = viewModel.notice { NoticeView(message: notice) }
                 if viewModel.items.isEmpty { emptyState } else { filesSection }
+                settingsCard
                 conversionAction
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 20)
         }
+        .converterSoftScrollEdge()
         .fileImporter(
             isPresented: $importerPresented,
             allowedContentTypes: inputTypes,
@@ -36,6 +38,17 @@ struct AudioConversionView: View {
                 .disabled(viewModel.isConverting)
             }
         }
+        .alert(
+            L10n.string("conversion.delete_all.title"),
+            isPresented: $isClearAllConfirmationPresented
+        ) {
+            Button(L10n.string("action.cancel"), role: .cancel) {}
+            Button(L10n.string("conversion.delete.action"), role: .destructive) {
+                viewModel.removeAll()
+            }
+        } message: {
+            Text(L10n.string("conversion.delete_all.message"))
+        }
     }
 
     private var inputTypes: [UTType] {
@@ -48,8 +61,6 @@ struct AudioConversionView: View {
         VStack(spacing: 12) {
             Image(systemName: "waveform").font(.system(size: 34)).foregroundStyle(.tint)
             Text(L10n.string("audio.import.title")).font(.headline)
-            Text(L10n.string("import.subtitle"))
-                .font(.subheadline).foregroundStyle(.secondary)
             Button { importerPresented = true } label: {
                 Label(L10n.string("action.choose_files"), systemImage: "folder")
                     .frame(maxWidth: .infinity)
@@ -61,15 +72,22 @@ struct AudioConversionView: View {
     }
 
     private var settingsCard: some View {
-        VStack(spacing: 14) {
+        VStack(alignment: .leading, spacing: 14) {
+            Label(L10n.string("settings.title"), systemImage: "slider.horizontal.3")
+                .font(.headline)
+
             row(L10n.string("settings.format")) {
                 Picker("", selection: Binding(
                     get: { viewModel.outputFormat },
                     set: { viewModel.outputFormat = $0 }
                 )) {
-                    Text("AAC · M4A").tag(AudioOutputFormat.aac)
-                    Text("ALAC · M4A").tag(AudioOutputFormat.alac)
-                    Text("WAV · PCM").tag(AudioOutputFormat.wav)
+                    Text(L10n.string("audio.format.aac")).tag(AudioOutputFormat.aac)
+                    Text(L10n.string("audio.format.aac_file")).tag(AudioOutputFormat.aacFile)
+                    Text(L10n.string("audio.format.alac")).tag(AudioOutputFormat.alac)
+                    Text(L10n.string("audio.format.wav")).tag(AudioOutputFormat.wav)
+                    Text(L10n.string("audio.format.aiff")).tag(AudioOutputFormat.aiff)
+                    Text(L10n.string("audio.format.caf_pcm")).tag(AudioOutputFormat.cafPCM)
+                    Text(L10n.string("audio.format.caf_alac")).tag(AudioOutputFormat.cafALAC)
                 }.labelsHidden().pickerStyle(.menu)
             }
             if !viewModel.outputFormat.isLossless {
@@ -113,7 +131,9 @@ struct AudioConversionView: View {
             HStack {
                 Text(L10n.format("files.title", viewModel.items.count)).font(.headline)
                 Spacer()
-                Button(L10n.string("action.clear_all"), role: .destructive) { viewModel.removeAll() }
+                Button(L10n.string("action.clear_all"), role: .destructive) {
+                    isClearAllConfirmationPresented = true
+                }
                     .disabled(viewModel.isConverting)
             }
             ForEach(viewModel.items) { item in
@@ -126,7 +146,12 @@ struct AudioConversionView: View {
                     }
                     Spacer()
                     if case let .completed(url) = item.status {
-                        ShareLink(item: url) { Image(systemName: "square.and.arrow.up") }
+                        HStack {
+                            ShareLink(item: url) { Image(systemName: "square.and.arrow.up") }
+                            Button(role: .destructive) { viewModel.remove(item.id) } label: {
+                                Image(systemName: "trash")
+                            }
+                        }
                     } else if case .converting = item.status {
                         ProgressView().controlSize(.small)
                     } else {

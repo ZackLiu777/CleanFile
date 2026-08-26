@@ -16,6 +16,7 @@ private enum AppTab: String, Hashable {
 }
 
 struct ContentView: View {
+    @Environment(\.appTheme) private var theme
     @StateObject private var mediaViewModel = PhotoLibraryViewModel()
     @StateObject private var fileViewModel = FileScannerViewModel()
     @AppStorage("selectedAppTab") private var selectedTab: AppTab = .photos
@@ -34,7 +35,7 @@ struct ContentView: View {
                 }
                 .tag(AppTab.storage)
 
-            ImageConversionView()
+            ImageConversionView(theme: theme.conversionTheme)
                 .tabItem {
                     Label("Convert", systemImage: "arrow.triangle.2.circlepath")
                 }
@@ -46,9 +47,34 @@ struct ContentView: View {
                 }
                 .tag(AppTab.settings)
         }
+        .tint(theme.accentPrimary)
         .toolbarBackground(.hidden, for: .tabBar)
-        .tint(AppTheme.accentPrimary)
         .sensoryFeedback(.selection, trigger: selectedTab)
+    }
+}
+
+private extension Theme {
+    var conversionTheme: ConversionTheme {
+        ConversionTheme(
+            background: conversionBackground,
+            cardSurface: cardSurface,
+            cardElevated: cardElevated,
+            textPrimary: textPrimary,
+            textSecondary: textSecondary,
+            accent: accentPrimary,
+            destructive: negativeRed,
+            divider: divider,
+            liquidGlassEnabled: liquidGlassEnabled
+        )
+    }
+
+    var conversionBackground: ConversionBackground {
+        switch background {
+        case let .solid(color):
+            .solid(color)
+        case let .linearGradient(colors, startPoint, endPoint):
+            .linearGradient(colors: colors, startPoint: startPoint, endPoint: endPoint)
+        }
     }
 }
 
@@ -59,7 +85,7 @@ struct ContentView: View {
     VStack(spacing: 16) {
         Image(systemName: "photo.on.rectangle")
             .font(.largeTitle)
-            .foregroundStyle(AppTheme.accentPrimary)
+            .foregroundStyle(Theme.system.accentPrimary)
 
         Text("CleanMyIPhone")
             .font(.title2.bold())

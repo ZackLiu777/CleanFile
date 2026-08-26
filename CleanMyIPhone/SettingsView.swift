@@ -4,79 +4,110 @@
 //
 
 import SwiftUI
+import Photos
+import UIKit
 
 struct SettingsView: View {
+    @Environment(\.appTheme) private var theme
     @EnvironmentObject private var themeSettings: ThemeSettings
+    @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var photoAuthorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                AppBackground()
-
-                ScrollView {
-                    LazyVStack(spacing: 20) {
-                        settingsSection(
-                            title: "Appearance",
-                            footer: "Choose the appearance used throughout the app."
-                        ) {
-                        Picker("Theme", selection: $themeSettings.appearance) {
-                            ForEach(AppAppearance.allCases) { appearance in
-                                Text(appearance.displayName)
-                                    .tag(appearance)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .tint(AppTheme.accentPrimary)
-                        }
-
-                        settingsSection(
-                            title: "Accent Color",
-                            footer: "The brand accent is used for selection, progress, and primary actions."
-                        ) {
-                        HStack(spacing: 12) {
-                            Circle()
-                                .fill(AppTheme.accentPrimary)
-                                .frame(width: 30, height: 30)
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("CleanMyIPhone Pink")
-                                Text("#E8A39C")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-
-                            Spacer()
-
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(AppTheme.accentPrimary)
-                        }
+            List {
+                Section("Color Theme") {
+                    Picker("Color Theme", selection: $themeSettings.selectedThemeID) {
+                        ForEach(AppThemeID.allCases) { themeID in
+                            Text(themeID.displayName)
+                                .tag(themeID)
                         }
                     }
-                    .padding()
+                    .pickerStyle(.navigationLink)
                 }
-                .scrollEdgeEffectStyle(.soft, for: .vertical)
+                .listRowBackground(theme.cardSurface)
+
+                Section {
+                    Picker("Appearance", selection: $themeSettings.appearance) {
+                        ForEach(AppAppearance.allCases) { appearance in
+                            Text(appearance.displayName)
+                                .tag(appearance)
+                        }
+                    }
+                    .pickerStyle(.navigationLink)
+                    .disabled(theme.preferredColorScheme != nil)
+                } header: {
+                    Text("Appearance")
+                } footer: {
+                    Text(appearanceFooter)
+                }
+                .listRowBackground(theme.cardSurface)
+
+                Section("Permissions") {
+                    LabeledContent {
+                        Text(photoAccessDescription)
+                            .foregroundStyle(.secondary)
+                    } label: {
+                        Label("Photos", systemImage: "photo.on.rectangle")
+                    }
+
+                    Button {
+                        guard let url = URL(string: UIApplication.openSettingsURLString) else {
+                            return
+                        }
+                        openURL(url)
+                    } label: {
+                        Label("Open System Settings", systemImage: "gear")
+                    }
+                }
+                .listRowBackground(theme.cardSurface)
+
+                Section("Privacy") {
+                    Label("Media and file analysis stays on this device.", systemImage: "lock.shield")
+                        .foregroundStyle(.secondary)
+                }
+                .listRowBackground(theme.cardSurface)
+
+                Section("About") {
+                    LabeledContent("Version", value: appVersion)
+                    LabeledContent("Build", value: buildNumber)
+                }
+                .listRowBackground(theme.cardSurface)
             }
+            .scrollContentBackground(.hidden)
+            .background(AppBackground())
+            .appSoftScrollEdge()
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active else { return }
+                photoAuthorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+            }
         }
     }
 
-    private func settingsSection<Content: View>(
-        title: LocalizedStringKey,
-        footer: LocalizedStringKey,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.headline)
-
-            content()
-
-            Text(footer)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+    private var photoAccessDescription: LocalizedStringKey {
+        switch photoAuthorizationStatus {
+        case .authorized: "Full Access"
+        case .limited: "Limited Access"
+        case .denied, .restricted: "No Access"
+        case .notDetermined: "Not Requested"
+        @unknown default: "No Access"
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .appGlassCard()
+    }
+
+    private var appearanceFooter: LocalizedStringKey {
+        theme.preferredColorScheme == nil
+            ? "Choose the appearance used throughout the app."
+            : "This color theme uses a fixed appearance."
+    }
+
+    private var appVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
+    }
+
+    private var buildNumber: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"
     }
 }

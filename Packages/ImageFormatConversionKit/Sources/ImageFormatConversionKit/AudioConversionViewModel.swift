@@ -16,6 +16,7 @@ final class AudioConversionViewModel {
     let outputDirectory: URL
 
     private let engine: AudioConversionEngine
+    private let workspace = ConversionWorkspace.shared
     @ObservationIgnored private var task: Task<Void, Never>?
 
     init(engine: AudioConversionEngine = AudioConversionEngine()) {
@@ -24,6 +25,7 @@ final class AudioConversionViewModel {
         let base = manager.urls(for: .documentDirectory, in: .userDomainMask).first
             ?? manager.temporaryDirectory
         outputDirectory = base.appendingPathComponent("Converted Audio", isDirectory: true)
+        Task { [weak self] in await self?.restore() }
     }
 
     var canConvert: Bool {
@@ -37,25 +39,60 @@ final class AudioConversionViewModel {
 
     func addFiles(_ urls: [URL]) {
         guard !isConverting else { return }
+        Task { [weak self] in await self?.importFiles(urls) }
+    }
+
+    private func importFiles(_ urls: [URL]) async {
+        guard !isConverting else { return }
         let allowed = Set(AudioConversionEngine.supportedInputExtensions)
         let accepted = urls.filter { allowed.contains($0.pathExtension.lowercased()) }
         if accepted.count != urls.count { notice = L10n.string("audio.error.unsupported") }
-        var known = Set(items.map { $0.sourceURL.standardizedFileURL })
-        for url in accepted where known.insert(url.standardizedFileURL).inserted {
-            let bytes = Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
-            items.append(AudioConversionItem(sourceURL: url, sourceBytes: bytes))
+        var knownURLs = Set(items.map { $0.sourceURL.standardizedFileURL })
+        for url in accepted where knownURLs.insert(url.standardizedFileURL).inserted {
+            let id = UUID()
+            do {
+                let (stagedURL, bytes) = try await workspace.stage(url, id: id, kind: .audio)
+                items.append(AudioConversionItem(id: id, sourceURL: stagedURL, sourceBytes: bytes))
+            } catch {
+                notice = L10n.format("notice.import_failed", error.localizedDescription)
+            }
         }
+        persist()
     }
 
     func remove(_ id: UUID) {
         guard !isConverting else { return }
-        items.removeAll { $0.id == id }
+        guard let item = items.first(where: { $0.id == id }) else { return }
+        Task {
+            let succeeded = await workspace.delete(
+                record(item), kind: .audio, outputRoot: outputDirectory
+            )
+            if succeeded {
+                items.removeAll { $0.id == id }
+            } else {
+                notice = L10n.string("conversion.delete.failed")
+            }
+            persist()
+        }
     }
 
     func removeAll() {
         guard !isConverting else { return }
-        items.removeAll()
+        let removedItems = items
         notice = nil
+        Task {
+            var deletedIDs = Set<UUID>()
+            for item in removedItems {
+                if await workspace.delete(record(item), kind: .audio, outputRoot: outputDirectory) {
+                    deletedIDs.insert(item.id)
+                }
+            }
+            items.removeAll { deletedIDs.contains($0.id) }
+            if deletedIDs.count != removedItems.count {
+                notice = L10n.string("conversion.delete.failed")
+            }
+            persist()
+        }
     }
 
     func reportImportFailure(_ message: String) {
@@ -108,11 +145,58 @@ final class AudioConversionViewModel {
                 items[index].status = .failed(error.localizedDescription)
             }
             completed += 1
+            persist()
         }
         notice = Task.isCancelled
             ? L10n.string("notice.cancelled")
             : L10n.format("audio.notice.completed", completed)
         isConverting = false
         task = nil
+        persist()
+    }
+
+    private func restore() async {
+        guard items.isEmpty, !isConverting else { return }
+        let records = await workspace.load(.audio)
+        items = records.map { record in
+            let outputURL = record.outputPath.map { URL(fileURLWithPath: $0) }
+            let status: AudioConversionStatus
+            switch record.status {
+            case .completed where outputURL.map({ FileManager.default.fileExists(atPath: $0.path) }) == true:
+                status = .completed(outputURL!)
+            case .cancelled: status = .cancelled
+            default: status = .ready
+            }
+            return AudioConversionItem(
+                id: record.id,
+                sourceURL: URL(fileURLWithPath: record.sourcePath),
+                sourceBytes: record.sourceBytes,
+                status: status
+            )
+        }
+        persist()
+    }
+
+    private func persist() {
+        let records = items.map(record)
+        Task { await workspace.save(records, kind: .audio) }
+    }
+
+    private func record(_ item: AudioConversionItem) -> PersistedConversionItem {
+        let status: PersistedConversionStatus
+        let outputPath: String?
+        switch item.status {
+        case .completed(let url): status = .completed; outputPath = url.path
+        case .failed: status = .failed; outputPath = nil
+        case .cancelled: status = .cancelled; outputPath = nil
+        case .ready, .converting: status = .ready; outputPath = nil
+        }
+        return PersistedConversionItem(
+            id: item.id,
+            sourcePath: item.sourceURL.path,
+            sourceBytes: item.sourceBytes,
+            status: status,
+            outputPath: outputPath
+        )
     }
 }

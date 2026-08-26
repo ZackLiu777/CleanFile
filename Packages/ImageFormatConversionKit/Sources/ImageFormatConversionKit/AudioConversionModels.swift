@@ -2,19 +2,31 @@ import Foundation
 
 public enum AudioOutputFormat: String, CaseIterable, Identifiable, Sendable {
     case aac
+    case aacFile
     case alac
     case wav
+    case aiff
+    case cafPCM
+    case cafALAC
 
     public var id: Self { self }
 
     public var fileExtension: String {
         switch self {
         case .aac, .alac: "m4a"
+        case .aacFile: "aac"
         case .wav: "wav"
+        case .aiff: "aiff"
+        case .cafPCM, .cafALAC: "caf"
         }
     }
 
-    public var isLossless: Bool { self != .aac }
+    public var isLossless: Bool {
+        switch self {
+        case .aac, .aacFile: false
+        case .alac, .wav, .aiff, .cafPCM, .cafALAC: true
+        }
+    }
 }
 
 public enum AudioBitRate: Int, CaseIterable, Identifiable, Sendable {

@@ -109,13 +109,13 @@ struct PersistenceTests {
 @MainActor
 @Suite("Theme persistence")
 struct ThemePersistenceTests {
-    @Test("Theme defaults to light when no value exists")
-    func themeDefaultsToLight() {
+    @Test("Theme follows the system when no value exists")
+    func themeDefaultsToSystem() {
         let defaults = isolatedDefaults()
 
         let settings = ThemeSettings(userDefaults: defaults)
 
-        #expect(settings.appearance == .light)
+        #expect(settings.appearance == .system)
     }
 
     @Test("Theme restores a persisted dark value")
@@ -128,14 +128,14 @@ struct ThemePersistenceTests {
         #expect(settings.appearance == .dark)
     }
 
-    @Test("Invalid persisted theme safely falls back to light")
-    func invalidThemeFallsBackToLight() {
+    @Test("Invalid persisted theme safely falls back to the system")
+    func invalidThemeFallsBackToSystem() {
         let defaults = isolatedDefaults()
         defaults.set("unsupported", forKey: "appAppearance")
 
         let settings = ThemeSettings(userDefaults: defaults)
 
-        #expect(settings.appearance == .light)
+        #expect(settings.appearance == .system)
     }
 
     @Test("Changing theme persists immediately")
@@ -145,6 +145,30 @@ struct ThemePersistenceTests {
 
         settings.appearance = .dark
 
+        #expect(defaults.string(forKey: "appAppearance") == AppAppearance.dark.rawValue)
+    }
+
+    @Test("Legacy decorative themes migrate to the restrained palette")
+    func legacyThemesAreMigrated() {
+        let defaults = isolatedDefaults()
+        defaults.set("nebula", forKey: "appTheme")
+
+        let settings = ThemeSettings(userDefaults: defaults)
+
+        #expect(settings.selectedThemeID == .porcelain)
+        #expect(defaults.string(forKey: "appTheme") == AppThemeID.porcelain.rawValue)
+    }
+
+    @Test("Legacy Pure Black preserves a dark appearance")
+    func legacyPureBlackPreservesDarkAppearance() {
+        let defaults = isolatedDefaults()
+        defaults.set("pureBlack", forKey: "appTheme")
+
+        let settings = ThemeSettings(userDefaults: defaults)
+
+        #expect(settings.selectedThemeID == .system)
+        #expect(settings.appearance == .dark)
+        #expect(defaults.string(forKey: "appTheme") == AppThemeID.system.rawValue)
         #expect(defaults.string(forKey: "appAppearance") == AppAppearance.dark.rawValue)
     }
 

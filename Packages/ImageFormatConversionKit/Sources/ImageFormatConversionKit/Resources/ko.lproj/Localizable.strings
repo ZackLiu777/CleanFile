@@ -1,4 +1,4 @@
-"converter.title" = "이미지 형식 변환";
+"converter.title" = "미디어 변환";
 "import.title" = "기기에서 이미지 변환";
 "import.subtitle" = "파일은 이 기기에서만 처리되며 업로드되지 않습니다.";
 "action.add_images" = "이미지 추가";
@@ -67,6 +67,17 @@
 "audio.action.add" = "오디오 추가";
 "audio.import.title" = "오디오 변환";
 "audio.settings.quality" = "품질";
+"audio.format.aac" = "M4A(AAC 인코딩)";
+"audio.format.aac_file" = "AAC(AAC 인코딩)";
+"audio.format.alac" = "M4A(Apple 무손실)";
+"audio.format.wav" = "WAV(비압축 PCM)";
+"audio.format.aiff" = "AIFF(비압축 PCM)";
+"audio.format.caf_pcm" = "CAF(비압축 PCM)";
+"audio.format.caf_alac" = "CAF(Apple 무손실)";
+"conversion.delete_all.title" = "모든 변환 파일을 삭제할까요?";
+"conversion.delete_all.message" = "앱의 가져온 복사본과 변환된 출력을 삭제합니다. 사진 및 파일의 원본은 삭제되지 않습니다.";
+"conversion.delete.action" = "파일 삭제";
+"conversion.delete.failed" = "일부 앱 관리 파일을 삭제하지 못했습니다. 실패한 항목은 목록에 유지됩니다.";
 "audio.lossless" = "무손실 출력은 사용 가능한 음질을 보존합니다.";
 "audio.empty.title" = "오디오 없음";
 "audio.empty.subtitle" = "변환할 오디오 파일을 선택하세요.";

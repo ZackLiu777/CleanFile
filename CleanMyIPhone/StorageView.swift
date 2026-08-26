@@ -7,6 +7,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct StorageView: View {
+    @Environment(\.appTheme) private var theme
     @ObservedObject var viewModel: FileScannerViewModel
     @State private var isImporterPresented = false
 
@@ -21,14 +22,14 @@ struct StorageView: View {
                         statusCard
 
                         if let summary = viewModel.summary {
-                            if let fileTree = viewModel.fileTree, fileTree.byteCount > 0 {
-                                sunburstCard(root: fileTree)
-                            }
-
                             summaryCard(summary)
 
                             if !viewModel.largestFiles.isEmpty {
                                 largestFilesCard
+                            }
+
+                            if let fileTree = viewModel.fileTree, fileTree.byteCount > 0 {
+                                folderMapLink(root: fileTree)
                             }
 
                             if !viewModel.files.isEmpty {
@@ -39,15 +40,16 @@ struct StorageView: View {
                                         .frame(maxWidth: .infinity)
                                 }
                                 .buttonStyle(.borderedProminent)
-                                .tint(AppTheme.accentPrimary)
+                                .tint(theme.accentPrimary)
                             }
                         }
                     }
                     .padding()
                 }
-                .scrollEdgeEffectStyle(.soft, for: .vertical)
+                .appSoftScrollEdge()
             }
             .navigationTitle("Storage")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -72,7 +74,7 @@ struct StorageView: View {
             HStack(spacing: 12) {
                 Image(systemName: "folder.fill")
                     .font(.title2)
-                    .foregroundStyle(AppTheme.accentPrimary)
+                    .foregroundStyle(theme.accentPrimary)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Analyzed Folder")
@@ -113,12 +115,12 @@ struct StorageView: View {
                     .foregroundStyle(.secondary)
             case .scanning(let progress):
                 ProgressView()
-                    .tint(AppTheme.accentPrimary)
+                    .tint(theme.accentPrimary)
                 Text("Scanned \(progress.scannedFileCount) files")
                     .foregroundStyle(.secondary)
             case .success:
                 Label("Scan completed.", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(AppTheme.accentPrimary)
+                    .foregroundStyle(theme.accentPrimary)
             case .empty:
                 Label("No readable files found.", systemImage: "folder")
                     .foregroundStyle(.secondary)
@@ -132,24 +134,37 @@ struct StorageView: View {
                     .foregroundStyle(.secondary)
             case .failure(let error):
                 Label(error.localizedDescription, systemImage: "xmark.circle")
-                    .foregroundStyle(.red)
+                    .foregroundStyle(theme.negativeRed)
             }
         }
         .storageCard()
     }
 
-    private func sunburstCard(root: FileNode) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Folder Map")
-                    .font(.headline)
-                Spacer()
+    private func folderMapLink(root: FileNode) -> some View {
+        NavigationLink {
+            FolderMapView(root: root)
+        } label: {
+            HStack(spacing: 12) {
                 Image(systemName: "circle.hexagongrid")
-                    .foregroundStyle(AppTheme.accentPrimary)
-            }
+                    .font(.title3)
+                    .foregroundStyle(theme.accentPrimary)
 
-            SunburstChartView(root: root)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Folder Map")
+                        .font(.headline)
+                    Text("Explore the folder hierarchy")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
         }
+        .buttonStyle(.plain)
         .storageCard()
     }
 
@@ -173,51 +188,81 @@ struct StorageView: View {
             }
 
             ForEach(summary.nonEmptyCategories) { category in
-                VStack(spacing: 6) {
-                    HStack {
-                        Circle()
-                            .fill(AppTheme.fileCategoryColor(category.category))
-                            .frame(width: 9, height: 9)
-                        Text(category.category.displayName)
-                        Text("\(category.fileCount)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(byteCountText(category.byteCount))
-                            .foregroundStyle(.secondary)
-                    }
+                NavigationLink {
+                    ScannedFilesView(viewModel: viewModel, category: category.category)
+                } label: {
+                    VStack(spacing: 7) {
+                        HStack(spacing: 10) {
+                            Circle()
+                                .fill(theme.fileCategoryColor(category.category))
+                                .frame(width: 9, height: 9)
 
-                    ProgressView(value: category.percentage)
-                        .tint(AppTheme.fileCategoryColor(category.category))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(category.category.displayName)
+                                    .foregroundStyle(.primary)
+                                Text(fileCountText(category.fileCount))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Spacer()
+
+                            Text(byteCountText(category.byteCount))
+                                .foregroundStyle(.secondary)
+
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+
+                        ProgressView(value: category.percentage)
+                            .tint(theme.fileCategoryColor(category.category))
+                    }
                 }
+                .buttonStyle(.plain)
             }
         }
         .storageCard()
     }
 
     private var largestFilesCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Largest Files")
-                .font(.headline)
+        NavigationLink {
+            ScannedFilesView(viewModel: viewModel)
+        } label: {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Largest Files")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
 
-            ForEach(viewModel.largestFiles) { file in
-                HStack(spacing: 10) {
-                    Image(systemName: "doc")
-                        .foregroundStyle(AppTheme.fileCategoryColor(file.category))
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(file.name)
-                            .lineLimit(1)
-                        Text(file.category.displayName)
-                            .font(.caption)
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+
+                ForEach(viewModel.largestFiles) { file in
+                    HStack(spacing: 10) {
+                        Image(systemName: "doc")
+                            .foregroundStyle(theme.fileCategoryColor(file.category))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(file.name)
+                                .foregroundStyle(.primary)
+                                .lineLimit(1)
+                            Text(file.category.displayName)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Text(byteCountText(file.byteCount))
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
-                    Spacer()
-                    Text(byteCountText(file.byteCount))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
                 }
             }
         }
+        .buttonStyle(.plain)
         .storageCard()
     }
 
@@ -228,7 +273,7 @@ struct StorageView: View {
                 .foregroundStyle(.secondary)
             Text(value)
                 .font(.title3.weight(.semibold))
-                .foregroundStyle(AppTheme.accentPrimary)
+                .foregroundStyle(theme.accentPrimary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -249,23 +294,60 @@ struct StorageView: View {
     private func byteCountText(_ byteCount: Int64) -> String {
         ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
     }
+
+    private func fileCountText(_ count: Int) -> String {
+        String.localizedStringWithFormat(String(localized: "%lld files"), Int64(count))
+    }
+}
+
+private struct FolderMapView: View {
+    let root: FileNode
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Tap a folder segment to drill down. Tap the center to go back.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                SunburstChartView(root: root)
+            }
+            .padding()
+        }
+        .appSoftScrollEdge()
+        .background(AppBackground())
+        .navigationTitle("Folder Map")
+        .navigationBarTitleDisplayMode(.inline)
+    }
 }
 
 private struct ScannedFilesView: View {
+    @Environment(\.appTheme) private var theme
     @ObservedObject var viewModel: FileScannerViewModel
+    let category: FileCategory?
     @State private var selectedURLs = Set<URL>()
     @State private var isDeleteConfirmationPresented = false
 
+    init(viewModel: FileScannerViewModel, category: FileCategory? = nil) {
+        self.viewModel = viewModel
+        self.category = category
+    }
+
+    private var displayedFiles: [ScannedFile] {
+        guard let category else { return viewModel.files }
+        return viewModel.files.filter { $0.category == category }
+    }
+
     var body: some View {
         Group {
-            if viewModel.files.isEmpty {
+            if displayedFiles.isEmpty {
                 ContentUnavailableView(
                     "No Files",
                     systemImage: "folder",
                     description: Text("No scanned files are available.")
                 )
             } else {
-                List(viewModel.files) { file in
+                List(displayedFiles) { file in
                     Button {
                         if selectedURLs.contains(file.url) {
                             selectedURLs.remove(file.url)
@@ -279,11 +361,11 @@ private struct ScannedFilesView: View {
                                 : "circle")
                                 .foregroundStyle(
                                     selectedURLs.contains(file.url)
-                                        ? AppTheme.accentPrimary
+                                        ? theme.accentPrimary
                                         : .secondary
                                 )
                             Image(systemName: "doc")
-                                .foregroundStyle(AppTheme.fileCategoryColor(file.category))
+                                .foregroundStyle(theme.fileCategoryColor(file.category))
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(file.name)
                                     .lineLimit(1)
@@ -302,21 +384,25 @@ private struct ScannedFilesView: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    .listRowBackground(theme.cardSurface)
                 }
+                .scrollContentBackground(.hidden)
+                .background(AppBackground())
+                .appSoftScrollEdge()
             }
         }
-        .navigationTitle("Scanned Files")
+        .navigationTitle(category?.displayName ?? String(localized: "Scanned Files"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(selectedURLs.count == viewModel.files.count ? "Deselect All" : "Select All") {
-                    if selectedURLs.count == viewModel.files.count {
+                Button(selectedURLs.count == displayedFiles.count ? "Deselect All" : "Select All") {
+                    if selectedURLs.count == displayedFiles.count {
                         selectedURLs.removeAll()
                     } else {
-                        selectedURLs = Set(viewModel.files.map(\.url))
+                        selectedURLs = Set(displayedFiles.map(\.url))
                     }
                 }
-                .disabled(viewModel.files.isEmpty || viewModel.deletionState.isDeleting)
+                .disabled(displayedFiles.isEmpty || viewModel.deletionState.isDeleting)
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -341,7 +427,7 @@ private struct ScannedFilesView: View {
                     }
                 }
                 .buttonStyle(.glass)
-                .foregroundStyle(.red)
+                .foregroundStyle(theme.negativeRed)
                 .disabled(selectedURLs.isEmpty || viewModel.deletionState.isDeleting)
             }
             .padding(.horizontal, 16)
@@ -353,7 +439,7 @@ private struct ScannedFilesView: View {
                 let urls = selectedURLs
                 Task {
                     await viewModel.deleteFiles(withURLs: urls)
-                    selectedURLs.formIntersection(Set(viewModel.files.map(\.url)))
+                    selectedURLs.formIntersection(Set(displayedFiles.map(\.url)))
                 }
             }
         } message: {
@@ -382,7 +468,7 @@ private struct ScannedFilesView: View {
     }
 
     private var selectedFileSizeText: String {
-        let byteCount = viewModel.files.reduce(Int64.zero) { total, file in
+        let byteCount = displayedFiles.reduce(Int64.zero) { total, file in
             selectedURLs.contains(file.url) && file.hasKnownByteCount
                 ? total + file.byteCount
                 : total
@@ -412,6 +498,6 @@ private extension View {
     func storageCard() -> some View {
         padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .appGlassCard()
+            .appContentCard()
     }
 }

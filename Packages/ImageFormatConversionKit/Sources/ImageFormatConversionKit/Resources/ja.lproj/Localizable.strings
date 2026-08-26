@@ -1,4 +1,4 @@
-"converter.title" = "画像フォーマット変換";
+"converter.title" = "メディア変換";
 "import.title" = "端末内で画像を変換";
 "import.subtitle" = "ファイルはこの端末上だけで処理され、アップロードされません。";
 "action.add_images" = "画像を追加";
@@ -67,6 +67,17 @@
 "audio.action.add" = "オーディオを追加";
 "audio.import.title" = "オーディオ変換";
 "audio.settings.quality" = "品質";
+"audio.format.aac" = "M4A（AAC エンコード）";
+"audio.format.aac_file" = "AAC（AAC エンコード）";
+"audio.format.alac" = "M4A（Apple Lossless）";
+"audio.format.wav" = "WAV（非圧縮 PCM）";
+"audio.format.aiff" = "AIFF（非圧縮 PCM）";
+"audio.format.caf_pcm" = "CAF（非圧縮 PCM）";
+"audio.format.caf_alac" = "CAF（Apple Lossless）";
+"conversion.delete_all.title" = "変換ファイルをすべて削除しますか？";
+"conversion.delete_all.message" = "App 内の読み込みコピーと変換出力を削除します。写真やファイルのオリジナルは削除されません。";
+"conversion.delete.action" = "ファイルを削除";
+"conversion.delete.failed" = "一部の App 管理ファイルを削除できませんでした。失敗した項目は一覧に残されています。";
 "audio.lossless" = "ロスレス出力は利用可能な音質を保持します。";
 "audio.empty.title" = "オーディオがありません";
 "audio.empty.subtitle" = "変換するオーディオファイルを選択してください。";
