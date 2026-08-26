@@ -34,6 +34,20 @@ enum PhotoLibraryImport {
         type: T.Type,
         progress progressHandler: @escaping @Sendable (Double) -> Void
     ) async throws -> T? {
+        try await ConversionImportScheduler.shared.withPermit {
+            try await loadTransferableWithoutScheduling(
+                from: item,
+                type: type,
+                progress: progressHandler
+            )
+        }
+    }
+
+    private static func loadTransferableWithoutScheduling<T: Transferable & Sendable>(
+        from item: PhotosPickerItem,
+        type: T.Type,
+        progress progressHandler: @escaping @Sendable (Double) -> Void
+    ) async throws -> T? {
         let operation = TransferProgressOperation()
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
@@ -54,7 +68,9 @@ enum PhotoLibraryImport {
                             progressHandler(snapshot.fraction)
                         }
                         if snapshot.isFinished { break }
-                        try? await Task.sleep(for: .milliseconds(33))
+                        // Ten UI updates per second remain smooth while avoiding
+                        // excessive observation invalidations during large batches.
+                        try? await Task.sleep(for: .milliseconds(100))
                     }
                 }
             }

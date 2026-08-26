@@ -50,7 +50,23 @@ actor ConversionWorkspace {
         _ sourceURL: URL,
         id: UUID,
         kind: ConversionMediaKind,
-        progress: @Sendable (Int64, Int64) async -> Void
+        progress: @escaping @Sendable (Int64, Int64) async -> Void
+    ) async throws -> (URL, Int64) {
+        try await ConversionImportScheduler.shared.withPermit {
+            try await self.stageWithoutScheduling(
+                sourceURL,
+                id: id,
+                kind: kind,
+                progress: progress
+            )
+        }
+    }
+
+    private func stageWithoutScheduling(
+        _ sourceURL: URL,
+        id: UUID,
+        kind: ConversionMediaKind,
+        progress: @escaping @Sendable (Int64, Int64) async -> Void
     ) async throws -> (URL, Int64) {
         let source = sourceURL.standardizedFileURL
         var sourceBytes = fileSize(source)
@@ -70,6 +86,21 @@ actor ConversionWorkspace {
         let destination = itemDirectory.appendingPathComponent(fileName)
         if fileManager.fileExists(atPath: destination.path) {
             try fileManager.removeItem(at: destination)
+        }
+
+        // PhotosPicker has already created a stable file in our Application
+        // Support directory. Moving it into the workspace is atomic on the same
+        // volume and avoids reading and writing the full media file a second time.
+        if isDescendant(source, of: legacyPhotoImportsURL) {
+            do {
+                try fileManager.moveItem(at: source, to: destination)
+                let movedBytes = fileSize(destination)
+                await progress(movedBytes, movedBytes)
+                return (destination, movedBytes)
+            } catch {
+                // Fall back to the streaming copy below if a provider placed the
+                // source on a different volume or the atomic move is unavailable.
+            }
         }
 
         guard fileManager.createFile(atPath: destination.path, contents: nil) else {

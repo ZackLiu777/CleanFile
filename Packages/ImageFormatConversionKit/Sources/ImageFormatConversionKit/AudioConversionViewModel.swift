@@ -86,7 +86,10 @@ final class AudioConversionViewModel {
                     }
                 }
                 do {
-                    let duration = try await engine.inspect(stagedURL, sourceKind: sourceKind)
+                    let audioEngine = engine
+                    let duration = try await ConversionImportScheduler.shared.withPermit {
+                        try await audioEngine.inspect(stagedURL, sourceKind: sourceKind)
+                    }
                     items.append(AudioConversionItem(
                         id: id,
                         sourceURL: stagedURL,

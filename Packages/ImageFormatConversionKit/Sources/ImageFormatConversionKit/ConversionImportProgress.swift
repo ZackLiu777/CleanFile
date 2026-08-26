@@ -70,12 +70,12 @@ struct ConversionImportProgressView: View {
                     .font(.headline)
                 Spacer()
                 AnimatedImportPercentage(value: progress.fractionCompleted)
-                    .animation(.linear(duration: 0.18), value: progress.fractionCompleted)
+                    .animation(.linear(duration: 0.12), value: progress.fractionCompleted)
             }
 
             ProgressView(value: progress.fractionCompleted)
                 .tint(theme.accent)
-                .animation(.linear(duration: 0.18), value: progress.fractionCompleted)
+                .animation(.linear(duration: 0.12), value: progress.fractionCompleted)
                 .accessibilityValue(Text("\(progress.percentage)%"))
                 .accessibilityIdentifier("conversion.import.progressBar")
 

@@ -149,7 +149,7 @@ public final class ImageConversionViewModel {
         items.append(contentsOf: newItems)
 
         await withTaskGroup(of: InspectionOutcome.self) { group in
-            let concurrencyLimit = min(4, newItems.count)
+            let concurrencyLimit = min(Self.inspectionConcurrencyLimit, newItems.count)
             var nextItemIndex = 0
 
             for _ in 0 ..< concurrencyLimit {
@@ -157,9 +157,12 @@ public final class ImageConversionViewModel {
                 let conversionEngine = engine
                 group.addTask {
                     do {
+                        let info = try await ConversionImportScheduler.shared.withPermit {
+                            try await conversionEngine.inspect(item.sourceURL)
+                        }
                         return .success(
                             id: item.id,
-                            info: try await conversionEngine.inspect(item.sourceURL)
+                            info: info
                         )
                     } catch let error as ImageConversionError {
                         return .failure(
@@ -199,9 +202,12 @@ public final class ImageConversionViewModel {
                     let conversionEngine = engine
                     group.addTask {
                         do {
+                            let info = try await ConversionImportScheduler.shared.withPermit {
+                                try await conversionEngine.inspect(item.sourceURL)
+                            }
                             return .success(
                                 id: item.id,
-                                info: try await conversionEngine.inspect(item.sourceURL)
+                                info: info
                             )
                         } catch let error as ImageConversionError {
                             return .failure(
@@ -217,6 +223,14 @@ public final class ImageConversionViewModel {
             }
         }
         persist()
+    }
+
+    private static var inspectionConcurrencyLimit: Int {
+        switch ProcessInfo.processInfo.thermalState {
+        case .serious, .critical: 1
+        case .nominal, .fair: 2
+        @unknown default: 1
+        }
     }
 
     public func removeItem(id: UUID) {
