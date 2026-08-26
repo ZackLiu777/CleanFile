@@ -10,6 +10,7 @@ final class AudioConversionViewModel {
     private(set) var total = 0
     private(set) var itemProgress = 0.0
     private(set) var notice: String?
+    private(set) var importProgress: ConversionImportProgress?
 
     var outputFormat: AudioOutputFormat = .aac
     var bitRate: AudioBitRate = .high
@@ -37,13 +38,12 @@ final class AudioConversionViewModel {
         }
     }
 
-    func addFiles(_ urls: [URL], sourceKind: AudioSourceKind = .audioFile) {
-        guard !isConverting else { return }
-        Task { [weak self] in await self?.importFiles(urls, sourceKind: sourceKind) }
-    }
-
-    private func importFiles(_ urls: [URL], sourceKind: AudioSourceKind) async {
-        guard !isConverting else { return }
+    func addFiles(
+        _ urls: [URL],
+        sourceKind: AudioSourceKind = .audioFile,
+        progressRange: ClosedRange<Double> = 0 ... 1
+    ) async {
+        guard !isConverting, importProgress == nil else { return }
         let allowed = Set(
             sourceKind == .video
                 ? AudioConversionEngine.supportedVideoInputExtensions
@@ -52,10 +52,39 @@ final class AudioConversionViewModel {
         let accepted = urls.filter { allowed.contains($0.pathExtension.lowercased()) }
         if accepted.count != urls.count { notice = L10n.string("audio.error.unsupported") }
         var knownURLs = Set(items.map { $0.sourceURL.standardizedFileURL })
-        for url in accepted where knownURLs.insert(url.standardizedFileURL).inserted {
+        let uniqueURLs = accepted.filter {
+            knownURLs.insert($0.standardizedFileURL).inserted
+        }
+        guard !uniqueURLs.isEmpty else { return }
+        importProgress = ConversionImportProgress(
+            completed: 0,
+            total: uniqueURLs.count,
+            currentFileName: uniqueURLs.first?.lastPathComponent
+        ).mapped(to: progressRange)
+        defer { importProgress = nil }
+        for (index, url) in uniqueURLs.enumerated() {
+            importProgress = ConversionImportProgress(
+                completed: index,
+                total: uniqueURLs.count,
+                currentFileName: url.lastPathComponent
+            ).mapped(to: progressRange)
             let id = UUID()
             do {
-                let (stagedURL, bytes) = try await workspace.stage(url, id: id, kind: .audio)
+                let (stagedURL, bytes) = try await workspace.stage(
+                    url,
+                    id: id,
+                    kind: .audio
+                ) { [weak self] copiedBytes, totalBytes in
+                    guard totalBytes > 0 else { return }
+                    await MainActor.run {
+                        self?.importProgress = ConversionImportProgress(
+                            completed: index,
+                            total: uniqueURLs.count,
+                            currentFileName: url.lastPathComponent,
+                            currentFileFraction: Double(copiedBytes) / Double(totalBytes)
+                        ).mapped(to: progressRange)
+                    }
+                }
                 do {
                     let duration = try await engine.inspect(stagedURL, sourceKind: sourceKind)
                     items.append(AudioConversionItem(
@@ -83,6 +112,11 @@ final class AudioConversionViewModel {
             } catch {
                 notice = L10n.format("notice.import_failed", error.localizedDescription)
             }
+            importProgress = ConversionImportProgress(
+                completed: index + 1,
+                total: uniqueURLs.count,
+                currentFileName: nil
+            ).mapped(to: progressRange)
         }
         persist()
     }

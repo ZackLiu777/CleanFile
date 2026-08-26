@@ -149,3 +149,4 @@
 "formats.image.title" = "支持的图片格式";
 "formats.video.title" = "支持的视频格式";
 "action.done" = "完成";
+"import.progress.title" = "正在导入";

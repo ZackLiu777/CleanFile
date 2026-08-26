@@ -32,11 +32,12 @@ actor ConversionWorkspace {
     private let manifestsURL: URL
     private let legacyPhotoImportsURL: URL
 
-    init(fileManager: FileManager = .default) {
+    init(fileManager: FileManager = .default, rootURL customRootURL: URL? = nil) {
         self.fileManager = fileManager
         let support = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? fileManager.temporaryDirectory
-        rootURL = support.appendingPathComponent("Media Conversion Workspace", isDirectory: true)
+        rootURL = customRootURL
+            ?? support.appendingPathComponent("Media Conversion Workspace", isDirectory: true)
         importsURL = rootURL.appendingPathComponent("Imports", isDirectory: true)
         manifestsURL = rootURL.appendingPathComponent("Manifests", isDirectory: true)
         legacyPhotoImportsURL = support.appendingPathComponent(
@@ -45,10 +46,17 @@ actor ConversionWorkspace {
         )
     }
 
-    func stage(_ sourceURL: URL, id: UUID, kind: ConversionMediaKind) throws -> (URL, Int64) {
+    func stage(
+        _ sourceURL: URL,
+        id: UUID,
+        kind: ConversionMediaKind,
+        progress: @Sendable (Int64, Int64) async -> Void
+    ) async throws -> (URL, Int64) {
         let source = sourceURL.standardizedFileURL
+        var sourceBytes = fileSize(source)
         if isDescendant(source, of: importsURL) {
-            return (source, fileSize(source))
+            await progress(sourceBytes, sourceBytes)
+            return (source, sourceBytes)
         }
 
         let hasAccess = source.startAccessingSecurityScopedResource()
@@ -63,11 +71,49 @@ actor ConversionWorkspace {
         if fileManager.fileExists(atPath: destination.path) {
             try fileManager.removeItem(at: destination)
         }
-        try fileManager.copyItem(at: source, to: destination)
+
+        guard fileManager.createFile(atPath: destination.path, contents: nil) else {
+            throw CocoaError(.fileWriteUnknown)
+        }
+
+        do {
+            let reader = try FileHandle(forReadingFrom: source)
+            let writer = try FileHandle(forWritingTo: destination)
+            defer {
+                try? reader.close()
+                try? writer.close()
+            }
+
+            if sourceBytes <= 0 {
+                sourceBytes = Int64(try reader.seekToEnd())
+                try reader.seek(toOffset: 0)
+            }
+            var copiedBytes: Int64 = 0
+            // Aim for roughly one callback per percentage point. Small files use
+            // smaller chunks; very large files stay capped at 1 MiB to avoid
+            // excessive I/O calls.
+            let targetChunkBytes = sourceBytes > 0 ? sourceBytes / 100 : 1_048_576
+            let readChunkBytes = Int(min(max(targetChunkBytes, 16_384), 1_048_576))
+            await progress(0, sourceBytes)
+            while true {
+                try Task.checkCancellation()
+                guard let data = try reader.read(upToCount: readChunkBytes), !data.isEmpty else { break }
+                try writer.write(contentsOf: data)
+                copiedBytes += Int64(data.count)
+                await progress(copiedBytes, sourceBytes)
+            }
+            try writer.synchronize()
+        } catch {
+            try? fileManager.removeItem(at: itemDirectory)
+            throw error
+        }
+
         if isDescendant(source, of: legacyPhotoImportsURL) {
             try? fileManager.removeItem(at: source)
         }
-        return (destination, fileSize(destination))
+        let stagedBytes = fileSize(destination)
+        await progress(stagedBytes, max(sourceBytes, stagedBytes))
+        return (destination, stagedBytes)
     }
 
     func load(_ kind: ConversionMediaKind) -> [PersistedConversionItem] {

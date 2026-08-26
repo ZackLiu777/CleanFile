@@ -8,11 +8,15 @@ struct VideoConversionView: View {
     @State private var importerPresented = false
     @State private var selectedVideoItems: [PhotosPickerItem] = []
     @State private var isClearAllConfirmationPresented = false
+    @State private var libraryImportProgress: ConversionImportProgress?
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 importCard
+                if let progress = libraryImportProgress ?? viewModel.importProgress {
+                    ConversionImportProgressView(progress: progress)
+                }
                 if let notice = viewModel.notice { NoticeView(message: notice) }
                 if viewModel.items.isEmpty { emptyState } else { filesSection }
                 settingsCard
@@ -28,7 +32,8 @@ struct VideoConversionView: View {
             allowsMultipleSelection: true
         ) { result in
             switch result {
-            case let .success(urls): viewModel.addFiles(urls)
+            case let .success(urls):
+                Task { await viewModel.addFiles(urls) }
             case let .failure(error): viewModel.reportImportFailure(error.localizedDescription)
             }
         }
@@ -41,7 +46,7 @@ struct VideoConversionView: View {
                 Button { importerPresented = true } label: {
                     Label(L10n.string("video.action.add"), systemImage: "video.badge.plus")
                 }
-                .disabled(viewModel.isConverting)
+                .disabled(viewModel.isConverting || viewModel.importProgress != nil)
             }
         }
         .alert(
@@ -74,6 +79,7 @@ struct VideoConversionView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
+            .disabled(viewModel.isConverting || viewModel.importProgress != nil)
 
             PhotosPicker(
                 selection: $selectedVideoItems,
@@ -84,24 +90,54 @@ struct VideoConversionView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
+            .disabled(viewModel.isConverting || viewModel.importProgress != nil)
         }
         .padding(20)
         .converterCard()
     }
 
     private func importVideos(_ selections: [PhotosPickerItem]) async {
+        defer {
+            selectedVideoItems = []
+            libraryImportProgress = nil
+        }
         var urls: [URL] = []
-        for selection in selections {
+        for (index, selection) in selections.enumerated() {
+            libraryImportProgress = ConversionImportProgress(
+                completed: index,
+                total: selections.count,
+                currentFileName: nil
+            ).mapped(to: 0 ... 0.95)
             do {
-                if let imported = try await selection.loadTransferable(type: ImportedVideoFile.self) {
+                if let imported = try await PhotoLibraryImport.loadTransferable(
+                    from: selection,
+                    type: ImportedVideoFile.self,
+                    progress: { fraction in
+                        Task { @MainActor in
+                            libraryImportProgress = ConversionImportProgress(
+                                completed: index,
+                                total: selections.count,
+                                currentFileName: nil,
+                                currentFileFraction: fraction
+                            ).mapped(to: 0 ... 0.95)
+                        }
+                    }
+                ) {
                     urls.append(imported.url)
                 }
             } catch {
                 viewModel.reportImportFailure(error.localizedDescription)
             }
+            libraryImportProgress = ConversionImportProgress(
+                completed: index + 1,
+                total: selections.count,
+                currentFileName: nil
+            ).mapped(to: 0 ... 0.95)
         }
-        selectedVideoItems = []
-        viewModel.addFiles(urls)
+        // The workspace copy has byte-accurate progress. Stop masking it with
+        // the PhotoKit acquisition phase once all source URLs are available.
+        libraryImportProgress = nil
+        await viewModel.addFiles(urls, progressRange: 0.95 ... 1)
     }
 
     private var settingsCard: some View {

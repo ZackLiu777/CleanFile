@@ -149,3 +149,4 @@
 "format.audio.aiff.detail" = ".aiff · Apple 작업에서 사용하는 무압축 PCM 오디오입니다.";
 "format.audio.cafPCM.detail" = ".caf · 무압축 PCM을 담는 Apple Core Audio 컨테이너입니다.";
 "format.audio.cafALAC.detail" = ".caf · 무손실 ALAC를 담는 Apple Core Audio 컨테이너입니다.";
+"import.progress.title" = "가져오는 중";

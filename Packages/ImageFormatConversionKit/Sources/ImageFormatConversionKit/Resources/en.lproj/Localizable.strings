@@ -149,3 +149,4 @@
 "formats.image.title" = "Supported Image Formats";
 "formats.video.title" = "Supported Video Formats";
 "action.done" = "Done";
+"import.progress.title" = "Importing";

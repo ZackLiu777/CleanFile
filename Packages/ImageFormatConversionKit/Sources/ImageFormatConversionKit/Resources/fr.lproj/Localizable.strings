@@ -149,3 +149,4 @@
 "format.audio.aiff.detail" = ".aiff · Audio PCM non compressé courant dans les flux Apple.";
 "format.audio.cafPCM.detail" = ".caf · Conteneur Apple Core Audio avec PCM non compressé.";
 "format.audio.cafALAC.detail" = ".caf · Conteneur Apple Core Audio avec ALAC sans perte.";
+"import.progress.title" = "Importation";

@@ -200,6 +200,7 @@ private struct ImageConversionContentView: View {
     @State private var isImporterPresented = false
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var isClearAllConfirmationPresented = false
+    @State private var libraryImportProgress: ConversionImportProgress?
 
     init(viewModel: ImageConversionViewModel = ImageConversionViewModel()) {
         _viewModel = State(initialValue: viewModel)
@@ -209,6 +210,10 @@ private struct ImageConversionContentView: View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 importCard
+
+                if let progress = libraryImportProgress ?? viewModel.importProgress {
+                    ConversionImportProgressView(progress: progress)
+                }
 
                 if let notice = viewModel.notice {
                     NoticeView(message: notice)
@@ -237,7 +242,7 @@ private struct ImageConversionContentView: View {
                         systemImage: "photo.badge.plus"
                     )
                 }
-                .disabled(viewModel.isConverting)
+                .disabled(viewModel.isConverting || viewModel.importProgress != nil)
             }
         }
         .fileImporter(
@@ -292,7 +297,7 @@ private struct ImageConversionContentView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
-            .disabled(viewModel.isConverting)
+            .disabled(viewModel.isConverting || viewModel.importProgress != nil)
 
             PhotosPicker(
                 selection: $selectedPhotoItems,
@@ -303,7 +308,7 @@ private struct ImageConversionContentView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
-            .disabled(viewModel.isConverting)
+            .disabled(viewModel.isConverting || viewModel.importProgress != nil)
         }
         .frame(maxWidth: .infinity)
         .padding(20)
@@ -311,18 +316,45 @@ private struct ImageConversionContentView: View {
     }
 
     private func importPhotos(_ selections: [PhotosPickerItem]) async {
+        defer {
+            selectedPhotoItems = []
+            libraryImportProgress = nil
+        }
         var urls: [URL] = []
-        for selection in selections {
+        for (index, selection) in selections.enumerated() {
+            libraryImportProgress = ConversionImportProgress(
+                completed: index,
+                total: selections.count,
+                currentFileName: nil
+            ).mapped(to: 0 ... 0.95)
             do {
-                if let imported = try await selection.loadTransferable(type: ImportedPhotoFile.self) {
+                if let imported = try await PhotoLibraryImport.loadTransferable(
+                    from: selection,
+                    type: ImportedPhotoFile.self,
+                    progress: { fraction in
+                        Task { @MainActor in
+                            libraryImportProgress = ConversionImportProgress(
+                                completed: index,
+                                total: selections.count,
+                                currentFileName: nil,
+                                currentFileFraction: fraction
+                            ).mapped(to: 0 ... 0.95)
+                        }
+                    }
+                ) {
                     urls.append(imported.url)
                 }
             } catch {
                 viewModel.reportImportFailure(error.localizedDescription)
             }
+            libraryImportProgress = ConversionImportProgress(
+                completed: index + 1,
+                total: selections.count,
+                currentFileName: nil
+            ).mapped(to: 0 ... 0.95)
         }
-        selectedPhotoItems = []
-        await viewModel.addFiles(urls)
+        libraryImportProgress = nil
+        await viewModel.addFiles(urls, progressRange: 0.95 ... 1)
     }
 
     private var emptyState: some View {

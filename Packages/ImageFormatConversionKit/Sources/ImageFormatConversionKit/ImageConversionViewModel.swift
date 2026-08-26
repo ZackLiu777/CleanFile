@@ -43,6 +43,7 @@ public final class ImageConversionViewModel {
         lastSourceURL: nil
     )
     public private(set) var notice: String?
+    private(set) var importProgress: ConversionImportProgress?
 
     public var outputFormat: ImageOutputFormat
     public var quality = 0.85
@@ -86,8 +87,11 @@ public final class ImageConversionViewModel {
         }
     }
 
-    public func addFiles(_ urls: [URL]) async {
-        guard !isConverting else { return }
+    public func addFiles(
+        _ urls: [URL],
+        progressRange: ClosedRange<Double> = 0 ... 1
+    ) async {
+        guard !isConverting, importProgress == nil else { return }
         notice = nil
 
         var seenURLs = Set(items.map { $0.sourceURL.standardizedFileURL })
@@ -102,15 +106,45 @@ public final class ImageConversionViewModel {
             return
         }
 
+        importProgress = ConversionImportProgress(
+            completed: 0,
+            total: uniqueURLs.count,
+            currentFileName: uniqueURLs.first?.lastPathComponent
+        ).mapped(to: progressRange)
+        defer { importProgress = nil }
         var newItems: [ImageConversionItem] = []
-        for url in uniqueURLs {
+        for (index, url) in uniqueURLs.enumerated() {
+            importProgress = ConversionImportProgress(
+                completed: index,
+                total: uniqueURLs.count,
+                currentFileName: url.lastPathComponent
+            ).mapped(to: progressRange)
             let id = UUID()
             do {
-                let (stagedURL, _) = try await workspace.stage(url, id: id, kind: .image)
+                let (stagedURL, _) = try await workspace.stage(
+                    url,
+                    id: id,
+                    kind: .image
+                ) { [weak self] copiedBytes, totalBytes in
+                    guard totalBytes > 0 else { return }
+                    await MainActor.run {
+                        self?.importProgress = ConversionImportProgress(
+                            completed: index,
+                            total: uniqueURLs.count,
+                            currentFileName: url.lastPathComponent,
+                            currentFileFraction: Double(copiedBytes) / Double(totalBytes)
+                        ).mapped(to: progressRange)
+                    }
+                }
                 newItems.append(ImageConversionItem(id: id, sourceURL: stagedURL))
             } catch {
                 notice = L10n.format("notice.import_failed", error.localizedDescription)
             }
+            importProgress = ConversionImportProgress(
+                completed: index + 1,
+                total: uniqueURLs.count,
+                currentFileName: nil
+            ).mapped(to: progressRange)
         }
         items.append(contentsOf: newItems)
 
