@@ -53,8 +53,6 @@ struct PhotosView: View {
                     }
                 }
             }
-            .navigationTitle("Media")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {

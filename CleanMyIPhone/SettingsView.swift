@@ -78,8 +78,6 @@ struct SettingsView: View {
             .scrollContentBackground(.hidden)
             .background(AppBackground())
             .appSoftScrollEdge()
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
             .onChange(of: scenePhase) { _, phase in
                 guard phase == .active else { return }
                 photoAuthorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)

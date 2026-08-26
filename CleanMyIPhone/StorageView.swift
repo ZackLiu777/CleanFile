@@ -48,8 +48,6 @@ struct StorageView: View {
                 }
                 .appSoftScrollEdge()
             }
-            .navigationTitle("Storage")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {

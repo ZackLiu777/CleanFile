@@ -40,8 +40,6 @@ public struct ImageConversionView: View {
                 }
             }
             .background(converterBackground)
-            .navigationTitle(L10n.string("converter.title"))
-            .navigationBarTitleDisplayMode(.inline)
         }
         .environment(\.conversionTheme, theme)
         .tint(theme.accent)
