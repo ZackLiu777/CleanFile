@@ -1,10 +1,13 @@
 import SwiftUI
+import PhotosUI
 import UniformTypeIdentifiers
 
 @MainActor
 struct AudioConversionView: View {
     @State private var viewModel = AudioConversionViewModel()
-    @State private var importerPresented = false
+    @State private var audioImporterPresented = false
+    @State private var videoImporterPresented = false
+    @State private var selectedVideoItems: [PhotosPickerItem] = []
     @State private var isClearAllConfirmationPresented = false
 
     var body: some View {
@@ -21,19 +24,40 @@ struct AudioConversionView: View {
         }
         .converterSoftScrollEdge()
         .fileImporter(
-            isPresented: $importerPresented,
-            allowedContentTypes: inputTypes,
+            isPresented: $audioImporterPresented,
+            allowedContentTypes: audioInputTypes,
             allowsMultipleSelection: true
         ) { result in
             switch result {
-            case let .success(urls): viewModel.addFiles(urls)
+            case let .success(urls): viewModel.addFiles(urls, sourceKind: .audioFile)
             case let .failure(error): viewModel.reportImportFailure(error.localizedDescription)
             }
         }
+        .fileImporter(
+            isPresented: $videoImporterPresented,
+            allowedContentTypes: videoInputTypes,
+            allowsMultipleSelection: true
+        ) { result in
+            switch result {
+            case let .success(urls): viewModel.addFiles(urls, sourceKind: .video)
+            case let .failure(error): viewModel.reportImportFailure(error.localizedDescription)
+            }
+        }
+        .onChange(of: selectedVideoItems) { _, items in
+            guard !items.isEmpty else { return }
+            Task { await importVideos(items) }
+        }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button { importerPresented = true } label: {
-                    Label(L10n.string("audio.action.add"), systemImage: "waveform.badge.plus")
+                Menu {
+                    Button { audioImporterPresented = true } label: {
+                        Label(L10n.string("audio.action.add_audio"), systemImage: "waveform.badge.plus")
+                    }
+                    Button { videoImporterPresented = true } label: {
+                        Label(L10n.string("audio.action.add_video"), systemImage: "video.badge.plus")
+                    }
+                } label: {
+                    Label(L10n.string("audio.action.add"), systemImage: "plus")
                 }
                 .disabled(viewModel.isConverting)
             }
@@ -51,24 +75,57 @@ struct AudioConversionView: View {
         }
     }
 
-    private var inputTypes: [UTType] {
+    private var audioInputTypes: [UTType] {
         AudioConversionEngine.supportedInputExtensions.compactMap {
             UTType(filenameExtension: $0)
         }
+    }
+
+    private var videoInputTypes: [UTType] {
+        var types: [UTType] = [.quickTimeMovie, .mpeg4Movie]
+        if let m4v = UTType(filenameExtension: "m4v") { types.append(m4v) }
+        return types
     }
 
     private var importCard: some View {
         VStack(spacing: 12) {
             Image(systemName: "waveform").font(.system(size: 34)).foregroundStyle(.tint)
             Text(L10n.string("audio.import.title")).font(.headline)
-            Button { importerPresented = true } label: {
-                Label(L10n.string("action.choose_files"), systemImage: "folder")
+            Button { audioImporterPresented = true } label: {
+                Label(L10n.string("audio.action.add_audio"), systemImage: "waveform.badge.plus")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+
+            Button { videoImporterPresented = true } label: {
+                Label(L10n.string("audio.action.add_video_file"), systemImage: "folder.badge.plus")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+
+            PhotosPicker(selection: $selectedVideoItems, maxSelectionCount: 50, matching: .videos) {
+                Label(L10n.string("audio.action.choose_video_library"), systemImage: "photo.on.rectangle")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
         }
         .padding(20)
         .converterCard()
+    }
+
+    private func importVideos(_ selections: [PhotosPickerItem]) async {
+        var urls: [URL] = []
+        for selection in selections {
+            do {
+                if let imported = try await selection.loadTransferable(type: ImportedVideoFile.self) {
+                    urls.append(imported.url)
+                }
+            } catch {
+                viewModel.reportImportFailure(error.localizedDescription)
+            }
+        }
+        selectedVideoItems = []
+        viewModel.addFiles(urls, sourceKind: .video)
     }
 
     private var settingsCard: some View {
@@ -138,9 +195,14 @@ struct AudioConversionView: View {
             }
             ForEach(viewModel.items) { item in
                 HStack(spacing: 12) {
-                    Image(systemName: "waveform").foregroundStyle(.tint).frame(width: 34)
+                    Image(systemName: item.sourceKind == .video ? "video" : "waveform")
+                        .foregroundStyle(.tint)
+                        .frame(width: 34)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(item.sourceURL.lastPathComponent).lineLimit(1)
+                        Text(sourceDescription(item))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                         Text(sizeDescription(item)).font(.caption).foregroundStyle(.secondary)
                         statusText(item.status).font(.caption)
                     }
@@ -191,6 +253,15 @@ struct AudioConversionView: View {
         guard case let .completed(url) = item.status else { return source }
         let bytes = Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
         return "\(source) → \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))"
+    }
+
+    private func sourceDescription(_ item: AudioConversionItem) -> String {
+        let kind = item.sourceKind == .video
+            ? L10n.string("audio.source.video")
+            : L10n.string("audio.source.audio")
+        guard let duration = item.duration else { return kind }
+        let totalSeconds = max(Int(duration.rounded()), 0)
+        return "\(kind) · \(String(format: "%d:%02d", totalSeconds / 60, totalSeconds % 60))"
     }
 
     private func statusText(_ status: AudioConversionStatus) -> Text {

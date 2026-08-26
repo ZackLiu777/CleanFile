@@ -228,6 +228,49 @@ struct ImageConversionEngineTests {
     }
 }
 
+@Suite("Video to audio conversion models")
+struct VideoAudioConversionModelTests {
+    @Test("Video inputs are limited to native movie containers")
+    func supportedVideoInputsAreExplicit() {
+        #expect(AudioConversionEngine.supportedVideoInputExtensions == ["mov", "mp4", "m4v"])
+    }
+
+    @Test("Existing audio manifests decode as audio file sources")
+    func legacyAudioManifestRemainsCompatible() throws {
+        let id = UUID()
+        let json = """
+        [{
+          "id":"\(id.uuidString)",
+          "sourcePath":"/tmp/source.m4a",
+          "sourceBytes":100,
+          "status":"ready",
+          "outputPath":null
+        }]
+        """
+
+        let records = try JSONDecoder().decode(
+            [PersistedConversionItem].self,
+            from: Data(json.utf8)
+        )
+
+        #expect(records.count == 1)
+        #expect(records[0].sourceKind == nil)
+        #expect(records[0].duration == nil)
+    }
+
+    @Test("Audio conversion requests default to audio file sources")
+    func requestDefaultsToAudioSource() {
+        let request = AudioConversionRequest(
+            sourceURL: URL(fileURLWithPath: "/tmp/source.wav"),
+            destinationDirectory: URL(fileURLWithPath: "/tmp/output"),
+            outputFormat: .wav,
+            bitRate: .standard
+        )
+
+        #expect(request.sourceKind == .audioFile)
+    }
+}
+
 private struct TestImageWorkspace {
     let root: URL
     let output: URL

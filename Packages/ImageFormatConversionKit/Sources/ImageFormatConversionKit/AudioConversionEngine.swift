@@ -1,11 +1,26 @@
 import AVFAudio
+import AVFoundation
 import AudioToolbox
 import Foundation
 
 public actor AudioConversionEngine {
     public static let supportedInputExtensions = ["m4a", "aac", "mp3", "wav", "aiff", "aif", "caf"]
+    public static let supportedVideoInputExtensions = ["mov", "mp4", "m4v"]
+
+    private let videoExtractor = VideoAudioExtractionEngine()
 
     public init() {}
+
+    public func inspect(_ sourceURL: URL, sourceKind: AudioSourceKind) async throws -> TimeInterval {
+        switch sourceKind {
+        case .audioFile:
+            let file = try AVAudioFile(forReading: sourceURL)
+            let sampleRate = file.processingFormat.sampleRate
+            return sampleRate > 0 ? Double(file.length) / sampleRate : 0
+        case .video:
+            return try await videoExtractor.inspect(sourceURL)
+        }
+    }
 
     public func convert(
         _ request: AudioConversionRequest,
@@ -20,7 +35,10 @@ public actor AudioConversionEngine {
             if directoryAccess { directory.stopAccessingSecurityScopedResource() }
         }
 
-        guard Self.supportedInputExtensions.contains(source.pathExtension.lowercased()) else {
+        let supportedExtensions = request.sourceKind == .video
+            ? Self.supportedVideoInputExtensions
+            : Self.supportedInputExtensions
+        guard supportedExtensions.contains(source.pathExtension.lowercased()) else {
             throw AudioConversionError.unsupportedInput
         }
         guard (try? source.checkResourceIsReachable()) == true else {
@@ -39,8 +57,33 @@ public actor AudioConversionEngine {
         )
         defer { try? manager.removeItem(at: temporary) }
 
+        let conversionSource: URL
+        let extractedPCM: URL?
+        if request.sourceKind == .video {
+            let extracted = directory
+                .appendingPathComponent(".video-audio-\(UUID().uuidString)")
+                .appendingPathExtension("caf")
+            extractedPCM = extracted
+            do {
+                try await videoExtractor.extractPCM(from: source, to: extracted) { value in
+                    await progress(value * 0.55)
+                }
+            } catch let error as AudioConversionError {
+                throw error
+            } catch {
+                throw AudioConversionError.conversionFailed(error.localizedDescription)
+            }
+            conversionSource = extracted
+        } else {
+            extractedPCM = nil
+            conversionSource = source
+        }
+        defer {
+            if let extractedPCM { try? manager.removeItem(at: extractedPCM) }
+        }
+
         do {
-            let input = try AVAudioFile(forReading: source)
+            let input = try AVAudioFile(forReading: conversionSource)
             let inputFormat = input.processingFormat
             guard input.length > 0, inputFormat.channelCount > 0 else {
                 throw AudioConversionError.invalidAudio
@@ -106,7 +149,11 @@ public actor AudioConversionEngine {
                 if outputBuffer.frameLength > 0 {
                     try outputFile.write(from: outputBuffer)
                 }
-                await progress(Double(input.framePosition) / Double(input.length))
+                let encodingProgress = Double(input.framePosition) / Double(input.length)
+                let overallProgress = request.sourceKind == .video
+                    ? 0.55 + encodingProgress * 0.45
+                    : encodingProgress
+                await progress(overallProgress)
                 if status == .endOfStream { break }
             }
         } catch is CancellationError {
@@ -125,6 +172,10 @@ public actor AudioConversionEngine {
         }
         await progress(1)
         return output
+    }
+
+    public func cancelAll() async {
+        await videoExtractor.cancelAll()
     }
 
     private func outputSettings(

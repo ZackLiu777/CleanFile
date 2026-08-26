@@ -19,6 +19,8 @@ struct PersistedConversionItem: Codable, Sendable {
     let sourceBytes: Int64
     let status: PersistedConversionStatus
     let outputPath: String?
+    var sourceKind: AudioSourceKind? = nil
+    var duration: TimeInterval? = nil
 }
 
 actor ConversionWorkspace {

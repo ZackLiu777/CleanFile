@@ -131,6 +131,10 @@ private struct SupportedFormatsSheet: View {
                             formats: ["M4A", "AAC", "MP3", "WAV", "AIFF", "CAF"]
                         )
                         FormatChipSection(
+                            title: L10n.string("formats.video_to_audio_import"),
+                            formats: ["MOV", "MP4", "M4V"]
+                        )
+                        FormatChipSection(
                             title: L10n.string("formats.export"),
                             formats: ["AAC · M4A", "ALAC · M4A", "WAV · PCM"]
                         )

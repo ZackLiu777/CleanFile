@@ -37,14 +37,18 @@ final class AudioConversionViewModel {
         }
     }
 
-    func addFiles(_ urls: [URL]) {
+    func addFiles(_ urls: [URL], sourceKind: AudioSourceKind = .audioFile) {
         guard !isConverting else { return }
-        Task { [weak self] in await self?.importFiles(urls) }
+        Task { [weak self] in await self?.importFiles(urls, sourceKind: sourceKind) }
     }
 
-    private func importFiles(_ urls: [URL]) async {
+    private func importFiles(_ urls: [URL], sourceKind: AudioSourceKind) async {
         guard !isConverting else { return }
-        let allowed = Set(AudioConversionEngine.supportedInputExtensions)
+        let allowed = Set(
+            sourceKind == .video
+                ? AudioConversionEngine.supportedVideoInputExtensions
+                : AudioConversionEngine.supportedInputExtensions
+        )
         let accepted = urls.filter { allowed.contains($0.pathExtension.lowercased()) }
         if accepted.count != urls.count { notice = L10n.string("audio.error.unsupported") }
         var knownURLs = Set(items.map { $0.sourceURL.standardizedFileURL })
@@ -52,7 +56,30 @@ final class AudioConversionViewModel {
             let id = UUID()
             do {
                 let (stagedURL, bytes) = try await workspace.stage(url, id: id, kind: .audio)
-                items.append(AudioConversionItem(id: id, sourceURL: stagedURL, sourceBytes: bytes))
+                do {
+                    let duration = try await engine.inspect(stagedURL, sourceKind: sourceKind)
+                    items.append(AudioConversionItem(
+                        id: id,
+                        sourceURL: stagedURL,
+                        sourceBytes: bytes,
+                        sourceKind: sourceKind,
+                        duration: duration
+                    ))
+                } catch {
+                    _ = await workspace.delete(
+                        PersistedConversionItem(
+                            id: id,
+                            sourcePath: stagedURL.path,
+                            sourceBytes: bytes,
+                            status: .failed,
+                            outputPath: nil,
+                            sourceKind: sourceKind
+                        ),
+                        kind: .audio,
+                        outputRoot: outputDirectory
+                    )
+                    throw error
+                }
             } catch {
                 notice = L10n.format("notice.import_failed", error.localizedDescription)
             }
@@ -104,7 +131,10 @@ final class AudioConversionViewModel {
         task = Task { [weak self] in await self?.run() }
     }
 
-    func cancel() { task?.cancel() }
+    func cancel() {
+        task?.cancel()
+        Task { await engine.cancelAll() }
+    }
 
     private func run() async {
         isConverting = true
@@ -130,7 +160,8 @@ final class AudioConversionViewModel {
                 sourceURL: items[index].sourceURL,
                 destinationDirectory: outputDirectory,
                 outputFormat: outputFormat,
-                bitRate: bitRate
+                bitRate: bitRate,
+                sourceKind: items[index].sourceKind
             )
             do {
                 let url = try await engine.convert(request) { [weak self] value in
@@ -171,6 +202,8 @@ final class AudioConversionViewModel {
                 id: record.id,
                 sourceURL: URL(fileURLWithPath: record.sourcePath),
                 sourceBytes: record.sourceBytes,
+                sourceKind: record.sourceKind ?? .audioFile,
+                duration: record.duration,
                 status: status
             )
         }
@@ -196,7 +229,9 @@ final class AudioConversionViewModel {
             sourcePath: item.sourceURL.path,
             sourceBytes: item.sourceBytes,
             status: status,
-            outputPath: outputPath
+            outputPath: outputPath,
+            sourceKind: item.sourceKind,
+            duration: item.duration
         )
     }
 }
