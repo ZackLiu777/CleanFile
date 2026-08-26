@@ -296,7 +296,7 @@ private struct MediaDashboardResultsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            videoBreakdown
+            videoCategoryGrid
 
             if isPartial {
                 Label(
@@ -362,49 +362,34 @@ private struct MediaDashboardResultsView: View {
         ]
     }
 
-    private var videoBreakdown: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Video Categories")
-                .font(.headline)
+    private var videoCategories: [MediaCategorySummary] {
+        VideoCategory.allCases.compactMap { category in
+            let ids = result.classifiedVideos
+                .filter { $0.categories.contains(category) }
+                .map(\.id)
+            guard !ids.isEmpty else { return nil }
+            return MediaCategorySummary(
+                title: category.displayName,
+                assetIDs: ids,
+                systemImage: videoCategorySymbol(category)
+            )
+        }
+    }
 
-            ForEach(VideoCategory.allCases, id: \.self) { category in
-                let ids = result.classifiedVideos
-                    .filter { $0.categories.contains(category) }
-                    .map(\.id)
-                NavigationLink {
-                    MediaCategoryDetailView(
-                        title: category.displayName,
-                        assetIDs: ids,
-                        viewModel: viewModel
-                    )
-                } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: videoCategorySymbol(category))
-                            .foregroundStyle(theme.accentPrimary)
-                            .frame(width: 24)
+    @ViewBuilder
+    private var videoCategoryGrid: some View {
+        if !videoCategories.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Video Categories")
+                    .font(.title2.bold())
 
-                        Text(category.displayName)
-                        Spacer()
-
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text(itemCount(ids.count))
-                                .foregroundStyle(.primary)
-                            Text(estimatedSizeText(for: ids))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
+                LazyVGrid(columns: columns, spacing: 10) {
+                    ForEach(videoCategories) { category in
+                        categoryLink(category)
                     }
                 }
-                .buttonStyle(.plain)
-                .disabled(ids.isEmpty)
-                .opacity(ids.isEmpty ? 0.55 : 1)
             }
         }
-        .mediaAnalysisCard()
     }
 
     private func categoryLink(_ category: MediaCategorySummary) -> some View {
@@ -449,6 +434,7 @@ private struct MediaDashboardResultsView: View {
         case .timeLapse: "timelapse"
         }
     }
+
 }
 
 private struct MediaCategorySummary: Identifiable {

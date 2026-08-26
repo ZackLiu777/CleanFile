@@ -22,15 +22,11 @@ struct StorageView: View {
                         statusCard
 
                         if let summary = viewModel.summary {
-                            summaryCard(summary)
-
-                            if !viewModel.largestFiles.isEmpty {
-                                largestFilesCard
-                            }
-
                             if let fileTree = viewModel.fileTree, fileTree.byteCount > 0 {
-                                folderMapLink(root: fileTree)
+                                sunburstCard(root: fileTree)
                             }
+
+                            summaryCard(summary)
 
                             if !viewModel.files.isEmpty {
                                 NavigationLink {
@@ -138,31 +134,25 @@ struct StorageView: View {
         .storageCard()
     }
 
-    private func folderMapLink(root: FileNode) -> some View {
-        NavigationLink {
-            FolderMapView(root: root)
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "circle.hexagongrid")
-                    .font(.title3)
-                    .foregroundStyle(theme.accentPrimary)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Folder Map")
-                        .font(.headline)
-                    Text("Explore the folder hierarchy")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
+    private func sunburstCard(root: FileNode) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("Folder Map", systemImage: "circle.hexagongrid")
+                    .font(.headline)
                 Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+                NavigationLink {
+                    FolderMapView(root: root)
+                } label: {
+                    Label("Expand", systemImage: "arrow.up.left.and.arrow.down.right")
+                        .labelStyle(.iconOnly)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(theme.accentPrimary)
             }
+
+            SunburstChartView(root: root)
+                .frame(height: 300)
         }
-        .buttonStyle(.plain)
         .storageCard()
     }
 
@@ -220,47 +210,6 @@ struct StorageView: View {
                 .buttonStyle(.plain)
             }
         }
-        .storageCard()
-    }
-
-    private var largestFilesCard: some View {
-        NavigationLink {
-            ScannedFilesView(viewModel: viewModel)
-        } label: {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Largest Files")
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-
-                    Spacer()
-
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-
-                ForEach(viewModel.largestFiles) { file in
-                    HStack(spacing: 10) {
-                        Image(systemName: "doc")
-                            .foregroundStyle(theme.fileCategoryColor(file.category))
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(file.name)
-                                .foregroundStyle(.primary)
-                                .lineLimit(1)
-                            Text(file.category.displayName)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Text(byteCountText(file.byteCount))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-        }
-        .buttonStyle(.plain)
         .storageCard()
     }
 
@@ -332,8 +281,12 @@ private struct ScannedFilesView: View {
     }
 
     private var displayedFiles: [ScannedFile] {
-        guard let category else { return viewModel.files }
-        return viewModel.files.filter { $0.category == category }
+        let filteredFiles = if let category {
+            viewModel.files.filter { $0.category == category }
+        } else {
+            viewModel.files
+        }
+        return FileDisplayOrder.bySizeDescending(filteredFiles)
     }
 
     var body: some View {

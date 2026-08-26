@@ -109,13 +109,21 @@ struct VideoConversionView: View {
             Label(L10n.string("settings.title"), systemImage: "slider.horizontal.3")
                 .font(.headline)
 
-            setting(L10n.string("settings.format")) {
-                Picker("", selection: Binding(
-                    get: { viewModel.container },
-                    set: { viewModel.container = $0 }
-                )) {
-                    ForEach(viewModel.availableContainers) { Text($0.rawValue.uppercased()).tag($0) }
-                }.labelsHidden().pickerStyle(.menu)
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L10n.string("settings.format"))
+                ConversionFormatWheelPicker(
+                    selection: Binding(
+                        get: { viewModel.container },
+                        set: { viewModel.container = $0 }
+                    ),
+                    options: viewModel.availableContainers.map { container in
+                        ConversionFormatOption(
+                            value: container,
+                            title: container.rawValue.uppercased(),
+                            detail: L10n.string("format.video.\(container.rawValue).detail")
+                        )
+                    }
+                )
             }
             setting(L10n.string("video.settings.codec")) {
                 Picker("", selection: Binding(

@@ -5,6 +5,30 @@ import Testing
 
 @Suite("Media model behavior")
 struct MediaModelTests {
+    @Test("Storage files sort by known size descending and keep unknown sizes last")
+    func storageFilesSortBySizeDescending() {
+        let files = [
+            scannedFile(name: "unknown", bytes: 9_999, hasKnownSize: false),
+            scannedFile(name: "small", bytes: 10),
+            scannedFile(name: "large", bytes: 1_000),
+            scannedFile(name: "medium", bytes: 100)
+        ]
+
+        #expect(FileDisplayOrder.bySizeDescending(files).map(\.name) == [
+            "large", "medium", "small", "unknown"
+        ])
+    }
+
+    @Test("Equal-size storage files have a stable name order")
+    func equalSizeStorageFilesSortByName() {
+        let files = [
+            scannedFile(name: "Beta", bytes: 100),
+            scannedFile(name: "Alpha", bytes: 100)
+        ]
+
+        #expect(FileDisplayOrder.bySizeDescending(files).map(\.name) == ["Alpha", "Beta"])
+    }
+
     @Test("Storage usage clamps negative used bytes to zero")
     func storageUsageClampsNegativeValues() {
         let snapshot = DeviceStorageSnapshot(totalBytes: 100, availableBytes: 140)
@@ -230,4 +254,19 @@ struct MediaModelTests {
     private func item(_ id: String) -> SimilarImageItem {
         SimilarImageItem(id: id, pixelWidth: 100, pixelHeight: 100, creationDate: nil)
     }
+}
+
+private func scannedFile(
+    name: String,
+    bytes: Int64,
+    hasKnownSize: Bool = true
+) -> ScannedFile {
+    ScannedFile(
+        url: URL(fileURLWithPath: "/tmp/\(name)"),
+        name: name,
+        relativePathComponents: [name],
+        category: .other,
+        byteCount: bytes,
+        hasKnownByteCount: hasKnownSize
+    )
 }

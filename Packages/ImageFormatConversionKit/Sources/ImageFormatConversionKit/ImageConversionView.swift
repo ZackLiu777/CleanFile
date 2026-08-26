@@ -422,14 +422,18 @@ private struct ImageConversionSettingsCard: View {
             Label(L10n.string("settings.title"), systemImage: "slider.horizontal.3")
                 .font(.headline)
 
-            settingRow(title: L10n.string("settings.format")) {
-                Picker(L10n.string("settings.format"), selection: $viewModel.outputFormat) {
-                    ForEach(viewModel.availableFormats) { format in
-                        Text(format.rawValue.uppercased()).tag(format)
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L10n.string("settings.format"))
+                ConversionFormatWheelPicker(
+                    selection: $viewModel.outputFormat,
+                    options: viewModel.availableFormats.map { format in
+                        ConversionFormatOption(
+                            value: format,
+                            title: format.rawValue.uppercased(),
+                            detail: L10n.string("format.image.\(format.rawValue).detail")
+                        )
                     }
-                }
-                .labelsHidden()
-                .pickerStyle(.menu)
+                )
             }
 
             if viewModel.outputFormat.supportsQuality {

@@ -133,19 +133,21 @@ struct AudioConversionView: View {
             Label(L10n.string("settings.title"), systemImage: "slider.horizontal.3")
                 .font(.headline)
 
-            row(L10n.string("settings.format")) {
-                Picker("", selection: Binding(
-                    get: { viewModel.outputFormat },
-                    set: { viewModel.outputFormat = $0 }
-                )) {
-                    Text(L10n.string("audio.format.aac")).tag(AudioOutputFormat.aac)
-                    Text(L10n.string("audio.format.aac_file")).tag(AudioOutputFormat.aacFile)
-                    Text(L10n.string("audio.format.alac")).tag(AudioOutputFormat.alac)
-                    Text(L10n.string("audio.format.wav")).tag(AudioOutputFormat.wav)
-                    Text(L10n.string("audio.format.aiff")).tag(AudioOutputFormat.aiff)
-                    Text(L10n.string("audio.format.caf_pcm")).tag(AudioOutputFormat.cafPCM)
-                    Text(L10n.string("audio.format.caf_alac")).tag(AudioOutputFormat.cafALAC)
-                }.labelsHidden().pickerStyle(.menu)
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L10n.string("settings.format"))
+                ConversionFormatWheelPicker(
+                    selection: Binding(
+                        get: { viewModel.outputFormat },
+                        set: { viewModel.outputFormat = $0 }
+                    ),
+                    options: AudioOutputFormat.allCases.map { format in
+                        ConversionFormatOption(
+                            value: format,
+                            title: audioFormatTitle(format),
+                            detail: L10n.string("format.audio.\(format.rawValue).detail")
+                        )
+                    }
+                )
             }
             if !viewModel.outputFormat.isLossless {
                 row(L10n.string("audio.settings.quality")) {
@@ -171,6 +173,18 @@ struct AudioConversionView: View {
         .padding(16)
         .converterCard()
         .disabled(viewModel.isConverting)
+    }
+
+    private func audioFormatTitle(_ format: AudioOutputFormat) -> String {
+        switch format {
+        case .aac: L10n.string("audio.format.aac")
+        case .aacFile: L10n.string("audio.format.aac_file")
+        case .alac: L10n.string("audio.format.alac")
+        case .wav: L10n.string("audio.format.wav")
+        case .aiff: L10n.string("audio.format.aiff")
+        case .cafPCM: L10n.string("audio.format.caf_pcm")
+        case .cafALAC: L10n.string("audio.format.caf_alac")
+        }
     }
 
     private var emptyState: some View {

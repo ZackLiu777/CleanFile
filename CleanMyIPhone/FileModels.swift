@@ -118,6 +118,20 @@ nonisolated struct ScannedFile: Identifiable, Codable, Hashable, Sendable {
     }
 }
 
+nonisolated enum FileDisplayOrder {
+    static func bySizeDescending(_ files: [ScannedFile]) -> [ScannedFile] {
+        files.sorted { lhs, rhs in
+            if lhs.hasKnownByteCount != rhs.hasKnownByteCount {
+                return lhs.hasKnownByteCount
+            }
+            if lhs.byteCount != rhs.byteCount {
+                return lhs.byteCount > rhs.byteCount
+            }
+            return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
+        }
+    }
+}
+
 enum RelativePathComponents: Sendable {
     /// Produces the file's hierarchy below the user-selected root without guessing.
     nonisolated static func make(fileURL: URL, relativeTo rootURL: URL) -> [String]? {
