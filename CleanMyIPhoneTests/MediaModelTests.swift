@@ -5,6 +5,64 @@ import Testing
 
 @Suite("Media model behavior")
 struct MediaModelTests {
+    @Test("Media date sections and items sort newest first")
+    func mediaDateSectionsSortNewestFirst() throws {
+        let calendar = utcCalendar
+        let olderMorning = try #require(calendar.date(from: DateComponents(
+            year: 2026, month: 8, day: 25, hour: 9
+        )))
+        let olderEvening = try #require(calendar.date(from: DateComponents(
+            year: 2026, month: 8, day: 25, hour: 18
+        )))
+        let newer = try #require(calendar.date(from: DateComponents(
+            year: 2026, month: 8, day: 26, hour: 8
+        )))
+
+        let sections = MediaDateSectionBuilder.sections(from: [
+            MediaDatedAsset(id: "older-morning", creationDate: olderMorning),
+            MediaDatedAsset(id: "newer", creationDate: newer),
+            MediaDatedAsset(id: "older-evening", creationDate: olderEvening)
+        ], calendar: calendar)
+
+        #expect(sections.count == 2)
+        #expect(sections[0].assetIDs == ["newer"])
+        #expect(sections[1].assetIDs == ["older-evening", "older-morning"])
+    }
+
+    @Test("Media without a creation date appears in the final section")
+    func unknownMediaDatesAppearLast() throws {
+        let knownDate = try #require(utcCalendar.date(from: DateComponents(
+            year: 2026, month: 8, day: 26
+        )))
+
+        let sections = MediaDateSectionBuilder.sections(from: [
+            MediaDatedAsset(id: "unknown-b", creationDate: nil),
+            MediaDatedAsset(id: "known", creationDate: knownDate),
+            MediaDatedAsset(id: "unknown-a", creationDate: nil)
+        ], calendar: utcCalendar)
+
+        #expect(sections.last?.day == nil)
+        #expect(sections.last?.assetIDs == ["unknown-a", "unknown-b"])
+    }
+
+    @Test("Date grouping preserves every media identifier exactly once")
+    func mediaDateGroupingPreservesIdentifiers() throws {
+        let date = try #require(utcCalendar.date(from: DateComponents(
+            year: 2026, month: 8, day: 26
+        )))
+        let assets = [
+            MediaDatedAsset(id: "one", creationDate: date),
+            MediaDatedAsset(id: "two", creationDate: date),
+            MediaDatedAsset(id: "three", creationDate: nil)
+        ]
+
+        let identifiers = MediaDateSectionBuilder.sections(from: assets, calendar: utcCalendar)
+            .flatMap(\.assetIDs)
+
+        #expect(identifiers.count == assets.count)
+        #expect(Set(identifiers) == Set(assets.map(\.id)))
+    }
+
     @Test("Storage files sort by known size descending and keep unknown sizes last")
     func storageFilesSortBySizeDescending() {
         let files = [
@@ -254,6 +312,12 @@ struct MediaModelTests {
     private func item(_ id: String) -> SimilarImageItem {
         SimilarImageItem(id: id, pixelWidth: 100, pixelHeight: 100, creationDate: nil)
     }
+}
+
+private var utcCalendar: Calendar {
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+    return calendar
 }
 
 private func scannedFile(

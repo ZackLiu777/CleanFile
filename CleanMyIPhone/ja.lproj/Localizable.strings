@@ -169,3 +169,6 @@
 "Sage" = "セージ";
 "Graphite" = "グラファイト";
 "This color theme uses a fixed appearance." = "このカラーテーマでは外観モードが固定されます。";
+"Today" = "今日";
+"Yesterday" = "昨日";
+"Unknown Date" = "日付不明";

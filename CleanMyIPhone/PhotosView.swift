@@ -520,8 +520,21 @@ private struct MediaCategoryDetailView: View {
         assetIDs.filter { viewModel.asset(withIdentifier: $0) != nil }
     }
 
+    private var dateSections: [MediaDateSection] {
+        MediaDateSectionBuilder.sections(
+            from: visibleAssetIDs.compactMap { assetID in
+                guard let asset = viewModel.asset(withIdentifier: assetID) else { return nil }
+                return MediaDatedAsset(id: assetID, creationDate: asset.creationDate)
+            }
+        )
+    }
+
+    private var chronologicallySortedAssetIDs: [String] {
+        dateSections.flatMap(\.assetIDs)
+    }
+
     private var preheatedAssetIDs: ArraySlice<String> {
-        visibleAssetIDs.prefix(60)
+        chronologicallySortedAssetIDs.prefix(60)
     }
 
     private var thumbnailTargetSize: CGSize {
@@ -539,52 +552,17 @@ private struct MediaCategoryDetailView: View {
                 )
             } else {
                 ScrollView {
-                    LazyVGrid(
-                        columns: albumColumns,
-                        spacing: 3
-                    ) {
-                        ForEach(visibleAssetIDs, id: \.self) { assetID in
-                            Button {
-                                if suppressedTapAssetID == assetID {
-                                    suppressedTapAssetID = nil
-                                    return
+                    LazyVStack(spacing: 14) {
+                        ForEach(dateSections) { section in
+                            Section {
+                                LazyVGrid(columns: albumColumns, spacing: 3) {
+                                    ForEach(section.assetIDs, id: \.self) { assetID in
+                                        assetButton(assetID)
+                                    }
                                 }
-                                if isSelecting {
-                                    toggleSelection(assetID)
-                                } else {
-                                    previewAssetID = assetID
-                                }
-                            } label: {
-                                Rectangle()
-                                    .fill(.clear)
-                                    .aspectRatio(1, contentMode: .fit)
-                                    .overlay {
-                                        MediaAssetThumbnailView(
-                                            assetID: assetID,
-                                            viewModel: viewModel
-                                        )
-                                    }
-                                    .overlay(alignment: .topTrailing) {
-                                        selectionIndicator(for: assetID)
-                                    }
-                                    .overlay(alignment: .topLeading) {
-                                        livePhotoBadge(for: assetID)
-                                    }
-                                    .overlay(alignment: .bottomTrailing) {
-                                        videoDurationBadge(for: assetID)
-                                    }
-                                    .contentShape(Rectangle())
-                                    .clipped()
+                            } header: {
+                                dateHeader(section)
                             }
-                            .buttonStyle(.plain)
-                            .simultaneousGesture(
-                                LongPressGesture(minimumDuration: 0.45)
-                                    .onEnded { _ in
-                                        suppressedTapAssetID = assetID
-                                        isSelecting = true
-                                        selectedIDs.insert(assetID)
-                                    }
-                            )
                         }
                     }
                 }
@@ -679,7 +657,7 @@ private struct MediaCategoryDetailView: View {
         ) {
             if let previewAssetID {
                 MediaPreviewGallery(
-                    assetIDs: visibleAssetIDs,
+                    assetIDs: chronologicallySortedAssetIDs,
                     initialAssetID: previewAssetID,
                     viewModel: viewModel,
                     onDismiss: { self.previewAssetID = nil }
@@ -698,6 +676,77 @@ private struct MediaCategoryDetailView: View {
                 targetSize: thumbnailTargetSize
             )
         }
+    }
+
+    private func assetButton(_ assetID: String) -> some View {
+        Button {
+            if suppressedTapAssetID == assetID {
+                suppressedTapAssetID = nil
+                return
+            }
+            if isSelecting {
+                toggleSelection(assetID)
+            } else {
+                previewAssetID = assetID
+            }
+        } label: {
+            Rectangle()
+                .fill(.clear)
+                .aspectRatio(1, contentMode: .fit)
+                .overlay {
+                    MediaAssetThumbnailView(assetID: assetID, viewModel: viewModel)
+                }
+                .overlay(alignment: .topTrailing) {
+                    selectionIndicator(for: assetID)
+                }
+                .overlay(alignment: .topLeading) {
+                    livePhotoBadge(for: assetID)
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    videoDurationBadge(for: assetID)
+                }
+                .contentShape(Rectangle())
+                .clipped()
+        }
+        .buttonStyle(.plain)
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.45)
+                .onEnded { _ in
+                    suppressedTapAssetID = assetID
+                    isSelecting = true
+                    selectedIDs.insert(assetID)
+                }
+        )
+    }
+
+    private func dateHeader(_ section: MediaDateSection) -> some View {
+        HStack {
+            Text(dateTitle(section.day))
+                .font(.headline)
+            Spacer()
+            Text(itemCount(section.assetIDs.count))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.bar)
+    }
+
+    private func dateTitle(_ day: Date?) -> String {
+        guard let day else { return String(localized: "Unknown Date") }
+        let calendar = Calendar.current
+        if calendar.isDateInToday(day) {
+            return String(localized: "Today")
+        }
+        if calendar.isDateInYesterday(day) {
+            return String(localized: "Yesterday")
+        }
+        return day.formatted(.dateTime.year().month(.wide).day())
+    }
+
+    private func itemCount(_ count: Int) -> String {
+        String.localizedStringWithFormat(String(localized: "%lld items"), Int64(count))
     }
 
     private func toggleSelection(_ assetID: String) {

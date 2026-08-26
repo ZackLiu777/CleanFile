@@ -169,3 +169,6 @@
 "Sage" = "세이지";
 "Graphite" = "그래파이트";
 "This color theme uses a fixed appearance." = "이 색상 테마는 고정된 화면 모드를 사용합니다.";
+"Today" = "오늘";
+"Yesterday" = "어제";
+"Unknown Date" = "날짜 알 수 없음";
