@@ -377,17 +377,8 @@ private struct ImageConversionContentView: View {
 
                 Spacer()
 
-                Menu {
-                    if viewModel.completedCount > 0 {
-                        Button(L10n.string("action.clear_completed")) {
-                            viewModel.clearCompleted()
-                        }
-                    }
-                    Button(L10n.string("action.clear_all"), role: .destructive) {
-                        isClearAllConfirmationPresented = true
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
+                Button(L10n.string("action.clear_all"), role: .destructive) {
+                    isClearAllConfirmationPresented = true
                 }
                 .disabled(viewModel.isConverting)
             }
@@ -459,7 +450,7 @@ private struct ImageConversionSettingsCard: View {
                 Text(L10n.string("settings.format"))
                 ConversionSettingsWheelPicker(
                     summary: imageSettingsSummary,
-                    detail: L10n.string("format.image.\(viewModel.outputFormat.rawValue).detail")
+                    detail: L10n.dynamicString("format.image.\(viewModel.outputFormat.rawValue).detail")
                 ) {
                     HStack(spacing: 0) {
                         ConversionWheelColumn(

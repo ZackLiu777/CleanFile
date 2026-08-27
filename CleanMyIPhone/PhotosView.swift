@@ -531,7 +531,6 @@ private struct MediaCategoryDetailView: View {
 
     private let albumColumns = [
         GridItem(.flexible(minimum: 0), spacing: 3),
-        GridItem(.flexible(minimum: 0), spacing: 3),
         GridItem(.flexible(minimum: 0), spacing: 3)
     ]
 
@@ -721,8 +720,11 @@ private struct MediaCategoryDetailView: View {
                 .overlay(alignment: .topLeading) {
                     livePhotoBadge(for: assetID)
                 }
-                .overlay(alignment: .bottomTrailing) {
+                .overlay(alignment: .topLeading) {
                     videoDurationBadge(for: assetID)
+                }
+                .overlay(alignment: .bottom) {
+                    assetInformation(for: assetID)
                 }
                 .contentShape(Rectangle())
                 .clipped()
@@ -819,6 +821,35 @@ private struct MediaCategoryDetailView: View {
             return String(format: "%d:%02d:%02d", hours, minutes, seconds)
         }
         return String(format: "%d:%02d", minutes, seconds)
+    }
+
+    private func assetInformation(for assetID: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(viewModel.displayName(for: assetID))
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+            Text(
+                "~" + ByteCountFormatter.string(
+                    fromByteCount: viewModel.estimatedByteCount(for: assetID),
+                    countStyle: .file
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.white.opacity(0.76))
+        }
+        .foregroundStyle(.white)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10)
+        .padding(.top, 26)
+        .padding(.bottom, 9)
+        .background(
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.72)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .accessibilityElement(children: .combine)
     }
 
     @ViewBuilder

@@ -81,17 +81,15 @@ struct ConversionSettingsWheelPicker<WheelContent: View>: View {
             Button {
                 isPresented = true
             } label: {
-                HStack(spacing: 8) {
-                    Text(summary)
-                        .fontWeight(.semibold)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.72)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.caption2.weight(.semibold))
-                }
-                .foregroundStyle(theme.accent)
+                Text(summary)
+                    .fontWeight(.semibold)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundStyle(theme.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ConversionSettingsTriggerButtonStyle(accent: theme.accent))
+            .accessibilityHint(L10n.string("settings.title"))
 
             if let detail, !detail.isEmpty {
                 Label(detail, systemImage: "info.circle")
@@ -117,6 +115,22 @@ struct ConversionSettingsWheelPicker<WheelContent: View>: View {
             .presentationDetents([.height(350), .medium])
             .presentationDragIndicator(.visible)
         }
+    }
+}
+
+private struct ConversionSettingsTriggerButtonStyle: ButtonStyle {
+    let accent: Color
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(.horizontal, 4)
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
+            .background(
+                accent.opacity(configuration.isPressed ? 0.18 : 0),
+                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+            )
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 

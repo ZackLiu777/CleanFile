@@ -9,6 +9,7 @@ struct VideoConversionView: View {
     @State private var selectedVideoItems: [PhotosPickerItem] = []
     @State private var isClearAllConfirmationPresented = false
     @State private var libraryImportProgress: ConversionImportProgress?
+    @State private var libraryImportSessionID: UUID?
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -97,9 +98,14 @@ struct VideoConversionView: View {
     }
 
     private func importVideos(_ selections: [PhotosPickerItem]) async {
+        let sessionID = UUID()
+        libraryImportSessionID = sessionID
         defer {
             selectedVideoItems = []
-            libraryImportProgress = nil
+            if libraryImportSessionID == sessionID {
+                libraryImportSessionID = nil
+                libraryImportProgress = nil
+            }
         }
         var urls: [URL] = []
         for (index, selection) in selections.enumerated() {
@@ -114,6 +120,7 @@ struct VideoConversionView: View {
                     type: ImportedVideoFile.self,
                     progress: { fraction in
                         Task { @MainActor in
+                            guard libraryImportSessionID == sessionID else { return }
                             libraryImportProgress = ConversionImportProgress(
                                 completed: index,
                                 total: selections.count,
@@ -136,6 +143,9 @@ struct VideoConversionView: View {
         }
         // The workspace copy has byte-accurate progress. Stop masking it with
         // the PhotoKit acquisition phase once all source URLs are available.
+        // Invalidate the session first so queued PhotoKit callbacks cannot put
+        // the completed 95% acquisition state back on screen.
+        libraryImportSessionID = nil
         libraryImportProgress = nil
         await viewModel.addFiles(urls, progressRange: 0.95 ... 1)
     }
@@ -149,7 +159,7 @@ struct VideoConversionView: View {
                 Text(L10n.string("settings.format"))
                 ConversionSettingsWheelPicker(
                     summary: videoSettingsSummary,
-                    detail: L10n.string("format.video.\(viewModel.container.rawValue).detail")
+                    detail: L10n.dynamicString("format.video.\(viewModel.container.rawValue).detail")
                 ) {
                     HStack(spacing: 0) {
                         ConversionWheelColumn(

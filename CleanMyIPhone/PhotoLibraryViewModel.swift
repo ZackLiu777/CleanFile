@@ -27,6 +27,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     private var analysisTask: Task<Void, Never>?
     private var hasLoadedLibrary = false
     private var assetsByIdentifier: [String: PHAsset] = [:]
+    private var displayNamesByIdentifier: [String: String] = [:]
 
     init() {
         let environment = ProcessInfo.processInfo.environment
@@ -151,6 +152,34 @@ final class PhotoLibraryViewModel: ObservableObject {
             guard let asset = assetsByIdentifier[identifier] else { return total }
             return total + Self.estimatedByteCount(for: asset)
         }
+    }
+
+    func displayName(for assetID: String) -> String {
+        if let cachedName = displayNamesByIdentifier[assetID] {
+            return cachedName
+        }
+        guard let asset = assetsByIdentifier[assetID] else { return "" }
+
+        let resource = PHAssetResource.assetResources(for: asset).first { resource in
+            switch asset.mediaType {
+            case .image:
+                resource.type == .photo || resource.type == .fullSizePhoto
+            case .video:
+                resource.type == .video || resource.type == .fullSizeVideo
+            default:
+                false
+            }
+        } ?? PHAssetResource.assetResources(for: asset).first
+
+        let originalName = resource?.originalFilename ?? ""
+        let name = (originalName as NSString).deletingPathExtension
+        displayNamesByIdentifier[assetID] = name
+        return name
+    }
+
+    func estimatedByteCount(for assetID: String) -> Int64 {
+        guard let asset = assetsByIdentifier[assetID] else { return 0 }
+        return Self.estimatedByteCount(for: asset)
     }
 
     func startCachingThumbnails(for assetIDs: ArraySlice<String>, targetSize: CGSize) {
@@ -351,6 +380,9 @@ final class PhotoLibraryViewModel: ObservableObject {
         assetsByIdentifier = Dictionary(
             uniqueKeysWithValues: assets.map { ($0.localIdentifier, $0) }
         )
+        displayNamesByIdentifier = displayNamesByIdentifier.filter {
+            assetsByIdentifier[$0.key] != nil
+        }
     }
 
     private func updateAnalysisAfterDeleting(_ deletedIDs: Set<String>) {

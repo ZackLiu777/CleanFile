@@ -69,6 +69,7 @@
 "formats.video_to_audio_import" = "可擷取音訊的影片格式";
 "audio.action.add" = "加入音訊";
 "audio.action.add_audio" = "加入音訊檔案";
+"audio.action.add_media" = "選擇音訊或影片檔案";
 "audio.action.add_video" = "從影片擷取";
 "audio.action.add_video_file" = "選擇影片檔案";
 "audio.action.choose_video_library" = "從照片選擇影片";

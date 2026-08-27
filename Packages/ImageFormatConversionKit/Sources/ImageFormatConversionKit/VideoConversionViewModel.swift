@@ -222,6 +222,9 @@ public final class VideoConversionViewModel {
     private func restore() async {
         guard items.isEmpty, !isConverting else { return }
         let records = await workspace.load(.video)
+        // A user can finish an import while the manifest is being read. Never
+        // replace those live items with the older restored snapshot.
+        guard items.isEmpty, importProgress == nil, !isConverting else { return }
         items = records.map { record in
             let outputURL = record.outputPath.map { URL(fileURLWithPath: $0) }
             let status: VideoConversionStatus

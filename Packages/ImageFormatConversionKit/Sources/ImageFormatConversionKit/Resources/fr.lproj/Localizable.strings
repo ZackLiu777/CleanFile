@@ -69,6 +69,7 @@
 "formats.video_to_audio_import" = "Formats vidéo pour l’extraction audio";
 "audio.action.add" = "Ajouter un fichier audio";
 "audio.action.add_audio" = "Ajouter des fichiers audio";
+"audio.action.add_media" = "Choisir des fichiers audio ou vidéo";
 "audio.action.add_video" = "Extraire d’une vidéo";
 "audio.action.add_video_file" = "Choisir des fichiers vidéo";
 "audio.action.choose_video_library" = "Choisir des vidéos dans Photos";

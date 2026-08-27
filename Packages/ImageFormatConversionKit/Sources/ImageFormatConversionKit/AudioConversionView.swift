@@ -1,21 +1,17 @@
 import SwiftUI
-import PhotosUI
 import UniformTypeIdentifiers
 
 @MainActor
 struct AudioConversionView: View {
     @State private var viewModel = AudioConversionViewModel()
-    @State private var audioImporterPresented = false
-    @State private var videoImporterPresented = false
-    @State private var selectedVideoItems: [PhotosPickerItem] = []
+    @State private var mediaImporterPresented = false
     @State private var isClearAllConfirmationPresented = false
-    @State private var libraryImportProgress: ConversionImportProgress?
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 16) {
                 importCard
-                if let progress = libraryImportProgress ?? viewModel.importProgress {
+                if let progress = viewModel.importProgress {
                     ConversionImportProgressView(progress: progress)
                 }
                 if let notice = viewModel.notice { NoticeView(message: notice) }
@@ -28,42 +24,20 @@ struct AudioConversionView: View {
         }
         .converterSoftScrollEdge()
         .fileImporter(
-            isPresented: $audioImporterPresented,
-            allowedContentTypes: audioInputTypes,
+            isPresented: $mediaImporterPresented,
+            allowedContentTypes: mediaInputTypes,
             allowsMultipleSelection: true
         ) { result in
             switch result {
             case let .success(urls):
-                Task { await viewModel.addFiles(urls, sourceKind: .audioFile) }
+                Task { await importMediaFiles(urls) }
             case let .failure(error): viewModel.reportImportFailure(error.localizedDescription)
             }
-        }
-        .fileImporter(
-            isPresented: $videoImporterPresented,
-            allowedContentTypes: videoInputTypes,
-            allowsMultipleSelection: true
-        ) { result in
-            switch result {
-            case let .success(urls):
-                Task { await viewModel.addFiles(urls, sourceKind: .video) }
-            case let .failure(error): viewModel.reportImportFailure(error.localizedDescription)
-            }
-        }
-        .onChange(of: selectedVideoItems) { _, items in
-            guard !items.isEmpty else { return }
-            Task { await importVideos(items) }
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    Button { audioImporterPresented = true } label: {
-                        Label(L10n.string("audio.action.add_audio"), systemImage: "waveform.badge.plus")
-                    }
-                    Button { videoImporterPresented = true } label: {
-                        Label(L10n.string("audio.action.add_video"), systemImage: "video.badge.plus")
-                    }
-                } label: {
-                    Label(L10n.string("audio.action.add"), systemImage: "plus")
+                Button { mediaImporterPresented = true } label: {
+                    Label(L10n.string("audio.action.add_media"), systemImage: "plus")
                 }
                 .disabled(viewModel.isConverting || viewModel.importProgress != nil)
             }
@@ -93,26 +67,16 @@ struct AudioConversionView: View {
         return types
     }
 
+    private var mediaInputTypes: [UTType] {
+        Array(Set(audioInputTypes + videoInputTypes))
+    }
+
     private var importCard: some View {
         VStack(spacing: 12) {
             Image(systemName: "waveform").font(.system(size: 34)).foregroundStyle(.tint)
             Text(L10n.string("audio.import.title")).font(.headline)
-            Button { audioImporterPresented = true } label: {
-                Label(L10n.string("audio.action.add_audio"), systemImage: "waveform.badge.plus")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .disabled(viewModel.isConverting || viewModel.importProgress != nil)
-
-            Button { videoImporterPresented = true } label: {
-                Label(L10n.string("audio.action.add_video_file"), systemImage: "folder.badge.plus")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .disabled(viewModel.isConverting || viewModel.importProgress != nil)
-
-            PhotosPicker(selection: $selectedVideoItems, maxSelectionCount: 50, matching: .videos) {
-                Label(L10n.string("audio.action.choose_video_library"), systemImage: "photo.on.rectangle")
+            Button { mediaImporterPresented = true } label: {
+                Label(L10n.string("audio.action.add_media"), systemImage: "doc.badge.plus")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
@@ -122,50 +86,21 @@ struct AudioConversionView: View {
         .converterCard()
     }
 
-    private func importVideos(_ selections: [PhotosPickerItem]) async {
-        defer {
-            selectedVideoItems = []
-            libraryImportProgress = nil
+    private func importMediaFiles(_ urls: [URL]) async {
+        let videoExtensions = Set(["mov", "mp4", "m4v"])
+        let videoURLs = urls.filter {
+            videoExtensions.contains($0.pathExtension.lowercased())
         }
-        var urls: [URL] = []
-        for (index, selection) in selections.enumerated() {
-            libraryImportProgress = ConversionImportProgress(
-                completed: index,
-                total: selections.count,
-                currentFileName: nil
-            ).mapped(to: 0 ... 0.95)
-            do {
-                if let imported = try await PhotoLibraryImport.loadTransferable(
-                    from: selection,
-                    type: ImportedVideoFile.self,
-                    progress: { fraction in
-                        Task { @MainActor in
-                            libraryImportProgress = ConversionImportProgress(
-                                completed: index,
-                                total: selections.count,
-                                currentFileName: nil,
-                                currentFileFraction: fraction
-                            ).mapped(to: 0 ... 0.95)
-                        }
-                    }
-                ) {
-                    urls.append(imported.url)
-                }
-            } catch {
-                viewModel.reportImportFailure(error.localizedDescription)
-            }
-            libraryImportProgress = ConversionImportProgress(
-                completed: index + 1,
-                total: selections.count,
-                currentFileName: nil
-            ).mapped(to: 0 ... 0.95)
+        let audioURLs = urls.filter {
+            !videoExtensions.contains($0.pathExtension.lowercased())
         }
-        libraryImportProgress = nil
-        await viewModel.addFiles(
-            urls,
-            sourceKind: .video,
-            progressRange: 0.95 ... 1
-        )
+
+        if !audioURLs.isEmpty {
+            await viewModel.addFiles(audioURLs, sourceKind: .audioFile)
+        }
+        if !videoURLs.isEmpty {
+            await viewModel.addFiles(videoURLs, sourceKind: .video)
+        }
     }
 
     private var settingsCard: some View {
@@ -177,7 +112,7 @@ struct AudioConversionView: View {
                 Text(L10n.string("settings.format"))
                 ConversionSettingsWheelPicker(
                     summary: audioSettingsSummary,
-                    detail: L10n.string("format.audio.\(viewModel.outputFormat.rawValue).detail")
+                    detail: L10n.dynamicString("format.audio.\(viewModel.outputFormat.rawValue).detail")
                 ) {
                     HStack(spacing: 0) {
                         ConversionWheelColumn(

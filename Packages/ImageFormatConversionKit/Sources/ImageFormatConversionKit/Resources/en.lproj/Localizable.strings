@@ -69,6 +69,7 @@
 "formats.video_to_audio_import" = "Video Inputs for Audio Extraction";
 "audio.action.add" = "Add Audio";
 "audio.action.add_audio" = "Add Audio Files";
+"audio.action.add_media" = "Choose Audio or Video Files";
 "audio.action.add_video" = "Extract from Video";
 "audio.action.add_video_file" = "Choose Video Files";
 "audio.action.choose_video_library" = "Choose Videos from Photos";

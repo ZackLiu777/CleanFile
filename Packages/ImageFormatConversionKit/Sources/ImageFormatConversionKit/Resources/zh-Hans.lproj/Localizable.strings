@@ -69,6 +69,7 @@
 "formats.video_to_audio_import" = "可提取音频的视频格式";
 "audio.action.add" = "添加音频";
 "audio.action.add_audio" = "添加音频文件";
+"audio.action.add_media" = "选择音频或视频文件";
 "audio.action.add_video" = "从视频提取";
 "audio.action.add_video_file" = "选择视频文件";
 "audio.action.choose_video_library" = "从相册选择视频";

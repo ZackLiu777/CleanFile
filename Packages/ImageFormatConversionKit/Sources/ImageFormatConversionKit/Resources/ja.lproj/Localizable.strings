@@ -69,6 +69,7 @@
 "formats.video_to_audio_import" = "音声抽出に対応するビデオ形式";
 "audio.action.add" = "オーディオを追加";
 "audio.action.add_audio" = "オーディオファイルを追加";
+"audio.action.add_media" = "オーディオまたはビデオを選択";
 "audio.action.add_video" = "ビデオから抽出";
 "audio.action.add_video_file" = "ビデオファイルを選択";
 "audio.action.choose_video_library" = "写真からビデオを選択";
