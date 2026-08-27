@@ -222,8 +222,7 @@ struct StorageView: View {
                                     .foregroundStyle(theme.textSecondary)
                             }
 
-                            ProgressView(value: category.percentage * summaryBarProgress)
-                                .tint(storageColor(category.category))
+                            storageCategoryBar(category)
 
                             HStack {
                                 Text(fileCountText(category.fileCount))
@@ -278,6 +277,52 @@ struct StorageView: View {
         case .archive: "archivebox"
         case .other: "ellipsis"
         }
+    }
+
+    private func storageCategoryBar(_ category: StorageCategorySummary) -> some View {
+        GeometryReader { proxy in
+            let naturalWidth = proxy.size.width
+                * category.percentage
+                * summaryBarProgress
+            let minimumVisibleWidth = category.byteCount > 0
+                ? 5 * summaryBarProgress
+                : 0
+            let fillWidth = max(naturalWidth, minimumVisibleWidth)
+            let color = storageColor(category.category)
+
+            Capsule()
+                .fill(theme.divider.opacity(0.45))
+                .overlay(alignment: .leading) {
+                    ZStack {
+                        LinearGradient(
+                            colors: [
+                                color.opacity(0.66),
+                                color.opacity(0.76),
+                                color.opacity(0.70)
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+
+                        Color.black.opacity(0.10)
+
+                        StorageBarStripeTexture()
+                            .blendMode(.softLight)
+
+                        LinearGradient(
+                            colors: [.white.opacity(0.07), .clear, .black.opacity(0.09)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    }
+                    .frame(width: fillWidth)
+                    .clipShape(Capsule())
+                    .shadow(color: .black.opacity(0.08), radius: 2, y: 1)
+                }
+                .clipShape(Capsule())
+        }
+        .frame(height: 8)
+        .accessibilityHidden(true)
     }
 
     private func animateStorageDashboardIfNeeded() {
@@ -340,6 +385,35 @@ struct StorageView: View {
 
     private func fileCountText(_ count: Int) -> String {
         String.localizedStringWithFormat(String(localized: "%lld files"), Int64(count))
+    }
+}
+
+private struct StorageBarStripeTexture: View {
+    private let stripePattern: [(position: CGFloat, width: CGFloat, opacity: Double)] = [
+        (0.46, 0.8, 0.08), (0.55, 1.0, 0.10), (0.61, 0.6, 0.07),
+        (0.67, 1.2, 0.11), (0.72, 0.7, 0.08), (0.76, 1.0, 0.10),
+        (0.80, 0.6, 0.07), (0.84, 1.3, 0.12), (0.88, 0.7, 0.08),
+        (0.91, 1.0, 0.10), (0.94, 0.6, 0.07), (0.97, 1.1, 0.11)
+    ]
+
+    var body: some View {
+        Canvas { context, size in
+            for (index, stripe) in stripePattern.enumerated() {
+                let x = size.width * stripe.position
+                let rect = CGRect(
+                    x: x,
+                    y: 0,
+                    width: stripe.width,
+                    height: size.height
+                )
+                let shade = index.isMultiple(of: 3)
+                    ? Color.black.opacity(stripe.opacity * 0.55)
+                    : Color.white.opacity(stripe.opacity)
+                context.fill(Path(rect), with: .color(shade))
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
