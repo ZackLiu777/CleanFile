@@ -265,10 +265,16 @@ struct StorageView: View {
             await Task.yield()
             guard isTabActive, generation == animationGeneration else { return }
 
-            withAnimation(.easeInOut(duration: 0.9)) {
+            let depth = viewModel.fileTree.map(FileTreeDiagnostics.maximumDepth(of:)) ?? 1
+            let sunburstDuration = min(max(0.75 + Double(depth) * 0.12, 1.0), 1.8)
+
+            withAnimation(.easeInOut(duration: sunburstDuration)) {
                 sunburstRevealProgress = 1
             }
-            withAnimation(.spring(duration: 0.72, bounce: 0.16)) {
+            withAnimation(
+                .spring(duration: 0.72, bounce: 0.16)
+                    .delay(sunburstDuration * 0.3)
+            ) {
                 summaryBarProgress = 1
             }
         }

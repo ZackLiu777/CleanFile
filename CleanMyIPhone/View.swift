@@ -223,10 +223,13 @@ struct SunburstSectorShape: Shape {
     }
 }
 
-/// Reveals the already-laid-out chart with one animated angular mask. This
-/// keeps large trees from running a separate animation for every file sector.
-private struct SunburstFanRevealShape: Shape {
+/// Reveals one complete hierarchy ring at a time. The active ring opens
+/// clockwise, so its individual file sectors appear progressively without
+/// creating an animation task for every node in a large tree.
+private struct SunburstLayeredRevealShape: Shape {
     var progress: Double
+    let geometry: SunburstChartGeometry
+    let visibleDepth: Int
 
     var animatableData: Double {
         get { progress }
@@ -236,26 +239,49 @@ private struct SunburstFanRevealShape: Shape {
     func path(in rect: CGRect) -> Path {
         let clampedProgress = min(max(progress, 0), 1)
         guard clampedProgress > 0 else { return Path() }
-        guard clampedProgress < 0.9999 else { return Path(ellipseIn: rect) }
 
         let center = CGPoint(x: rect.midX, y: rect.midY)
-        let radius = hypot(rect.width, rect.height)
-        let startAngle = Angle.degrees(-90)
-        let endAngle = Angle.degrees(-90 + 360 * clampedProgress)
+        let maximumDepth = max(1, visibleDepth)
+        let stage = clampedProgress * Double(maximumDepth)
+        let completedDepth = min(Int(stage), maximumDepth)
+        let activeDepth = min(completedDepth + 1, maximumDepth)
+        let activeProgress = completedDepth < maximumDepth
+            ? stage - Double(completedDepth)
+            : 0
         var path = Path()
-        path.move(to: center)
-        path.addLine(to: CGPoint(
-            x: center.x + radius * cos(startAngle.radians),
-            y: center.y + radius * sin(startAngle.radians)
-        ))
-        path.addArc(
+
+        if completedDepth > 0 {
+            let completedOuterRadius = geometry.radii(at: completedDepth).outer
+            path.addEllipse(in: CGRect(
+                x: center.x - completedOuterRadius,
+                y: center.y - completedOuterRadius,
+                width: completedOuterRadius * 2,
+                height: completedOuterRadius * 2
+            ))
+        }
+
+        guard completedDepth < maximumDepth, activeProgress > 0 else { return path }
+
+        let radii = geometry.radii(at: activeDepth)
+        let startAngle = Angle.degrees(-90)
+        let endAngle = Angle.degrees(-90 + 360 * activeProgress)
+        var activeRingPath = Path()
+        activeRingPath.addArc(
             center: center,
-            radius: radius,
+            radius: radii.inner,
             startAngle: startAngle,
             endAngle: endAngle,
             clockwise: false
         )
-        path.closeSubpath()
+        activeRingPath.addArc(
+            center: center,
+            radius: radii.outer,
+            startAngle: endAngle,
+            endAngle: startAngle,
+            clockwise: true
+        )
+        activeRingPath.closeSubpath()
+        path.addPath(activeRingPath)
         return path
     }
 }
@@ -411,7 +437,11 @@ private struct SunburstChartCanvas: View {
                         )
                     }
                 }
-                .mask(SunburstFanRevealShape(progress: revealProgress))
+                .mask(SunburstLayeredRevealShape(
+                    progress: revealProgress,
+                    geometry: geometry,
+                    visibleDepth: rootNode.maximumDepth - 1
+                ))
 
                 Circle()
                     .fill(.clear)
