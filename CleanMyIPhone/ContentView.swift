@@ -32,7 +32,10 @@ struct ContentView: View {
                 }
                 .tag(AppTab.photos)
 
-            StorageView(viewModel: fileViewModel)
+            StorageView(
+                viewModel: fileViewModel,
+                isTabActive: selectedTab == .storage
+            )
                 .tabItem {
                     Label("Storage", systemImage: "externaldrive")
                 }

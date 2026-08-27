@@ -223,6 +223,43 @@ struct SunburstSectorShape: Shape {
     }
 }
 
+/// Reveals the already-laid-out chart with one animated angular mask. This
+/// keeps large trees from running a separate animation for every file sector.
+private struct SunburstFanRevealShape: Shape {
+    var progress: Double
+
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let clampedProgress = min(max(progress, 0), 1)
+        guard clampedProgress > 0 else { return Path() }
+        guard clampedProgress < 0.9999 else { return Path(ellipseIn: rect) }
+
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let radius = hypot(rect.width, rect.height)
+        let startAngle = Angle.degrees(-90)
+        let endAngle = Angle.degrees(-90 + 360 * clampedProgress)
+        var path = Path()
+        path.move(to: center)
+        path.addLine(to: CGPoint(
+            x: center.x + radius * cos(startAngle.radians),
+            y: center.y + radius * sin(startAngle.radians)
+        ))
+        path.addArc(
+            center: center,
+            radius: radius,
+            startAngle: startAngle,
+            endAngle: endAngle,
+            clockwise: false
+        )
+        path.closeSubpath()
+        return path
+    }
+}
+
 // MARK: - 4. 递归节点 View
 struct SunburstNodeView: View {
     let node: DemoFileNode
@@ -336,15 +373,18 @@ extension Color {
 // MARK: - 6. 旭日图主 View
 private struct SunburstChartCanvas: View {
     let rootNode: DemoFileNode
+    let revealProgress: Double
     var onNodeTap: ((DemoFileNode) -> Void)?
     var onCenterTap: (() -> Void)?
 
     init(
         rootNode: DemoFileNode,
+        revealProgress: Double = 1,
         onNodeTap: ((DemoFileNode) -> Void)? = nil,
         onCenterTap: (() -> Void)? = nil
     ) {
         self.rootNode = rootNode
+        self.revealProgress = revealProgress
         self.onNodeTap = onNodeTap
         self.onCenterTap = onCenterTap
     }
@@ -359,16 +399,19 @@ private struct SunburstChartCanvas: View {
             let slices = rootSlices()
 
             ZStack {
-                ForEach(slices, id: \.child.id) { slice in
-                    SunburstNodeView(
-                        node: slice.child,
-                        startAngle: slice.startAngle,
-                        endAngle: slice.endAngle,
-                        depth: 1,
-                        inheritedColor: slice.color,
-                        geometry: geometry
-                    )
+                ZStack {
+                    ForEach(slices, id: \.child.id) { slice in
+                        SunburstNodeView(
+                            node: slice.child,
+                            startAngle: slice.startAngle,
+                            endAngle: slice.endAngle,
+                            depth: 1,
+                            inheritedColor: slice.color,
+                            geometry: geometry
+                        )
+                    }
                 }
+                .mask(SunburstFanRevealShape(progress: revealProgress))
 
                 Circle()
                     .fill(.clear)
@@ -389,6 +432,7 @@ private struct SunburstChartCanvas: View {
             .gesture(
                 SpatialTapGesture()
                     .onEnded { value in
+                        guard revealProgress >= 0.999 else { return }
                         handleTap(value.location, size: geo.size, geometry: geometry)
                     }
             )
@@ -599,16 +643,19 @@ private final class SunburstChartViewModel: ObservableObject {
 
 struct SunburstChartView: View {
     let root: FileNode
+    let revealProgress: Double
     @StateObject private var viewModel: SunburstChartViewModel
 
-    init(root: FileNode) {
+    init(root: FileNode, revealProgress: Double = 1) {
         self.root = root
+        self.revealProgress = revealProgress
         _viewModel = StateObject(wrappedValue: SunburstChartViewModel(root: root))
     }
 
     var body: some View {
         SunburstChartCanvas(
             rootNode: viewModel.chartRoot,
+            revealProgress: revealProgress,
             onNodeTap: viewModel.open,
             onCenterTap: viewModel.navigateBack
         )

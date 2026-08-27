@@ -8,8 +8,13 @@ import UniformTypeIdentifiers
 
 struct StorageView: View {
     @Environment(\.appTheme) private var theme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ObservedObject var viewModel: FileScannerViewModel
+    let isTabActive: Bool
     @State private var isImporterPresented = false
+    @State private var sunburstRevealProgress = 0.0
+    @State private var summaryBarProgress = 0.0
+    @State private var animationGeneration = 0
 
     var body: some View {
         NavigationStack {
@@ -61,6 +66,19 @@ struct StorageView: View {
             ) { result in
                 handleImport(result)
             }
+        }
+        .onAppear {
+            animateStorageDashboardIfNeeded()
+        }
+        .onChange(of: isTabActive) { _, isActive in
+            if isActive {
+                animateStorageDashboardIfNeeded()
+            } else {
+                resetStorageAnimations()
+            }
+        }
+        .onChange(of: viewModel.summary) { _, _ in
+            animateStorageDashboardIfNeeded()
         }
     }
 
@@ -151,7 +169,10 @@ struct StorageView: View {
                 .foregroundStyle(theme.accentPrimary)
             }
 
-            SunburstChartView(root: root)
+            SunburstChartView(
+                root: root,
+                revealProgress: sunburstRevealProgress
+            )
                 .frame(height: 300)
         }
         .storageCard()
@@ -204,7 +225,7 @@ struct StorageView: View {
                                 .foregroundStyle(.tertiary)
                         }
 
-                        ProgressView(value: category.percentage)
+                        ProgressView(value: category.percentage * summaryBarProgress)
                             .tint(theme.fileCategoryColor(category.category))
                     }
                 }
@@ -224,6 +245,39 @@ struct StorageView: View {
                 .foregroundStyle(theme.accentPrimary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func animateStorageDashboardIfNeeded() {
+        guard isTabActive, viewModel.summary != nil else { return }
+        animationGeneration += 1
+        let generation = animationGeneration
+        sunburstRevealProgress = 0
+        summaryBarProgress = 0
+
+        guard !reduceMotion else {
+            sunburstRevealProgress = 1
+            summaryBarProgress = 1
+            return
+        }
+
+        Task { @MainActor in
+            // Render the empty tracks and closed fan before starting both animations.
+            await Task.yield()
+            guard isTabActive, generation == animationGeneration else { return }
+
+            withAnimation(.easeInOut(duration: 0.9)) {
+                sunburstRevealProgress = 1
+            }
+            withAnimation(.spring(duration: 0.72, bounce: 0.16)) {
+                summaryBarProgress = 1
+            }
+        }
+    }
+
+    private func resetStorageAnimations() {
+        animationGeneration += 1
+        sunburstRevealProgress = 0
+        summaryBarProgress = 0
     }
 
     private func handleImport(_ result: Result<[URL], Error>) {
