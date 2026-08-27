@@ -12,6 +12,8 @@ public struct ImageConversionView: View {
     private let theme: ConversionTheme
     @AppStorage("conversion.selectedMode") private var mode: ConversionMode = .image
     @State private var isFormatSheetPresented = false
+    @State private var transitionDirection: CGFloat = 1
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(theme: ConversionTheme = .system) {
         self.theme = theme
@@ -20,7 +22,7 @@ public struct ImageConversionView: View {
     public var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Picker(L10n.string("converter.mode"), selection: $mode) {
+                Picker(L10n.string("converter.mode"), selection: modeSelection) {
                     Text(L10n.string("converter.mode.image")).tag(ConversionMode.image)
                     Text(L10n.string("converter.mode.video")).tag(ConversionMode.video)
                     Text(L10n.string("converter.mode.audio")).tag(ConversionMode.audio)
@@ -34,11 +36,13 @@ public struct ImageConversionView: View {
                     .padding(.top, 8)
                     .padding(.bottom, 16)
 
-                switch mode {
-                case .image: ImageConversionContentView()
-                case .video: VideoConversionView()
-                case .audio: AudioConversionView()
+                ZStack {
+                    conversionContent
+                        .id(mode)
+                        .transition(modeTransition)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
             }
             .background(converterBackground)
 #if os(iOS)
@@ -53,6 +57,36 @@ public struct ImageConversionView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
+    }
+
+    private var modeSelection: Binding<ConversionMode> {
+        Binding(
+            get: { mode },
+            set: { newMode in
+                guard newMode != mode else { return }
+                transitionDirection = newMode.position > mode.position ? 1 : -1
+                withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.24)) {
+                    mode = newMode
+                }
+            }
+        )
+    }
+
+    @ViewBuilder
+    private var conversionContent: some View {
+        switch mode {
+        case .image: ImageConversionContentView()
+        case .video: VideoConversionView()
+        case .audio: AudioConversionView()
+        }
+    }
+
+    private var modeTransition: AnyTransition {
+        guard !reduceMotion else { return .opacity }
+        return .asymmetric(
+            insertion: .offset(x: 18 * transitionDirection).combined(with: .opacity),
+            removal: .offset(x: -12 * transitionDirection).combined(with: .opacity)
+        )
     }
 
     private var privacySummary: some View {
@@ -87,6 +121,14 @@ private enum ConversionMode: String, Hashable {
     case image
     case video
     case audio
+
+    var position: Int {
+        switch self {
+        case .image: 0
+        case .video: 1
+        case .audio: 2
+        }
+    }
 }
 
 private struct SupportedFormatsSheet: View {
