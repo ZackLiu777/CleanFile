@@ -39,7 +39,9 @@ struct SunburstTreeAdapter {
     static func adapt(_ root: FileNode) -> AdaptedTree {
         var sourceNodes: [UUID: FileNode] = [:]
         let children = root.children.enumerated().map { index, child in
-            let color = SunburstPalette.colors[index % SunburstPalette.colors.count]
+            let color = StorageVisualizationPalette.colors[
+                index % StorageVisualizationPalette.colors.count
+            ]
             return adaptNode(child, color: color, sourceNodes: &sourceNodes)
         }
         let rootNode = DemoFileNode(
@@ -90,16 +92,28 @@ struct SunburstTreeAdapter {
     }
 }
 
-private enum SunburstPalette {
+enum StorageVisualizationPalette {
     static let colors: [Color] = [
-        Color(red: 0.2, green: 0.9, blue: 0.95),
-        Color(red: 0.65, green: 0.95, blue: 0.3),
-        Color(red: 1.0, green: 0.7, blue: 0.35),
-        Color(red: 1.0, green: 0.35, blue: 0.6),
-        Color(red: 0.45, green: 0.4, blue: 0.95),
-        Color(red: 0.95, green: 0.25, blue: 0.35),
-        Color(red: 0.3, green: 0.8, blue: 0.5)
+        color(for: .image),
+        color(for: .audio),
+        color(for: .document),
+        color(for: .video),
+        color(for: .pdf),
+        color(for: .archive),
+        color(for: .other)
     ]
+
+    static func color(for category: FileCategory?) -> Color {
+        switch category {
+        case .image: Color(red: 0.2, green: 0.9, blue: 0.95)
+        case .audio: Color(red: 0.65, green: 0.95, blue: 0.3)
+        case .document: Color(red: 1.0, green: 0.7, blue: 0.35)
+        case .video: Color(red: 1.0, green: 0.35, blue: 0.6)
+        case .pdf: Color(red: 0.45, green: 0.4, blue: 0.95)
+        case .archive: Color(red: 0.95, green: 0.25, blue: 0.35)
+        case .other, nil: Color(red: 0.3, green: 0.8, blue: 0.5)
+        }
+    }
 }
 
 struct SunburstCapacityFormatter {
@@ -749,7 +763,7 @@ extension DemoFileNode {
 
     static var sampleData: DemoFileNode {
         let topLevelCount = Int.random(in: 4...6)
-        let shuffledColors = SunburstPalette.colors.shuffled()
+        let shuffledColors = StorageVisualizationPalette.colors.shuffled()
         var topLevelNodes: [DemoFileNode] = []
 
         for index in 1...topLevelCount {

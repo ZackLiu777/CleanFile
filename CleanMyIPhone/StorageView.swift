@@ -179,11 +179,11 @@ struct StorageView: View {
     }
 
     private func summaryCard(_ summary: StorageSummary) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Storage Summary")
-                .font(.headline)
+                .font(.title2.bold())
 
-            HStack(spacing: 12) {
+            HStack(spacing: 20) {
                 metric(title: "Files", value: "\(summary.fileCount)")
                 metric(title: "Analyzed", value: byteCountText(summary.totalBytes))
             }
@@ -201,33 +201,50 @@ struct StorageView: View {
                 NavigationLink {
                     ScannedFilesView(viewModel: viewModel, category: category.category)
                 } label: {
-                    VStack(spacing: 7) {
-                        HStack(spacing: 10) {
-                            Circle()
-                                .fill(theme.fileCategoryColor(category.category))
-                                .frame(width: 9, height: 9)
+                    HStack(spacing: 12) {
+                        Image(systemName: categorySymbol(category.category))
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(storageColor(category.category))
+                            .frame(width: 30, height: 30)
+                            .background(
+                                storageColor(category.category).opacity(0.14),
+                                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            )
 
-                            VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(alignment: .firstTextBaseline) {
                                 Text(category.category.displayName)
-                                    .foregroundStyle(.primary)
-                                Text(fileCountText(category.fileCount))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .font(.body.weight(.medium))
+                                    .foregroundStyle(theme.textPrimary)
+                                Spacer(minLength: 8)
+                                Text(byteCountText(category.byteCount))
+                                    .font(.system(.caption, design: .monospaced).weight(.medium))
+                                    .foregroundStyle(theme.textSecondary)
                             }
 
-                            Spacer()
+                            ProgressView(value: category.percentage * summaryBarProgress)
+                                .tint(storageColor(category.category))
 
-                            Text(byteCountText(category.byteCount))
-                                .foregroundStyle(.secondary)
-
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
+                            HStack {
+                                Text(fileCountText(category.fileCount))
+                                    .font(.caption)
+                                    .foregroundStyle(theme.textTertiary)
+                                Spacer()
+                                if category.unknownByteCount > 0 {
+                                    Image(systemName: "icloud")
+                                        .font(.caption2)
+                                        .foregroundStyle(theme.textTertiary)
+                                        .accessibilityLabel("Size unavailable for some iCloud files")
+                                }
+                            }
                         }
 
-                        ProgressView(value: category.percentage * summaryBarProgress)
-                            .tint(theme.fileCategoryColor(category.category))
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(theme.textTertiary)
                     }
+                    .padding(.vertical, 5)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
@@ -242,9 +259,25 @@ struct StorageView: View {
                 .foregroundStyle(.secondary)
             Text(value)
                 .font(.title3.weight(.semibold))
-                .foregroundStyle(theme.accentPrimary)
+                .foregroundStyle(theme.textPrimary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func storageColor(_ category: FileCategory) -> Color {
+        StorageVisualizationPalette.color(for: category)
+    }
+
+    private func categorySymbol(_ category: FileCategory) -> String {
+        switch category {
+        case .video: "film"
+        case .image: "photo"
+        case .audio: "music.note"
+        case .document: "doc.text"
+        case .pdf: "doc.richtext"
+        case .archive: "archivebox"
+        case .other: "ellipsis"
+        }
     }
 
     private func animateStorageDashboardIfNeeded() {
