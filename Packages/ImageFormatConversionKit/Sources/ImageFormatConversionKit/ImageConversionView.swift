@@ -592,11 +592,7 @@ private struct ImageConversionFileRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "photo")
-                .font(.title3)
-                .foregroundStyle(.tint)
-                .frame(width: 34, height: 34)
-                .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 9))
+            ConversionFileThumbnail(url: item.sourceURL, kind: .image)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.sourceURL.lastPathComponent)
@@ -604,19 +600,40 @@ private struct ImageConversionFileRow: View {
                     .lineLimit(1)
 
                 if let info = item.info {
-                    Text(
-                        "\(info.pixelWidth) × \(info.pixelHeight)  ·  "
-                            + ByteCountFormatter.string(
-                                fromByteCount: info.fileSizeBytes,
-                                countStyle: .file
-                            )
-                    )
-                    .font(.caption)
+                    HStack(spacing: 6) {
+                        ConversionStatusDot(
+                            phase: statusPhase,
+                            accessibilityLabel: statusText
+                        )
+                        Text("\(info.pixelWidth)×\(info.pixelHeight)")
+                        Text("·")
+                        Text(ByteCountFormatter.string(
+                            fromByteCount: info.fileSizeBytes,
+                            countStyle: .file
+                        ))
+                    }
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(.secondary)
-                    .monospacedDigit()
                 }
 
-                statusLabel
+                if item.info == nil {
+                    HStack(spacing: 6) {
+                        ConversionStatusDot(
+                            phase: statusPhase,
+                            accessibilityLabel: statusText
+                        )
+                        Text(statusText)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+
+                if case let .failed(message) = item.status {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(theme.destructive)
+                        .lineLimit(2)
+                }
             }
 
             Spacer(minLength: 8)
@@ -625,28 +642,23 @@ private struct ImageConversionFileRow: View {
         }
     }
 
-    @ViewBuilder
-    private var statusLabel: some View {
+    private var statusPhase: ConversionFilePhase {
         switch item.status {
-        case .inspecting:
-            Label(L10n.string("status.inspecting"), systemImage: "magnifyingglass")
-                .foregroundStyle(.secondary)
-        case .ready:
-            Label(L10n.string("status.ready"), systemImage: "checkmark.circle")
-                .foregroundStyle(.secondary)
-        case .converting:
-            Label(L10n.string("status.converting"), systemImage: "arrow.triangle.2.circlepath")
-                .foregroundStyle(.tint)
-        case .completed:
-            Label(L10n.string("status.completed"), systemImage: "checkmark.circle.fill")
-                .foregroundStyle(.green)
-        case let .failed(message):
-            Label(message, systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(theme.destructive)
-                .lineLimit(2)
-        case .cancelled:
-            Label(L10n.string("status.cancelled"), systemImage: "xmark.circle")
-                .foregroundStyle(.secondary)
+        case .inspecting, .ready, .cancelled: .pending
+        case .converting: .working
+        case .completed: .completed
+        case .failed: .failed
+        }
+    }
+
+    private var statusText: String {
+        switch item.status {
+        case .inspecting: L10n.string("status.inspecting")
+        case .ready: L10n.string("status.ready")
+        case .converting: L10n.string("status.converting")
+        case .completed: L10n.string("status.completed")
+        case let .failed(message): message
+        case .cancelled: L10n.string("status.cancelled")
         }
     }
 
@@ -674,8 +686,10 @@ private struct ImageConversionFileRow: View {
             ProgressView()
                 .controlSize(.small)
         case .ready, .failed, .cancelled:
-            Button(role: .destructive, action: onRemove) {
+            Button(action: onRemove) {
                 Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.secondary)
                     .frame(width: 32, height: 32)
             }
             .buttonStyle(.borderless)

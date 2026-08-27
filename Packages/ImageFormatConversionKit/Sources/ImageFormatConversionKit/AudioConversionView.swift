@@ -197,16 +197,29 @@ struct AudioConversionView: View {
             }
             ForEach(viewModel.items) { item in
                 HStack(spacing: 12) {
-                    Image(systemName: item.sourceKind == .video ? "video" : "waveform")
-                        .foregroundStyle(.tint)
-                        .frame(width: 34)
+                    ConversionFileThumbnail(
+                        url: item.sourceURL,
+                        kind: item.sourceKind == .video ? .video : .audio
+                    )
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(item.sourceURL.lastPathComponent).lineLimit(1)
-                        Text(sourceDescription(item))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Text(sizeDescription(item)).font(.caption).foregroundStyle(.secondary)
-                        statusText(item.status).font(.caption)
+                        Text(item.sourceURL.lastPathComponent)
+                            .font(.subheadline.weight(.medium))
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        HStack(spacing: 6) {
+                            ConversionStatusDot(
+                                phase: phase(item.status),
+                                accessibilityLabel: statusString(item.status)
+                            )
+                            Text(sourceDescription(item))
+                            Text("·")
+                            Text(sizeDescription(item))
+                        }
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        if case let .failed(message) = item.status {
+                            Text(message).font(.caption).foregroundStyle(.red).lineLimit(2)
+                        }
                     }
                     Spacer()
                     if case let .completed(url) = item.status {
@@ -219,8 +232,11 @@ struct AudioConversionView: View {
                     } else if case .converting = item.status {
                         ProgressView().controlSize(.small)
                     } else {
-                        Button(role: .destructive) { viewModel.remove(item.id) } label: {
+                        Button { viewModel.remove(item.id) } label: {
                             Image(systemName: "xmark")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 32, height: 32)
                         }
                     }
                 }
@@ -266,13 +282,22 @@ struct AudioConversionView: View {
         return "\(kind) · \(String(format: "%d:%02d", totalSeconds / 60, totalSeconds % 60))"
     }
 
-    private func statusText(_ status: AudioConversionStatus) -> Text {
+    private func phase(_ status: AudioConversionStatus) -> ConversionFilePhase {
         switch status {
-        case .ready: Text(L10n.string("status.ready"))
-        case .converting: Text(L10n.string("status.converting"))
-        case .completed: Text(L10n.string("status.completed"))
-        case let .failed(message): Text(message)
-        case .cancelled: Text(L10n.string("status.cancelled"))
+        case .ready, .cancelled: .pending
+        case .converting: .working
+        case .completed: .completed
+        case .failed: .failed
+        }
+    }
+
+    private func statusString(_ status: AudioConversionStatus) -> String {
+        switch status {
+        case .ready: L10n.string("status.ready")
+        case .converting: L10n.string("status.converting")
+        case .completed: L10n.string("status.completed")
+        case let .failed(message): message
+        case .cancelled: L10n.string("status.cancelled")
         }
     }
 }
