@@ -19,7 +19,7 @@ struct VideoConversionView: View {
                     ConversionImportProgressView(progress: progress)
                 }
                 if let notice = viewModel.notice { NoticeView(message: notice) }
-                if viewModel.items.isEmpty { emptyState } else { filesSection }
+                if !viewModel.items.isEmpty { filesSection }
                 settingsCard
                 action
             }
@@ -152,8 +152,7 @@ struct VideoConversionView: View {
 
     private var settingsCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label(L10n.string("settings.title"), systemImage: "slider.horizontal.3")
-                .font(.headline)
+            ConversionMicroText(L10n.string("settings.title"))
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.string("settings.format"))
@@ -201,7 +200,8 @@ struct VideoConversionView: View {
             }
             setting(L10n.string("settings.output")) {
                 Text(viewModel.outputDirectory.lastPathComponent)
-                    .font(.footnote).foregroundStyle(.secondary)
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.secondary)
             }
         }
         .padding(16)
@@ -232,16 +232,6 @@ struct VideoConversionView: View {
         case .proRes422: "ProRes 422"
         case .proRes4444: "ProRes 4444"
         }
-    }
-
-    private var emptyState: some View {
-        ContentUnavailableView(
-            L10n.string("video.empty.title"),
-            systemImage: "film",
-            description: Text(L10n.string("video.empty.subtitle"))
-        )
-        .padding(.vertical, 28)
-        .converterCard()
     }
 
     private var filesSection: some View {

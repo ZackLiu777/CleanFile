@@ -135,12 +135,19 @@ struct PhotosView: View {
 
     private var mediaDashboard: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            LazyVStack(spacing: 18) {
+            LazyVStack(spacing: 24) {
+                Text("My Space")
+                    .font(.largeTitle.bold())
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .padding(.bottom, -16)
+
                 storageOverview
                 analysisContent
             }
             .padding(.horizontal, 4)
-            .padding(.vertical, 16)
+            .padding(.top, -24)
+            .padding(.bottom, 24)
         }
         .appSoftScrollEdge()
     }
@@ -216,35 +223,13 @@ struct PhotosView: View {
     @ViewBuilder
     private var storageOverview: some View {
         if let storage = viewModel.storageSnapshot {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text("Device Storage")
-                        .font(.headline)
-                    Spacer()
-                    Text(
-                        "\(byteCountText(storage.usedBytes)) of \(byteCountText(storage.totalBytes)) used"
-                    )
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                }
-
-                ProgressView(value: animatedStorageFraction)
-                    .tint(theme.accentPrimary)
-
-                HStack {
-                    Label("Used", systemImage: "internaldrive.fill")
-                    Spacer()
-                    Text("\(byteCountText(storage.availableBytes)) available")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-            .mediaAnalysisCard()
+            MediaStorageOverview(
+                storage: storage,
+                photoBytes: viewModel.estimatedPhotoLibraryBytes,
+                videoBytes: viewModel.estimatedVideoLibraryBytes,
+                animatedUsedFraction: animatedStorageFraction
+            )
         }
-    }
-
-    private func byteCountText(_ byteCount: Int64) -> String {
-        ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
     }
 
     private func animateStorageBarIfNeeded() {
@@ -454,6 +439,159 @@ private struct MediaDashboardResultsView: View {
         }
     }
 
+}
+
+private struct MediaStorageOverview: View {
+    @Environment(\.appTheme) private var theme
+    let storage: DeviceStorageSnapshot
+    let photoBytes: Int64
+    let videoBytes: Int64
+    let animatedUsedFraction: Double
+
+    private var visiblePhotoBytes: Int64 { min(max(photoBytes, 0), storage.usedBytes) }
+    private var visibleVideoBytes: Int64 {
+        min(max(videoBytes, 0), max(storage.usedBytes - visiblePhotoBytes, 0))
+    }
+    private var otherUsedBytes: Int64 {
+        max(storage.usedBytes - visiblePhotoBytes - visibleVideoBytes, 0)
+    }
+
+    private var segments: [MediaStorageSegment] {
+        [
+            MediaStorageSegment(
+                title: String(localized: "Photos"),
+                bytes: visiblePhotoBytes,
+                color: theme.positiveGreen.opacity(0.82)
+            ),
+            MediaStorageSegment(
+                title: String(localized: "Videos"),
+                bytes: visibleVideoBytes,
+                color: theme.fileCategoryColor(.document).opacity(0.82)
+            ),
+            MediaStorageSegment(
+                title: String(localized: "System & Apps"),
+                bytes: otherUsedBytes,
+                color: theme.warningOrange.opacity(0.72)
+            ),
+            MediaStorageSegment(
+                title: String(localized: "Available"),
+                bytes: storage.availableBytes,
+                color: theme.textTertiary.opacity(0.42)
+            )
+        ]
+    }
+
+    private let legendColumns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            GeometryReader { proxy in
+                let spacing: CGFloat = 1
+                let availableWidth = max(
+                    proxy.size.width - spacing * CGFloat(segments.count - 1),
+                    0
+                )
+                let widths = displayWidths(totalWidth: availableWidth)
+
+                HStack(spacing: spacing) {
+                    ForEach(Array(segments.enumerated()), id: \.offset) { index, segment in
+                        segment.color
+                            .frame(width: widths[index])
+                    }
+                }
+                .frame(maxHeight: .infinity, alignment: .center)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .animation(.spring(duration: 0.72, bounce: 0.16), value: animatedUsedFraction)
+            }
+            .frame(height: 42)
+            .background(
+                theme.cardElevated,
+                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+            )
+
+            LazyVGrid(columns: legendColumns, alignment: .leading, spacing: 8) {
+                ForEach(Array(segments.enumerated()), id: \.offset) { _, segment in
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(segment.color)
+                            .frame(width: 7, height: 7)
+                        Text(segment.title)
+                            .lineLimit(1)
+                        Text(byteCountText(segment.bytes))
+                            .font(.system(.caption2, design: .monospaced).weight(.medium))
+                            .foregroundStyle(theme.textSecondary)
+                            .lineLimit(1)
+                    }
+                    .font(.caption2)
+                }
+            }
+
+            Text("Includes iOS, system data, and other app data.")
+                .font(.caption2)
+                .foregroundStyle(theme.textTertiary)
+
+            Text(storageSummary)
+                .font(.system(.subheadline, design: .rounded).weight(.medium))
+                .foregroundStyle(theme.textPrimary)
+        }
+        .padding(14)
+        .appContentCard(cornerRadius: 18)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func fraction(for bytes: Int64) -> Double {
+        guard storage.totalBytes > 0 else { return 0 }
+        return min(max(Double(bytes) / Double(storage.totalBytes), 0), 1)
+    }
+
+    private var usedAnimationScale: Double {
+        guard storage.usedFraction > 0 else { return 0 }
+        return min(max(animatedUsedFraction / storage.usedFraction, 0), 1)
+    }
+
+    private func displayWidths(totalWidth: CGFloat) -> [CGFloat] {
+        guard totalWidth > 0 else { return Array(repeating: 0, count: segments.count) }
+
+        var widths = segments.enumerated().map { index, segment in
+            let animatedFraction: CGFloat = index == segments.count - 1
+                ? CGFloat(max(1 - animatedUsedFraction, 0))
+                : CGFloat(fraction(for: segment.bytes) * usedAnimationScale)
+            let naturalWidth = totalWidth * animatedFraction
+
+            // Preserve truthful proportions while ensuring a non-zero category remains visible.
+            guard index != segments.count - 1, segment.bytes > 0 else { return naturalWidth }
+            return max(naturalWidth, 6 * CGFloat(usedAnimationScale))
+        }
+
+        let overflow = max(widths.reduce(0, +) - totalWidth, 0)
+        if overflow > 0,
+           let largestIndex = widths.indices.max(by: { widths[$0] < widths[$1] }) {
+            widths[largestIndex] = max(widths[largestIndex] - overflow, 0)
+        }
+        return widths
+    }
+
+    private var storageSummary: String {
+        String.localizedStringWithFormat(
+            String(localized: "%lld%% used · %@ of %@"),
+            Int64((storage.usedFraction * 100).rounded()),
+            byteCountText(storage.usedBytes),
+            byteCountText(storage.totalBytes)
+        )
+    }
+
+    private func byteCountText(_ byteCount: Int64) -> String {
+        ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
+    }
+}
+
+private struct MediaStorageSegment {
+    let title: String
+    let bytes: Int64
+    let color: Color
 }
 
 private struct MediaCategorySummary: Identifiable {

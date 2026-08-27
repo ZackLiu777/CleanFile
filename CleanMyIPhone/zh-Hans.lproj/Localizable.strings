@@ -46,6 +46,11 @@
 "Accent Color" = "强调色";
 "The brand accent is used for selection, progress, and primary actions." = "品牌强调色用于选择、进度和主要操作。";
 "Videos" = "视频";
+"My Space" = "我的空间";
+"System & Apps" = "系统与应用";
+"Includes iOS, system data, and other app data." = "含 iOS、系统数据和其他 App 数据";
+"Available" = "可用";
+"%lld%% used · %@ of %@" = "设备存储已使用 %lld%%（%@ / %@）";
 "Images" = "图片";
 "Audio" = "音频";
 "Documents" = "文档";

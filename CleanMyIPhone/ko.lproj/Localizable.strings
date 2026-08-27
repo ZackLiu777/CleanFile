@@ -46,6 +46,11 @@
 "Accent Color" = "강조 색상";
 "The brand accent is used for selection, progress, and primary actions." = "브랜드 강조 색상은 선택, 진행 상태 및 주요 작업에 사용됩니다.";
 "Videos" = "비디오";
+"My Space" = "나의 공간";
+"System & Apps" = "시스템 및 앱";
+"Includes iOS, system data, and other app data." = "iOS, 시스템 데이터 및 다른 앱 데이터를 포함합니다.";
+"Available" = "사용 가능";
+"%lld%% used · %@ of %@" = "%lld%% 사용됨 · %@ / %@";
 "Images" = "이미지";
 "Audio" = "오디오";
 "Documents" = "문서";

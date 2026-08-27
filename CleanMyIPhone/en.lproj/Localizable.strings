@@ -46,6 +46,11 @@
 "Accent Color" = "Accent Color";
 "The brand accent is used for selection, progress, and primary actions." = "The brand accent is used for selection, progress, and primary actions.";
 "Videos" = "Videos";
+"My Space" = "My Space";
+"System & Apps" = "System & Apps";
+"Includes iOS, system data, and other app data." = "Includes iOS, system data, and other app data.";
+"Available" = "Available";
+"%lld%% used · %@ of %@" = "%lld%% used · %@ of %@";
 "Images" = "Images";
 "Audio" = "Audio";
 "Documents" = "Documents";

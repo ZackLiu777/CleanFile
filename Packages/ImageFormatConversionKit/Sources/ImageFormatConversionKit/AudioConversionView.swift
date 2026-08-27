@@ -15,7 +15,7 @@ struct AudioConversionView: View {
                     ConversionImportProgressView(progress: progress)
                 }
                 if let notice = viewModel.notice { NoticeView(message: notice) }
-                if viewModel.items.isEmpty { emptyState } else { filesSection }
+                if !viewModel.items.isEmpty { filesSection }
                 settingsCard
                 conversionAction
             }
@@ -105,8 +105,7 @@ struct AudioConversionView: View {
 
     private var settingsCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label(L10n.string("settings.title"), systemImage: "slider.horizontal.3")
-                .font(.headline)
+            ConversionMicroText(L10n.string("settings.title"))
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.string("settings.format"))
@@ -147,7 +146,8 @@ struct AudioConversionView: View {
             }
             row(L10n.string("settings.output")) {
                 Text(viewModel.outputDirectory.lastPathComponent)
-                    .font(.footnote).foregroundStyle(.secondary)
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.secondary)
             }
         }
         .padding(16)
@@ -173,16 +173,6 @@ struct AudioConversionView: View {
         case .cafPCM: L10n.string("audio.format.caf_pcm")
         case .cafALAC: L10n.string("audio.format.caf_alac")
         }
-    }
-
-    private var emptyState: some View {
-        ContentUnavailableView(
-            L10n.string("audio.empty.title"),
-            systemImage: "waveform",
-            description: Text(L10n.string("audio.empty.subtitle"))
-        )
-        .padding(.vertical, 28)
-        .converterCard()
     }
 
     private var filesSection: some View {

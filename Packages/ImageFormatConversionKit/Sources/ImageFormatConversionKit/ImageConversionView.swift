@@ -21,9 +21,9 @@ public struct ImageConversionView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 Picker(L10n.string("converter.mode"), selection: $mode) {
-                    Label(L10n.string("converter.mode.image"), systemImage: "photo").tag(ConversionMode.image)
-                    Label(L10n.string("converter.mode.video"), systemImage: "film").tag(ConversionMode.video)
-                    Label(L10n.string("converter.mode.audio"), systemImage: "waveform").tag(ConversionMode.audio)
+                    Text(L10n.string("converter.mode.image")).tag(ConversionMode.image)
+                    Text(L10n.string("converter.mode.video")).tag(ConversionMode.video)
+                    Text(L10n.string("converter.mode.audio")).tag(ConversionMode.audio)
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 4)
@@ -53,28 +53,18 @@ public struct ImageConversionView: View {
     }
 
     private var privacySummary: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             Label(L10n.string("import.subtitle"), systemImage: "lock.shield")
-                .font(.footnote)
+                .font(.caption2)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            formatDetailsButton
-        }
-    }
-
-    @ViewBuilder
-    private var formatDetailsButton: some View {
-        if #available(iOS 26.0, *) {
             Button(L10n.string("formats.view_all")) {
                 isFormatSheetPresented = true
             }
-            .buttonStyle(.glass)
-        } else {
-            Button(L10n.string("formats.view_all")) {
-                isFormatSheetPresented = true
-            }
-            .buttonStyle(.bordered)
+            .font(.caption2.weight(.medium))
+            .foregroundStyle(.secondary)
+            .buttonStyle(.plain)
         }
     }
 
@@ -178,17 +168,24 @@ private struct FormatChipSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title).font(.headline)
+            ConversionMicroText(title)
             LazyVGrid(columns: columns, alignment: .leading, spacing: 10) {
                 ForEach(formats, id: \.self) { format in
                     Text(format)
-                        .font(.subheadline.weight(.semibold))
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 8)
-                        .background(.thinMaterial, in: Capsule())
+                        .background(
+                            Color.primary.opacity(0.055),
+                            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        )
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                        }
                 }
             }
         }
@@ -220,9 +217,7 @@ private struct ImageConversionContentView: View {
                     NoticeView(message: notice)
                 }
 
-                if viewModel.items.isEmpty {
-                    emptyState
-                } else {
+                if !viewModel.items.isEmpty {
                     filesSection
                 }
 
@@ -358,17 +353,6 @@ private struct ImageConversionContentView: View {
         await viewModel.addFiles(urls, progressRange: 0.95 ... 1)
     }
 
-    private var emptyState: some View {
-        ContentUnavailableView(
-            L10n.string("empty.title"),
-            systemImage: "photo.on.rectangle.angled",
-            description: Text(L10n.string("empty.subtitle"))
-        )
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 28)
-        .converterCard()
-    }
-
     private var filesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -443,8 +427,7 @@ private struct ImageConversionSettingsCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Label(L10n.string("settings.title"), systemImage: "slider.horizontal.3")
-                .font(.headline)
+            ConversionMicroText(L10n.string("settings.title"))
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.string("settings.format"))
@@ -502,9 +485,6 @@ private struct ImageConversionSettingsCard: View {
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
 
-                    Label(qualityExplanation, systemImage: "info.circle")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -527,7 +507,7 @@ private struct ImageConversionSettingsCard: View {
                 Text(L10n.string("settings.output"))
                 Spacer()
                 Text(viewModel.outputDirectory.lastPathComponent)
-                    .font(.footnote)
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
@@ -573,13 +553,6 @@ private struct ImageConversionSettingsCard: View {
         }
     }
 
-    private var qualityExplanation: String {
-        switch viewModel.quality {
-        case ..<0.5: L10n.string("quality.explanation.small")
-        case ..<0.8: L10n.string("quality.explanation.balanced")
-        default: L10n.string("quality.explanation.high")
-        }
-    }
 }
 
 @MainActor
@@ -729,9 +702,9 @@ struct PrimaryConversionButton: View {
             if #available(iOS 26.0, *), theme.liquidGlassEnabled {
                 Button(action: action) {
                     Label(title, systemImage: "arrow.triangle.2.circlepath")
-                        .font(.headline)
+                        .font(.system(size: 17, weight: .semibold))
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .frame(height: 54)
                 }
                 .buttonStyle(.glassProminent)
             } else {
@@ -747,9 +720,9 @@ struct PrimaryConversionButton: View {
     private var fallbackButton: some View {
         Button(action: action) {
             Label(title, systemImage: "arrow.triangle.2.circlepath")
-                .font(.headline)
+                .font(.system(size: 17, weight: .semibold))
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
+                .frame(height: 54)
         }
         .buttonStyle(.borderedProminent)
         .tint(theme.accent)
@@ -761,9 +734,9 @@ private struct ConverterCardModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .background(theme.cardSurface, in: RoundedRectangle(cornerRadius: 20))
+            .background(theme.cardSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .strokeBorder(theme.divider.opacity(0.65), lineWidth: 0.5)
             }
     }

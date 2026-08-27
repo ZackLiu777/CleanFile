@@ -46,6 +46,11 @@
 "Accent Color" = "Couleur d’accentuation";
 "The brand accent is used for selection, progress, and primary actions." = "La couleur de la marque est utilisée pour la sélection, la progression et les actions principales.";
 "Videos" = "Vidéos";
+"My Space" = "Mon espace";
+"System & Apps" = "Système et apps";
+"Includes iOS, system data, and other app data." = "Inclut iOS, les données système et celles des autres apps.";
+"Available" = "Disponible";
+"%lld%% used · %@ of %@" = "%lld%% utilisés · %@ sur %@";
 "Images" = "Images";
 "Audio" = "Audio";
 "Documents" = "Documents";

@@ -46,6 +46,11 @@
 "Accent Color" = "アクセントカラー";
 "The brand accent is used for selection, progress, and primary actions." = "ブランドのアクセントカラーは、選択、進行状況、主要操作に使用されます。";
 "Videos" = "ビデオ";
+"My Space" = "マイスペース";
+"System & Apps" = "システムとApp";
+"Includes iOS, system data, and other app data." = "iOS、システムデータ、他のAppのデータを含みます。";
+"Available" = "空き容量";
+"%lld%% used · %@ of %@" = "%lld%% 使用済み · %@ / %@";
 "Images" = "画像";
 "Audio" = "オーディオ";
 "Documents" = "書類";

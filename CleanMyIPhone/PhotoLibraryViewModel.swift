@@ -18,6 +18,8 @@ final class PhotoLibraryViewModel: ObservableObject {
     @Published private(set) var analysisState: MediaAnalysisState = .idle
     @Published private(set) var deletionState: MediaDeletionState = .idle
     @Published private(set) var storageSnapshot: DeviceStorageSnapshot?
+    @Published private(set) var estimatedPhotoLibraryBytes: Int64 = 0
+    @Published private(set) var estimatedVideoLibraryBytes: Int64 = 0
 
     private let imageManager = PHCachingImageManager()
     private let thumbnailCache = NSCache<NSString, UIImage>()
@@ -380,6 +382,12 @@ final class PhotoLibraryViewModel: ObservableObject {
         assetsByIdentifier = Dictionary(
             uniqueKeysWithValues: assets.map { ($0.localIdentifier, $0) }
         )
+        estimatedPhotoLibraryBytes = assets.lazy
+            .filter { $0.mediaType == .image }
+            .reduce(Int64.zero) { $0 + Self.estimatedByteCount(for: $1) }
+        estimatedVideoLibraryBytes = assets.lazy
+            .filter { $0.mediaType == .video }
+            .reduce(Int64.zero) { $0 + Self.estimatedByteCount(for: $1) }
         displayNamesByIdentifier = displayNamesByIdentifier.filter {
             assetsByIdentifier[$0.key] != nil
         }

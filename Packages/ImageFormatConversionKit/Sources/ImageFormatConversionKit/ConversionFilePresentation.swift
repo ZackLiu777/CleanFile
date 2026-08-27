@@ -11,6 +11,21 @@ enum ConversionFileKind: Sendable {
     case audio
 }
 
+struct ConversionMicroText: View {
+    let text: String
+
+    init(_ text: String) {
+        self.text = text
+    }
+
+    var body: some View {
+        Text(text.uppercased())
+            .font(.system(size: 11, weight: .semibold))
+            .tracking(0.8)
+            .foregroundStyle(.secondary.opacity(0.72))
+    }
+}
+
 enum ConversionFilePhase {
     case pending
     case working
