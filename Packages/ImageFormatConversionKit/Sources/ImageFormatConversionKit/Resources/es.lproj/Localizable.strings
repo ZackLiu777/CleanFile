@@ -12,6 +12,8 @@
 "empty.title" = "No hay imágenes seleccionadas";
 "empty.subtitle" = "Elige una o varias imágenes estáticas para empezar.";
 "files.title" = "%ld imágenes";
+"files.videos.title" = "%ld vídeos";
+"files.audio.title" = "%ld archivos de audio";
 "settings.title" = "Ajustes de conversión";
 "settings.format" = "Formato";
 "settings.quality" = "Calidad";

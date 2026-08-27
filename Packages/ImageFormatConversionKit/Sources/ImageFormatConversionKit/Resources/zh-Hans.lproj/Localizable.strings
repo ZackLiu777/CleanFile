@@ -12,6 +12,8 @@
 "empty.title" = "尚未选择图片";
 "empty.subtitle" = "选择一张或多张静态图片即可开始。";
 "files.title" = "%ld 张图片";
+"files.videos.title" = "%ld 个视频";
+"files.audio.title" = "%ld 个音频文件";
 "settings.title" = "转换设置";
 "settings.format" = "输出格式";
 "settings.quality" = "压缩质量";

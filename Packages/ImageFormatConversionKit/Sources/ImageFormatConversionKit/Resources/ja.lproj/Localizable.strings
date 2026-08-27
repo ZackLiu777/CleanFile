@@ -12,6 +12,8 @@
 "empty.title" = "画像が選択されていません";
 "empty.subtitle" = "1 枚以上の静止画像を選択してください。";
 "files.title" = "%ld 枚の画像";
+"files.videos.title" = "%ld 本のビデオ";
+"files.audio.title" = "%ld 件のオーディオ";
 "settings.title" = "変換設定";
 "settings.format" = "出力形式";
 "settings.quality" = "圧縮品質";

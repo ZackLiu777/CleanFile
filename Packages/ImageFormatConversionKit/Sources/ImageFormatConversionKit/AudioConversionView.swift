@@ -240,7 +240,7 @@ struct AudioConversionView: View {
     private var filesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(L10n.format("files.title", viewModel.items.count)).font(.headline)
+                Text(L10n.format("files.audio.title", viewModel.items.count)).font(.headline)
                 Spacer()
                 Button(L10n.string("action.clear_all"), role: .destructive) {
                     isClearAllConfirmationPresented = true

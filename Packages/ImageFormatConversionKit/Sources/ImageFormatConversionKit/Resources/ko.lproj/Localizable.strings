@@ -12,6 +12,8 @@
 "empty.title" = "선택한 이미지 없음";
 "empty.subtitle" = "시작하려면 하나 이상의 정지 이미지를 선택하세요.";
 "files.title" = "이미지 %ld개";
+"files.videos.title" = "동영상 %ld개";
+"files.audio.title" = "오디오 파일 %ld개";
 "settings.title" = "변환 설정";
 "settings.format" = "형식";
 "settings.quality" = "품질";

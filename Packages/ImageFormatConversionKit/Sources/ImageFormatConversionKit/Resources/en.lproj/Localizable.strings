@@ -12,6 +12,8 @@
 "empty.title" = "No images selected";
 "empty.subtitle" = "Choose one or more still images to begin.";
 "files.title" = "%ld Images";
+"files.videos.title" = "%ld Videos";
+"files.audio.title" = "%ld Audio Files";
 "settings.title" = "Conversion Settings";
 "settings.format" = "Format";
 "settings.quality" = "Quality";

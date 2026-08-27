@@ -12,6 +12,8 @@
 "empty.title" = "尚未選擇圖片";
 "empty.subtitle" = "選擇一張或多張靜態圖片即可開始。";
 "files.title" = "%ld 張圖片";
+"files.videos.title" = "%ld 個影片";
+"files.audio.title" = "%ld 個音訊檔案";
 "settings.title" = "轉換設定";
 "settings.format" = "輸出格式";
 "settings.quality" = "壓縮品質";
