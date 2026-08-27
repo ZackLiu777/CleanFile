@@ -27,11 +27,12 @@ public struct ImageConversionView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 4)
-                .padding(.top, 10)
+                .padding(.top, 2)
 
                 privacySummary
                     .padding(.horizontal, 4)
-                    .padding(.top, 10)
+                    .padding(.top, 8)
+                    .padding(.bottom, 16)
 
                 switch mode {
                 case .image: ImageConversionContentView()
@@ -456,16 +457,37 @@ private struct ImageConversionSettingsCard: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.string("settings.format"))
-                ConversionFormatWheelPicker(
-                    selection: $viewModel.outputFormat,
-                    options: viewModel.availableFormats.map { format in
-                        ConversionFormatOption(
-                            value: format,
-                            title: format.rawValue.uppercased(),
-                            detail: L10n.string("format.image.\(format.rawValue).detail")
-                        )
+                ConversionSettingsWheelPicker(
+                    summary: imageSettingsSummary,
+                    detail: L10n.string("format.image.\(viewModel.outputFormat.rawValue).detail")
+                ) {
+                    HStack(spacing: 0) {
+                        ConversionWheelColumn(
+                            title: L10n.string("settings.format"),
+                            selection: $viewModel.outputFormat
+                        ) {
+                            ForEach(viewModel.availableFormats) { format in
+                                Text(format.rawValue.uppercased()).tag(format)
+                            }
+                        }
+                        ConversionWheelColumn(
+                            title: L10n.string("settings.metadata"),
+                            selection: $viewModel.metadataPolicy
+                        ) {
+                            ForEach(ImageMetadataPolicy.allCases) { policy in
+                                Text(metadataTitle(policy)).tag(policy)
+                            }
+                        }
+                        ConversionWheelColumn(
+                            title: L10n.string("settings.resize"),
+                            selection: $viewModel.resizePreset
+                        ) {
+                            ForEach(ImageResizePreset.allCases) { preset in
+                                Text(resizeTitle(preset)).tag(preset)
+                            }
+                        }
                     }
-                )
+                }
             }
 
             if viewModel.outputFormat.supportsQuality {
@@ -495,26 +517,6 @@ private struct ImageConversionSettingsCard: View {
                 }
             }
 
-            settingRow(title: L10n.string("settings.metadata")) {
-                Picker(L10n.string("settings.metadata"), selection: $viewModel.metadataPolicy) {
-                    ForEach(ImageMetadataPolicy.allCases) { policy in
-                        Text(metadataTitle(policy)).tag(policy)
-                    }
-                }
-                .labelsHidden()
-                .pickerStyle(.menu)
-            }
-
-            settingRow(title: L10n.string("settings.resize")) {
-                Picker(L10n.string("settings.resize"), selection: $viewModel.resizePreset) {
-                    ForEach(ImageResizePreset.allCases) { preset in
-                        Text(resizeTitle(preset)).tag(preset)
-                    }
-                }
-                .labelsHidden()
-                .pickerStyle(.menu)
-            }
-
             if viewModel.outputFormat.requiresOpaquePixels {
                 settingRow(title: L10n.string("settings.transparent_background")) {
                     Picker(
@@ -542,6 +544,14 @@ private struct ImageConversionSettingsCard: View {
         .padding(16)
         .converterCard()
         .disabled(viewModel.isConverting)
+    }
+
+    private var imageSettingsSummary: String {
+        [
+            viewModel.outputFormat.rawValue.uppercased(),
+            metadataTitle(viewModel.metadataPolicy),
+            resizeTitle(viewModel.resizePreset)
+        ].joined(separator: " · ")
     }
 
     private func settingRow<Content: View>(

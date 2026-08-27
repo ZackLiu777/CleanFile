@@ -33,9 +33,22 @@
 		FF23C76D3033FBD600B13EBA /* CleanMyIPhoneUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CleanMyIPhoneUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A10000000000000000000004 /* Exceptions for "CleanMyIPhone" folder in "CleanMyIPhone" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FF23C7533033FBD500B13EBA /* CleanMyIPhone */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		FF23C7563033FBD500B13EBA /* CleanMyIPhone */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A10000000000000000000004 /* Exceptions for "CleanMyIPhone" folder in "CleanMyIPhone" target */,
+			);
 			path = CleanMyIPhone;
 			sourceTree = "<group>";
 		};
@@ -410,7 +423,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NL82DMN369;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CleanMyIPhone/Info.plist;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Allow CleanMyIPhone to display images from your Photos library.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -444,7 +458,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NL82DMN369;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CleanMyIPhone/Info.plist;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Allow CleanMyIPhone to display images from your Photos library.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

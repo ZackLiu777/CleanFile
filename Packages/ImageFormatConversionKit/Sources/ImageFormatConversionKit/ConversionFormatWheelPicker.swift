@@ -65,3 +65,81 @@ struct ConversionFormatWheelPicker<Value: Hashable>: View {
         }
     }
 }
+
+/// Presents related conversion settings as one clock-style multi-column wheel.
+/// Each conversion screen owns its strongly typed bindings; this component only
+/// coordinates the shared trigger, summary, sheet, and layout.
+struct ConversionSettingsWheelPicker<WheelContent: View>: View {
+    @Environment(\.conversionTheme) private var theme
+    let summary: String
+    let detail: String?
+    @ViewBuilder let wheelContent: () -> WheelContent
+    @State private var isPresented = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                isPresented = true
+            } label: {
+                HStack(spacing: 8) {
+                    Text(summary)
+                        .fontWeight(.semibold)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2.weight(.semibold))
+                }
+                .foregroundStyle(theme.accent)
+            }
+            .buttonStyle(.plain)
+
+            if let detail, !detail.isEmpty {
+                Label(detail, systemImage: "info.circle")
+                    .font(.caption)
+                    .foregroundStyle(theme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .sheet(isPresented: $isPresented) {
+            NavigationStack {
+                wheelContent()
+                    .padding(.horizontal, 8)
+                    .navigationTitle(L10n.string("settings.title"))
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button(L10n.string("format_picker.done")) {
+                                isPresented = false
+                            }
+                        }
+                    }
+            }
+            .presentationDetents([.height(350), .medium])
+            .presentationDragIndicator(.visible)
+        }
+    }
+}
+
+struct ConversionWheelColumn<Selection: Hashable, Content: View>: View {
+    let title: String
+    @Binding var selection: Selection
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            Picker(title, selection: $selection) {
+                content()
+            }
+            .labelsHidden()
+            .pickerStyle(.wheel)
+        }
+        .frame(maxWidth: .infinity)
+        .clipped()
+    }
+}

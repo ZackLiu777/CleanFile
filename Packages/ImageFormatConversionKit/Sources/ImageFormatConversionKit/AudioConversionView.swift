@@ -175,32 +175,37 @@ struct AudioConversionView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.string("settings.format"))
-                ConversionFormatWheelPicker(
-                    selection: Binding(
-                        get: { viewModel.outputFormat },
-                        set: { viewModel.outputFormat = $0 }
-                    ),
-                    options: AudioOutputFormat.allCases.map { format in
-                        ConversionFormatOption(
-                            value: format,
-                            title: audioFormatTitle(format),
-                            detail: L10n.string("format.audio.\(format.rawValue).detail")
-                        )
-                    }
-                )
-            }
-            if !viewModel.outputFormat.isLossless {
-                row(L10n.string("audio.settings.quality")) {
-                    Picker("", selection: Binding(
-                        get: { viewModel.bitRate },
-                        set: { viewModel.bitRate = $0 }
-                    )) {
-                        ForEach(AudioBitRate.allCases) { bitRate in
-                            Text("\(bitRate.rawValue / 1_000) kbps").tag(bitRate)
+                ConversionSettingsWheelPicker(
+                    summary: audioSettingsSummary,
+                    detail: L10n.string("format.audio.\(viewModel.outputFormat.rawValue).detail")
+                ) {
+                    HStack(spacing: 0) {
+                        ConversionWheelColumn(
+                            title: L10n.string("settings.format"),
+                            selection: Binding(
+                                get: { viewModel.outputFormat },
+                                set: { viewModel.outputFormat = $0 }
+                            )
+                        ) {
+                            ForEach(AudioOutputFormat.allCases) { format in
+                                Text(audioFormatTitle(format)).tag(format)
+                            }
                         }
-                    }.labelsHidden().pickerStyle(.menu)
+                        ConversionWheelColumn(
+                            title: L10n.string("audio.settings.quality"),
+                            selection: Binding(
+                                get: { viewModel.bitRate },
+                                set: { viewModel.bitRate = $0 }
+                            )
+                        ) {
+                            ForEach(AudioBitRate.allCases) { bitRate in
+                                Text("\(bitRate.rawValue / 1_000) kbps").tag(bitRate)
+                            }
+                        }
+                    }
                 }
-            } else {
+            }
+            if viewModel.outputFormat.isLossless {
                 Label(L10n.string("audio.lossless"), systemImage: "waveform.badge.checkmark")
                     .font(.caption).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -213,6 +218,14 @@ struct AudioConversionView: View {
         .padding(16)
         .converterCard()
         .disabled(viewModel.isConverting)
+    }
+
+    private var audioSettingsSummary: String {
+        let quality = viewModel.outputFormat.isLossless
+            ? L10n.string("audio.lossless")
+            : "\(viewModel.bitRate.rawValue / 1_000) kbps"
+        return [audioFormatTitle(viewModel.outputFormat), quality]
+            .joined(separator: " · ")
     }
 
     private func audioFormatTitle(_ format: AudioOutputFormat) -> String {

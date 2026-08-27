@@ -147,40 +147,47 @@ struct VideoConversionView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.string("settings.format"))
-                ConversionFormatWheelPicker(
-                    selection: Binding(
-                        get: { viewModel.container },
-                        set: { viewModel.container = $0 }
-                    ),
-                    options: viewModel.availableContainers.map { container in
-                        ConversionFormatOption(
-                            value: container,
-                            title: container.rawValue.uppercased(),
-                            detail: L10n.string("format.video.\(container.rawValue).detail")
-                        )
+                ConversionSettingsWheelPicker(
+                    summary: videoSettingsSummary,
+                    detail: L10n.string("format.video.\(viewModel.container.rawValue).detail")
+                ) {
+                    HStack(spacing: 0) {
+                        ConversionWheelColumn(
+                            title: L10n.string("settings.format"),
+                            selection: Binding(
+                                get: { viewModel.container },
+                                set: { viewModel.container = $0 }
+                            )
+                        ) {
+                            ForEach(viewModel.availableContainers) { container in
+                                Text(container.rawValue.uppercased()).tag(container)
+                            }
+                        }
+                        ConversionWheelColumn(
+                            title: L10n.string("video.settings.codec"),
+                            selection: Binding(
+                                get: { viewModel.codec },
+                                set: { viewModel.codec = $0 }
+                            )
+                        ) {
+                            Text("H.264").tag(VideoCodec.h264)
+                            Text("HEVC").tag(VideoCodec.hevc)
+                            Text("ProRes 422").tag(VideoCodec.proRes422)
+                            Text("ProRes 4444").tag(VideoCodec.proRes4444)
+                        }
+                        ConversionWheelColumn(
+                            title: L10n.string("video.settings.resolution"),
+                            selection: Binding(
+                                get: { viewModel.resolution },
+                                set: { viewModel.resolution = $0 }
+                            )
+                        ) {
+                            ForEach(viewModel.availableResolutions) { preset in
+                                Text(resolutionTitle(preset)).tag(preset)
+                            }
+                        }
                     }
-                )
-            }
-            setting(L10n.string("video.settings.codec")) {
-                Picker("", selection: Binding(
-                    get: { viewModel.codec },
-                    set: { viewModel.codec = $0 }
-                )) {
-                    Text("H.264").tag(VideoCodec.h264)
-                    Text("HEVC").tag(VideoCodec.hevc)
-                    Text("ProRes 422").tag(VideoCodec.proRes422)
-                    Text("ProRes 4444").tag(VideoCodec.proRes4444)
-                }.labelsHidden().pickerStyle(.menu)
-            }
-            setting(L10n.string("video.settings.resolution")) {
-                Picker("", selection: Binding(
-                    get: { viewModel.resolution },
-                    set: { viewModel.resolution = $0 }
-                )) {
-                    ForEach(viewModel.availableResolutions) { preset in
-                        Text(resolutionTitle(preset)).tag(preset)
-                    }
-                }.labelsHidden().pickerStyle(.menu)
+                }
             }
             setting(L10n.string("settings.output")) {
                 Text(viewModel.outputDirectory.lastPathComponent)
@@ -197,6 +204,23 @@ struct VideoConversionView: View {
             if !viewModel.availableResolutions.contains(viewModel.resolution) {
                 viewModel.resolution = viewModel.availableResolutions[0]
             }
+        }
+    }
+
+    private var videoSettingsSummary: String {
+        [
+            viewModel.container.rawValue.uppercased(),
+            codecTitle(viewModel.codec),
+            resolutionTitle(viewModel.resolution)
+        ].joined(separator: " · ")
+    }
+
+    private func codecTitle(_ codec: VideoCodec) -> String {
+        switch codec {
+        case .h264: "H.264"
+        case .hevc: "HEVC"
+        case .proRes422: "ProRes 422"
+        case .proRes4444: "ProRes 4444"
         }
     }
 

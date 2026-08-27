@@ -437,6 +437,10 @@ private struct SunburstChartCanvas: View {
                         )
                     }
                 }
+                // The hierarchy is static while the reveal progresses. Flatten it
+                // once so the GPU animates one texture and one mask instead of
+                // recompositing every file sector on every frame.
+                .drawingGroup(opaque: false, colorMode: .nonLinear)
                 .mask(SunburstLayeredRevealShape(
                     progress: revealProgress,
                     geometry: geometry,
@@ -690,6 +694,9 @@ struct SunburstChartView: View {
             onCenterTap: viewModel.navigateBack
         )
         .aspectRatio(1, contentMode: .fit)
+        // The surrounding cards use leading-aligned stacks. Expand the chart
+        // wrapper to the available width so the square canvas stays centered.
+        .frame(maxWidth: .infinity, alignment: .center)
         .onChange(of: root) { _, newRoot in
             viewModel.replaceRoot(newRoot)
         }

@@ -266,14 +266,16 @@ struct StorageView: View {
             guard isTabActive, generation == animationGeneration else { return }
 
             let depth = viewModel.fileTree.map(FileTreeDiagnostics.maximumDepth(of:)) ?? 1
-            let sunburstDuration = min(max(0.75 + Double(depth) * 0.12, 1.0), 1.8)
+            // Keep deep trees legible without making the Tab feel slow. The
+            // flattened chart layer makes this a mask-only animation.
+            let sunburstDuration = min(max(0.43 + Double(depth) * 0.055, 0.55), 0.95)
 
-            withAnimation(.easeInOut(duration: sunburstDuration)) {
+            withAnimation(.easeOut(duration: sunburstDuration)) {
                 sunburstRevealProgress = 1
             }
             withAnimation(
-                .spring(duration: 0.72, bounce: 0.16)
-                    .delay(sunburstDuration * 0.3)
+                .spring(duration: 0.48, bounce: 0.12)
+                    .delay(sunburstDuration * 0.15)
             ) {
                 summaryBarProgress = 1
             }
