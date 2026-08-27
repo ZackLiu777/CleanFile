@@ -16,7 +16,7 @@ struct StorageView: View {
             ZStack {
                 AppBackground()
 
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: false) {
                     LazyVStack(spacing: 16) {
                         folderCard
                         statusCard
@@ -40,7 +40,8 @@ struct StorageView: View {
                             }
                         }
                     }
-                    .padding()
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 16)
                 }
                 .appSoftScrollEdge()
             }
@@ -251,7 +252,7 @@ private struct FolderMapView: View {
     let root: FileNode
 
     var body: some View {
-        ScrollView {
+        ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Tap a folder segment to drill down. Tap the center to go back.")
                     .font(.subheadline)
@@ -259,7 +260,8 @@ private struct FolderMapView: View {
 
                 SunburstChartView(root: root)
             }
-            .padding()
+            .padding(.horizontal, 4)
+            .padding(.vertical, 16)
         }
         .appSoftScrollEdge()
         .background(AppBackground())

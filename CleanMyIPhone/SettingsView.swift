@@ -75,6 +75,8 @@ struct SettingsView: View {
                 }
                 .listRowBackground(theme.cardSurface)
             }
+            .contentMargins(.horizontal, 4, for: .scrollContent)
+            .scrollIndicators(.hidden)
             .scrollContentBackground(.hidden)
             .background(AppBackground())
             .appSoftScrollEdge()

@@ -12,7 +12,7 @@ struct AudioConversionView: View {
     @State private var libraryImportProgress: ConversionImportProgress?
 
     var body: some View {
-        ScrollView {
+        ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 16) {
                 importCard
                 if let progress = libraryImportProgress ?? viewModel.importProgress {
@@ -23,7 +23,7 @@ struct AudioConversionView: View {
                 settingsCard
                 conversionAction
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 4)
             .padding(.vertical, 20)
         }
         .converterSoftScrollEdge()

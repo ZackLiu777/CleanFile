@@ -10,6 +10,8 @@ import UIKit
 struct PhotosView: View {
     @Environment(\.appTheme) private var theme
     @ObservedObject var viewModel: PhotoLibraryViewModel
+    let isTabActive: Bool
+    @State private var animatedStorageFraction = 0.0
 
     var body: some View {
         NavigationStack {
@@ -79,6 +81,19 @@ struct PhotosView: View {
         .task {
             await viewModel.loadIfNeeded()
         }
+        .onAppear {
+            animateStorageBarIfNeeded()
+        }
+        .onChange(of: isTabActive) { _, isActive in
+            if isActive {
+                animateStorageBarIfNeeded()
+            } else {
+                animatedStorageFraction = 0
+            }
+        }
+        .onChange(of: viewModel.storageSnapshot) { _, _ in
+            animateStorageBarIfNeeded()
+        }
     }
 
     @ViewBuilder
@@ -119,12 +134,13 @@ struct PhotosView: View {
     }
 
     private var mediaDashboard: some View {
-        ScrollView {
+        ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 18) {
                 storageOverview
                 analysisContent
             }
-            .padding()
+            .padding(.horizontal, 4)
+            .padding(.vertical, 16)
         }
         .appSoftScrollEdge()
     }
@@ -212,7 +228,7 @@ struct PhotosView: View {
                     .foregroundStyle(.secondary)
                 }
 
-                ProgressView(value: storage.usedFraction)
+                ProgressView(value: animatedStorageFraction)
                     .tint(theme.accentPrimary)
 
                 HStack {
@@ -229,6 +245,20 @@ struct PhotosView: View {
 
     private func byteCountText(_ byteCount: Int64) -> String {
         ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
+    }
+
+    private func animateStorageBarIfNeeded() {
+        guard isTabActive, let storage = viewModel.storageSnapshot else { return }
+        animatedStorageFraction = 0
+
+        Task { @MainActor in
+            // Yield once so SwiftUI renders the empty track before the fill animation.
+            await Task.yield()
+            guard isTabActive else { return }
+            withAnimation(.spring(duration: 0.72, bounce: 0.16)) {
+                animatedStorageFraction = storage.usedFraction
+            }
+        }
     }
 
     private func analysisTitle(for phase: MediaAnalysisPhase) -> LocalizedStringKey {
@@ -260,7 +290,6 @@ struct PhotosView: View {
 }
 
 private struct MediaDashboardResultsView: View {
-    @Environment(\.appTheme) private var theme
     let result: MediaClassificationResult
     let isPartial: Bool
     @ObservedObject var viewModel: PhotoLibraryViewModel
@@ -273,16 +302,6 @@ private struct MediaDashboardResultsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 6) {
-                Label("Analysis Complete", systemImage: "checkmark.circle.fill")
-                    .font(.headline)
-                    .foregroundStyle(theme.accentPrimary)
-                Text("Analysis never deletes media automatically.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-            .mediaAnalysisCard()
-
             Text("Cleanup Recommendations")
                 .font(.title2.bold())
 
@@ -551,7 +570,7 @@ private struct MediaCategoryDetailView: View {
                     description: Text("No media matched this category.")
                 )
             } else {
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: false) {
                     LazyVStack(spacing: 14) {
                         ForEach(dateSections) { section in
                             Section {

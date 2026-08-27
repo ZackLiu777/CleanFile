@@ -26,11 +26,11 @@ public struct ImageConversionView: View {
                     Label(L10n.string("converter.mode.audio"), systemImage: "waveform").tag(ConversionMode.audio)
                 }
                 .pickerStyle(.segmented)
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 4)
                 .padding(.top, 10)
 
                 privacySummary
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, 4)
                     .padding(.top, 10)
 
                 switch mode {
@@ -101,7 +101,7 @@ private struct SupportedFormatsSheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
                     if mode == .image {
                         FormatChipSection(
@@ -207,7 +207,7 @@ private struct ImageConversionContentView: View {
     }
 
     public var body: some View {
-        ScrollView {
+        ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 16) {
                 importCard
 
@@ -228,7 +228,7 @@ private struct ImageConversionContentView: View {
                 ImageConversionSettingsCard(viewModel: viewModel)
                 conversionAction
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 4)
             .padding(.vertical, 20)
         }
         .converterSoftScrollEdge()

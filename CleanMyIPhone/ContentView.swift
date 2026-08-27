@@ -23,7 +23,10 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            PhotosView(viewModel: mediaViewModel)
+            PhotosView(
+                viewModel: mediaViewModel,
+                isTabActive: selectedTab == .photos
+            )
                 .tabItem {
                     Label("Media", systemImage: "photo.on.rectangle")
                 }
