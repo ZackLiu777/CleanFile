@@ -114,6 +114,7 @@ public final class ImageConversionViewModel {
         defer { importProgress = nil }
         var newItems: [ImageConversionItem] = []
         for (index, url) in uniqueURLs.enumerated() {
+            if Task.isCancelled { break }
             importProgress = ConversionImportProgress(
                 completed: index,
                 total: uniqueURLs.count,
@@ -136,7 +137,11 @@ public final class ImageConversionViewModel {
                         ).mapped(to: progressRange)
                     }
                 }
-                newItems.append(ImageConversionItem(id: id, sourceURL: stagedURL))
+                let item = ImageConversionItem(id: id, sourceURL: stagedURL)
+                newItems.append(item)
+                items.append(item)
+            } catch is CancellationError {
+                break
             } catch {
                 notice = L10n.format("notice.import_failed", error.localizedDescription)
             }
@@ -146,8 +151,6 @@ public final class ImageConversionViewModel {
                 currentFileName: nil
             ).mapped(to: progressRange)
         }
-        items.append(contentsOf: newItems)
-
         await withTaskGroup(of: InspectionOutcome.self) { group in
             let concurrencyLimit = min(Self.inspectionConcurrencyLimit, newItems.count)
             var nextItemIndex = 0

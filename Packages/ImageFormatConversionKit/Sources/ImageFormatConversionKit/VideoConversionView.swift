@@ -10,21 +10,20 @@ struct VideoConversionView: View {
     @State private var isClearAllConfirmationPresented = false
     @State private var libraryImportProgress: ConversionImportProgress?
     @State private var libraryImportSessionID: UUID?
+    @State private var pendingImportCount = 0
+    @State private var pendingPreviewURLs: [URL] = []
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 16) {
-                importCard
-                if let progress = libraryImportProgress ?? viewModel.importProgress {
-                    ConversionImportProgressView(progress: progress)
-                }
+                if shouldShowImportCard { importCard } else { selectedFilesCard }
                 if let notice = viewModel.notice { NoticeView(message: notice) }
-                if !viewModel.items.isEmpty { filesSection }
                 settingsCard
                 action
             }
             .padding(.horizontal, 4)
-            .padding(.vertical, 20)
+            .padding(.top, 4)
+            .padding(.bottom, 20)
         }
         .converterSoftScrollEdge()
         .fileImporter(
@@ -34,21 +33,13 @@ struct VideoConversionView: View {
         ) { result in
             switch result {
             case let .success(urls):
-                Task { await viewModel.addFiles(urls) }
+                Task { await importFiles(urls) }
             case let .failure(error): viewModel.reportImportFailure(error.localizedDescription)
             }
         }
         .onChange(of: selectedVideoItems) { _, items in
             guard !items.isEmpty else { return }
             Task { await importVideos(items) }
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button { importerPresented = true } label: {
-                    Label(L10n.string("video.action.add"), systemImage: "video.badge.plus")
-                }
-                .disabled(viewModel.isConverting || viewModel.importProgress != nil)
-            }
         }
         .alert(
             L10n.string("conversion.delete_all.title"),
@@ -61,6 +52,18 @@ struct VideoConversionView: View {
         } message: {
             Text(L10n.string("conversion.delete_all.message"))
         }
+    }
+
+    private var activeImportProgress: ConversionImportProgress? {
+        libraryImportProgress ?? viewModel.importProgress
+    }
+
+    private var shouldShowImportCard: Bool {
+        viewModel.items.isEmpty && activeImportProgress == nil && pendingImportCount == 0
+    }
+
+    private var displayedFileCount: Int {
+        max(viewModel.items.count, pendingImportCount)
     }
 
     private var supportedVideoImportTypes: [UTType] {
@@ -100,12 +103,15 @@ struct VideoConversionView: View {
     private func importVideos(_ selections: [PhotosPickerItem]) async {
         let sessionID = UUID()
         libraryImportSessionID = sessionID
+        pendingImportCount = selections.count
         defer {
             selectedVideoItems = []
             if libraryImportSessionID == sessionID {
                 libraryImportSessionID = nil
                 libraryImportProgress = nil
             }
+            pendingImportCount = 0
+            pendingPreviewURLs = []
         }
         var urls: [URL] = []
         for (index, selection) in selections.enumerated() {
@@ -131,6 +137,7 @@ struct VideoConversionView: View {
                     }
                 ) {
                     urls.append(imported.url)
+                    pendingPreviewURLs.append(imported.url)
                 }
             } catch {
                 viewModel.reportImportFailure(error.localizedDescription)
@@ -148,6 +155,16 @@ struct VideoConversionView: View {
         libraryImportSessionID = nil
         libraryImportProgress = nil
         await viewModel.addFiles(urls, progressRange: 0.95 ... 1)
+    }
+
+    private func importFiles(_ urls: [URL]) async {
+        pendingImportCount = urls.count
+        pendingPreviewURLs = urls
+        defer {
+            pendingImportCount = 0
+            pendingPreviewURLs = []
+        }
+        await viewModel.addFiles(urls)
     }
 
     private var settingsCard: some View {
@@ -234,61 +251,51 @@ struct VideoConversionView: View {
         }
     }
 
-    private var filesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(L10n.format("files.videos.title", viewModel.items.count)).font(.headline)
-                Spacer()
-                Button(L10n.string("action.clear_all"), role: .destructive) {
-                    isClearAllConfirmationPresented = true
-                }
-                    .disabled(viewModel.isConverting)
-            }
+    private var selectedFilesCard: some View {
+        ConversionFileTray(
+            title: activeImportProgress == nil
+                ? L10n.format("files.videos.title", displayedFileCount)
+                : "\(L10n.string("import.progress.title")) · \(L10n.format("files.videos.title", displayedFileCount))",
+            progress: activeImportProgress,
+            rowCount: displayedFileCount > 3 ? 2 : 1,
+            canClear: !viewModel.isConverting && activeImportProgress == nil,
+            onClear: { isClearAllConfirmationPresented = true }
+        ) {
             ForEach(viewModel.items) { item in
-                HStack(spacing: 12) {
-                    ConversionFileThumbnail(url: item.sourceURL, kind: .video)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(item.sourceURL.lastPathComponent)
-                            .font(.subheadline.weight(.medium))
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                        HStack(spacing: 6) {
-                            ConversionStatusDot(
-                                phase: phase(item.status),
-                                accessibilityLabel: statusText(item.status)
-                            )
-                            Text(sizeDescription(item))
-                        }
-                        .font(.system(size: 12, weight: .medium, design: .monospaced))
-                        .foregroundStyle(.secondary)
-                        if case let .failed(message) = item.status {
-                            Text(message).font(.caption).foregroundStyle(.red).lineLimit(2)
-                        }
-                    }
-                    Spacer()
-                    if case let .completed(url) = item.status {
-                        HStack {
-                            ShareLink(item: url) { Image(systemName: "square.and.arrow.up") }
-                            Button(role: .destructive) { viewModel.remove(item.id) } label: {
-                                Image(systemName: "trash")
-                            }
-                        }
-                    } else if case .converting = item.status {
-                        ProgressView().controlSize(.small)
-                    } else {
-                        Button { viewModel.remove(item.id) } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(.secondary)
-                                .frame(width: 32, height: 32)
-                        }
-                    }
+                ConversionFileTile(
+                    url: item.sourceURL,
+                    kind: .video,
+                    title: item.sourceURL.lastPathComponent,
+                    subtitle: sizeDescription(item),
+                    phase: phase(item.status),
+                    statusLabel: statusText(item.status),
+                    isLocked: viewModel.isConverting,
+                    outputURL: outputURL(item.status),
+                    onRemove: { viewModel.remove(item.id) }
+                )
+            }
+
+            ForEach(Array(pendingPreviewURLs.dropFirst(min(viewModel.items.count, pendingPreviewURLs.count)).enumerated()), id: \.offset) { _, url in
+                ConversionFileTile(
+                    url: url,
+                    kind: .video,
+                    title: url.lastPathComponent,
+                    subtitle: L10n.string("import.progress.title"),
+                    phase: .working,
+                    statusLabel: L10n.string("import.progress.title"),
+                    isLocked: true,
+                    outputURL: nil,
+                    onRemove: {}
+                )
+            }
+
+            let representedCount = max(viewModel.items.count, pendingPreviewURLs.count)
+            if displayedFileCount > representedCount {
+                ForEach(representedCount ..< displayedFileCount, id: \.self) { index in
+                    ConversionPendingFileTile(index: index, kind: .video)
                 }
-                Divider()
             }
         }
-        .padding(16)
-        .converterCard()
     }
 
     @ViewBuilder private var action: some View {
@@ -341,6 +348,11 @@ struct VideoConversionView: View {
         case let .failed(message): message
         case .cancelled: L10n.string("status.cancelled")
         }
+    }
+
+    private func outputURL(_ status: VideoConversionStatus) -> URL? {
+        guard case let .completed(url) = status else { return nil }
+        return url
     }
 
     private func sizeDescription(_ item: VideoConversionItem) -> String {

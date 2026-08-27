@@ -6,21 +6,20 @@ struct AudioConversionView: View {
     @State private var viewModel = AudioConversionViewModel()
     @State private var mediaImporterPresented = false
     @State private var isClearAllConfirmationPresented = false
+    @State private var pendingImportCount = 0
+    @State private var pendingPreviewURLs: [URL] = []
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 16) {
-                importCard
-                if let progress = viewModel.importProgress {
-                    ConversionImportProgressView(progress: progress)
-                }
+                if shouldShowImportCard { importCard } else { selectedFilesCard }
                 if let notice = viewModel.notice { NoticeView(message: notice) }
-                if !viewModel.items.isEmpty { filesSection }
                 settingsCard
                 conversionAction
             }
             .padding(.horizontal, 4)
-            .padding(.vertical, 20)
+            .padding(.top, 4)
+            .padding(.bottom, 20)
         }
         .converterSoftScrollEdge()
         .fileImporter(
@@ -30,16 +29,8 @@ struct AudioConversionView: View {
         ) { result in
             switch result {
             case let .success(urls):
-                Task { await importMediaFiles(urls) }
+                Task { await importFiles(urls) }
             case let .failure(error): viewModel.reportImportFailure(error.localizedDescription)
-            }
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button { mediaImporterPresented = true } label: {
-                    Label(L10n.string("audio.action.add_media"), systemImage: "plus")
-                }
-                .disabled(viewModel.isConverting || viewModel.importProgress != nil)
             }
         }
         .alert(
@@ -53,6 +44,14 @@ struct AudioConversionView: View {
         } message: {
             Text(L10n.string("conversion.delete_all.message"))
         }
+    }
+
+    private var shouldShowImportCard: Bool {
+        viewModel.items.isEmpty && viewModel.importProgress == nil && pendingImportCount == 0
+    }
+
+    private var displayedFileCount: Int {
+        max(viewModel.items.count, pendingImportCount)
     }
 
     private var audioInputTypes: [UTType] {
@@ -101,6 +100,16 @@ struct AudioConversionView: View {
         if !videoURLs.isEmpty {
             await viewModel.addFiles(videoURLs, sourceKind: .video)
         }
+    }
+
+    private func importFiles(_ urls: [URL]) async {
+        pendingImportCount = urls.count
+        pendingPreviewURLs = urls
+        defer {
+            pendingImportCount = 0
+            pendingPreviewURLs = []
+        }
+        await importMediaFiles(urls)
     }
 
     private var settingsCard: some View {
@@ -175,66 +184,54 @@ struct AudioConversionView: View {
         }
     }
 
-    private var filesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(L10n.format("files.audio.title", viewModel.items.count)).font(.headline)
-                Spacer()
-                Button(L10n.string("action.clear_all"), role: .destructive) {
-                    isClearAllConfirmationPresented = true
-                }
-                    .disabled(viewModel.isConverting)
-            }
+    private var selectedFilesCard: some View {
+        ConversionFileTray(
+            title: viewModel.importProgress == nil
+                ? L10n.format("files.audio.title", displayedFileCount)
+                : "\(L10n.string("import.progress.title")) · \(L10n.format("files.audio.title", displayedFileCount))",
+            progress: viewModel.importProgress,
+            rowCount: displayedFileCount > 3 ? 2 : 1,
+            canClear: !viewModel.isConverting && viewModel.importProgress == nil,
+            onClear: { isClearAllConfirmationPresented = true }
+        ) {
             ForEach(viewModel.items) { item in
-                HStack(spacing: 12) {
-                    ConversionFileThumbnail(
-                        url: item.sourceURL,
-                        kind: item.sourceKind == .video ? .video : .audio
-                    )
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(item.sourceURL.lastPathComponent)
-                            .font(.subheadline.weight(.medium))
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                        HStack(spacing: 6) {
-                            ConversionStatusDot(
-                                phase: phase(item.status),
-                                accessibilityLabel: statusString(item.status)
-                            )
-                            Text(sourceDescription(item))
-                            Text("·")
-                            Text(sizeDescription(item))
-                        }
-                        .font(.system(size: 12, weight: .medium, design: .monospaced))
-                        .foregroundStyle(.secondary)
-                        if case let .failed(message) = item.status {
-                            Text(message).font(.caption).foregroundStyle(.red).lineLimit(2)
-                        }
-                    }
-                    Spacer()
-                    if case let .completed(url) = item.status {
-                        HStack {
-                            ShareLink(item: url) { Image(systemName: "square.and.arrow.up") }
-                            Button(role: .destructive) { viewModel.remove(item.id) } label: {
-                                Image(systemName: "trash")
-                            }
-                        }
-                    } else if case .converting = item.status {
-                        ProgressView().controlSize(.small)
-                    } else {
-                        Button { viewModel.remove(item.id) } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(.secondary)
-                                .frame(width: 32, height: 32)
-                        }
-                    }
+                ConversionFileTile(
+                    url: item.sourceURL,
+                    kind: item.sourceKind == .video ? .video : .audio,
+                    title: item.sourceURL.lastPathComponent,
+                    subtitle: "\(sourceDescription(item)) · \(sizeDescription(item))",
+                    phase: phase(item.status),
+                    statusLabel: statusString(item.status),
+                    isLocked: viewModel.isConverting,
+                    outputURL: outputURL(item.status),
+                    onRemove: { viewModel.remove(item.id) }
+                )
+            }
+
+            ForEach(Array(pendingPreviewURLs.dropFirst(min(viewModel.items.count, pendingPreviewURLs.count)).enumerated()), id: \.offset) { _, url in
+                let kind: ConversionFileKind = ["mov", "mp4", "m4v"].contains(url.pathExtension.lowercased())
+                    ? .video
+                    : .audio
+                ConversionFileTile(
+                    url: url,
+                    kind: kind,
+                    title: url.lastPathComponent,
+                    subtitle: L10n.string("import.progress.title"),
+                    phase: .working,
+                    statusLabel: L10n.string("import.progress.title"),
+                    isLocked: true,
+                    outputURL: nil,
+                    onRemove: {}
+                )
+            }
+
+            let representedCount = max(viewModel.items.count, pendingPreviewURLs.count)
+            if displayedFileCount > representedCount {
+                ForEach(representedCount ..< displayedFileCount, id: \.self) { index in
+                    ConversionPendingFileTile(index: index, kind: .audio)
                 }
-                Divider()
             }
         }
-        .padding(16)
-        .converterCard()
     }
 
     @ViewBuilder private var conversionAction: some View {
@@ -261,6 +258,11 @@ struct AudioConversionView: View {
         guard case let .completed(url) = item.status else { return source }
         let bytes = Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
         return "\(source) → \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))"
+    }
+
+    private func outputURL(_ status: AudioConversionStatus) -> URL? {
+        guard case let .completed(url) = status else { return nil }
+        return url
     }
 
     private func sourceDescription(_ item: AudioConversionItem) -> String {

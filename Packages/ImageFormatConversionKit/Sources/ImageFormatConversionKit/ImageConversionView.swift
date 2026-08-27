@@ -41,6 +41,9 @@ public struct ImageConversionView: View {
                 }
             }
             .background(converterBackground)
+#if os(iOS)
+            .toolbar(.hidden, for: .navigationBar)
+#endif
         }
         .environment(\.conversionTheme, theme)
         .tint(theme.accent)
@@ -199,6 +202,8 @@ private struct ImageConversionContentView: View {
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var isClearAllConfirmationPresented = false
     @State private var libraryImportProgress: ConversionImportProgress?
+    @State private var pendingImportCount = 0
+    @State private var pendingPreviewURLs: [URL] = []
 
     init(viewModel: ImageConversionViewModel = ImageConversionViewModel()) {
         _viewModel = State(initialValue: viewModel)
@@ -207,40 +212,24 @@ private struct ImageConversionContentView: View {
     public var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 16) {
-                importCard
-
-                if let progress = libraryImportProgress ?? viewModel.importProgress {
-                    ConversionImportProgressView(progress: progress)
+                if shouldShowImportCard {
+                    importCard
+                } else {
+                    selectedFilesCard
                 }
 
                 if let notice = viewModel.notice {
                     NoticeView(message: notice)
                 }
 
-                if !viewModel.items.isEmpty {
-                    filesSection
-                }
-
                 ImageConversionSettingsCard(viewModel: viewModel)
                 conversionAction
             }
             .padding(.horizontal, 4)
-            .padding(.vertical, 20)
+            .padding(.top, 4)
+            .padding(.bottom, 20)
         }
         .converterSoftScrollEdge()
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    isImporterPresented = true
-                } label: {
-                    Label(
-                        L10n.string("action.add_images"),
-                        systemImage: "photo.badge.plus"
-                    )
-                }
-                .disabled(viewModel.isConverting || viewModel.importProgress != nil)
-            }
-        }
         .fileImporter(
             isPresented: $isImporterPresented,
             allowedContentTypes: ImageConversionEngine.supportedInputContentTypes,
@@ -249,7 +238,7 @@ private struct ImageConversionContentView: View {
             switch result {
             case let .success(urls):
                 Task { @MainActor in
-                    await viewModel.addFiles(urls)
+                    await importFiles(urls)
                 }
             case let .failure(error):
                 let message = error.localizedDescription
@@ -273,6 +262,18 @@ private struct ImageConversionContentView: View {
             guard !items.isEmpty else { return }
             Task { await importPhotos(items) }
         }
+    }
+
+    private var activeImportProgress: ConversionImportProgress? {
+        libraryImportProgress ?? viewModel.importProgress
+    }
+
+    private var shouldShowImportCard: Bool {
+        viewModel.items.isEmpty && activeImportProgress == nil && pendingImportCount == 0
+    }
+
+    private var displayedFileCount: Int {
+        max(viewModel.items.count, pendingImportCount)
     }
 
     private var importCard: some View {
@@ -312,9 +313,12 @@ private struct ImageConversionContentView: View {
     }
 
     private func importPhotos(_ selections: [PhotosPickerItem]) async {
+        pendingImportCount = selections.count
         defer {
             selectedPhotoItems = []
             libraryImportProgress = nil
+            pendingImportCount = 0
+            pendingPreviewURLs = []
         }
         var urls: [URL] = []
         for (index, selection) in selections.enumerated() {
@@ -339,6 +343,7 @@ private struct ImageConversionContentView: View {
                     }
                 ) {
                     urls.append(imported.url)
+                    pendingPreviewURLs.append(imported.url)
                 }
             } catch {
                 viewModel.reportImportFailure(error.localizedDescription)
@@ -353,34 +358,92 @@ private struct ImageConversionContentView: View {
         await viewModel.addFiles(urls, progressRange: 0.95 ... 1)
     }
 
-    private var filesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(L10n.format("files.title", viewModel.items.count))
-                    .font(.headline)
+    private func importFiles(_ urls: [URL]) async {
+        pendingImportCount = urls.count
+        pendingPreviewURLs = urls
+        defer {
+            pendingImportCount = 0
+            pendingPreviewURLs = []
+        }
+        await viewModel.addFiles(urls)
+    }
 
-                Spacer()
-
-                Button(L10n.string("action.clear_all"), role: .destructive) {
-                    isClearAllConfirmationPresented = true
-                }
-                .disabled(viewModel.isConverting)
-            }
-
+    private var selectedFilesCard: some View {
+        ConversionFileTray(
+            title: activeImportProgress == nil
+                ? L10n.format("files.title", displayedFileCount)
+                : "\(L10n.string("import.progress.title")) · \(L10n.format("files.title", displayedFileCount))",
+            progress: activeImportProgress,
+            rowCount: displayedFileCount > 3 ? 2 : 1,
+            canClear: !viewModel.isConverting && activeImportProgress == nil,
+            onClear: { isClearAllConfirmationPresented = true }
+        ) {
             ForEach(viewModel.items) { item in
-                ImageConversionFileRow(
-                    item: item,
+                ConversionFileTile(
+                    url: item.sourceURL,
+                    kind: .image,
+                    title: item.sourceURL.lastPathComponent,
+                    subtitle: imageSubtitle(item),
+                    phase: imagePhase(item.status),
+                    statusLabel: imageStatusText(item.status),
                     isLocked: viewModel.isConverting,
+                    outputURL: imageOutputURL(item.status),
                     onRemove: { viewModel.removeItem(id: item.id) }
                 )
+            }
 
-                if item.id != viewModel.items.last?.id {
-                    Divider()
+            ForEach(Array(pendingPreviewURLs.dropFirst(min(viewModel.items.count, pendingPreviewURLs.count)).enumerated()), id: \.offset) { _, url in
+                ConversionFileTile(
+                    url: url,
+                    kind: .image,
+                    title: url.lastPathComponent,
+                    subtitle: L10n.string("import.progress.title"),
+                    phase: .working,
+                    statusLabel: L10n.string("import.progress.title"),
+                    isLocked: true,
+                    outputURL: nil,
+                    onRemove: {}
+                )
+            }
+
+            let representedCount = max(viewModel.items.count, pendingPreviewURLs.count)
+            if displayedFileCount > representedCount {
+                ForEach(representedCount ..< displayedFileCount, id: \.self) { index in
+                    ConversionPendingFileTile(index: index, kind: .image)
                 }
             }
         }
-        .padding(16)
-        .converterCard()
+    }
+
+    private func imageSubtitle(_ item: ImageConversionItem) -> String {
+        guard let info = item.info else { return imageStatusText(item.status) }
+        let size = ByteCountFormatter.string(fromByteCount: info.fileSizeBytes, countStyle: .file)
+        return "\(info.pixelWidth)×\(info.pixelHeight) · \(size)"
+    }
+
+    private func imagePhase(_ status: ImageConversionItemStatus) -> ConversionFilePhase {
+        switch status {
+        case .inspecting, .ready, .cancelled: .pending
+        case .converting: .working
+        case .completed: .completed
+        case .failed: .failed
+        }
+    }
+
+    private func imageStatusText(_ status: ImageConversionItemStatus) -> String {
+        switch status {
+        case .inspecting: L10n.string("status.inspecting")
+        case .ready: L10n.string("status.ready")
+        case .converting: L10n.string("status.converting")
+        case .completed: L10n.string("status.completed")
+        case let .failed(message): message
+        case .cancelled: L10n.string("status.cancelled")
+        }
+    }
+
+    private func imageOutputURL(_ status: ImageConversionItemStatus) -> URL? {
+        guard case let .completed(url) = status else { return nil }
+        return url
     }
 
     @ViewBuilder
