@@ -14,7 +14,10 @@ import Vision
 struct MediaClassificationService {
     typealias ProgressHandler = @MainActor @Sendable (MediaAnalysisProgress) -> Void
 
-    private let maximumConcurrentFeatureRequests = 2
+    /// 轻量哈希只处理 64×64 缩略图，可以用略高的有界并发缩短相册读取时间。
+    private let maximumConcurrentHashRequests = 4
+    /// Vision 特征生成仍属于 CPU 密集任务，限制为两路以避免扫描时挤占 UI 和内存。
+    private let maximumConcurrentVisionRequests = 2
     private let maximumPerceptualHashDistance = 16
     private let maximumHashMatchesPerImage = 32
     // Vision has no universal distance threshold. Start conservatively and
@@ -50,21 +53,38 @@ struct MediaClassificationService {
             completed: 0,
             total: candidates.count
         ))
-        let featureOutcomes = await generateFeatures(
+        let hashOutcomes = await generateHashes(
             for: candidates,
             assetsByIdentifier: assetsByIdentifier,
             progress: progress
         )
         try Task.checkCancellation()
 
-        let availableFeatures = featureOutcomes.compactMap(\.feature)
-        let skippedCount = featureOutcomes.count - availableFeatures.count
-        let comparisonPairs = candidatePairs(from: availableFeatures)
+        let availableHashes = hashOutcomes.compactMap(\.feature)
+        let hashSkippedCount = hashOutcomes.count - availableHashes.count
+        let comparisonPairs = candidatePairs(from: availableHashes)
+        let comparisonIdentifiers = Set(comparisonPairs.flatMap { [$0.firstID, $0.secondID] })
+        let comparisonCandidates = candidates.filter { comparisonIdentifiers.contains($0.id) }
+        let comparisonWorkCount = comparisonCandidates.count + comparisonPairs.count
         progress(MediaAnalysisProgress(
             phase: .comparingImages,
             completed: 0,
-            total: comparisonPairs.count
+            total: comparisonWorkCount
         ))
+
+        // Vision 是扫描中最昂贵的一步。只有通过感知哈希初筛的图片才生成
+        // Feature Print，普通且没有相似候选的照片不会再承担这部分成本。
+        let visionSkippedCount = await generateVisionFeatures(
+            for: comparisonCandidates,
+            assetsByIdentifier: assetsByIdentifier
+        ) { completed in
+            progress(MediaAnalysisProgress(
+                phase: .comparingImages,
+                completed: completed,
+                total: comparisonWorkCount
+            ))
+        }
+        try Task.checkCancellation()
 
         var acceptedPairs: [AcceptedPair] = []
         let comparisonBatchSize = 128
@@ -79,8 +99,8 @@ struct MediaClassificationService {
             }
             progress(MediaAnalysisProgress(
                 phase: .comparingImages,
-                completed: batchEnd,
-                total: comparisonPairs.count
+                completed: comparisonCandidates.count + batchEnd,
+                total: comparisonWorkCount
             ))
         }
 
@@ -92,7 +112,7 @@ struct MediaClassificationService {
             classifiedVideos: videos,
             screenshotIDs: screenshotIDs,
             livePhotoIDs: livePhotoIDs,
-            skippedImageCount: skippedCount
+            skippedImageCount: hashSkippedCount + visionSkippedCount
         )
     }
 
@@ -145,8 +165,8 @@ struct MediaClassificationService {
         }
     }
 
-    /// 封装 `generateFeatures` 对应的局部行为，供当前类型在统一入口下复用。
-    private func generateFeatures(
+    /// 为全相册生成低成本感知哈希，先完成候选召回而不执行昂贵的 Vision 分析。
+    private func generateHashes(
         for candidates: [SimilarityCandidate],
         assetsByIdentifier: [String: PHAsset],
         progress: ProgressHandler
@@ -156,12 +176,12 @@ struct MediaClassificationService {
         var nextIndex = 0
 
         await withTaskGroup(of: FeatureOutcome.self) { group in
-            let initialCount = min(maximumConcurrentFeatureRequests, candidates.count)
+            let initialCount = min(maximumConcurrentHashRequests, candidates.count)
             for _ in 0 ..< initialCount {
                 let candidate = candidates[nextIndex]
                 let asset = assetsByIdentifier[candidate.id]
                 group.addTask { @MainActor in
-                    await generateFeature(for: candidate, asset: asset)
+                    await generateHash(for: candidate, asset: asset)
                 }
                 nextIndex += 1
             }
@@ -181,7 +201,7 @@ struct MediaClassificationService {
                     let candidate = candidates[nextIndex]
                     let asset = assetsByIdentifier[candidate.id]
                     group.addTask { @MainActor in
-                        await generateFeature(for: candidate, asset: asset)
+                        await generateHash(for: candidate, asset: asset)
                     }
                     nextIndex += 1
                 }
@@ -190,8 +210,8 @@ struct MediaClassificationService {
         return outcomes
     }
 
-    /// 封装 `generateFeature` 对应的局部行为，供当前类型在统一入口下复用。
-    private func generateFeature(
+    /// 读取一张低分辨率缩略图并生成 dHash；缓存命中时完全跳过图片请求。
+    private func generateHash(
         for candidate: SimilarityCandidate,
         asset: PHAsset?
     ) async -> FeatureOutcome {
@@ -206,28 +226,97 @@ struct MediaClassificationService {
             ) {
                 return FeatureOutcome(feature: CandidateFeature(
                     id: candidate.id,
-                    perceptualHash: hash,
-                    creationDate: candidate.creationDate
+                    perceptualHash: hash
                 ))
             }
-            let image = try await requestThumbnail(for: asset)
-            let hash = try await featureEngine.store(
+            let image = try await requestThumbnail(for: asset, targetPixelSize: 64)
+            let hash = try await featureEngine.storeHash(
                 id: candidate.id,
                 cacheKey: candidate.cacheKey,
                 image: image
             )
             return FeatureOutcome(feature: CandidateFeature(
                 id: candidate.id,
-                perceptualHash: hash,
-                creationDate: candidate.creationDate
+                perceptualHash: hash
             ))
         } catch {
             return FeatureOutcome(feature: nil)
         }
     }
 
-    /// 封装 `requestThumbnail` 对应的局部行为，供当前类型在统一入口下复用。
-    private func requestThumbnail(for asset: PHAsset) async throws -> CGImage {
+    /// 仅为哈希命中的候选图片生成 Vision Feature Print，并以有界并发控制资源占用。
+    private func generateVisionFeatures(
+        for candidates: [SimilarityCandidate],
+        assetsByIdentifier: [String: PHAsset],
+        progress: @MainActor @Sendable (Int) -> Void
+    ) async -> Int {
+        guard !candidates.isEmpty else { return 0 }
+        var completed = 0
+        var skipped = 0
+        var nextIndex = 0
+
+        await withTaskGroup(of: Bool.self) { group in
+            let initialCount = min(maximumConcurrentVisionRequests, candidates.count)
+            for _ in 0 ..< initialCount {
+                let candidate = candidates[nextIndex]
+                let asset = assetsByIdentifier[candidate.id]
+                group.addTask { @MainActor in
+                    await generateVisionFeature(for: candidate, asset: asset)
+                }
+                nextIndex += 1
+            }
+
+            while let succeeded = await group.next() {
+                completed += 1
+                if !succeeded { skipped += 1 }
+                if Self.shouldReportProgress(completed: completed, total: candidates.count) {
+                    progress(completed)
+                }
+                if Task.isCancelled {
+                    group.cancelAll()
+                } else if nextIndex < candidates.count {
+                    let candidate = candidates[nextIndex]
+                    let asset = assetsByIdentifier[candidate.id]
+                    group.addTask { @MainActor in
+                        await generateVisionFeature(for: candidate, asset: asset)
+                    }
+                    nextIndex += 1
+                }
+            }
+        }
+        return skipped
+    }
+
+    /// 为单个候选生成 Vision 特征；已有同版本缓存时不再请求 Photos 缩略图。
+    private func generateVisionFeature(
+        for candidate: SimilarityCandidate,
+        asset: PHAsset?
+    ) async -> Bool {
+        guard !Task.isCancelled, let asset else { return false }
+        if await featureEngine.hasObservation(id: candidate.id, cacheKey: candidate.cacheKey) {
+            return true
+        }
+
+        do {
+            let image = try await requestThumbnail(for: asset, targetPixelSize: 256)
+            try await featureEngine.storeObservation(
+                id: candidate.id,
+                cacheKey: candidate.cacheKey,
+                image: image
+            )
+            return true
+        } catch {
+            // 单张资源可能位于尚未下载的 iCloud、已被删除或暂时不可读。
+            // 跳过该候选可保证其余本地资源继续完成扫描。
+            return false
+        }
+    }
+
+    /// 按扫描阶段请求恰好够用的缩略图，避免轻量哈希阶段解码 256×256 图片。
+    private func requestThumbnail(
+        for asset: PHAsset,
+        targetPixelSize: CGFloat
+    ) async throws -> CGImage {
         let controller = ImageRequestController(manager: imageManager)
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
@@ -239,7 +328,7 @@ struct MediaClassificationService {
 
                 let requestID = imageManager.requestImage(
                     for: asset,
-                    targetSize: CGSize(width: 256, height: 256),
+                    targetSize: CGSize(width: targetPixelSize, height: targetPixelSize),
                     contentMode: .aspectFit,
                     options: options
                 ) { image, info in
@@ -275,15 +364,9 @@ struct MediaClassificationService {
         for feature in features.sorted(by: { $0.id < $1.id }) {
             let matches = index.matches(
                 hash: feature.perceptualHash,
-                maximumDistance: maximumPerceptualHashDistance
+                maximumDistance: maximumPerceptualHashDistance,
+                maximumResults: maximumHashMatchesPerImage
             )
-            .sorted { lhs, rhs in
-                let lhsDistance = (lhs.perceptualHash ^ feature.perceptualHash).nonzeroBitCount
-                let rhsDistance = (rhs.perceptualHash ^ feature.perceptualHash).nonzeroBitCount
-                if lhsDistance != rhsDistance { return lhsDistance < rhsDistance }
-                return lhs.id < rhs.id
-            }
-            .prefix(maximumHashMatchesPerImage)
 
             pairs.append(contentsOf: matches.map { match in
                 CandidatePair(firstID: match.id, secondID: feature.id)
@@ -376,7 +459,7 @@ private struct SimilarityCandidate: Sendable {
 }
 
 /// 定义 `FeatureCacheKey` 的值语义数据与相关行为。
-private struct FeatureCacheKey: Hashable, Sendable {
+nonisolated private struct FeatureCacheKey: Hashable, Sendable {
     let modificationDate: Date?
     let pixelWidth: Int
     let pixelHeight: Int
@@ -386,7 +469,6 @@ private struct FeatureCacheKey: Hashable, Sendable {
 private struct CandidateFeature: Sendable {
     let id: String
     let perceptualHash: UInt64
-    let creationDate: Date?
 }
 
 /// 定义 `FeatureOutcome` 的值语义数据与相关行为。
@@ -436,26 +518,46 @@ private final class HammingBKTree {
         }
     }
 
-    /// 查询整棵索引中汉明距离未超过阈值的图片特征。
-    func matches(hash: UInt64, maximumDistance: Int) -> [CandidateFeature] {
-        guard let root else { return [] }
-        var matches: [CandidateFeature] = []
+    /// 在查询阶段直接保留有限个最近邻，避免密集相似哈希先形成平方级临时候选数组。
+    func matches(
+        hash: UInt64,
+        maximumDistance: Int,
+        maximumResults: Int
+    ) -> [CandidateFeature] {
+        guard let root, maximumResults > 0 else { return [] }
+        var matches: [(feature: CandidateFeature, distance: Int)] = []
         var pending = [root]
 
         while let node = pending.popLast() {
             let distance = Self.distance(node.hash, hash)
             if distance <= maximumDistance {
-                matches.append(contentsOf: node.features)
+                // 同一节点中的图片拥有完全相同的哈希。最多取结果上限数量，
+                // 即使图库存在数千张相同截图，也不会逐次复制整个节点数组。
+                let nodeMatches = node.features.prefix(maximumResults).map {
+                    (feature: $0, distance: distance)
+                }
+                matches.append(contentsOf: nodeMatches)
+                matches.sort {
+                    if $0.distance != $1.distance { return $0.distance < $1.distance }
+                    return $0.feature.id < $1.feature.id
+                }
+                if matches.count > maximumResults {
+                    matches.removeLast(matches.count - maximumResults)
+                }
             }
 
-            let lowerBound = max(0, distance - maximumDistance)
-            let upperBound = distance + maximumDistance
+            // 结果已满时可将搜索半径收紧到当前最差候选距离，减少无效分支。
+            let searchRadius = matches.count == maximumResults
+                ? min(maximumDistance, matches.last?.distance ?? maximumDistance)
+                : maximumDistance
+            let lowerBound = max(0, distance - searchRadius)
+            let upperBound = distance + searchRadius
             pending.append(contentsOf: node.children.compactMap { edge, child in
                 (lowerBound ... upperBound).contains(edge) ? child : nil
             })
         }
 
-        return matches
+        return matches.map(\.feature)
     }
 
     /// 计算两个 64 位感知哈希之间不同位的数量。
@@ -466,11 +568,11 @@ private final class HammingBKTree {
 
 /// 使用 Actor 隔离 `VisionFeatureEngine` 的可变状态，确保并发访问安全。
 private actor VisionFeatureEngine {
-    /// 定义 `CachedFeature` 的值语义数据与相关行为。
+    /// 同时保存廉价哈希和可选 Vision 特征，使刷新扫描能够分别复用两阶段结果。
     private struct CachedFeature {
         let cacheKey: FeatureCacheKey
-        let observation: VNFeaturePrintObservation
         let perceptualHash: UInt64
+        var observation: VNFeaturePrintObservation?
     }
 
     private var features: [String: CachedFeature] = [:]
@@ -486,22 +588,43 @@ private actor VisionFeatureEngine {
         return feature.perceptualHash
     }
 
-    /// 持久化 `store` 对应的数据，并保持后续恢复所需的信息完整。
-    func store(id: String, cacheKey: FeatureCacheKey, image: CGImage) throws -> UInt64 {
-        let request = VNGenerateImageFeaturePrintRequest()
-        request.imageCropAndScaleOption = .scaleFit
-        let handler = VNImageRequestHandler(cgImage: image, options: [:])
-        try handler.perform([request])
-        guard let observation = request.results?.first as? VNFeaturePrintObservation else {
-            throw MediaAnalysisError.unexpected
-        }
+    /// 保存全相册轻量 dHash；资源版本变化时一并淘汰旧 Vision 特征。
+    func storeHash(id: String, cacheKey: FeatureCacheKey, image: CGImage) throws -> UInt64 {
         let hash = try Self.differenceHash(for: image)
         features[id] = CachedFeature(
             cacheKey: cacheKey,
-            observation: observation,
-            perceptualHash: hash
+            perceptualHash: hash,
+            observation: nil
         )
         return hash
+    }
+
+    /// 判断指定资源版本是否已经生成 Vision 特征，避免刷新时重复进行昂贵分析。
+    func hasObservation(id: String, cacheKey: FeatureCacheKey) -> Bool {
+        guard let feature = features[id], feature.cacheKey == cacheKey else { return false }
+        return feature.observation != nil
+    }
+
+    /// 在后台任务中生成 Vision Feature Print，并在完成后写回 Actor 隔离缓存。
+    func storeObservation(
+        id: String,
+        cacheKey: FeatureCacheKey,
+        image: CGImage
+    ) async throws {
+        let observation = try await Task.detached(priority: .utility) {
+            let request = VNGenerateImageFeaturePrintRequest()
+            request.imageCropAndScaleOption = .scaleFit
+            let handler = VNImageRequestHandler(cgImage: image, options: [:])
+            try handler.perform([request])
+            guard let observation = request.results?.first as? VNFeaturePrintObservation else {
+                throw MediaAnalysisError.unexpected
+            }
+            return observation
+        }.value
+
+        guard var feature = features[id], feature.cacheKey == cacheKey else { return }
+        feature.observation = observation
+        features[id] = feature
     }
 
     /// 封装 `acceptedPairs` 对应的局部行为，供当前类型在统一入口下复用。
