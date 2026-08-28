@@ -98,6 +98,8 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         private var batchSelectionStartIndexPath: IndexPath?
         private var batchSelectionStartLocation: CGPoint?
         private var batchSelectionFurthestItem: Int?
+        private var batchSelectionFurthestRow: Int?
+        private var batchSelectionDirection: MediaBatchSelectionDirection?
         private var isBatchSelectionActive = false
         private var isBatchSelectionRejected = false
         private var selectionFeedbackGenerator: UISelectionFeedbackGenerator?
@@ -108,7 +110,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             self.parent = parent
         }
 
-        /// 安装捏合、长按和独立横向批选手势，避免批选依赖滚动手势的内部状态。
+        /// 安装捏合、长按和独立方向批选手势，避免批选依赖滚动手势的内部状态。
         func installGestures(on collectionView: UICollectionView) {
             let pinchGesture = UIPinchGestureRecognizer(
                 target: self,
@@ -135,7 +137,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             batchSelectionPanGesture.cancelsTouchesInView = true
             collectionView.addGestureRecognizer(batchSelectionPanGesture)
 
-            // 垂直滚动先等待批选手势判断方向：向右时批选胜出，纵向时批选立即失败并交还滚动。
+            // 滚动先等待批选手势判断方向：左右或向下时批选胜出，向上时交还浏览。
             collectionView.panGestureRecognizer.require(toFail: batchSelectionPanGesture)
             self.batchSelectionPanGesture = batchSelectionPanGesture
         }
@@ -259,7 +261,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             return batchSelectionStartIndexPath != nil
         }
 
-        /// 仅允许明确向右且横向占主导的一指拖动开始，纵向和向左手势直接失败。
+        /// 仅允许明确横向或向下的一指拖动开始，向上和方向不明的手势直接失败。
         func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
             guard gestureRecognizer === batchSelectionPanGesture else { return true }
             guard
@@ -268,7 +270,19 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             else { return false }
 
             let velocity = panGesture.velocity(in: collectionView)
-            return velocity.x > 0 && velocity.x > abs(velocity.y) * 1.35
+            if velocity.x > 0, velocity.x > abs(velocity.y) * 1.35 {
+                batchSelectionDirection = .right
+                return true
+            }
+            if velocity.x < 0, -velocity.x > abs(velocity.y) * 1.35 {
+                batchSelectionDirection = .left
+                return true
+            }
+            if velocity.y > 0, velocity.y > abs(velocity.x) * 1.35 {
+                batchSelectionDirection = .down
+                return true
+            }
+            return false
         }
 
         // MARK: Cell and header configuration
@@ -590,7 +604,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             refreshCell(for: assetID)
         }
 
-        /// 处理独立横向手势；方向竞争已在识别前完成，此处只负责更新批选范围。
+        /// 处理独立方向手势；方向竞争已在识别前完成，此处只负责更新批选范围。
         @objc private func handleSelectionPan(_ gesture: UIPanGestureRecognizer) {
             guard
                 parent.isSelecting,
@@ -637,6 +651,8 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             batchSelectionStartIndexPath = indexPath
             batchSelectionStartLocation = location
             batchSelectionFurthestItem = nil
+            batchSelectionFurthestRow = nil
+            batchSelectionDirection = nil
             isBatchSelectionActive = false
             isBatchSelectionRejected = false
             selectionFeedbackGenerator = UISelectionFeedbackGenerator(view: collectionView)
@@ -658,30 +674,25 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             let translation = gesture.translation(in: collectionView)
             let velocity = gesture.velocity(in: collectionView)
             let horizontalDistance = translation.x
-            let verticalDistance = abs(translation.y)
+            let verticalDistance = translation.y
 
             if !isBatchSelectionActive {
-                // 一旦纵向意图先变得明确，整次手势固定为滚动，后续抖动不能重新触发批选。
-                if verticalDistance >= 10,
-                   verticalDistance > max(abs(horizontalDistance) * 1.2, 10) {
-                    isBatchSelectionRejected = true
-                    selectionFeedbackGenerator = nil
-                    return
+                guard let batchSelectionDirection else { return }
+                let reachedActivationThreshold: Bool = switch batchSelectionDirection {
+                case .right:
+                    horizontalDistance >= 18
+                        && horizontalDistance > abs(verticalDistance) * 1.45
+                        && velocity.x > 0
+                case .left:
+                    horizontalDistance <= -18
+                        && -horizontalDistance > abs(verticalDistance) * 1.45
+                        && velocity.x < 0
+                case .down:
+                    verticalDistance >= 18
+                        && verticalDistance > abs(horizontalDistance) * 1.45
+                        && velocity.y > 0
                 }
-                if horizontalDistance <= -10,
-                   abs(horizontalDistance) > verticalDistance * 1.2 {
-                    // 向左滑同样固定为普通浏览手势，反向折返不能意外触发向右批选。
-                    isBatchSelectionRejected = true
-                    selectionFeedbackGenerator = nil
-                    return
-                }
-
-                // 只接受向右且横向占主导的动作；18pt 门槛过滤点击后的轻微手指偏移。
-                guard
-                    horizontalDistance >= 18,
-                    horizontalDistance > verticalDistance * 1.45,
-                    velocity.x > 0
-                else { return }
+                guard reachedActivationThreshold else { return }
 
                 isBatchSelectionActive = true
                 applyBatchSelection(
@@ -693,16 +704,37 @@ struct MediaInteractiveGrid: UIViewRepresentable {
                 selectionFeedbackGenerator?.prepare()
             }
 
-            guard isBatchSelectionActive else { return }
-            let allowedVerticalDrift = batchSelectionVerticalTolerance(in: collectionView)
             guard
-                horizontalDistance >= 0,
-                abs(location.y - startLocation.y) <= allowedVerticalDrift,
+                isBatchSelectionActive,
+                let batchSelectionDirection,
                 let endpoint = collectionView.indexPathForItem(at: location),
-                endpoint.section == startIndexPath.section,
-                endpoint.item >= startIndexPath.item,
-                row(of: endpoint.item) == row(of: startIndexPath.item)
+                endpoint.section == startIndexPath.section
             else { return }
+
+            let followsLockedDirection: Bool = switch batchSelectionDirection {
+            case .right:
+                horizontalDistance >= 0
+                    && abs(location.y - startLocation.y) <= batchSelectionVerticalTolerance(
+                        in: collectionView
+                    )
+                    && endpoint.item >= startIndexPath.item
+                    && row(of: endpoint.item) == row(of: startIndexPath.item)
+            case .left:
+                horizontalDistance <= 0
+                    && abs(location.y - startLocation.y) <= batchSelectionVerticalTolerance(
+                        in: collectionView
+                    )
+                    && endpoint.item <= startIndexPath.item
+                    && row(of: endpoint.item) == row(of: startIndexPath.item)
+            case .down:
+                verticalDistance >= 0
+                    && abs(location.x - startLocation.x) <= batchSelectionHorizontalTolerance(
+                        in: collectionView
+                    )
+                    && row(of: endpoint.item) >= row(of: startIndexPath.item)
+                    && column(of: endpoint.item) == column(of: startIndexPath.item)
+            }
+            guard followsLockedDirection else { return }
 
             applyBatchSelection(
                 from: startIndexPath,
@@ -711,8 +743,63 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             )
         }
 
-        /// 选中起点到当前右侧端点的同一行资源，并在端点扩展时提供一次选择触觉。
+        /// 根据锁定方向选择或取消同一行、同一列资源，并在范围扩展时提供一次触觉。
         private func applyBatchSelection(
+            from startIndexPath: IndexPath,
+            through endpoint: IndexPath,
+            in collectionView: UICollectionView
+        ) {
+            guard let batchSelectionDirection else { return }
+            switch batchSelectionDirection {
+            case .right:
+                applyHorizontalBatchSelection(
+                    from: startIndexPath,
+                    through: endpoint,
+                    in: collectionView
+                )
+            case .left:
+                applyHorizontalBatchDeselection(
+                    from: startIndexPath,
+                    through: endpoint,
+                    in: collectionView
+                )
+            case .down:
+                applyVerticalBatchSelection(
+                    from: startIndexPath,
+                    through: endpoint,
+                    in: collectionView
+                )
+            }
+        }
+
+        /// 取消起点到左侧端点之间同一行资源的选择，不影响该范围之外的已选资源。
+        private func applyHorizontalBatchDeselection(
+            from startIndexPath: IndexPath,
+            through endpoint: IndexPath,
+            in collectionView: UICollectionView
+        ) {
+            let previousFurthestItem = batchSelectionFurthestItem ?? (startIndexPath.item + 1)
+            let newFurthestItem = min(previousFurthestItem, endpoint.item)
+            guard newFurthestItem < previousFurthestItem else { return }
+            var didChangeSelection = false
+
+            for item in newFurthestItem ... min(startIndexPath.item, previousFurthestItem - 1) {
+                let indexPath = IndexPath(item: item, section: startIndexPath.section)
+                guard let assetID = assetID(at: indexPath) else { continue }
+                didChangeSelection = parent.selectedIDs.remove(assetID) != nil
+                    || didChangeSelection
+                refreshCell(for: assetID)
+            }
+            batchSelectionFurthestItem = newFurthestItem
+
+            // 激活时已有一次反馈；之后仅在实际取消新资源时提供新的触觉刻度。
+            if previousFurthestItem <= startIndexPath.item, didChangeSelection {
+                playBatchSelectionFeedback()
+            }
+        }
+
+        /// 选中起点到右侧端点之间的同一行资源。
+        private func applyHorizontalBatchSelection(
             from startIndexPath: IndexPath,
             through endpoint: IndexPath,
             in collectionView: UICollectionView
@@ -733,9 +820,42 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 
             // 激活批选时已经反馈一次；之后每次扩展到新端点再反馈一个轻量“刻度”。
             if previousFurthestItem >= startIndexPath.item, didChangeSelection {
-                selectionFeedbackGenerator?.selectionChanged()
-                selectionFeedbackGenerator?.prepare()
+                playBatchSelectionFeedback()
             }
+        }
+
+        /// 选中起点到下方端点之间的同一列资源，跳过分区末尾不存在的单元格。
+        private func applyVerticalBatchSelection(
+            from startIndexPath: IndexPath,
+            through endpoint: IndexPath,
+            in collectionView: UICollectionView
+        ) {
+            let startRow = row(of: startIndexPath.item)
+            let endpointRow = row(of: endpoint.item)
+            let previousFurthestRow = batchSelectionFurthestRow ?? (startRow - 1)
+            let newFurthestRow = max(previousFurthestRow, endpointRow)
+            guard newFurthestRow > previousFurthestRow else { return }
+            var didChangeSelection = false
+
+            for rowIndex in max(startRow, previousFurthestRow + 1) ... newFurthestRow {
+                let item = rowIndex * density.columnCount + column(of: startIndexPath.item)
+                let indexPath = IndexPath(item: item, section: startIndexPath.section)
+                guard let assetID = assetID(at: indexPath) else { continue }
+                didChangeSelection = parent.selectedIDs.insert(assetID).inserted
+                    || didChangeSelection
+                refreshCell(for: assetID)
+            }
+            batchSelectionFurthestRow = newFurthestRow
+
+            if previousFurthestRow >= startRow, didChangeSelection {
+                playBatchSelectionFeedback()
+            }
+        }
+
+        /// 播放一次离散选择反馈，并立即重新准备触觉引擎供下一次范围扩展使用。
+        private func playBatchSelectionFeedback() {
+            selectionFeedbackGenerator?.selectionChanged()
+            selectionFeedbackGenerator?.prepare()
         }
 
         /// 根据稳定布局的列数计算行号，确保向右批选不会跨入下一行。
@@ -743,11 +863,23 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             item / density.columnCount
         }
 
+        /// 根据稳定布局的列数计算资源所在列。
+        private func column(of item: Int) -> Int {
+            item % density.columnCount
+        }
+
         /// 根据当前单元格高度设置允许的轻微斜向误差，同时阻止明显上下滑动进入批选。
         private func batchSelectionVerticalTolerance(in collectionView: UICollectionView) -> CGFloat {
             let itemHeight = (collectionView.collectionViewLayout as? MediaDensityFlowLayout)?.itemSize.height
                 ?? 44
             return max(12, itemHeight * 0.38)
+        }
+
+        /// 根据当前单元格宽度设置向下批选允许的轻微横向误差。
+        private func batchSelectionHorizontalTolerance(in collectionView: UICollectionView) -> CGFloat {
+            let itemWidth = (collectionView.collectionViewLayout as? MediaDensityFlowLayout)?.itemSize.width
+                ?? 44
+            return max(12, itemWidth * 0.38)
         }
 
         /// 切换单个资源的选中状态。
@@ -764,6 +896,8 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             batchSelectionStartIndexPath = nil
             batchSelectionStartLocation = nil
             batchSelectionFurthestItem = nil
+            batchSelectionFurthestRow = nil
+            batchSelectionDirection = nil
             isBatchSelectionActive = false
             isBatchSelectionRejected = false
             selectionFeedbackGenerator = nil
@@ -979,6 +1113,13 @@ private final class MediaInteractiveGridHeaderView: UICollectionReusableView {
 }
 
 // MARK: - Supporting models
+
+/// 锁定一次批选的主方向，避免手指轻微斜移时在行选与列选之间跳变。
+private enum MediaBatchSelectionDirection {
+    case right
+    case left
+    case down
+}
 
 /// 媒体相册的三档视觉密度：2 列、5 列和 8 列。
 private enum MediaGridDensity: Int, CaseIterable {
