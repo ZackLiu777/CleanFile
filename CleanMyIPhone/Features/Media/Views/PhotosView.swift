@@ -442,7 +442,7 @@ private struct MediaDashboardResultsView: View {
     /// 封装 `estimatedSizeText` 对应的局部行为，供当前类型在统一入口下复用。
     private func estimatedSizeText(for assetIDs: [String]) -> String {
         let byteCount = viewModel.estimatedByteCount(for: Set(assetIDs))
-        return "~\(ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file))"
+        return ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
     }
 
     /// 封装 `videoCategorySymbol` 对应的局部行为，供当前类型在统一入口下复用。
@@ -1001,7 +1001,7 @@ private struct MediaCategoryDetailView: View {
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)
             Text(
-                "~" + ByteCountFormatter.string(
+                ByteCountFormatter.string(
                     fromByteCount: viewModel.estimatedByteCount(for: assetID),
                     countStyle: .file
                 )

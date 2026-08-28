@@ -33,6 +33,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     private let stateStore = AppStateStore.shared
     private let isRunningInPreviews: Bool
     private var analysisTask: Task<Void, Never>?
+    private var analysisGeneration = 0
     private var hasLoadedLibrary = false
     private var assetsByIdentifier: [String: PHAsset] = [:]
     private var displayNamesByIdentifier: [String: String] = [:]
@@ -51,6 +52,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     func refresh() {
         Task { await stateStore.saveMediaState(nil) }
         refreshLibrary(resetAnalysis: true)
+        startAnalysis()
     }
 
     /// 更新 `refreshLibrary` 对应的数据，使界面状态与底层结果保持一致。
@@ -59,6 +61,7 @@ final class PhotoLibraryViewModel: ObservableObject {
 
         storageSnapshot = Self.loadStorageSnapshot()
 
+        analysisGeneration &+= 1
         analysisTask?.cancel()
         analysisTask = nil
         if resetAnalysis {
@@ -300,6 +303,8 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
 
         let assetsToAnalyze = assets
+        analysisGeneration &+= 1
+        let generation = analysisGeneration
         Task { await stateStore.saveMediaState(nil) }
         analysisTask = Task { [weak self] in
             guard let self else { return }
@@ -308,9 +313,11 @@ final class PhotoLibraryViewModel: ObservableObject {
                 let result = try await classificationService.analyze(
                     assets: assetsToAnalyze,
                     progress: { [weak self] progress in
+                        guard self?.analysisGeneration == generation else { return }
                         self?.analysisState = .analyzing(progress)
                     }
                 )
+                guard generation == analysisGeneration else { return }
 
                 if result.skippedImageCount > 0 {
                     analysisState = .partialFailure(result)
@@ -319,18 +326,23 @@ final class PhotoLibraryViewModel: ObservableObject {
                 }
                 persistAnalysisState()
             } catch is CancellationError {
+                guard generation == analysisGeneration else { return }
                 analysisState = .cancelled
             } catch {
+                guard generation == analysisGeneration else { return }
                 analysisState = .failure(.unexpected)
             }
 
-            analysisTask = nil
+            if generation == analysisGeneration {
+                analysisTask = nil
+            }
         }
     }
 
     /// 取消 `cancelAnalysis` 对应的进行中任务，并收敛到可继续操作的状态。
     func cancelAnalysis() {
         guard analysisState.isAnalyzing else { return }
+        analysisGeneration &+= 1
         analysisTask?.cancel()
         analysisTask = nil
         analysisState = .cancelled
