@@ -23,6 +23,12 @@ struct StorageView: View {
 
                 ScrollView(.vertical, showsIndicators: false) {
                     LazyVStack(spacing: 16) {
+                        Text("Storage")
+                            .font(.largeTitle.bold())
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(12)
+                            .padding(.bottom, -16)
+
                         folderCard
                         statusCard
 
@@ -46,7 +52,8 @@ struct StorageView: View {
                         }
                     }
                     .padding(.horizontal, 4)
-                    .padding(.vertical, 16)
+                    .padding(.top, -24)
+                    .padding(.bottom, 24)
                 }
                 .appSoftScrollEdge()
             }
@@ -59,6 +66,8 @@ struct StorageView: View {
                     }
                 }
             }
+            .toolbar(.visible, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
             .fileImporter(
                 isPresented: $isImporterPresented,
                 allowedContentTypes: [.folder],

@@ -1,4 +1,5 @@
 "converter.title" = "媒体格式转换";
+"converter.heading" = "转换";
 "import.title" = "在本地转换图片";
 "import.subtitle" = "文件只在此设备上处理，不会上传。";
 "action.add_images" = "添加图片";

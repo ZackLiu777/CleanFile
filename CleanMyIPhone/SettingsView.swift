@@ -17,6 +17,15 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                Text("Settings")
+                    .font(.largeTitle.bold())
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .listRowInsets(
+                        EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12)
+                    )
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+
                 Section("Color Theme") {
                     Picker("Color Theme", selection: $themeSettings.selectedThemeID) {
                         ForEach(AppThemeID.allCases) { themeID in
@@ -76,6 +85,7 @@ struct SettingsView: View {
                 .listRowBackground(theme.cardSurface)
             }
             .contentMargins(.horizontal, 4, for: .scrollContent)
+            .contentMargins(.top, -24, for: .scrollContent)
             .scrollIndicators(.hidden)
             .scrollContentBackground(.hidden)
             .background(AppBackground())
@@ -84,6 +94,8 @@ struct SettingsView: View {
                 guard phase == .active else { return }
                 photoAuthorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
             }
+            .toolbar(.visible, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 

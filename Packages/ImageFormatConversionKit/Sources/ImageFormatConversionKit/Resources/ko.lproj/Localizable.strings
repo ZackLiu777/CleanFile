@@ -1,4 +1,5 @@
 "converter.title" = "미디어 변환";
+"converter.heading" = "변환";
 "import.title" = "기기에서 이미지 변환";
 "import.subtitle" = "파일은 이 기기에서만 처리되며 업로드되지 않습니다.";
 "action.add_images" = "이미지 추가";

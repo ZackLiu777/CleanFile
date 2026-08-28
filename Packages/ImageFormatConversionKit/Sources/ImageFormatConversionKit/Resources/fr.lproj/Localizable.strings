@@ -1,4 +1,5 @@
 "converter.title" = "Convertisseur multimédia";
+"converter.heading" = "Convertir";
 "import.title" = "Convertir des images localement";
 "import.subtitle" = "Les fichiers sont traités sur cet appareil et ne sont jamais envoyés.";
 "action.add_images" = "Ajouter des images";

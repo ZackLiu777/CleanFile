@@ -1,4 +1,5 @@
 "converter.title" = "Media Converter";
+"converter.heading" = "Convert";
 "import.title" = "Convert images locally";
 "import.subtitle" = "Files are processed on this device and are never uploaded.";
 "action.add_images" = "Add Images";

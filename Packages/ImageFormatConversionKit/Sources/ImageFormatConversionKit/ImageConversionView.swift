@@ -22,6 +22,13 @@ public struct ImageConversionView: View {
     public var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                Text(L10n.string("converter.heading"))
+                    .font(.largeTitle.bold())
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, -12)
+                    .padding(.bottom, 12)
+
                 Picker(L10n.string("converter.mode"), selection: modeSelection) {
                     Text(L10n.string("converter.mode.image")).tag(ConversionMode.image)
                     Text(L10n.string("converter.mode.video")).tag(ConversionMode.video)
@@ -46,7 +53,8 @@ public struct ImageConversionView: View {
             }
             .background(converterBackground)
 #if os(iOS)
-            .toolbar(.hidden, for: .navigationBar)
+            .toolbar(.visible, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
 #endif
         }
         .environment(\.conversionTheme, theme)
