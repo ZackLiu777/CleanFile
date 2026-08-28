@@ -1,0 +1,513 @@
+//
+//  PhotoLibraryViewModel.swift
+//  CleanMyIPhone
+//
+
+//
+//  文件职责：协调 PhotoLibrary 页面状态、用户操作与底层服务。
+//  所属模块：CleanMyIPhone。
+//
+
+import Combine
+import AVFoundation
+import Photos
+import PhotosUI
+import SwiftUI
+import UIKit
+
+@MainActor
+/// 封装 `PhotoLibraryViewModel` 的引用语义、状态与业务行为。
+final class PhotoLibraryViewModel: ObservableObject {
+    @Published private(set) var authorizationStatus: PHAuthorizationStatus
+    @Published private(set) var assets: [PHAsset] = []
+    @Published private(set) var isLoading = false
+    @Published private(set) var analysisState: MediaAnalysisState = .idle
+    @Published private(set) var deletionState: MediaDeletionState = .idle
+    @Published private(set) var storageSnapshot: DeviceStorageSnapshot?
+    @Published private(set) var estimatedPhotoLibraryBytes: Int64 = 0
+    @Published private(set) var estimatedVideoLibraryBytes: Int64 = 0
+
+    private let imageManager = PHCachingImageManager()
+    private let thumbnailCache = NSCache<NSString, UIImage>()
+    private let classificationService = MediaClassificationService()
+    private let stateStore = AppStateStore.shared
+    private let isRunningInPreviews: Bool
+    private var analysisTask: Task<Void, Never>?
+    private var hasLoadedLibrary = false
+    private var assetsByIdentifier: [String: PHAsset] = [:]
+    private var displayNamesByIdentifier: [String: String] = [:]
+
+    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    init() {
+        let environment = ProcessInfo.processInfo.environment
+        isRunningInPreviews = environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+            || environment["XCODE_RUNNING_FOR_PLAYGROUNDS"] == "1"
+        authorizationStatus = isRunningInPreviews
+            ? .notDetermined
+            : PHPhotoLibrary.authorizationStatus(for: .readWrite)
+    }
+
+    /// 更新 `refresh` 对应的数据，使界面状态与底层结果保持一致。
+    func refresh() {
+        Task { await stateStore.saveMediaState(nil) }
+        refreshLibrary(resetAnalysis: true)
+    }
+
+    /// 更新 `refreshLibrary` 对应的数据，使界面状态与底层结果保持一致。
+    private func refreshLibrary(resetAnalysis: Bool) {
+        guard !isRunningInPreviews else { return }
+
+        storageSnapshot = Self.loadStorageSnapshot()
+
+        analysisTask?.cancel()
+        analysisTask = nil
+        if resetAnalysis {
+            analysisState = .idle
+        }
+
+        authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+
+        guard authorizationStatus == .authorized || authorizationStatus == .limited else {
+            assets = []
+            rebuildAssetIndex()
+            hasLoadedLibrary = true
+            return
+        }
+
+        fetchAssets()
+    }
+
+    /// 加载 `loadIfNeeded` 所需的数据，并将结果转换为当前层可消费的状态。
+    func loadIfNeeded() async {
+        guard !hasLoadedLibrary else { return }
+        hasLoadedLibrary = true
+        let snapshot = await stateStore.loadMediaState()
+        refreshLibrary(resetAnalysis: false)
+        restoreAnalysis(from: snapshot)
+    }
+
+    /// 封装 `requestAccess` 对应的局部行为，供当前类型在统一入口下复用。
+    func requestAccess() {
+        guard !isRunningInPreviews else { return }
+
+        isLoading = true
+
+        PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] status in
+            Task { @MainActor [weak self] in
+                self?.authorizationStatus = status
+                self?.isLoading = false
+                self?.fetchAssetsIfAllowed()
+            }
+        }
+    }
+
+    /// 控制 `presentLimitedLibraryPicker` 对应界面或资源的展示生命周期。
+    func presentLimitedLibraryPicker() {
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first,
+              let rootViewController = windowScene.windows
+                .first(where: \.isKeyWindow)?.rootViewController else {
+            return
+        }
+
+        var presenter = rootViewController
+        while let presentedViewController = presenter.presentedViewController {
+            presenter = presentedViewController
+        }
+
+        PHPhotoLibrary.shared().presentLimitedLibraryPicker(from: presenter) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.refresh()
+            }
+        }
+    }
+
+    /// 控制 `openSettings` 对应界面或资源的展示生命周期。
+    func openSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
+    }
+
+    /// 封装 `requestThumbnail` 对应的局部行为，供当前类型在统一入口下复用。
+    func requestThumbnail(
+        for asset: PHAsset,
+        targetSize: CGSize,
+        completion: @escaping @MainActor (UIImage?) -> Void
+    ) -> PHImageRequestID {
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .opportunistic
+        options.resizeMode = .fast
+        options.isNetworkAccessAllowed = true
+
+        return imageManager.requestImage(
+            for: asset,
+            targetSize: targetSize,
+            contentMode: .aspectFill,
+            options: options
+        ) { image, _ in
+            Task { @MainActor in
+                if let image {
+                    self.thumbnailCache.setObject(image, forKey: asset.localIdentifier as NSString)
+                }
+                completion(image)
+            }
+        }
+    }
+
+    /// 封装 `asset` 对应的局部行为，供当前类型在统一入口下复用。
+    func asset(withIdentifier identifier: String) -> PHAsset? {
+        assetsByIdentifier[identifier]
+    }
+
+    /// 封装 `cachedThumbnail` 对应的局部行为，供当前类型在统一入口下复用。
+    func cachedThumbnail(for identifier: String) -> UIImage? {
+        thumbnailCache.object(forKey: identifier as NSString)
+    }
+
+    /// 封装 `estimatedByteCount` 对应的局部行为，供当前类型在统一入口下复用。
+    func estimatedByteCount(for assetIDs: Set<String>) -> Int64 {
+        assetIDs.reduce(Int64.zero) { total, identifier in
+            guard let asset = assetsByIdentifier[identifier] else { return total }
+            return total + Self.estimatedByteCount(for: asset)
+        }
+    }
+
+    /// 封装 `displayName` 对应的局部行为，供当前类型在统一入口下复用。
+    func displayName(for assetID: String) -> String {
+        if let cachedName = displayNamesByIdentifier[assetID] {
+            return cachedName
+        }
+        guard let asset = assetsByIdentifier[assetID] else { return "" }
+
+        let resource = PHAssetResource.assetResources(for: asset).first { resource in
+            switch asset.mediaType {
+            case .image:
+                resource.type == .photo || resource.type == .fullSizePhoto
+            case .video:
+                resource.type == .video || resource.type == .fullSizeVideo
+            default:
+                false
+            }
+        } ?? PHAssetResource.assetResources(for: asset).first
+
+        let originalName = resource?.originalFilename ?? ""
+        let name = (originalName as NSString).deletingPathExtension
+        displayNamesByIdentifier[assetID] = name
+        return name
+    }
+
+    /// 封装 `estimatedByteCount` 对应的局部行为，供当前类型在统一入口下复用。
+    func estimatedByteCount(for assetID: String) -> Int64 {
+        guard let asset = assetsByIdentifier[assetID] else { return 0 }
+        return Self.estimatedByteCount(for: asset)
+    }
+
+    /// 启动 `startCachingThumbnails` 对应流程，并初始化本轮任务需要的状态。
+    func startCachingThumbnails(for assetIDs: ArraySlice<String>, targetSize: CGSize) {
+        let assets = assetIDs.compactMap { assetsByIdentifier[$0] }
+        guard !assets.isEmpty else { return }
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .fastFormat
+        options.resizeMode = .fast
+        options.isNetworkAccessAllowed = false
+        imageManager.startCachingImages(
+            for: assets,
+            targetSize: targetSize,
+            contentMode: .aspectFill,
+            options: options
+        )
+    }
+
+    /// 取消 `stopCachingThumbnails` 对应的进行中任务，并收敛到可继续操作的状态。
+    func stopCachingThumbnails(for assetIDs: ArraySlice<String>, targetSize: CGSize) {
+        let assets = assetIDs.compactMap { assetsByIdentifier[$0] }
+        guard !assets.isEmpty else { return }
+        imageManager.stopCachingImages(
+            for: assets,
+            targetSize: targetSize,
+            contentMode: .aspectFill,
+            options: nil
+        )
+    }
+
+    /// 取消 `cancelThumbnail` 对应的进行中任务，并收敛到可继续操作的状态。
+    func cancelThumbnail(_ requestID: PHImageRequestID) {
+        imageManager.cancelImageRequest(requestID)
+    }
+
+    /// 封装 `requestPreviewImage` 对应的局部行为，供当前类型在统一入口下复用。
+    func requestPreviewImage(
+        for asset: PHAsset,
+        targetSize: CGSize,
+        completion: @escaping @MainActor (UIImage?) -> Void
+    ) -> PHImageRequestID {
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .highQualityFormat
+        options.resizeMode = .exact
+        options.isNetworkAccessAllowed = true
+
+        return imageManager.requestImage(
+            for: asset,
+            targetSize: targetSize,
+            contentMode: .aspectFit,
+            options: options
+        ) { image, _ in
+            Task { @MainActor in completion(image) }
+        }
+    }
+
+    /// 封装 `requestPlayerItem` 对应的局部行为，供当前类型在统一入口下复用。
+    func requestPlayerItem(
+        for asset: PHAsset,
+        completion: @escaping @MainActor (AVPlayerItem?) -> Void
+    ) -> PHImageRequestID {
+        let options = PHVideoRequestOptions()
+        options.deliveryMode = .automatic
+        options.isNetworkAccessAllowed = true
+
+        return imageManager.requestPlayerItem(forVideo: asset, options: options) { item, _ in
+            Task { @MainActor in completion(item) }
+        }
+    }
+
+    /// 封装 `requestLivePhoto` 对应的局部行为，供当前类型在统一入口下复用。
+    func requestLivePhoto(
+        for asset: PHAsset,
+        targetSize: CGSize,
+        completion: @escaping @MainActor (PHLivePhoto?) -> Void
+    ) -> PHImageRequestID {
+        let options = PHLivePhotoRequestOptions()
+        options.deliveryMode = .highQualityFormat
+        options.isNetworkAccessAllowed = true
+
+        return imageManager.requestLivePhoto(
+            for: asset,
+            targetSize: targetSize,
+            contentMode: .aspectFit,
+            options: options
+        ) { livePhoto, _ in
+            Task { @MainActor in completion(livePhoto) }
+        }
+    }
+
+    /// 启动 `startAnalysis` 对应流程，并初始化本轮任务需要的状态。
+    func startAnalysis() {
+        guard !analysisState.isAnalyzing else { return }
+        guard !assets.isEmpty else {
+            analysisState = .empty
+            return
+        }
+
+        let assetsToAnalyze = assets
+        Task { await stateStore.saveMediaState(nil) }
+        analysisTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let result = try await classificationService.analyze(
+                    assets: assetsToAnalyze,
+                    progress: { [weak self] progress in
+                        self?.analysisState = .analyzing(progress)
+                    }
+                )
+
+                if result.skippedImageCount > 0 {
+                    analysisState = .partialFailure(result)
+                } else {
+                    analysisState = .success(result)
+                }
+                persistAnalysisState()
+            } catch is CancellationError {
+                analysisState = .cancelled
+            } catch {
+                analysisState = .failure(.unexpected)
+            }
+
+            analysisTask = nil
+        }
+    }
+
+    /// 取消 `cancelAnalysis` 对应的进行中任务，并收敛到可继续操作的状态。
+    func cancelAnalysis() {
+        guard analysisState.isAnalyzing else { return }
+        analysisTask?.cancel()
+        analysisTask = nil
+        analysisState = .cancelled
+    }
+
+    /// 执行 `deleteAssets` 移除流程，并同步更新受影响的业务状态。
+    func deleteAssets(withIDs assetIDs: Set<String>) async {
+        guard !assetIDs.isEmpty else {
+            deletionState = .failure(.noItemsSelected)
+            return
+        }
+        guard authorizationStatus == .authorized || authorizationStatus == .limited else {
+            deletionState = .failure(.photoAccessUnavailable)
+            return
+        }
+
+        let fetchResult = PHAsset.fetchAssets(
+            withLocalIdentifiers: Array(assetIDs),
+            options: nil
+        )
+        guard fetchResult.count > 0 else {
+            deletionState = .failure(.deletionFailed)
+            return
+        }
+
+        deletionState = .deleting(itemCount: fetchResult.count)
+        do {
+            try await PHPhotoLibrary.shared().performChanges {
+                PHAssetChangeRequest.deleteAssets(fetchResult)
+            }
+            let deletedIDs = Set((0..<fetchResult.count).map { fetchResult.object(at: $0).localIdentifier })
+            assets.removeAll { deletedIDs.contains($0.localIdentifier) }
+            rebuildAssetIndex()
+            updateAnalysisAfterDeleting(deletedIDs)
+            persistAnalysisState()
+            storageSnapshot = Self.loadStorageSnapshot()
+            deletionState = .success(deletedCount: deletedIDs.count)
+        } catch {
+            deletionState = .failure(.deletionFailed)
+        }
+    }
+
+    /// 重置 `clearDeletionResult` 管理的状态，避免旧任务或旧数据影响下一次操作。
+    func clearDeletionResult() {
+        guard !deletionState.isDeleting else { return }
+        deletionState = .idle
+    }
+
+    /// 加载 `fetchAssetsIfAllowed` 所需的数据，并将结果转换为当前层可消费的状态。
+    private func fetchAssetsIfAllowed() {
+        guard authorizationStatus == .authorized || authorizationStatus == .limited else {
+            assets = []
+            rebuildAssetIndex()
+            return
+        }
+
+        fetchAssets()
+    }
+
+    /// 加载 `fetchAssets` 所需的数据，并将结果转换为当前层可消费的状态。
+    private func fetchAssets() {
+        isLoading = true
+
+        let options = PHFetchOptions()
+        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        let result = PHAsset.fetchAssets(with: options)
+
+        var fetchedAssets: [PHAsset] = []
+        fetchedAssets.reserveCapacity(result.count)
+        result.enumerateObjects { asset, _, _ in
+            fetchedAssets.append(asset)
+        }
+
+        assets = fetchedAssets
+        rebuildAssetIndex()
+        isLoading = false
+    }
+
+    /// 封装 `rebuildAssetIndex` 对应的局部行为，供当前类型在统一入口下复用。
+    private func rebuildAssetIndex() {
+        assetsByIdentifier = Dictionary(
+            uniqueKeysWithValues: assets.map { ($0.localIdentifier, $0) }
+        )
+        estimatedPhotoLibraryBytes = assets.lazy
+            .filter { $0.mediaType == .image }
+            .reduce(Int64.zero) { $0 + Self.estimatedByteCount(for: $1) }
+        estimatedVideoLibraryBytes = assets.lazy
+            .filter { $0.mediaType == .video }
+            .reduce(Int64.zero) { $0 + Self.estimatedByteCount(for: $1) }
+        displayNamesByIdentifier = displayNamesByIdentifier.filter {
+            assetsByIdentifier[$0.key] != nil
+        }
+    }
+
+    /// 更新 `updateAnalysisAfterDeleting` 对应的数据，使界面状态与底层结果保持一致。
+    private func updateAnalysisAfterDeleting(_ deletedIDs: Set<String>) {
+        switch analysisState {
+        case .success(let result):
+            analysisState = .success(result.removingAssetIDs(deletedIDs))
+        case .partialFailure(let result):
+            analysisState = .partialFailure(result.removingAssetIDs(deletedIDs))
+        default:
+            break
+        }
+    }
+
+    /// 加载 `restoreAnalysis` 所需的数据，并将结果转换为当前层可消费的状态。
+    private func restoreAnalysis(from snapshot: MediaStateSnapshot?) {
+        guard let snapshot else {
+            if analysisState.isAnalyzing { analysisState = .cancelled }
+            return
+        }
+        let availableIDs = Set(assetsByIdentifier.keys)
+        let persistedIDs = Set(
+            snapshot.result.similarImageIDs
+                + snapshot.result.videoIDs
+                + snapshot.result.screenshotIDs
+                + snapshot.result.livePhotoIDs
+        )
+        let result = snapshot.result.removingAssetIDs(persistedIDs.subtracting(availableIDs))
+        analysisState = snapshot.isPartial ? .partialFailure(result) : .success(result)
+    }
+
+    /// 持久化 `persistAnalysisState` 对应的数据，并保持后续恢复所需的信息完整。
+    private func persistAnalysisState() {
+        let snapshot: MediaStateSnapshot?
+        switch analysisState {
+        case .success(let result):
+            snapshot = MediaStateSnapshot(result: result, isPartial: false)
+        case .partialFailure(let result):
+            snapshot = MediaStateSnapshot(result: result, isPartial: true)
+        default:
+            snapshot = nil
+        }
+        Task { await stateStore.saveMediaState(snapshot) }
+    }
+
+    /// 加载 `loadStorageSnapshot` 所需的数据，并将结果转换为当前层可消费的状态。
+    private static func loadStorageSnapshot() -> DeviceStorageSnapshot? {
+        let baseURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        guard let values = try? baseURL.resourceValues(forKeys: [
+            .volumeTotalCapacityKey,
+            .volumeAvailableCapacityForImportantUsageKey
+        ]),
+              let totalCapacity = values.volumeTotalCapacity,
+              let availableCapacity = values.volumeAvailableCapacityForImportantUsage else {
+            return nil
+        }
+
+        return DeviceStorageSnapshot(
+            totalBytes: Int64(totalCapacity),
+            availableBytes: availableCapacity
+        )
+    }
+
+    /// 封装 `estimatedByteCount` 对应的局部行为，供当前类型在统一入口下复用。
+    private static func estimatedByteCount(for asset: PHAsset) -> Int64 {
+        let pixelCount = Double(max(asset.pixelWidth, 1) * max(asset.pixelHeight, 1))
+        if asset.mediaType == .video {
+            let bitsPerSecond: Double
+            if max(asset.pixelWidth, asset.pixelHeight) >= 3_840 {
+                bitsPerSecond = 35_000_000
+            } else if max(asset.pixelWidth, asset.pixelHeight) >= 1_920 {
+                bitsPerSecond = 10_000_000
+            } else {
+                bitsPerSecond = 4_000_000
+            }
+            return Int64(max(asset.duration, 1) * bitsPerSecond / 8)
+        }
+
+        // PhotoKit does not expose original resource byte size. This estimate avoids
+        // reading full-resolution data or downloading iCloud assets just for a label.
+        let stillImageBytes = pixelCount * 0.32
+        let livePhotoVideoBytes = asset.mediaSubtypes.contains(.photoLive)
+            ? 3_000_000.0
+            : 0
+        return Int64(stillImageBytes + livePhotoVideoBytes)
+    }
+}
