@@ -37,6 +37,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         collectionView.backgroundColor = .clear
         collectionView.alwaysBounceVertical = true
         collectionView.showsVerticalScrollIndicator = false
+        collectionView.isDirectionalLockEnabled = true
         collectionView.contentInsetAdjustmentBehavior = .automatic
         collectionView.dataSource = context.coordinator
         collectionView.delegate = context.coordinator
@@ -94,16 +95,20 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         private var isCompletingTransition = false
         private var pinchAnchor: MediaPinchAnchor?
 
-        private var dragSelectionMode: MediaDragSelectionMode?
-        private var previousDragLocation: CGPoint?
-        private var visitedDuringDrag = Set<String>()
+        private var batchSelectionStartIndexPath: IndexPath?
+        private var batchSelectionStartLocation: CGPoint?
+        private var batchSelectionFurthestItem: Int?
+        private var isBatchSelectionActive = false
+        private var isBatchSelectionRejected = false
+        private var selectionFeedbackGenerator: UISelectionFeedbackGenerator?
+        private weak var batchSelectionPanGesture: UIPanGestureRecognizer?
 
         /// 保存初始 SwiftUI 配置，后续由 updateUIView 持续替换为最新值。
         init(parent: MediaInteractiveGrid) {
             self.parent = parent
         }
 
-        /// 安装捏合、长按和滚动手势监听；滚动手势同时承担选择模式下的滑动批选。
+        /// 安装捏合、长按和独立横向批选手势，避免批选依赖滚动手势的内部状态。
         func installGestures(on collectionView: UICollectionView) {
             let pinchGesture = UIPinchGestureRecognizer(
                 target: self,
@@ -121,10 +126,18 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             longPressGesture.delegate = self
             collectionView.addGestureRecognizer(longPressGesture)
 
-            collectionView.panGestureRecognizer.addTarget(
-                self,
+            let batchSelectionPanGesture = UIPanGestureRecognizer(
+                target: self,
                 action: #selector(handleSelectionPan(_:))
             )
+            batchSelectionPanGesture.maximumNumberOfTouches = 1
+            batchSelectionPanGesture.delegate = self
+            batchSelectionPanGesture.cancelsTouchesInView = true
+            collectionView.addGestureRecognizer(batchSelectionPanGesture)
+
+            // 垂直滚动先等待批选手势判断方向：向右时批选胜出，纵向时批选立即失败并交还滚动。
+            collectionView.panGestureRecognizer.require(toFail: batchSelectionPanGesture)
+            self.batchSelectionPanGesture = batchSelectionPanGesture
         }
 
         /// 生成只反映分区和资源顺序的签名，避免选择状态变化触发整表 reloadData。
@@ -227,6 +240,37 @@ struct MediaInteractiveGrid: UIViewRepresentable {
                 || otherGestureRecognizer is UIPinchGestureRecognizer
         }
 
+        /// 在手指落下时保存真正的起点；必须从缩略图内部起手才允许批选识别。
+        func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldReceive touch: UITouch
+        ) -> Bool {
+            guard gestureRecognizer === batchSelectionPanGesture else { return true }
+            guard parent.isSelecting, let collectionView else { return false }
+
+            synchronizeDensityWithInstalledLayout(in: collectionView)
+            guard
+                !isCompletingTransition,
+                !(collectionView.collectionViewLayout is UICollectionViewTransitionLayout)
+            else { return false }
+            resetBatchSelection()
+            let location = touch.location(in: collectionView)
+            beginBatchSelectionCandidate(at: location, in: collectionView)
+            return batchSelectionStartIndexPath != nil
+        }
+
+        /// 仅允许明确向右且横向占主导的一指拖动开始，纵向和向左手势直接失败。
+        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+            guard gestureRecognizer === batchSelectionPanGesture else { return true }
+            guard
+                let panGesture = gestureRecognizer as? UIPanGestureRecognizer,
+                batchSelectionStartIndexPath != nil
+            else { return false }
+
+            let velocity = panGesture.velocity(in: collectionView)
+            return velocity.x > 0 && velocity.x > abs(velocity.y) * 1.35
+        }
+
         // MARK: Cell and header configuration
 
         /// 使用 UIHostingConfiguration 承载现有 SwiftUI 缩略图视图，避免复制图片加载链路。
@@ -269,6 +313,17 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         private var displayedDensity: MediaGridDensity {
             guard transitionProgress >= 0.5, let targetDensity else { return density }
             return targetDensity
+        }
+
+        /// 从已经安装的稳定布局回读密度，防止布局完成回调与下一次手势到达顺序不同步。
+        private func synchronizeDensityWithInstalledLayout(in collectionView: UICollectionView) {
+            guard let layout = collectionView.collectionViewLayout as? MediaDensityFlowLayout else { return }
+            density = layout.density
+            // UIKit 已换回稳定布局即表示交互过渡结束；同步清除可能晚一拍的桥接状态，
+            // 避免刚缩放完成时 isCompletingTransition 继续阻断新的单指选择手势。
+            if transitionLayout != nil || isCompletingTransition {
+                resetLayoutTransitionState()
+            }
         }
 
         /// 安全读取指定 IndexPath 对应的资源标识。
@@ -520,8 +575,12 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
             guard
                 gesture.state == .began,
-                transitionLayout == nil,
-                let collectionView,
+                let collectionView
+            else { return }
+            synchronizeDensityWithInstalledLayout(in: collectionView)
+            guard
+                !isCompletingTransition,
+                !(collectionView.collectionViewLayout is UICollectionViewTransitionLayout),
                 let indexPath = collectionView.indexPathForItem(at: gesture.location(in: collectionView)),
                 let assetID = assetID(at: indexPath)
             else { return }
@@ -531,80 +590,164 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             refreshCell(for: assetID)
         }
 
-        /// 监听集合视图滚动手势，在选择模式下把经过的连续缩略图批量选中或取消。
+        /// 处理独立横向手势；方向竞争已在识别前完成，此处只负责更新批选范围。
         @objc private func handleSelectionPan(_ gesture: UIPanGestureRecognizer) {
-            guard parent.isSelecting, transitionLayout == nil, let collectionView else {
-                resetDragSelection()
+            guard
+                parent.isSelecting,
+                !isCompletingTransition,
+                let collectionView,
+                !(collectionView.collectionViewLayout is UICollectionViewTransitionLayout)
+            else {
+                resetBatchSelection()
                 return
             }
             let location = gesture.location(in: collectionView)
 
             switch gesture.state {
             case .began:
-                beginDragSelection(at: location, in: collectionView)
+                synchronizeDensityWithInstalledLayout(in: collectionView)
+                updateBatchSelection(
+                    gesture: gesture,
+                    at: location,
+                    in: collectionView
+                )
             case .changed:
-                if dragSelectionMode == nil {
-                    beginDragSelection(at: location, in: collectionView)
-                }
-                updateDragSelection(to: location, in: collectionView)
+                updateBatchSelection(
+                    gesture: gesture,
+                    at: location,
+                    in: collectionView
+                )
             case .ended, .cancelled, .failed:
-                resetDragSelection()
+                resetBatchSelection()
             default:
                 break
             }
         }
 
-        /// 以手势起点的当前选中状态决定本轮批选是添加还是移除。
-        private func beginDragSelection(
+        /// 记录手势起点；此时只准备触觉引擎，不改变任何资源的选择状态。
+        private func beginBatchSelectionCandidate(
+            at location: CGPoint,
+            in collectionView: UICollectionView
+        ) {
+            guard let indexPath = collectionView.indexPathForItem(at: location) else {
+                // 必须从缩略图内部起手；从标题或空白处开始的滚动不能中途变成批选。
+                isBatchSelectionRejected = true
+                return
+            }
+            batchSelectionStartIndexPath = indexPath
+            batchSelectionStartLocation = location
+            batchSelectionFurthestItem = nil
+            isBatchSelectionActive = false
+            isBatchSelectionRejected = false
+            selectionFeedbackGenerator = UISelectionFeedbackGenerator(view: collectionView)
+            selectionFeedbackGenerator?.prepare()
+        }
+
+        /// 使用平移量和速度建立方向门槛，避免上、下滚动时误触批量选择。
+        private func updateBatchSelection(
+            gesture: UIPanGestureRecognizer,
             at location: CGPoint,
             in collectionView: UICollectionView
         ) {
             guard
-                let indexPath = collectionView.indexPathForItem(at: location),
-                let assetID = assetID(at: indexPath)
+                let startIndexPath = batchSelectionStartIndexPath,
+                let startLocation = batchSelectionStartLocation,
+                !isBatchSelectionRejected
             else { return }
-            dragSelectionMode = parent.selectedIDs.contains(assetID) ? .deselecting : .selecting
-            previousDragLocation = location
-            visitedDuringDrag.removeAll(keepingCapacity: true)
-            applyDragSelection(to: assetID)
+
+            let translation = gesture.translation(in: collectionView)
+            let velocity = gesture.velocity(in: collectionView)
+            let horizontalDistance = translation.x
+            let verticalDistance = abs(translation.y)
+
+            if !isBatchSelectionActive {
+                // 一旦纵向意图先变得明确，整次手势固定为滚动，后续抖动不能重新触发批选。
+                if verticalDistance >= 10,
+                   verticalDistance > max(abs(horizontalDistance) * 1.2, 10) {
+                    isBatchSelectionRejected = true
+                    selectionFeedbackGenerator = nil
+                    return
+                }
+                if horizontalDistance <= -10,
+                   abs(horizontalDistance) > verticalDistance * 1.2 {
+                    // 向左滑同样固定为普通浏览手势，反向折返不能意外触发向右批选。
+                    isBatchSelectionRejected = true
+                    selectionFeedbackGenerator = nil
+                    return
+                }
+
+                // 只接受向右且横向占主导的动作；18pt 门槛过滤点击后的轻微手指偏移。
+                guard
+                    horizontalDistance >= 18,
+                    horizontalDistance > verticalDistance * 1.45,
+                    velocity.x > 0
+                else { return }
+
+                isBatchSelectionActive = true
+                applyBatchSelection(
+                    from: startIndexPath,
+                    through: startIndexPath,
+                    in: collectionView
+                )
+                selectionFeedbackGenerator?.selectionChanged()
+                selectionFeedbackGenerator?.prepare()
+            }
+
+            guard isBatchSelectionActive else { return }
+            let allowedVerticalDrift = batchSelectionVerticalTolerance(in: collectionView)
+            guard
+                horizontalDistance >= 0,
+                abs(location.y - startLocation.y) <= allowedVerticalDrift,
+                let endpoint = collectionView.indexPathForItem(at: location),
+                endpoint.section == startIndexPath.section,
+                endpoint.item >= startIndexPath.item,
+                row(of: endpoint.item) == row(of: startIndexPath.item)
+            else { return }
+
+            applyBatchSelection(
+                from: startIndexPath,
+                through: endpoint,
+                in: collectionView
+            )
         }
 
-        /// 对相邻手势回调之间的路径采样，避免快速滑动越过中间缩略图。
-        private func updateDragSelection(
-            to location: CGPoint,
+        /// 选中起点到当前右侧端点的同一行资源，并在端点扩展时提供一次选择触觉。
+        private func applyBatchSelection(
+            from startIndexPath: IndexPath,
+            through endpoint: IndexPath,
             in collectionView: UICollectionView
         ) {
-            guard let previousDragLocation else { return }
-            let deltaX = location.x - previousDragLocation.x
-            let deltaY = location.y - previousDragLocation.y
-            let distance = hypot(deltaX, deltaY)
-            let sampleCount = max(1, Int(ceil(distance / 10)))
+            let previousFurthestItem = batchSelectionFurthestItem ?? (startIndexPath.item - 1)
+            let newFurthestItem = max(previousFurthestItem, endpoint.item)
+            guard newFurthestItem > previousFurthestItem else { return }
+            var didChangeSelection = false
 
-            for index in 0 ... sampleCount {
-                let progress = CGFloat(index) / CGFloat(sampleCount)
-                let point = CGPoint(
-                    x: previousDragLocation.x + deltaX * progress,
-                    y: previousDragLocation.y + deltaY * progress
-                )
-                guard
-                    let indexPath = collectionView.indexPathForItem(at: point),
-                    let assetID = assetID(at: indexPath)
-                else { continue }
-                applyDragSelection(to: assetID)
+            for item in max(startIndexPath.item, previousFurthestItem + 1) ... newFurthestItem {
+                let indexPath = IndexPath(item: item, section: startIndexPath.section)
+                guard let assetID = assetID(at: indexPath) else { continue }
+                didChangeSelection = parent.selectedIDs.insert(assetID).inserted
+                    || didChangeSelection
+                refreshCell(for: assetID)
             }
-            self.previousDragLocation = location
+            batchSelectionFurthestItem = newFurthestItem
+
+            // 激活批选时已经反馈一次；之后每次扩展到新端点再反馈一个轻量“刻度”。
+            if previousFurthestItem >= startIndexPath.item, didChangeSelection {
+                selectionFeedbackGenerator?.selectionChanged()
+                selectionFeedbackGenerator?.prepare()
+            }
         }
 
-        /// 按本轮固定方向修改资源状态，并确保同一资源一次拖动只处理一次。
-        private func applyDragSelection(to assetID: String) {
-            guard visitedDuringDrag.insert(assetID).inserted, let dragSelectionMode else { return }
-            switch dragSelectionMode {
-            case .selecting:
-                parent.selectedIDs.insert(assetID)
-            case .deselecting:
-                parent.selectedIDs.remove(assetID)
-            }
-            refreshCell(for: assetID)
+        /// 根据稳定布局的列数计算行号，确保向右批选不会跨入下一行。
+        private func row(of item: Int) -> Int {
+            item / density.columnCount
+        }
+
+        /// 根据当前单元格高度设置允许的轻微斜向误差，同时阻止明显上下滑动进入批选。
+        private func batchSelectionVerticalTolerance(in collectionView: UICollectionView) -> CGFloat {
+            let itemHeight = (collectionView.collectionViewLayout as? MediaDensityFlowLayout)?.itemSize.height
+                ?? 44
+            return max(12, itemHeight * 0.38)
         }
 
         /// 切换单个资源的选中状态。
@@ -616,11 +759,14 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             }
         }
 
-        /// 结束批选并清理路径状态，下一次滑动重新判断添加或移除方向。
-        private func resetDragSelection() {
-            dragSelectionMode = nil
-            previousDragLocation = nil
-            visitedDuringDrag.removeAll(keepingCapacity: true)
+        /// 结束批选并释放触觉对象，下一次手势重新判断横向或纵向意图。
+        private func resetBatchSelection() {
+            batchSelectionStartIndexPath = nil
+            batchSelectionStartLocation = nil
+            batchSelectionFurthestItem = nil
+            isBatchSelectionActive = false
+            isBatchSelectionRejected = false
+            selectionFeedbackGenerator = nil
         }
     }
 }
@@ -919,10 +1065,4 @@ private enum MediaGridTransitionDirection {
 private struct MediaPinchAnchor {
     let indexPath: IndexPath
     let normalizedPoint: CGPoint
-}
-
-/// 表示一次滑动批选期间固定的添加或移除方向。
-private enum MediaDragSelectionMode {
-    case selecting
-    case deselecting
 }
