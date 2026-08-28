@@ -1,5 +1,15 @@
 "converter.title" = "Media Converter";
 "converter.heading" = "Convert";
+"conversion.home.image.title" = "Convert Images";
+"conversion.home.image.detail" = "Formats, compression quality, and private metadata";
+"conversion.home.image.tagline" = "HEIC conversion · Compression · Remove GPS";
+"conversion.home.video.title" = "Convert Video";
+"conversion.home.video.detail" = "Containers, codecs, and output resolution";
+"conversion.home.video.tagline" = "MP4 / MOV · Compression · Extract audio";
+"conversion.home.audio.title" = "Convert Audio";
+"conversion.home.audio.detail" = "Convert audio or extract it from video";
+"conversion.home.audio.tagline" = "M4A / AAC / WAV conversion";
+"conversion.home.history.summary" = "%@ · Converted %ld files";
 "import.title" = "Convert images locally";
 "import.subtitle" = "Files are processed on this device and are never uploaded.";
 "action.add_images" = "Add Images";

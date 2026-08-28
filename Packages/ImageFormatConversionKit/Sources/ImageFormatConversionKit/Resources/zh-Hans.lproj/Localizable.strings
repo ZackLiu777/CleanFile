@@ -1,5 +1,15 @@
 "converter.title" = "媒体格式转换";
 "converter.heading" = "转换";
+"conversion.home.image.title" = "图片转换";
+"conversion.home.image.detail" = "格式互转、压缩质量与隐私元数据";
+"conversion.home.image.tagline" = "HEIC 互转 · 压缩 · 去 GPS";
+"conversion.home.video.title" = "视频转换";
+"conversion.home.video.detail" = "转换容器、编码器与输出分辨率";
+"conversion.home.video.tagline" = "MP4 / MOV · 压缩 · 提取音频";
+"conversion.home.audio.title" = "音频转换";
+"conversion.home.audio.detail" = "音频格式互转，也可从视频提取音频";
+"conversion.home.audio.tagline" = "M4A / AAC / WAV 互转";
+"conversion.home.history.summary" = "%@ · 转换过 %ld 个文件";
 "import.title" = "在本地转换图片";
 "import.subtitle" = "文件只在此设备上处理，不会上传。";
 "action.add_images" = "添加图片";

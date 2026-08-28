@@ -1,5 +1,15 @@
 "converter.title" = "미디어 변환";
 "converter.heading" = "변환";
+"conversion.home.image.title" = "이미지 변환";
+"conversion.home.image.detail" = "형식, 압축 품질 및 개인 정보 메타데이터";
+"conversion.home.image.tagline" = "HEIC 변환 · 압축 · GPS 제거";
+"conversion.home.video.title" = "비디오 변환";
+"conversion.home.video.detail" = "컨테이너, 코덱 및 출력 해상도";
+"conversion.home.video.tagline" = "MP4 / MOV · 압축 · 오디오 추출";
+"conversion.home.audio.title" = "오디오 변환";
+"conversion.home.audio.detail" = "오디오 변환 및 비디오에서 오디오 추출";
+"conversion.home.audio.tagline" = "M4A / AAC / WAV 변환";
+"conversion.home.history.summary" = "%@ · %ld개 파일 변환";
 "import.title" = "기기에서 이미지 변환";
 "import.subtitle" = "파일은 이 기기에서만 처리되며 업로드되지 않습니다.";
 "action.add_images" = "이미지 추가";

@@ -246,17 +246,19 @@ private struct FormatChipSection: View {
 }
 
 @MainActor
-private struct ImageConversionContentView: View {
+struct ImageConversionContentView: View {
     @State private var viewModel: ImageConversionViewModel
+    @State private var importSession: ConversionImportSession
     @State private var isImporterPresented = false
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var isClearAllConfirmationPresented = false
-    @State private var libraryImportProgress: ConversionImportProgress?
-    @State private var pendingImportCount = 0
-    @State private var pendingPreviewURLs: [URL] = []
 
-    init(viewModel: ImageConversionViewModel = ImageConversionViewModel()) {
+    init(
+        viewModel: ImageConversionViewModel = ImageConversionViewModel(),
+        importSession: ConversionImportSession = ConversionImportSession()
+    ) {
         _viewModel = State(initialValue: viewModel)
+        _importSession = State(initialValue: importSession)
     }
 
     public var body: some View {
@@ -315,15 +317,19 @@ private struct ImageConversionContentView: View {
     }
 
     private var activeImportProgress: ConversionImportProgress? {
-        libraryImportProgress ?? viewModel.importProgress
+        importSession.libraryProgress ?? viewModel.importProgress
     }
 
     private var shouldShowImportCard: Bool {
-        viewModel.items.isEmpty && activeImportProgress == nil && pendingImportCount == 0
+        viewModel.items.isEmpty && activeImportProgress == nil && importSession.pendingCount == 0
     }
 
     private var displayedFileCount: Int {
-        max(viewModel.items.count, pendingImportCount)
+        max(
+            viewModel.items.count,
+            importSession.pendingCount,
+            activeImportProgress?.total ?? 0
+        )
     }
 
     private var importCard: some View {
@@ -363,16 +369,21 @@ private struct ImageConversionContentView: View {
     }
 
     private func importPhotos(_ selections: [PhotosPickerItem]) async {
-        pendingImportCount = selections.count
+        let sessionID = UUID()
+        importSession.librarySessionID = sessionID
+        importSession.pendingCount = selections.count
         defer {
             selectedPhotoItems = []
-            libraryImportProgress = nil
-            pendingImportCount = 0
-            pendingPreviewURLs = []
+            if importSession.librarySessionID == sessionID {
+                importSession.librarySessionID = nil
+                importSession.libraryProgress = nil
+            }
+            importSession.pendingCount = 0
+            importSession.previewURLs = []
         }
         var urls: [URL] = []
         for (index, selection) in selections.enumerated() {
-            libraryImportProgress = ConversionImportProgress(
+            importSession.libraryProgress = ConversionImportProgress(
                 completed: index,
                 total: selections.count,
                 currentFileName: nil
@@ -383,7 +394,8 @@ private struct ImageConversionContentView: View {
                     type: ImportedPhotoFile.self,
                     progress: { fraction in
                         Task { @MainActor in
-                            libraryImportProgress = ConversionImportProgress(
+                            guard importSession.librarySessionID == sessionID else { return }
+                            importSession.libraryProgress = ConversionImportProgress(
                                 completed: index,
                                 total: selections.count,
                                 currentFileName: nil,
@@ -393,27 +405,28 @@ private struct ImageConversionContentView: View {
                     }
                 ) {
                     urls.append(imported.url)
-                    pendingPreviewURLs.append(imported.url)
+                    importSession.previewURLs.append(imported.url)
                 }
             } catch {
                 viewModel.reportImportFailure(error.localizedDescription)
             }
-            libraryImportProgress = ConversionImportProgress(
+            importSession.libraryProgress = ConversionImportProgress(
                 completed: index + 1,
                 total: selections.count,
                 currentFileName: nil
             ).mapped(to: 0 ... 0.95)
         }
-        libraryImportProgress = nil
+        importSession.librarySessionID = nil
+        importSession.libraryProgress = nil
         await viewModel.addFiles(urls, progressRange: 0.95 ... 1)
     }
 
     private func importFiles(_ urls: [URL]) async {
-        pendingImportCount = urls.count
-        pendingPreviewURLs = urls
+        importSession.pendingCount = urls.count
+        importSession.previewURLs = urls
         defer {
-            pendingImportCount = 0
-            pendingPreviewURLs = []
+            importSession.pendingCount = 0
+            importSession.previewURLs = []
         }
         await viewModel.addFiles(urls)
     }
@@ -429,10 +442,11 @@ private struct ImageConversionContentView: View {
             onClear: { isClearAllConfirmationPresented = true }
         ) {
             ForEach(viewModel.items) { item in
+                let presentationURL = imageOutputURL(item.status) ?? item.sourceURL
                 ConversionFileTile(
-                    url: item.sourceURL,
+                    url: presentationURL,
                     kind: .image,
-                    title: item.sourceURL.lastPathComponent,
+                    title: presentationURL.lastPathComponent,
                     subtitle: imageSubtitle(item),
                     phase: imagePhase(item.status),
                     statusLabel: imageStatusText(item.status),
@@ -442,7 +456,7 @@ private struct ImageConversionContentView: View {
                 )
             }
 
-            ForEach(Array(pendingPreviewURLs.dropFirst(min(viewModel.items.count, pendingPreviewURLs.count)).enumerated()), id: \.offset) { _, url in
+            ForEach(Array(importSession.previewURLs.dropFirst(min(viewModel.items.count, importSession.previewURLs.count)).enumerated()), id: \.offset) { _, url in
                 ConversionFileTile(
                     url: url,
                     kind: .image,
@@ -456,7 +470,7 @@ private struct ImageConversionContentView: View {
                 )
             }
 
-            let representedCount = max(viewModel.items.count, pendingPreviewURLs.count)
+            let representedCount = max(viewModel.items.count, importSession.previewURLs.count)
             if displayedFileCount > representedCount {
                 ForEach(representedCount ..< displayedFileCount, id: \.self) { index in
                     ConversionPendingFileTile(index: index, kind: .image)
@@ -577,29 +591,34 @@ private struct ImageConversionSettingsCard: View {
                 }
             }
 
-            if viewModel.outputFormat.supportsQuality {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text(L10n.string("settings.quality"))
-                        Spacer()
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(L10n.string("settings.quality"))
+                    Spacer()
+                    if viewModel.outputFormat.supportsQuality {
                         Text(viewModel.quality, format: .percent.precision(.fractionLength(0)))
                             .foregroundStyle(.secondary)
                             .monospacedDigit()
+                    } else {
+                        Text("—")
+                            .foregroundStyle(.tertiary)
                     }
-                    Slider(value: $viewModel.quality, in: 0.1 ... 1, step: 0.05)
-
-                    HStack {
-                        Text(L10n.string("quality.smaller"))
-                        Spacer()
-                        Text(L10n.string("quality.balanced"))
-                        Spacer()
-                        Text(L10n.string("quality.best"))
-                    }
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-
                 }
+                Slider(value: $viewModel.quality, in: 0.1 ... 1, step: 0.05)
+
+                HStack {
+                    Text(L10n.string("quality.smaller"))
+                    Spacer()
+                    Text(L10n.string("quality.balanced"))
+                    Spacer()
+                    Text(L10n.string("quality.best"))
+                }
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
             }
+            .disabled(!viewModel.outputFormat.supportsQuality)
+            .opacity(viewModel.outputFormat.supportsQuality ? 1 : 0.42)
+            .animation(.easeInOut(duration: 0.18), value: viewModel.outputFormat)
 
             if viewModel.outputFormat.requiresOpaquePixels {
                 settingRow(title: L10n.string("settings.transparent_background")) {
@@ -678,10 +697,10 @@ private struct ImageConversionFileRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            ConversionFileThumbnail(url: item.sourceURL, kind: .image)
+            ConversionFileThumbnail(url: presentationURL, kind: .image)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(item.sourceURL.lastPathComponent)
+                Text(presentationURL.lastPathComponent)
                     .font(.subheadline.weight(.medium))
                     .lineLimit(1)
 
@@ -726,6 +745,11 @@ private struct ImageConversionFileRow: View {
 
             trailingAction
         }
+    }
+
+    private var presentationURL: URL {
+        guard case let .completed(outputURL) = item.status else { return item.sourceURL }
+        return outputURL
     }
 
     private var statusPhase: ConversionFilePhase {

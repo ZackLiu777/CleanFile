@@ -3,11 +3,18 @@ import UniformTypeIdentifiers
 
 @MainActor
 struct AudioConversionView: View {
-    @State private var viewModel = AudioConversionViewModel()
+    @State private var viewModel: AudioConversionViewModel
+    @State private var importSession: ConversionImportSession
     @State private var mediaImporterPresented = false
     @State private var isClearAllConfirmationPresented = false
-    @State private var pendingImportCount = 0
-    @State private var pendingPreviewURLs: [URL] = []
+
+    init(
+        viewModel: AudioConversionViewModel = AudioConversionViewModel(),
+        importSession: ConversionImportSession = ConversionImportSession()
+    ) {
+        _viewModel = State(initialValue: viewModel)
+        _importSession = State(initialValue: importSession)
+    }
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -47,11 +54,17 @@ struct AudioConversionView: View {
     }
 
     private var shouldShowImportCard: Bool {
-        viewModel.items.isEmpty && viewModel.importProgress == nil && pendingImportCount == 0
+        viewModel.items.isEmpty
+            && viewModel.importProgress == nil
+            && importSession.pendingCount == 0
     }
 
     private var displayedFileCount: Int {
-        max(viewModel.items.count, pendingImportCount)
+        max(
+            viewModel.items.count,
+            importSession.pendingCount,
+            viewModel.importProgress?.total ?? 0
+        )
     }
 
     private var audioInputTypes: [UTType] {
@@ -103,11 +116,11 @@ struct AudioConversionView: View {
     }
 
     private func importFiles(_ urls: [URL]) async {
-        pendingImportCount = urls.count
-        pendingPreviewURLs = urls
+        importSession.pendingCount = urls.count
+        importSession.previewURLs = urls
         defer {
-            pendingImportCount = 0
-            pendingPreviewURLs = []
+            importSession.pendingCount = 0
+            importSession.previewURLs = []
         }
         await importMediaFiles(urls)
     }
@@ -195,10 +208,11 @@ struct AudioConversionView: View {
             onClear: { isClearAllConfirmationPresented = true }
         ) {
             ForEach(viewModel.items) { item in
+                let presentationURL = outputURL(item.status) ?? item.sourceURL
                 ConversionFileTile(
-                    url: item.sourceURL,
-                    kind: item.sourceKind == .video ? .video : .audio,
-                    title: item.sourceURL.lastPathComponent,
+                    url: presentationURL,
+                    kind: outputURL(item.status) == nil && item.sourceKind == .video ? .video : .audio,
+                    title: presentationURL.lastPathComponent,
                     subtitle: "\(sourceDescription(item)) · \(sizeDescription(item))",
                     phase: phase(item.status),
                     statusLabel: statusString(item.status),
@@ -208,7 +222,7 @@ struct AudioConversionView: View {
                 )
             }
 
-            ForEach(Array(pendingPreviewURLs.dropFirst(min(viewModel.items.count, pendingPreviewURLs.count)).enumerated()), id: \.offset) { _, url in
+            ForEach(Array(importSession.previewURLs.dropFirst(min(viewModel.items.count, importSession.previewURLs.count)).enumerated()), id: \.offset) { _, url in
                 let kind: ConversionFileKind = ["mov", "mp4", "m4v"].contains(url.pathExtension.lowercased())
                     ? .video
                     : .audio
@@ -225,7 +239,7 @@ struct AudioConversionView: View {
                 )
             }
 
-            let representedCount = max(viewModel.items.count, pendingPreviewURLs.count)
+            let representedCount = max(viewModel.items.count, importSession.previewURLs.count)
             if displayedFileCount > representedCount {
                 ForEach(representedCount ..< displayedFileCount, id: \.self) { index in
                     ConversionPendingFileTile(index: index, kind: .audio)

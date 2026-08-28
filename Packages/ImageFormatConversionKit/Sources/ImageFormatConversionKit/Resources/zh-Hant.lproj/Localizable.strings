@@ -1,5 +1,15 @@
 "converter.title" = "媒體格式轉換";
 "converter.heading" = "轉換";
+"conversion.home.image.title" = "圖片轉換";
+"conversion.home.image.detail" = "格式互轉、壓縮品質與隱私中繼資料";
+"conversion.home.image.tagline" = "HEIC 互轉 · 壓縮 · 移除 GPS";
+"conversion.home.video.title" = "影片轉換";
+"conversion.home.video.detail" = "轉換容器、編碼器與輸出解析度";
+"conversion.home.video.tagline" = "MP4 / MOV · 壓縮 · 擷取音訊";
+"conversion.home.audio.title" = "音訊轉換";
+"conversion.home.audio.detail" = "音訊格式互轉，也可從影片擷取音訊";
+"conversion.home.audio.tagline" = "M4A / AAC / WAV 互轉";
+"conversion.home.history.summary" = "%@ · 轉換過 %ld 個檔案";
 "import.title" = "在本機轉換圖片";
 "import.subtitle" = "檔案只在此裝置上處理，不會上傳。";
 "action.add_images" = "加入圖片";

@@ -1,5 +1,15 @@
 "converter.title" = "メディア変換";
 "converter.heading" = "変換";
+"conversion.home.image.title" = "画像を変換";
+"conversion.home.image.detail" = "形式、圧縮品質、プライバシーメタデータ";
+"conversion.home.image.tagline" = "HEIC 変換 · 圧縮 · GPS 削除";
+"conversion.home.video.title" = "ビデオを変換";
+"conversion.home.video.detail" = "コンテナ、コーデック、出力解像度";
+"conversion.home.video.tagline" = "MP4 / MOV · 圧縮 · 音声抽出";
+"conversion.home.audio.title" = "オーディオを変換";
+"conversion.home.audio.detail" = "音声変換とビデオからの音声抽出";
+"conversion.home.audio.tagline" = "M4A / AAC / WAV 変換";
+"conversion.home.history.summary" = "%@ · %ld ファイルを変換";
 "import.title" = "端末内で画像を変換";
 "import.subtitle" = "ファイルはこの端末上だけで処理され、アップロードされません。";
 "action.add_images" = "画像を追加";

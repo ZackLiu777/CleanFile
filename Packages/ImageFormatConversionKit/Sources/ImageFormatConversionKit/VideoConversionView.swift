@@ -4,14 +4,19 @@ import UniformTypeIdentifiers
 
 @MainActor
 struct VideoConversionView: View {
-    @State private var viewModel = VideoConversionViewModel()
+    @State private var viewModel: VideoConversionViewModel
+    @State private var importSession: ConversionImportSession
     @State private var importerPresented = false
     @State private var selectedVideoItems: [PhotosPickerItem] = []
     @State private var isClearAllConfirmationPresented = false
-    @State private var libraryImportProgress: ConversionImportProgress?
-    @State private var libraryImportSessionID: UUID?
-    @State private var pendingImportCount = 0
-    @State private var pendingPreviewURLs: [URL] = []
+
+    init(
+        viewModel: VideoConversionViewModel = VideoConversionViewModel(),
+        importSession: ConversionImportSession = ConversionImportSession()
+    ) {
+        _viewModel = State(initialValue: viewModel)
+        _importSession = State(initialValue: importSession)
+    }
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -55,15 +60,19 @@ struct VideoConversionView: View {
     }
 
     private var activeImportProgress: ConversionImportProgress? {
-        libraryImportProgress ?? viewModel.importProgress
+        importSession.libraryProgress ?? viewModel.importProgress
     }
 
     private var shouldShowImportCard: Bool {
-        viewModel.items.isEmpty && activeImportProgress == nil && pendingImportCount == 0
+        viewModel.items.isEmpty && activeImportProgress == nil && importSession.pendingCount == 0
     }
 
     private var displayedFileCount: Int {
-        max(viewModel.items.count, pendingImportCount)
+        max(
+            viewModel.items.count,
+            importSession.pendingCount,
+            activeImportProgress?.total ?? 0
+        )
     }
 
     private var supportedVideoImportTypes: [UTType] {
@@ -102,20 +111,20 @@ struct VideoConversionView: View {
 
     private func importVideos(_ selections: [PhotosPickerItem]) async {
         let sessionID = UUID()
-        libraryImportSessionID = sessionID
-        pendingImportCount = selections.count
+        importSession.librarySessionID = sessionID
+        importSession.pendingCount = selections.count
         defer {
             selectedVideoItems = []
-            if libraryImportSessionID == sessionID {
-                libraryImportSessionID = nil
-                libraryImportProgress = nil
+            if importSession.librarySessionID == sessionID {
+                importSession.librarySessionID = nil
+                importSession.libraryProgress = nil
             }
-            pendingImportCount = 0
-            pendingPreviewURLs = []
+            importSession.pendingCount = 0
+            importSession.previewURLs = []
         }
         var urls: [URL] = []
         for (index, selection) in selections.enumerated() {
-            libraryImportProgress = ConversionImportProgress(
+            importSession.libraryProgress = ConversionImportProgress(
                 completed: index,
                 total: selections.count,
                 currentFileName: nil
@@ -126,8 +135,8 @@ struct VideoConversionView: View {
                     type: ImportedVideoFile.self,
                     progress: { fraction in
                         Task { @MainActor in
-                            guard libraryImportSessionID == sessionID else { return }
-                            libraryImportProgress = ConversionImportProgress(
+                            guard importSession.librarySessionID == sessionID else { return }
+                            importSession.libraryProgress = ConversionImportProgress(
                                 completed: index,
                                 total: selections.count,
                                 currentFileName: nil,
@@ -137,12 +146,12 @@ struct VideoConversionView: View {
                     }
                 ) {
                     urls.append(imported.url)
-                    pendingPreviewURLs.append(imported.url)
+                    importSession.previewURLs.append(imported.url)
                 }
             } catch {
                 viewModel.reportImportFailure(error.localizedDescription)
             }
-            libraryImportProgress = ConversionImportProgress(
+            importSession.libraryProgress = ConversionImportProgress(
                 completed: index + 1,
                 total: selections.count,
                 currentFileName: nil
@@ -152,17 +161,17 @@ struct VideoConversionView: View {
         // the PhotoKit acquisition phase once all source URLs are available.
         // Invalidate the session first so queued PhotoKit callbacks cannot put
         // the completed 95% acquisition state back on screen.
-        libraryImportSessionID = nil
-        libraryImportProgress = nil
+        importSession.librarySessionID = nil
+        importSession.libraryProgress = nil
         await viewModel.addFiles(urls, progressRange: 0.95 ... 1)
     }
 
     private func importFiles(_ urls: [URL]) async {
-        pendingImportCount = urls.count
-        pendingPreviewURLs = urls
+        importSession.pendingCount = urls.count
+        importSession.previewURLs = urls
         defer {
-            pendingImportCount = 0
-            pendingPreviewURLs = []
+            importSession.pendingCount = 0
+            importSession.previewURLs = []
         }
         await viewModel.addFiles(urls)
     }
@@ -262,10 +271,11 @@ struct VideoConversionView: View {
             onClear: { isClearAllConfirmationPresented = true }
         ) {
             ForEach(viewModel.items) { item in
+                let presentationURL = outputURL(item.status) ?? item.sourceURL
                 ConversionFileTile(
-                    url: item.sourceURL,
+                    url: presentationURL,
                     kind: .video,
-                    title: item.sourceURL.lastPathComponent,
+                    title: presentationURL.lastPathComponent,
                     subtitle: sizeDescription(item),
                     phase: phase(item.status),
                     statusLabel: statusText(item.status),
@@ -275,7 +285,7 @@ struct VideoConversionView: View {
                 )
             }
 
-            ForEach(Array(pendingPreviewURLs.dropFirst(min(viewModel.items.count, pendingPreviewURLs.count)).enumerated()), id: \.offset) { _, url in
+            ForEach(Array(importSession.previewURLs.dropFirst(min(viewModel.items.count, importSession.previewURLs.count)).enumerated()), id: \.offset) { _, url in
                 ConversionFileTile(
                     url: url,
                     kind: .video,
@@ -289,7 +299,7 @@ struct VideoConversionView: View {
                 )
             }
 
-            let representedCount = max(viewModel.items.count, pendingPreviewURLs.count)
+            let representedCount = max(viewModel.items.count, importSession.previewURLs.count)
             if displayedFileCount > representedCount {
                 ForEach(representedCount ..< displayedFileCount, id: \.self) { index in
                     ConversionPendingFileTile(index: index, kind: .video)

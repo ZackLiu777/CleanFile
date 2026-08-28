@@ -41,7 +41,10 @@ struct ContentView: View {
                 }
                 .tag(AppTab.storage)
 
-            ImageConversionView(theme: theme.conversionTheme)
+            ConversionHomeView(
+                theme: theme.conversionTheme,
+                isTabActive: selectedTab == .conversion
+            )
                 .tabItem {
                     Label("Convert", systemImage: "arrow.triangle.2.circlepath")
                 }

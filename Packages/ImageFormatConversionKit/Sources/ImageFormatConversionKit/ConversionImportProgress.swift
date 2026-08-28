@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import SwiftUI
 
 struct ConversionImportProgress: Equatable, Sendable {
@@ -39,6 +40,17 @@ struct ConversionImportProgress: Equatable, Sendable {
             currentFileFraction: lower + ((upper - lower) * fractionCompleted)
         )
     }
+}
+
+/// Keeps the presentation phase of an import alive while a conversion detail
+/// page is temporarily removed from the navigation stack.
+@MainActor
+@Observable
+final class ConversionImportSession {
+    var libraryProgress: ConversionImportProgress?
+    var librarySessionID: UUID?
+    var pendingCount = 0
+    var previewURLs: [URL] = []
 }
 
 private struct AnimatedImportPercentage: View, Animatable {

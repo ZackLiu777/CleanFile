@@ -1,5 +1,15 @@
 "converter.title" = "Conversor multimedia";
 "converter.heading" = "Convertir";
+"conversion.home.image.title" = "Convertir imágenes";
+"conversion.home.image.detail" = "Formatos, compresión y metadatos privados";
+"conversion.home.image.tagline" = "Conversión HEIC · Compresión · Sin GPS";
+"conversion.home.video.title" = "Convertir vídeo";
+"conversion.home.video.detail" = "Contenedores, códecs y resolución de salida";
+"conversion.home.video.tagline" = "MP4 / MOV · Compresión · Extraer audio";
+"conversion.home.audio.title" = "Convertir audio";
+"conversion.home.audio.detail" = "Convierte audio o extráelo de un vídeo";
+"conversion.home.audio.tagline" = "Conversión M4A / AAC / WAV";
+"conversion.home.history.summary" = "%@ · %ld archivos convertidos";
 "import.title" = "Convierte imágenes localmente";
 "import.subtitle" = "Los archivos se procesan en este dispositivo y nunca se suben.";
 "action.add_images" = "Añadir imágenes";
