@@ -694,11 +694,18 @@ private struct MediaCategoryDetailView: View {
     @State private var assetFrames: [String: CGRect] = [:]
     @State private var dragSelectionMode: DragSelectionMode?
     @State private var previousDragLocation: CGPoint?
+    @State private var gridDensity = MediaGridDensity.large
+    @State private var pinchStartDensity: MediaGridDensity?
 
-    private let albumColumns = [
-        GridItem(.flexible(minimum: 0), spacing: 3),
-        GridItem(.flexible(minimum: 0), spacing: 3)
-    ]
+    private var albumColumns: [GridItem] {
+        Array(
+            repeating: GridItem(
+                .flexible(minimum: 0),
+                spacing: gridDensity.spacing
+            ),
+            count: gridDensity.columnCount
+        )
+    }
 
     private var visibleAssetIDs: [String] {
         assetIDs.filter { viewModel.asset(withIdentifier: $0) != nil }
@@ -739,7 +746,7 @@ private struct MediaCategoryDetailView: View {
                     LazyVStack(spacing: 14) {
                         ForEach(dateSections) { section in
                             Section {
-                                LazyVGrid(columns: albumColumns, spacing: 3) {
+                                LazyVGrid(columns: albumColumns, spacing: gridDensity.spacing) {
                                     ForEach(section.assetIDs, id: \.self) { assetID in
                                         assetButton(assetID)
                                     }
@@ -755,6 +762,7 @@ private struct MediaCategoryDetailView: View {
                     assetFrames = frames
                 }
                 .simultaneousGesture(dragSelectionGesture)
+                .simultaneousGesture(gridMagnificationGesture)
                 .appSoftScrollEdge()
             }
         }
@@ -890,13 +898,19 @@ private struct MediaCategoryDetailView: View {
                     selectionIndicator(for: assetID)
                 }
                 .overlay(alignment: .topLeading) {
-                    livePhotoBadge(for: assetID)
+                    if gridDensity.showsBadges {
+                        livePhotoBadge(for: assetID)
+                    }
                 }
                 .overlay(alignment: .topLeading) {
-                    videoDurationBadge(for: assetID)
+                    if gridDensity.showsBadges {
+                        videoDurationBadge(for: assetID)
+                    }
                 }
                 .overlay(alignment: .bottom) {
-                    assetInformation(for: assetID)
+                    if gridDensity.showsMetadata {
+                        assetInformation(for: assetID)
+                    }
                 }
                 .contentShape(Rectangle())
                 .clipped()
@@ -922,11 +936,33 @@ private struct MediaCategoryDetailView: View {
         )
     }
 
+    /// 通过双指捏合在 2、5、8 列三档网格之间切换，并保持每次手势只基于起始档位计算。
+    private var gridMagnificationGesture: some Gesture {
+        MagnifyGesture(minimumScaleDelta: 0.06)
+            .onChanged { value in
+                if pinchStartDensity == nil {
+                    pinchStartDensity = gridDensity
+                    resetDragSelection()
+                }
+                guard let pinchStartDensity else { return }
+                let targetDensity = pinchStartDensity.adjusted(
+                    forMagnification: value.magnification
+                )
+                guard targetDensity != gridDensity else { return }
+                withAnimation(.snappy(duration: 0.18)) {
+                    gridDensity = targetDensity
+                }
+            }
+            .onEnded { _ in
+                pinchStartDensity = nil
+            }
+    }
+
     /// 在选择模式下把手指滑过的连续缩略图映射为批量选中或批量取消操作。
     private var dragSelectionGesture: some Gesture {
         DragGesture(minimumDistance: 6, coordinateSpace: .named(MediaSelectionCoordinateSpace.name))
             .onChanged { value in
-                guard isSelecting else { return }
+                guard isSelecting, pinchStartDensity == nil else { return }
                 updateDragSelection(with: value)
             }
             .onEnded { _ in
@@ -1128,14 +1164,14 @@ private struct MediaCategoryDetailView: View {
             Image(systemName: selectedIDs.contains(assetID)
                 ? "checkmark.circle.fill"
                 : "circle")
-                .font(.title2)
+                .font(gridDensity.selectionIndicatorFont)
                 .foregroundStyle(
                     selectedIDs.contains(assetID)
                         ? theme.accentPrimary
                         : .white
                 )
                 .shadow(radius: 2)
-                .padding(6)
+                .padding(gridDensity.selectionIndicatorPadding)
         }
     }
 
@@ -1156,6 +1192,78 @@ private struct MediaCategoryDetailView: View {
         default:
             ""
         }
+    }
+}
+
+/// 定义媒体相册的三档缩略图密度：大图 2 列、中图 5 列、小图 8 列。
+nonisolated private enum MediaGridDensity: Int, CaseIterable {
+    case large = 0
+    case medium = 1
+    case compact = 2
+
+    /// 返回当前档位对应的固定列数，确保布局不会停留在不可预测的中间尺寸。
+    var columnCount: Int {
+        switch self {
+        case .large: 2
+        case .medium: 5
+        case .compact: 8
+        }
+    }
+
+    /// 较密网格使用更窄间距，让小缩略图仍保持清晰、连续的相册观感。
+    var spacing: CGFloat {
+        switch self {
+        case .large: 3
+        case .medium: 2
+        case .compact: 1
+        }
+    }
+
+    /// 文件名和体积只在最大档展示，避免五列和八列模式出现文字遮挡。
+    var showsMetadata: Bool { self == .large }
+
+    /// Live Photo 与视频时长在八列模式隐藏，为选择状态保留足够空间。
+    var showsBadges: Bool { self != .compact }
+
+    /// 根据网格密度缩放选择标记，同时维持各档位可辨识度。
+    var selectionIndicatorFont: Font {
+        switch self {
+        case .large: .title2
+        case .medium: .body
+        case .compact: .caption2
+        }
+    }
+
+    /// 根据网格密度缩小选择标记边距，防止八列模式覆盖大部分缩略图。
+    var selectionIndicatorPadding: CGFloat {
+        switch self {
+        case .large: 6
+        case .medium: 3
+        case .compact: 1
+        }
+    }
+
+    /// 将一次捏合相对起点映射到相邻或跨越两级的目标密度。
+    func adjusted(forMagnification magnification: CGFloat) -> MediaGridDensity {
+        let offset: Int
+        switch magnification {
+        case 1.55...:
+            offset = -2
+        case 1.14...:
+            offset = -1
+        case ...0.65:
+            offset = 2
+        case ...0.87:
+            offset = 1
+        default:
+            offset = 0
+        }
+
+        let targetRawValue = min(
+            MediaGridDensity.compact.rawValue,
+            max(MediaGridDensity.large.rawValue, rawValue + offset)
+        )
+        return MediaGridDensity(rawValue: targetRawValue) ?? self
     }
 }
 
