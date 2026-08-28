@@ -15,8 +15,8 @@ struct MediaClassificationService {
     typealias ProgressHandler = @MainActor @Sendable (MediaAnalysisProgress) -> Void
 
     private let maximumConcurrentFeatureRequests = 2
-    private let sequenceInterval: TimeInterval = 12
     private let maximumPerceptualHashDistance = 16
+    private let maximumHashMatchesPerImage = 32
     // Vision has no universal distance threshold. Start conservatively and
     // calibrate this value against representative user photo libraries.
     private let maximumFeaturePrintDistance: Float = 0.55
@@ -130,40 +130,18 @@ struct MediaClassificationService {
 
     /// 封装 `similarityCandidates` 对应的局部行为，供当前类型在统一入口下复用。
     private func similarityCandidates(from assets: [PHAsset]) -> [SimilarityCandidate] {
-        let eligibleAssets = assets
-            .filter { !$0.mediaSubtypes.contains(.photoScreenshot) }
-            .compactMap { asset -> (PHAsset, Date)? in
-                guard let creationDate = asset.creationDate else { return nil }
-                return (asset, creationDate)
-            }
-            .sorted { $0.1 < $1.1 }
-
-        var sequences: [[(PHAsset, Date)]] = []
-        for item in eligibleAssets {
-            if let lastDate = sequences.last?.last?.1,
-               item.1.timeIntervalSince(lastDate) <= sequenceInterval {
-                sequences[sequences.count - 1].append(item)
-            } else {
-                sequences.append([item])
-            }
-        }
-
-        return sequences.filter { $0.count > 1 }.flatMap { sequence in
-            let sequenceID = sequence[0].0.localIdentifier
-            return sequence.map { asset, creationDate in
-                SimilarityCandidate(
-                    id: asset.localIdentifier,
-                    sequenceID: sequenceID,
+        assets.map { asset in
+            SimilarityCandidate(
+                id: asset.localIdentifier,
+                pixelWidth: asset.pixelWidth,
+                pixelHeight: asset.pixelHeight,
+                creationDate: asset.creationDate,
+                cacheKey: FeatureCacheKey(
+                    modificationDate: asset.modificationDate,
                     pixelWidth: asset.pixelWidth,
-                    pixelHeight: asset.pixelHeight,
-                    creationDate: creationDate,
-                    cacheKey: FeatureCacheKey(
-                        modificationDate: asset.modificationDate,
-                        pixelWidth: asset.pixelWidth,
-                        pixelHeight: asset.pixelHeight
-                    )
+                    pixelHeight: asset.pixelHeight
                 )
-            }
+            )
         }
     }
 
@@ -228,7 +206,6 @@ struct MediaClassificationService {
             ) {
                 return FeatureOutcome(feature: CandidateFeature(
                     id: candidate.id,
-                    sequenceID: candidate.sequenceID,
                     perceptualHash: hash,
                     creationDate: candidate.creationDate
                 ))
@@ -241,7 +218,6 @@ struct MediaClassificationService {
             )
             return FeatureOutcome(feature: CandidateFeature(
                 id: candidate.id,
-                sequenceID: candidate.sequenceID,
                 perceptualHash: hash,
                 creationDate: candidate.creationDate
             ))
@@ -293,23 +269,29 @@ struct MediaClassificationService {
 
     /// 判断 `candidatePairs` 条件是否成立，供调用方选择正确的处理分支。
     private func candidatePairs(from features: [CandidateFeature]) -> [CandidatePair] {
-        Dictionary(grouping: features, by: \.sequenceID).values.flatMap { sequence in
-            let sorted = sequence.sorted { $0.creationDate < $1.creationDate }
-            var pairs: [CandidatePair] = []
-            for firstIndex in sorted.indices {
-                let upperBound = min(sorted.count, firstIndex + 11)
-                guard firstIndex + 1 < upperBound else { continue }
-                for secondIndex in (firstIndex + 1) ..< upperBound {
-                    let first = sorted[firstIndex]
-                    let second = sorted[secondIndex]
-                    let hashDistance = (first.perceptualHash ^ second.perceptualHash).nonzeroBitCount
-                    if hashDistance <= maximumPerceptualHashDistance {
-                        pairs.append(CandidatePair(firstID: first.id, secondID: second.id))
-                    }
-                }
+        let index = HammingBKTree()
+        var pairs: [CandidatePair] = []
+
+        for feature in features.sorted(by: { $0.id < $1.id }) {
+            let matches = index.matches(
+                hash: feature.perceptualHash,
+                maximumDistance: maximumPerceptualHashDistance
+            )
+            .sorted { lhs, rhs in
+                let lhsDistance = (lhs.perceptualHash ^ feature.perceptualHash).nonzeroBitCount
+                let rhsDistance = (rhs.perceptualHash ^ feature.perceptualHash).nonzeroBitCount
+                if lhsDistance != rhsDistance { return lhsDistance < rhsDistance }
+                return lhs.id < rhs.id
             }
-            return pairs
+            .prefix(maximumHashMatchesPerImage)
+
+            pairs.append(contentsOf: matches.map { match in
+                CandidatePair(firstID: match.id, secondID: feature.id)
+            })
+            index.insert(feature)
         }
+
+        return pairs
     }
 
     /// 创建 `makeConservativeGroups` 所需的值或资源，统一封装构造细节。
@@ -371,17 +353,25 @@ struct MediaClassificationService {
         let lhsPixels = lhs.pixelWidth * lhs.pixelHeight
         let rhsPixels = rhs.pixelWidth * rhs.pixelHeight
         if lhsPixels != rhsPixels { return lhsPixels > rhsPixels }
-        return lhs.creationDate < rhs.creationDate
+        switch (lhs.creationDate, rhs.creationDate) {
+        case let (.some(lhsDate), .some(rhsDate)) where lhsDate != rhsDate:
+            return lhsDate < rhsDate
+        case (.some, .none):
+            return true
+        case (.none, .some):
+            return false
+        default:
+            return lhs.id < rhs.id
+        }
     }
 }
 
 /// 定义 `SimilarityCandidate` 的值语义数据与相关行为。
 private struct SimilarityCandidate: Sendable {
     let id: String
-    let sequenceID: String
     let pixelWidth: Int
     let pixelHeight: Int
-    let creationDate: Date
+    let creationDate: Date?
     let cacheKey: FeatureCacheKey
 }
 
@@ -395,9 +385,8 @@ private struct FeatureCacheKey: Hashable, Sendable {
 /// 定义 `CandidateFeature` 的值语义数据与相关行为。
 private struct CandidateFeature: Sendable {
     let id: String
-    let sequenceID: String
     let perceptualHash: UInt64
-    let creationDate: Date
+    let creationDate: Date?
 }
 
 /// 定义 `FeatureOutcome` 的值语义数据与相关行为。
@@ -406,6 +395,74 @@ private struct FeatureOutcome: Sendable { let feature: CandidateFeature? }
 private struct CandidatePair: Sendable { let firstID: String; let secondID: String }
 /// 定义 `AcceptedPair` 的值语义数据与相关行为。
 private struct AcceptedPair: Sendable { let firstID: String; let secondID: String; let distance: Float }
+
+/// 使用 BK-tree 按汉明距离索引全相册感知哈希，避免产生全量平方级图片对。
+private final class HammingBKTree {
+    /// 保存同一哈希的图片以及按汉明距离分叉的子节点。
+    private final class Node {
+        let hash: UInt64
+        var features: [CandidateFeature]
+        var children: [Int: Node] = [:]
+
+        /// 创建一个以首张图片为代表值的哈希节点。
+        init(feature: CandidateFeature) {
+            hash = feature.perceptualHash
+            features = [feature]
+        }
+    }
+
+    private var root: Node?
+
+    /// 将图片特征插入对应汉明距离分支；相同哈希保存在同一节点。
+    func insert(_ feature: CandidateFeature) {
+        guard let root else {
+            self.root = Node(feature: feature)
+            return
+        }
+
+        var node = root
+        while true {
+            let distance = Self.distance(node.hash, feature.perceptualHash)
+            if distance == 0 {
+                node.features.append(feature)
+                return
+            }
+            if let child = node.children[distance] {
+                node = child
+            } else {
+                node.children[distance] = Node(feature: feature)
+                return
+            }
+        }
+    }
+
+    /// 查询整棵索引中汉明距离未超过阈值的图片特征。
+    func matches(hash: UInt64, maximumDistance: Int) -> [CandidateFeature] {
+        guard let root else { return [] }
+        var matches: [CandidateFeature] = []
+        var pending = [root]
+
+        while let node = pending.popLast() {
+            let distance = Self.distance(node.hash, hash)
+            if distance <= maximumDistance {
+                matches.append(contentsOf: node.features)
+            }
+
+            let lowerBound = max(0, distance - maximumDistance)
+            let upperBound = distance + maximumDistance
+            pending.append(contentsOf: node.children.compactMap { edge, child in
+                (lowerBound ... upperBound).contains(edge) ? child : nil
+            })
+        }
+
+        return matches
+    }
+
+    /// 计算两个 64 位感知哈希之间不同位的数量。
+    private static func distance(_ lhs: UInt64, _ rhs: UInt64) -> Int {
+        (lhs ^ rhs).nonzeroBitCount
+    }
+}
 
 /// 使用 Actor 隔离 `VisionFeatureEngine` 的可变状态，确保并发访问安全。
 private actor VisionFeatureEngine {
