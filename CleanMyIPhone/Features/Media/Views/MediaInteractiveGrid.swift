@@ -34,7 +34,13 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             frame: .zero,
             collectionViewLayout: MediaDensityFlowLayout(density: .large)
         )
+        // UIKit 默认可能将滚动容器视为不透明；显式关闭后才能透出 SwiftUI 的主题背景。
+        collectionView.isOpaque = false
         collectionView.backgroundColor = .clear
+        let transparentBackgroundView = UIView(frame: .zero)
+        transparentBackgroundView.isOpaque = false
+        transparentBackgroundView.backgroundColor = .clear
+        collectionView.backgroundView = transparentBackgroundView
         collectionView.alwaysBounceVertical = true
         collectionView.showsVerticalScrollIndicator = false
         collectionView.isDirectionalLockEnabled = true
@@ -306,6 +312,15 @@ struct MediaInteractiveGrid: UIViewRepresentable {
                 )
             }
             .margins(.all, 0)
+            .background {
+                Color.clear
+            }
+            // Cell、contentView 与 HostingConfiguration 必须同时透明，避免任一 UIKit 层回填系统背景。
+            cell.isOpaque = false
+            cell.backgroundColor = .clear
+            cell.contentView.backgroundColor = .clear
+            cell.backgroundView = nil
+            cell.selectedBackgroundView = nil
             cell.clipsToBounds = true
             cell.accessibilityIdentifier = "media.asset.\(assetID)"
         }
@@ -1043,12 +1058,14 @@ private struct MediaInteractiveGridCellContent: View {
 private final class MediaInteractiveGridHeaderView: UICollectionReusableView {
     private let titleLabel = UILabel()
     private let itemCountLabel = UILabel()
-    private let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemChromeMaterial))
 
     /// 创建日期标题的固定视图层级和约束。
     override init(frame: CGRect) {
         super.init(frame: frame)
 
+        // UICollectionReusableView 没有 contentView；透明化 Header 自身即可避免吸顶时形成白色横层。
+        isOpaque = false
+        backgroundColor = .clear
         titleLabel.font = .preferredFont(forTextStyle: .headline)
         titleLabel.textColor = .label
         titleLabel.adjustsFontForContentSizeCategory = true
@@ -1062,15 +1079,9 @@ private final class MediaInteractiveGridHeaderView: UICollectionReusableView {
         stack.alignment = .center
         stack.spacing = 8
 
-        blurView.translatesAutoresizingMaskIntoConstraints = false
         stack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(blurView)
         addSubview(stack)
         NSLayoutConstraint.activate([
-            blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            blurView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            blurView.topAnchor.constraint(equalTo: topAnchor),
-            blurView.bottomAnchor.constraint(equalTo: bottomAnchor),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
             stack.centerYAnchor.constraint(equalTo: centerYAnchor)

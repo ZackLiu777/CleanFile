@@ -738,7 +738,9 @@ private struct MediaCategoryDetailView: View {
                         selectedIDs.insert(assetID)
                     }
                 )
-                .appSoftScrollEdge()
+                .background(Color.clear)
+                // 仅让网格背景延伸到系统栏后方；UICollectionView 仍通过 automatic inset 保持内容可操作。
+                .ignoresSafeArea(.all, edges: .all)
             }
         }
         .navigationTitle(title)
