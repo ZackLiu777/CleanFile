@@ -673,8 +673,18 @@ private struct ImageConversionSettingsCard: View {
         [
             viewModel.outputFormat.rawValue.uppercased(),
             metadataTitle(viewModel.metadataPolicy),
-            resizeTitle(viewModel.resizePreset)
+            resizeSummaryTitle(viewModel.resizePreset)
         ].joined(separator: " · ")
+    }
+
+    /// 生成设置摘要使用的紧凑尺寸文本，仅省略“最长边不超过”的解释性前缀。
+    private func resizeSummaryTitle(_ preset: ImageResizePreset) -> String {
+        switch preset {
+        case .original: L10n.string("resize.original")
+        case .ultraHD: "4096 px"
+        case .large: "2048 px"
+        case .medium: "1280 px"
+        }
     }
 
     /// 封装 `settingRow` 对应的局部行为，供当前类型在统一入口下复用。

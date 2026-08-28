@@ -36,9 +36,9 @@
 "metadata.remove_gps" = "Remove GPS";
 "metadata.remove_all" = "Remove All";
 "resize.original" = "Original";
-"resize.4096" = "Fit within 4096 px";
-"resize.2048" = "Fit within 2048 px";
-"resize.1280" = "Fit within 1280 px";
+"resize.4096" = "4096 px";
+"resize.2048" = "2048 px";
+"resize.1280" = "1280 px";
 "color.white" = "White";
 "color.black" = "Black";
 "status.inspecting" = "Inspecting";

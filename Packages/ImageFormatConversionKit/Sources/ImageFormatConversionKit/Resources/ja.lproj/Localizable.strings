@@ -36,9 +36,9 @@
 "metadata.remove_gps" = "GPS を削除";
 "metadata.remove_all" = "すべて削除";
 "resize.original" = "元のサイズ";
-"resize.4096" = "長辺 4096 px 以内";
-"resize.2048" = "長辺 2048 px 以内";
-"resize.1280" = "長辺 1280 px 以内";
+"resize.4096" = "4096 px";
+"resize.2048" = "2048 px";
+"resize.1280" = "1280 px";
 "color.white" = "白";
 "color.black" = "黒";
 "status.inspecting" = "確認中";

@@ -36,9 +36,9 @@
 "metadata.remove_gps" = "移除 GPS";
 "metadata.remove_all" = "全部移除";
 "resize.original" = "保持原始尺寸";
-"resize.4096" = "最長邊不超過 4096 px";
-"resize.2048" = "最長邊不超過 2048 px";
-"resize.1280" = "最長邊不超過 1280 px";
+"resize.4096" = "4096 px";
+"resize.2048" = "2048 px";
+"resize.1280" = "1280 px";
 "color.white" = "白色";
 "color.black" = "黑色";
 "status.inspecting" = "正在讀取";

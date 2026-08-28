@@ -36,9 +36,9 @@
 "metadata.remove_gps" = "GPS 제거";
 "metadata.remove_all" = "모두 제거";
 "resize.original" = "원본";
-"resize.4096" = "4096px 이내";
-"resize.2048" = "2048px 이내";
-"resize.1280" = "1280px 이내";
+"resize.4096" = "4096 px";
+"resize.2048" = "2048 px";
+"resize.1280" = "1280 px";
 "color.white" = "흰색";
 "color.black" = "검은색";
 "status.inspecting" = "검사 중";
