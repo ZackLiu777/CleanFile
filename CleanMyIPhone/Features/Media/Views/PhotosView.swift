@@ -691,6 +691,9 @@ private struct MediaCategoryDetailView: View {
     @State private var isDeleteConfirmationPresented = false
     @State private var previewAssetID: String?
     @State private var suppressedTapAssetID: String?
+    @State private var assetFrames: [String: CGRect] = [:]
+    @State private var dragSelectionMode: DragSelectionMode?
+    @State private var previousDragLocation: CGPoint?
 
     private let albumColumns = [
         GridItem(.flexible(minimum: 0), spacing: 3),
@@ -747,6 +750,11 @@ private struct MediaCategoryDetailView: View {
                         }
                     }
                 }
+                .coordinateSpace(name: MediaSelectionCoordinateSpace.name)
+                .onPreferenceChange(MediaAssetFramePreferenceKey.self) { frames in
+                    assetFrames = frames
+                }
+                .simultaneousGesture(dragSelectionGesture)
                 .appSoftScrollEdge()
             }
         }
@@ -894,6 +902,16 @@ private struct MediaCategoryDetailView: View {
                 .clipped()
         }
         .buttonStyle(.plain)
+        .background {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: MediaAssetFramePreferenceKey.self,
+                    value: [
+                        assetID: proxy.frame(in: .named(MediaSelectionCoordinateSpace.name))
+                    ]
+                )
+            }
+        }
         .simultaneousGesture(
             LongPressGesture(minimumDuration: 0.45)
                 .onEnded { _ in
@@ -902,6 +920,85 @@ private struct MediaCategoryDetailView: View {
                     selectedIDs.insert(assetID)
                 }
         )
+    }
+
+    /// 在选择模式下把手指滑过的连续缩略图映射为批量选中或批量取消操作。
+    private var dragSelectionGesture: some Gesture {
+        DragGesture(minimumDistance: 6, coordinateSpace: .named(MediaSelectionCoordinateSpace.name))
+            .onChanged { value in
+                guard isSelecting else { return }
+                updateDragSelection(with: value)
+            }
+            .onEnded { _ in
+                resetDragSelection()
+            }
+    }
+
+    /// 根据拖动起点确定本轮是“选中”还是“取消”，随后处理本次位移覆盖的资源。
+    private func updateDragSelection(with value: DragGesture.Value) {
+        if dragSelectionMode == nil {
+            guard let startingID = assetID(at: value.startLocation) else { return }
+            // 长按进入选择模式时起点已被选中，继续滑动仍应执行批量选中；
+            // 已处于选择模式时，从选中项起拖则符合直觉地批量取消。
+            if suppressedTapAssetID == startingID {
+                dragSelectionMode = .selecting
+            } else {
+                dragSelectionMode = selectedIDs.contains(startingID) ? .deselecting : .selecting
+            }
+            previousDragLocation = value.startLocation
+        }
+
+        guard let dragSelectionMode else { return }
+        let previousLocation = previousDragLocation ?? value.startLocation
+        for assetID in assetIDs(
+            alongSegmentFrom: previousLocation,
+            to: value.location
+        ) {
+            switch dragSelectionMode {
+            case .selecting:
+                selectedIDs.insert(assetID)
+            case .deselecting:
+                selectedIDs.remove(assetID)
+            }
+        }
+        previousDragLocation = value.location
+    }
+
+    /// 对两次手势回调之间的路径进行采样，避免快速滑动时跳过中间缩略图。
+    private func assetIDs(
+        alongSegmentFrom start: CGPoint,
+        to end: CGPoint
+    ) -> Set<String> {
+        let horizontalDistance = end.x - start.x
+        let verticalDistance = end.y - start.y
+        let distance = hypot(horizontalDistance, verticalDistance)
+        let sampleCount = max(1, Int(ceil(distance / 12)))
+        var identifiers = Set<String>()
+
+        for index in 0 ... sampleCount {
+            let progress = CGFloat(index) / CGFloat(sampleCount)
+            let point = CGPoint(
+                x: start.x + horizontalDistance * progress,
+                y: start.y + verticalDistance * progress
+            )
+            if let assetID = assetID(at: point) {
+                identifiers.insert(assetID)
+            }
+        }
+        return identifiers
+    }
+
+    /// 返回包含指定手指位置的缩略图标识；日期标题和网格间隙不会误触选择。
+    private func assetID(at location: CGPoint) -> String? {
+        assetFrames.first { _, frame in
+            frame.contains(location)
+        }?.key
+    }
+
+    /// 清除单次滑动的方向和位置，确保下一次手势可以重新决定选中模式。
+    private func resetDragSelection() {
+        dragSelectionMode = nil
+        previousDragLocation = nil
     }
 
     /// 封装 `dateHeader` 对应的局部行为，供当前类型在统一入口下复用。
@@ -1059,6 +1156,30 @@ private struct MediaCategoryDetailView: View {
         default:
             ""
         }
+    }
+}
+
+/// 表示一次滑动批量选择期间固定的增删方向，避免经过同一缩略图时反复切换状态。
+nonisolated private enum DragSelectionMode {
+    case selecting
+    case deselecting
+}
+
+/// 提供缩略图网格统一的局部坐标空间，使跨日期分区的手势仍能正确命中资源。
+nonisolated private enum MediaSelectionCoordinateSpace {
+    static let name = "media-selection-grid"
+}
+
+/// 汇总当前已布局缩略图的可见区域，供父级滑动手势执行位置命中测试。
+nonisolated private struct MediaAssetFramePreferenceKey: PreferenceKey {
+    static var defaultValue: [String: CGRect] = [:]
+
+    /// 合并各个 LazyVGrid 子项报告的 frame；同一资源以最新布局值为准。
+    static func reduce(
+        value: inout [String: CGRect],
+        nextValue: () -> [String: CGRect]
+    ) {
+        value.merge(nextValue(), uniquingKeysWith: { _, latest in latest })
     }
 }
 

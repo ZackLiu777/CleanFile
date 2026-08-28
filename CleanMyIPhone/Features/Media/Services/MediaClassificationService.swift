@@ -69,7 +69,7 @@ struct MediaClassificationService {
         progress(MediaAnalysisProgress(
             phase: .comparingImages,
             completed: 0,
-            total: comparisonWorkCount
+            total: candidates.count
         ))
 
         // Vision 是扫描中最昂贵的一步。只有通过感知哈希初筛的图片才生成
@@ -80,8 +80,12 @@ struct MediaClassificationService {
         ) { completed in
             progress(MediaAnalysisProgress(
                 phase: .comparingImages,
-                completed: completed,
-                total: comparisonWorkCount
+                completed: Self.displayProgress(
+                    completedWork: completed,
+                    totalWork: comparisonWorkCount,
+                    imageCount: candidates.count
+                ),
+                total: candidates.count
             ))
         }
         try Task.checkCancellation()
@@ -99,8 +103,12 @@ struct MediaClassificationService {
             }
             progress(MediaAnalysisProgress(
                 phase: .comparingImages,
-                completed: comparisonCandidates.count + batchEnd,
-                total: comparisonWorkCount
+                completed: Self.displayProgress(
+                    completedWork: comparisonCandidates.count + batchEnd,
+                    totalWork: comparisonWorkCount,
+                    imageCount: candidates.count
+                ),
+                total: candidates.count
             ))
         }
 
@@ -354,6 +362,18 @@ struct MediaClassificationService {
         guard total > 0 else { return true }
         let interval = max(1, total / 100)
         return completed == total || completed.isMultiple(of: interval)
+    }
+
+    /// 将候选特征和图片对组成的内部工作量映射为真实图片计数，避免 UI 总数虚增。
+    nonisolated static func displayProgress(
+        completedWork: Int,
+        totalWork: Int,
+        imageCount: Int
+    ) -> Int {
+        guard imageCount > 0 else { return 0 }
+        guard totalWork > 0 else { return imageCount }
+        let fraction = Double(min(max(completedWork, 0), totalWork)) / Double(totalWork)
+        return min(imageCount, Int((fraction * Double(imageCount)).rounded(.down)))
     }
 
     /// 判断 `candidatePairs` 条件是否成立，供调用方选择正确的处理分支。

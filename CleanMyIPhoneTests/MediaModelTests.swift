@@ -21,6 +21,25 @@ struct MediaModelTests {
         #expect(MediaClassificationService.shouldReportProgress(completed: 0, total: 0))
     }
 
+    @Test("Internal comparison work maps back to the real image count")
+    func comparisonProgressUsesImageCount() {
+        #expect(MediaClassificationService.displayProgress(
+            completedWork: 0,
+            totalWork: 4_000,
+            imageCount: 2_000
+        ) == 0)
+        #expect(MediaClassificationService.displayProgress(
+            completedWork: 2_000,
+            totalWork: 4_000,
+            imageCount: 2_000
+        ) == 1_000)
+        #expect(MediaClassificationService.displayProgress(
+            completedWork: 4_000,
+            totalWork: 4_000,
+            imageCount: 2_000
+        ) == 2_000)
+    }
+
     @Test("Media date sections and items sort newest first")
     func mediaDateSectionsSortNewestFirst() throws {
         let calendar = utcCalendar
