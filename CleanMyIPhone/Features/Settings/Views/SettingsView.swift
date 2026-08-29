@@ -32,30 +32,26 @@ struct SettingsView: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
 
-                Section("Color Theme") {
-                    Picker("Color Theme", selection: $themeSettings.selectedThemeID) {
-                        ForEach(AppThemeID.allCases) { themeID in
-                            Text(themeID.displayName)
-                                .tag(themeID)
-                        }
-                    }
-                    .pickerStyle(.navigationLink)
-                }
-                .listRowBackground(theme.cardSurface)
-
                 Section {
-                    Picker("Appearance", selection: $themeSettings.appearance) {
-                        ForEach(AppAppearance.allCases) { appearance in
-                            Text(appearance.displayName)
-                                .tag(appearance)
+                    NavigationLink {
+                        AppearanceThemeView()
+                    } label: {
+                        Label {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Appearance & Theme")
+                                Text(selectedBackgroundName)
+                                    .font(.caption)
+                                    .foregroundStyle(theme.textSecondary)
+                            }
+                        } icon: {
+                            Image(systemName: "paintpalette")
+                                .foregroundStyle(theme.accentPrimary)
                         }
                     }
-                    .pickerStyle(.navigationLink)
-                    .disabled(theme.preferredColorScheme != nil)
                 } header: {
-                    Text("Appearance")
+                    Text("Personalization")
                 } footer: {
-                    Text(appearanceFooter)
+                    Text("Choose app colors, background, and appearance in one place.")
                 }
                 .listRowBackground(theme.cardSurface)
 
@@ -115,17 +111,18 @@ struct SettingsView: View {
         }
     }
 
-    private var appearanceFooter: LocalizedStringKey {
-        theme.preferredColorScheme == nil
-            ? "Choose the appearance used throughout the app."
-            : "This color theme uses a fixed appearance."
-    }
-
     private var appVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
     }
 
     private var buildNumber: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"
+    }
+
+    /// 在设置主页准确显示当前使用的是预设背景还是用户自定义背景。
+    private var selectedBackgroundName: LocalizedStringKey {
+        themeSettings.usesCustomBackground
+            ? "Custom"
+            : themeSettings.selectedThemeID.displayName
     }
 }

@@ -54,6 +54,172 @@ enum AppThemeID: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+// MARK: - AppThemeColor
+
+/// 保存用户选择的非透明 sRGB 颜色，并提供生成可读语义主题所需的颜色运算。
+struct AppThemeColor: Codable, Equatable, Sendable {
+    let red: Double
+    let green: Double
+    let blue: Double
+
+    static let brandPink = AppThemeColor(red: 0xE8 / 255, green: 0xA3 / 255, blue: 0x9C / 255)
+    static let cream = AppThemeColor(red: 250 / 255, green: 246 / 255, blue: 233 / 255)
+    static let black = AppThemeColor(red: 0, green: 0, blue: 0)
+    static let white = AppThemeColor(red: 1, green: 1, blue: 1)
+
+    private enum CodingKeys: String, CodingKey {
+        case red
+        case green
+        case blue
+    }
+
+    /// 创建规范化颜色，阻止损坏的持久化值越过 sRGB 的有效范围。
+    init(red: Double, green: Double, blue: Double) {
+        self.red = Self.clamp(red)
+        self.green = Self.clamp(green)
+        self.blue = Self.clamp(blue)
+    }
+
+    /// 从持久化数据恢复颜色，并通过指定初始化器统一执行范围校验。
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            red: try container.decode(Double.self, forKey: .red),
+            green: try container.decode(Double.self, forKey: .green),
+            blue: try container.decode(Double.self, forKey: .blue)
+        )
+    }
+
+    /// 将规范化分量编码为稳定、与 SwiftUI 实现细节无关的持久化结构。
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(red, forKey: .red)
+        try container.encode(green, forKey: .green)
+        try container.encode(blue, forKey: .blue)
+    }
+
+    /// 返回可直接交给 SwiftUI 绘制的非透明 sRGB Color。
+    var color: Color {
+        Color(.sRGB, red: red, green: green, blue: blue, opacity: 1)
+    }
+
+    /// 将系统 ColorPicker 返回的 Color 固化为 sRGB；转换失败时保留调用方提供的安全值。
+    static func resolved(from color: Color, fallback: AppThemeColor) -> AppThemeColor {
+        let resolvedColor = UIColor(color).resolvedColor(
+            with: UITraitCollection(userInterfaceStyle: .light)
+        )
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        guard resolvedColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+            return fallback
+        }
+
+        return AppThemeColor(red: Double(red), green: Double(green), blue: Double(blue))
+    }
+
+    /// 在当前颜色与目标颜色之间插值，用于生成卡片层级和可读的次级文字。
+    func blended(toward target: AppThemeColor, amount: Double) -> AppThemeColor {
+        let progress = Self.clamp(amount)
+        return AppThemeColor(
+            red: red + ((target.red - red) * progress),
+            green: green + ((target.green - green) * progress),
+            blue: blue + ((target.blue - blue) * progress)
+        )
+    }
+
+    /// 返回与当前背景对比更高的黑色或白色，供自定义背景建立文字基线。
+    var preferredForeground: AppThemeColor {
+        contrastRatio(with: .black) >= contrastRatio(with: .white) ? .black : .white
+    }
+
+    /// 从当前背景向目标前景逐步插值，找到满足最低对比度的最柔和颜色。
+    func contrastingVariant(
+        toward foreground: AppThemeColor,
+        minimumRatio: Double
+    ) -> AppThemeColor {
+        for step in 1 ... 100 {
+            let candidate = blended(toward: foreground, amount: Double(step) / 100)
+            if contrastRatio(with: candidate) >= minimumRatio {
+                return candidate
+            }
+        }
+        return foreground
+    }
+
+    /// 计算两个 sRGB 颜色的 WCAG 对比度，用于自定义主题的本地可读性保护。
+    func contrastRatio(with other: AppThemeColor) -> Double {
+        let lighter = max(relativeLuminance, other.relativeLuminance)
+        let darker = min(relativeLuminance, other.relativeLuminance)
+        return (lighter + 0.05) / (darker + 0.05)
+    }
+
+    /// 将 sRGB 分量转换为相对亮度，避免直接以平均 RGB 猜测明暗模式。
+    private var relativeLuminance: Double {
+        (0.2126 * Self.linearized(red))
+            + (0.7152 * Self.linearized(green))
+            + (0.0722 * Self.linearized(blue))
+    }
+
+    /// 将单个 sRGB 分量线性化，以符合标准对比度计算方式。
+    private static func linearized(_ component: Double) -> Double {
+        component <= 0.04045
+            ? component / 12.92
+            : pow((component + 0.055) / 1.055, 2.4)
+    }
+
+    /// 将任意数值限制在颜色分量允许的闭区间内。
+    private static func clamp(_ component: Double) -> Double {
+        min(max(component, 0), 1)
+    }
+}
+
+/// 定义应用强调色调色盘；`automatic` 保留所选背景主题原有的协调色。
+enum AppAccentPaletteID: String, CaseIterable, Identifiable, Sendable {
+    case automatic
+    case custom
+    case pink
+    case coral
+    case gold
+    case sage
+    case sky
+    case teal
+    case berry
+
+    var id: Self { self }
+
+    /// 返回调色盘在设置页显示的本地化名称。
+    var displayName: LocalizedStringKey {
+        switch self {
+        case .automatic: "Automatic"
+        case .custom: "Custom"
+        case .pink: "CleanMyIPhone Pink"
+        case .coral: "Coral"
+        case .gold: "Graphite Gold"
+        case .sage: "Sage"
+        case .sky: "Sky"
+        case .teal: "Teal"
+        case .berry: "Berry"
+        }
+    }
+
+    /// 返回策划过的强调色；自动模式由当前背景主题提供，因此返回 nil。
+    var color: Color? {
+        switch self {
+        case .automatic, .custom: nil
+        case .pink: Color(red: 0xE8 / 255, green: 0xA3 / 255, blue: 0x9C / 255)
+        case .coral: Color(red: 0.82, green: 0.39, blue: 0.33)
+        case .gold: Color(red: 0.69, green: 0.53, blue: 0.35)
+        case .sage: Color(red: 0.396, green: 0.478, blue: 0.400)
+        case .sky: Color(red: 0.333, green: 0.459, blue: 0.510)
+        case .teal: Color(red: 0.22, green: 0.50, blue: 0.43)
+        case .berry: Color(red: 0.57, green: 0.31, blue: 0.43)
+        }
+    }
+}
+
 /// 定义 `ThemeBackground` 使用的有限状态或选项集合。
 enum ThemeBackground: Sendable {
     case solid(Color)
@@ -72,15 +238,15 @@ struct Theme: Sendable {
     let textSecondary: Color
     let textTertiary: Color
     let textInverted: Color
-    let accentPrimary: Color
-    let accentSecondary: Color
+    var accentPrimary: Color
+    var accentSecondary: Color
     let positiveGreen: Color
     let negativeRed: Color
     let warningOrange: Color
     let divider: Color
     let navigationBackground: Color
     let emptyStateIcon: Color
-    let buttonPrimaryBackground: Color
+    var buttonPrimaryBackground: Color
     let buttonDisabledForeground: Color
     let liquidGlassEnabled: Bool
     let preferredColorScheme: ColorScheme?
@@ -96,6 +262,16 @@ struct Theme: Sendable {
         case .archive: positiveGreen
         case .other, nil: textSecondary
         }
+    }
+
+    /// 将可选强调色叠加到完整背景主题上，同时保留成功、警告和删除等语义色。
+    func applyingAccent(_ accent: Color?) -> Theme {
+        guard let accent else { return self }
+        var resolved = self
+        resolved.accentPrimary = accent
+        resolved.accentSecondary = accent.opacity(0.38)
+        resolved.buttonPrimaryBackground = accent
+        return resolved
     }
 
     static let system = Theme(
@@ -223,6 +399,49 @@ struct Theme: Sendable {
         preferredColorScheme: .light
     )
 
+    /// 从任意背景色派生一套完整语义 Theme，确保文字、卡片与分隔线不会随背景失去可读性。
+    static func custom(background: AppThemeColor) -> Theme {
+        let foreground = background.preferredForeground
+        let secondaryText = background.contrastingVariant(
+            toward: foreground,
+            minimumRatio: 4.5
+        )
+        let tertiaryText = background.contrastingVariant(
+            toward: foreground,
+            minimumRatio: 3
+        )
+        let divider = background.contrastingVariant(
+            toward: foreground,
+            minimumRatio: 1.5
+        )
+        let isDarkBackground = foreground == .white
+
+        return Theme(
+            background: .solid(background.color),
+            backgroundPrimary: background.color,
+            backgroundSecondary: background.blended(toward: foreground, amount: 0.035).color,
+            backgroundGrouped: background.color,
+            cardSurface: background.blended(toward: foreground, amount: 0.055).color,
+            cardElevated: background.blended(toward: foreground, amount: 0.10).color,
+            textPrimary: foreground.color,
+            textSecondary: secondaryText.color,
+            textTertiary: tertiaryText.color,
+            textInverted: isDarkBackground ? AppThemeColor.black.color : AppThemeColor.white.color,
+            accentPrimary: AppThemeColor.brandPink.color,
+            accentSecondary: AppThemeColor.brandPink.color.opacity(0.38),
+            positiveGreen: Color(red: 0.25, green: 0.62, blue: 0.38),
+            negativeRed: Color(red: 0.82, green: 0.28, blue: 0.25),
+            warningOrange: Color(red: 0.86, green: 0.55, blue: 0.20),
+            divider: divider.color,
+            navigationBackground: background.color,
+            emptyStateIcon: tertiaryText.color,
+            buttonPrimaryBackground: AppThemeColor.brandPink.color,
+            buttonDisabledForeground: tertiaryText.color,
+            liquidGlassEnabled: false,
+            preferredColorScheme: isDarkBackground ? .dark : .light
+        )
+    }
+
 }
 
 /// 定义 `AppThemeEnvironmentKey` 的值语义数据与相关行为。
@@ -245,15 +464,76 @@ final class ThemeSettings: ObservableObject {
         didSet { userDefaults.set(appearance.rawValue, forKey: Self.appearanceKey) }
     }
     @Published var selectedThemeID: AppThemeID {
-        didSet { userDefaults.set(selectedThemeID.rawValue, forKey: Self.themeKey) }
+        didSet {
+            userDefaults.set(selectedThemeID.rawValue, forKey: Self.themeKey)
+            if usesCustomBackground {
+                usesCustomBackground = false
+            }
+        }
+    }
+    @Published var selectedAccentPaletteID: AppAccentPaletteID {
+        didSet {
+            userDefaults.set(selectedAccentPaletteID.rawValue, forKey: Self.accentPaletteKey)
+        }
+    }
+    @Published private(set) var customAccentColor: AppThemeColor {
+        didSet {
+            Self.persist(
+                customAccentColor,
+                forKey: Self.customAccentColorKey,
+                in: userDefaults
+            )
+        }
+    }
+    @Published private(set) var customBackgroundColor: AppThemeColor {
+        didSet {
+            Self.persist(
+                customBackgroundColor,
+                forKey: Self.customBackgroundColorKey,
+                in: userDefaults
+            )
+        }
+    }
+    @Published var usesCustomBackground: Bool {
+        didSet {
+            userDefaults.set(usesCustomBackground, forKey: Self.usesCustomBackgroundKey)
+        }
     }
 
-    var theme: Theme { selectedThemeID.theme }
+    var theme: Theme {
+        baseTheme.applyingAccent(selectedAccentColor)
+    }
     var effectiveColorScheme: ColorScheme? { theme.preferredColorScheme ?? appearance.colorScheme }
+    var customBackgroundTheme: Theme { Theme.custom(background: customBackgroundColor) }
+    var accentPickerColor: Color {
+        selectedAccentPaletteID == .custom
+            ? customAccentColor.color
+            : (selectedAccentPaletteID.color ?? baseTheme.accentPrimary)
+    }
+    var backgroundPickerColor: Color {
+        usesCustomBackground ? customBackgroundColor.color : selectedThemeID.theme.backgroundPrimary
+    }
 
     private static let appearanceKey = "appAppearance"
     private static let themeKey = "appTheme"
+    private static let accentPaletteKey = "appAccentPalette"
+    private static let customAccentColorKey = "appCustomAccentColor"
+    private static let customBackgroundColorKey = "appCustomBackgroundColor"
+    private static let usesCustomBackgroundKey = "appUsesCustomBackground"
     private let userDefaults: UserDefaults
+    private var baseTheme: Theme {
+        usesCustomBackground ? customBackgroundTheme : selectedThemeID.theme
+    }
+    private var selectedAccentColor: Color? {
+        switch selectedAccentPaletteID {
+        case .automatic:
+            nil
+        case .custom:
+            customAccentColor.color
+        default:
+            selectedAccentPaletteID.color
+        }
+    }
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(userDefaults: UserDefaults = .standard) {
@@ -262,11 +542,37 @@ final class ThemeSettings: ObservableObject {
         let migratedTheme = Self.migratedThemeID(from: storedTheme)
         let storedAppearance = userDefaults.string(forKey: Self.appearanceKey)
             .flatMap(AppAppearance.init(rawValue:)) ?? .system
+        let storedAccentPalette = userDefaults.string(forKey: Self.accentPaletteKey)
+            .flatMap(AppAccentPaletteID.init(rawValue:)) ?? .automatic
+        let storedCustomAccentColor = Self.restoreColor(
+            forKey: Self.customAccentColorKey,
+            from: userDefaults,
+            fallback: .brandPink
+        )
+        let storedCustomBackgroundColor = Self.restoreColor(
+            forKey: Self.customBackgroundColorKey,
+            from: userDefaults,
+            fallback: .cream
+        )
 
         // Pure Black used to be a separate theme. Preserve its visible result
         // by moving those users to the native theme with Dark appearance.
         appearance = storedTheme == "pureBlack" ? .dark : storedAppearance
         selectedThemeID = migratedTheme
+        selectedAccentPaletteID = storedAccentPalette
+        customAccentColor = storedCustomAccentColor
+        customBackgroundColor = storedCustomBackgroundColor
+        usesCustomBackground = userDefaults.bool(forKey: Self.usesCustomBackgroundKey)
+
+        if userDefaults.string(forKey: Self.accentPaletteKey) != storedAccentPalette.rawValue {
+            userDefaults.set(storedAccentPalette.rawValue, forKey: Self.accentPaletteKey)
+        }
+        Self.persist(storedCustomAccentColor, forKey: Self.customAccentColorKey, in: userDefaults)
+        Self.persist(
+            storedCustomBackgroundColor,
+            forKey: Self.customBackgroundColorKey,
+            in: userDefaults
+        )
 
         if storedTheme != nil, storedTheme != migratedTheme.rawValue {
             userDefaults.set(migratedTheme.rawValue, forKey: Self.themeKey)
@@ -274,6 +580,37 @@ final class ThemeSettings: ObservableObject {
                 userDefaults.set(AppAppearance.dark.rawValue, forKey: Self.appearanceKey)
             }
         }
+    }
+
+    /// 选择预设应用颜色；自定义颜色仍保留，以便用户稍后重新启用。
+    func selectAccentPalette(_ paletteID: AppAccentPaletteID) {
+        selectedAccentPaletteID = paletteID
+    }
+
+    /// 保存 ColorPicker 产生的任意应用颜色，并立即切换到自定义调色盘。
+    func updateCustomAccentColor(_ color: Color) {
+        customAccentColor = AppThemeColor.resolved(from: color, fallback: customAccentColor)
+        selectedAccentPaletteID = .custom
+    }
+
+    /// 选择完整背景预设，并关闭自定义背景，但不丢弃用户已经编辑的颜色。
+    func selectBackgroundTheme(_ themeID: AppThemeID) {
+        selectedThemeID = themeID
+        usesCustomBackground = false
+    }
+
+    /// 重新启用上一次保存的自定义背景颜色。
+    func selectCustomBackground() {
+        usesCustomBackground = true
+    }
+
+    /// 保存 ColorPicker 产生的任意背景色，并用它重新派生整套语义主题。
+    func updateCustomBackgroundColor(_ color: Color) {
+        customBackgroundColor = AppThemeColor.resolved(
+            from: color,
+            fallback: customBackgroundColor
+        )
+        usesCustomBackground = true
     }
 
     /// 封装 `migratedThemeID` 对应的局部行为，供当前类型在统一入口下复用。
@@ -289,6 +626,30 @@ final class ThemeSettings: ObservableObject {
         case "pureBlack", nil: return .system
         default: return .system
         }
+    }
+
+    /// 从 UserDefaults 恢复结构化 sRGB 颜色；数据不存在或损坏时使用安全默认值。
+    private static func restoreColor(
+        forKey key: String,
+        from userDefaults: UserDefaults,
+        fallback: AppThemeColor
+    ) -> AppThemeColor {
+        guard let data = userDefaults.data(forKey: key),
+              let color = try? JSONDecoder().decode(AppThemeColor.self, from: data)
+        else {
+            return fallback
+        }
+        return color
+    }
+
+    /// 将结构化颜色编码到 UserDefaults，避免依赖 UIColor 或 SwiftUI Color 的非稳定归档格式。
+    private static func persist(
+        _ color: AppThemeColor,
+        forKey key: String,
+        in userDefaults: UserDefaults
+    ) {
+        guard let data = try? JSONEncoder().encode(color) else { return }
+        userDefaults.set(data, forKey: key)
     }
 }
 

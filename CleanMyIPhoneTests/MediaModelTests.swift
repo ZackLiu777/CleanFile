@@ -172,7 +172,7 @@ struct MediaModelTests {
     func deletionStateActivityFlag() {
         #expect(MediaDeletionState.deleting(itemCount: 2).isDeleting)
         #expect(!MediaDeletionState.idle.isDeleting)
-        #expect(!MediaDeletionState.success(deletedCount: 2).isDeleting)
+        #expect(!MediaDeletionState.success(deletedCount: 2, estimatedBytes: 1_024).isDeleting)
         #expect(!MediaDeletionState.failure(.deletionFailed).isDeleting)
     }
 

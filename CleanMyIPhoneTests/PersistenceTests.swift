@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Testing
 @testable import CleanMyIPhone
 
@@ -116,6 +117,10 @@ struct ThemePersistenceTests {
         let settings = ThemeSettings(userDefaults: defaults)
 
         #expect(settings.appearance == .system)
+        #expect(settings.selectedThemeID == .system)
+        #expect(settings.selectedAccentPaletteID == .automatic)
+        #expect(settings.effectiveColorScheme == nil)
+        #expect(defaults.string(forKey: "appAccentPalette") == "automatic")
     }
 
     @Test("Theme restores a persisted dark value")
@@ -128,8 +133,8 @@ struct ThemePersistenceTests {
         #expect(settings.appearance == .dark)
     }
 
-    @Test("Invalid persisted theme safely falls back to the system")
-    func invalidThemeFallsBackToSystem() {
+    @Test("Invalid persisted appearance safely falls back to the system")
+    func invalidAppearanceFallsBackToSystem() {
         let defaults = isolatedDefaults()
         defaults.set("unsupported", forKey: "appAppearance")
 
@@ -138,8 +143,8 @@ struct ThemePersistenceTests {
         #expect(settings.appearance == .system)
     }
 
-    @Test("Changing theme persists immediately")
-    func changingThemePersistsImmediately() {
+    @Test("Changing appearance persists immediately")
+    func changingAppearancePersistsImmediately() {
         let defaults = isolatedDefaults()
         let settings = ThemeSettings(userDefaults: defaults)
 
@@ -148,15 +153,164 @@ struct ThemePersistenceTests {
         #expect(defaults.string(forKey: "appAppearance") == AppAppearance.dark.rawValue)
     }
 
-    @Test("Legacy decorative themes migrate to the restrained palette")
-    func legacyThemesAreMigrated() {
+    @Test("Accent palette restores a persisted value")
+    func accentPaletteRestoresPersistedValue() {
         let defaults = isolatedDefaults()
-        defaults.set("nebula", forKey: "appTheme")
+        defaults.set("teal", forKey: "appAccentPalette")
 
         let settings = ThemeSettings(userDefaults: defaults)
 
-        #expect(settings.selectedThemeID == .porcelain)
-        #expect(defaults.string(forKey: "appTheme") == AppThemeID.porcelain.rawValue)
+        #expect(settings.selectedAccentPaletteID == .teal)
+        #expect(defaults.string(forKey: "appAccentPalette") == "teal")
+    }
+
+    @Test("Invalid accent palette is normalized to automatic")
+    func invalidAccentPaletteIsNormalized() {
+        let defaults = isolatedDefaults()
+        defaults.set("unsupported", forKey: "appAccentPalette")
+
+        let settings = ThemeSettings(userDefaults: defaults)
+
+        #expect(settings.selectedAccentPaletteID == .automatic)
+        #expect(defaults.string(forKey: "appAccentPalette") == "automatic")
+    }
+
+    @Test("Changing accent palette persists immediately")
+    func changingAccentPalettePersistsImmediately() {
+        let defaults = isolatedDefaults()
+        let settings = ThemeSettings(userDefaults: defaults)
+
+        settings.selectedAccentPaletteID = .berry
+
+        #expect(defaults.string(forKey: "appAccentPalette") == "berry")
+    }
+
+    @Test("Custom app color persists and restores as the active palette")
+    func customAccentColorPersistsAndRestores() {
+        let defaults = isolatedDefaults()
+        let settings = ThemeSettings(userDefaults: defaults)
+
+        settings.updateCustomAccentColor(
+            Color(.sRGB, red: 0.18, green: 0.42, blue: 0.76, opacity: 1)
+        )
+        let restored = ThemeSettings(userDefaults: defaults)
+
+        #expect(settings.selectedAccentPaletteID == .custom)
+        #expect(restored.selectedAccentPaletteID == .custom)
+        #expect(abs(restored.customAccentColor.red - 0.18) < 0.001)
+        #expect(abs(restored.customAccentColor.green - 0.42) < 0.001)
+        #expect(abs(restored.customAccentColor.blue - 0.76) < 0.001)
+    }
+
+    @Test("Custom background persists and derives a readable appearance")
+    func customBackgroundPersistsAndRestores() {
+        let defaults = isolatedDefaults()
+        let settings = ThemeSettings(userDefaults: defaults)
+
+        settings.updateCustomBackgroundColor(
+            Color(.sRGB, red: 0.04, green: 0.06, blue: 0.09, opacity: 1)
+        )
+        let restored = ThemeSettings(userDefaults: defaults)
+
+        #expect(restored.usesCustomBackground)
+        #expect(restored.effectiveColorScheme == .dark)
+        #expect(abs(restored.customBackgroundColor.red - 0.04) < 0.001)
+        #expect(abs(restored.customBackgroundColor.green - 0.06) < 0.001)
+        #expect(abs(restored.customBackgroundColor.blue - 0.09) < 0.001)
+
+        restored.selectBackgroundTheme(.cream)
+
+        #expect(!restored.usesCustomBackground)
+        #expect(restored.effectiveColorScheme == .light)
+        #expect(!defaults.bool(forKey: "appUsesCustomBackground"))
+    }
+
+    @Test("Custom background color math maintains readable text contrast")
+    func customBackgroundMaintainsTextContrast() {
+        let background = AppThemeColor(red: 0.52, green: 0.48, blue: 0.44)
+        let primary = background.preferredForeground
+        let secondary = background.contrastingVariant(
+            toward: primary,
+            minimumRatio: 4.5
+        )
+
+        #expect(background.contrastRatio(with: primary) >= 4.5)
+        #expect(background.contrastRatio(with: secondary) >= 4.5)
+    }
+
+    @Test("Theme selection restores and persists independently")
+    func themeSelectionRestoresAndPersists() {
+        let defaults = isolatedDefaults()
+        defaults.set("sage", forKey: "appTheme")
+
+        let settings = ThemeSettings(userDefaults: defaults)
+
+        #expect(settings.selectedThemeID == .sage)
+
+        settings.selectedThemeID = .graphite
+
+        #expect(defaults.string(forKey: "appTheme") == "graphite")
+    }
+
+    @Test("Fixed theme appearance takes precedence over the appearance preference")
+    func effectiveColorSchemeUsesThemePrecedence() {
+        do {
+            let defaults = isolatedDefaults()
+            let settings = ThemeSettings(userDefaults: defaults)
+
+            #expect(settings.effectiveColorScheme == nil)
+        }
+
+        do {
+            let defaults = isolatedDefaults()
+            defaults.set("dark", forKey: "appAppearance")
+            let settings = ThemeSettings(userDefaults: defaults)
+
+            #expect(settings.effectiveColorScheme == .dark)
+        }
+
+        do {
+            let defaults = isolatedDefaults()
+            defaults.set("dark", forKey: "appAppearance")
+            defaults.set("cream", forKey: "appTheme")
+            let settings = ThemeSettings(userDefaults: defaults)
+
+            #expect(settings.effectiveColorScheme == .light)
+        }
+
+        do {
+            let defaults = isolatedDefaults()
+            defaults.set("light", forKey: "appAppearance")
+            defaults.set("graphite", forKey: "appTheme")
+            let settings = ThemeSettings(userDefaults: defaults)
+
+            #expect(settings.effectiveColorScheme == .dark)
+        }
+    }
+
+    @Test("Every legacy decorative theme migrates to its restrained replacement")
+    func legacyThemesAreMigrated() {
+        let migrations: [(storedValue: String, expectedTheme: AppThemeID)] = [
+            ("sky", .porcelain),
+            ("monoStone", .porcelain),
+            ("nebula", .porcelain),
+            ("forest", .sage),
+            ("graphiteGold", .graphite),
+            ("roseNoir", .graphite)
+        ]
+
+        for migration in migrations {
+            let defaults = isolatedDefaults()
+            defaults.set(migration.storedValue, forKey: "appTheme")
+
+            let settings = ThemeSettings(userDefaults: defaults)
+
+            #expect(settings.selectedThemeID == migration.expectedTheme)
+            #expect(
+                defaults.string(forKey: "appTheme") == migration.expectedTheme.rawValue,
+                "Failed to migrate legacy theme \(migration.storedValue)"
+            )
+        }
     }
 
     @Test("Legacy Pure Black preserves a dark appearance")

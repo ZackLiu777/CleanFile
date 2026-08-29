@@ -137,6 +137,386 @@ Bright Pink
 
 ---
 
+# 外观、主题与调色盘设置规则
+
+外观与主题属于影响整个 App、且通常不会频繁修改的全局设置。
+
+因此，本项目应将它们放在：
+
+```text
+Settings
+    ↓
+Appearance / Theme 子页面
+```
+
+不要把全局主题切换长期放在：
+
+- 首页工具栏。
+- 每个功能页面。
+- TabBar。
+- 文件处理流程。
+- 与当前任务无关的快捷菜单。
+
+如果外观设置只有一个非常短的选项，可以直接放在 Settings 当前页面；当它包含外观模式、主题、强调色和预览等一组相关设置时，应使用标准 `NavigationLink` 进入独立子页面。
+
+Apple 官方依据：
+
+- [Human Interface Guidelines — Settings](https://developer.apple.com/design/human-interface-guidelines/settings)
+- [SwiftUI — NavigationLink](https://developer.apple.com/documentation/swiftui/navigationlink)
+
+---
+
+## Settings 页面结构
+
+设置页面优先使用系统结构：
+
+```swift
+NavigationStack {
+    Form {
+        Section {
+            NavigationLink {
+                AppearanceSettingsView()
+            } label: {
+                Label("Appearance", systemImage: "paintpalette")
+            }
+        }
+    }
+}
+```
+
+主题子页同样优先使用：
+
+```text
+Form
+    ↓
+Section
+    ↓
+Picker / ColorPicker / Preview
+```
+
+规则：
+
+- 使用 `Form` 获得平台一致的设置布局与控件样式。
+- 使用 `Section` 按“外观模式、主题、强调色、预览”分组。
+- 使用标准 `NavigationLink` 表达层级，不手绘 chevron 或自定义整行点击语义。
+- 使用 `Picker` 表达互斥选择，不用多个 Button 自行模拟单选控件。
+- 选项很少时优先采用系统自动或 inline 呈现；只有选项较多、确实需要进入列表时，才考虑 navigation-link picker style。
+- 不为简单的三个外观选项增加没有信息价值的额外导航层级。
+
+Apple 官方依据：
+
+- [SwiftUI — Form](https://developer.apple.com/documentation/swiftui/form)
+- [SwiftUI — Section](https://developer.apple.com/documentation/swiftui/section)
+- [SwiftUI — Picker](https://developer.apple.com/documentation/swiftui/picker)
+- [SwiftUI — NavigationLinkPickerStyle](https://developer.apple.com/documentation/swiftui/pickerstyle/navigationlink)
+
+---
+
+## 默认跟随系统
+
+外观模式至少应支持：
+
+```text
+System
+Light
+Dark
+```
+
+默认值必须是：
+
+> System / 跟随系统。
+
+SwiftUI 中应优先通过：
+
+```swift
+.preferredColorScheme(nil)    // System
+.preferredColorScheme(.light)
+.preferredColorScheme(.dark)
+```
+
+表达用户选择，而不是直接修改 `colorScheme` Environment。
+
+不得在首次启动时强迫用户选择浅色或深色，也不得用 App 内设置重复实现系统已有的：
+
+- Increase Contrast。
+- Reduce Motion。
+- Differentiate Without Color。
+- Button Shapes。
+- Bold Text。
+
+App 应直接尊重这些系统设置。
+
+Apple 官方依据：
+
+- [SwiftUI — ColorScheme](https://developer.apple.com/documentation/swiftui/colorscheme)
+- [Human Interface Guidelines — Settings](https://developer.apple.com/design/human-interface-guidelines/settings)
+
+---
+
+## 背景选择必须解析为完整语义 Theme
+
+主题或背景选项不得只保存和传递一个裸 `Color`：
+
+```swift
+// 不推荐
+let selectedBackground: Color
+```
+
+一个可选主题必须解析为完整的语义 Theme，例如至少能统一提供：
+
+```text
+Background Primary
+Background Secondary / Grouped Background
+Card / Elevated Surface
+Text Primary
+Text Secondary
+Separator
+Accent
+Selection
+Destructive / Warning / Success
+Light / Dark 适配
+Increased Contrast 适配
+```
+
+业务 View 应消费语义 Token：
+
+```swift
+theme.backgroundPrimary
+theme.cardSurface
+theme.textPrimary
+theme.textSecondary
+theme.separator
+```
+
+而不是根据一个背景色在 View 内临时推导文字颜色、透明度和卡片颜色。
+
+原因：
+
+- 单个 `Color` 无法保证整页层级。
+- 单个 `Color` 无法保证 Light / Dark 一致性。
+- 单个 `Color` 无法可靠满足 Increase Contrast。
+- 每个 View 自行推导会产生不一致和不可验证的对比度。
+
+系统结构色优先使用动态语义颜色；自定义 Theme 也必须提供相同的语义职责，而不是用固定 RGB 覆盖所有层级。
+
+Apple 官方依据：
+
+- [Human Interface Guidelines — Color](https://developer.apple.com/design/human-interface-guidelines/color)
+- [SwiftUI — ShapeStyle](https://developer.apple.com/documentation/swiftui/shapestyle)
+- [SwiftUI — ColorSchemeContrast](https://developer.apple.com/documentation/swiftui/colorschemecontrast)
+
+---
+
+## 强调色与语义色必须分离
+
+强调色负责：
+
+- Primary Action。
+- Link。
+- Selection 强调。
+- Toggle / Slider Tint。
+- 少量品牌识别。
+
+语义色负责：
+
+- Background。
+- Surface。
+- Primary / Secondary Text。
+- Separator。
+- Destructive。
+- Warning。
+- Success。
+
+禁止：
+
+- 用强调色替代页面背景。
+- 用强调色替代所有正文文字。
+- 根据强调色自动生成 Destructive / Warning / Success。
+- 为了“主题统一”把所有控件和卡片染成同一种颜色。
+- 改变强调色时同时破坏背景和文本的语义层级。
+
+品牌色可以进入 Theme，但它必须作为 `accentPrimary` 等明确 Token 存在，不能吞并其他语义颜色。
+
+---
+
+## Picker 与调色盘选择状态
+
+所有主题、外观或调色盘选择都必须同时提供非颜色状态标识。
+
+可以使用：
+
+- Checkmark。
+- Selected border。
+- 明确的选中文字。
+- 不同的 SF Symbol variant。
+- 系统 Picker 自带的 selection state。
+
+不得只通过：
+
+```text
+粉色圆点
+蓝色圆点
+绿色圆点
+```
+
+让用户判断当前选择。
+
+当系统开启 `Differentiate Without Color` 时，界面仍必须能够表达：
+
+- 哪一个主题已选中。
+- 哪一个颜色可点击。
+- 哪一个状态表示成功、警告或失败。
+
+自定义色块应具有清晰的可访问名称和当前值，例如：
+
+```text
+“暖粉色，已选择”
+“海蓝色，未选择”
+```
+
+Apple 官方依据：
+
+- [Human Interface Guidelines — Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility)
+- [SwiftUI — accessibilityDifferentiateWithoutColor](https://developer.apple.com/documentation/swiftui/environmentvalues/accessibilitydifferentiatewithoutcolor)
+- [SwiftUI — Accessibility modifiers](https://developer.apple.com/documentation/swiftui/view-accessibility)
+
+---
+
+## 任意颜色与 ColorPicker
+
+只有当产品确实允许用户选择任意颜色时，才显示系统 `ColorPicker`。
+
+主题强调色不支持透明度，因此必须使用：
+
+```swift
+ColorPicker(
+    "Accent Color",
+    selection: $accentColor,
+    supportsOpacity: false
+)
+```
+
+不得允许透明主题色进入正式 Theme，因为透明度会让最终颜色依赖未知背景，导致对比度不可预测。
+
+任意颜色在保存或应用前必须进行对比度校验，至少检查它在以下环境中的真实前景/背景组合：
+
+- Light Mode。
+- Dark Mode。
+- 普通对比度。
+- Increase Contrast。
+- 按钮文字或图标。
+- 选中状态。
+- Focus / Disabled 状态。
+
+如果颜色不能满足可读性要求，应：
+
+- 阻止把它用于需要承载文字的角色；或者
+- 自动选择可读的前景色并重新验证；或者
+- 明确提示用户并保留恢复默认颜色的入口。
+
+不得因为 ColorPicker 是系统控件，就假设用户选择的任意颜色天然满足可访问性。
+
+Apple HIG 给出的常用最低对比度参考：
+
+```text
+普通小号文字：4.5:1
+大号文字或粗体文字：3:1
+```
+
+Apple 官方依据：
+
+- [SwiftUI — ColorPicker](https://developer.apple.com/documentation/swiftui/colorpicker)
+- [Human Interface Guidelines — Color wells](https://developer.apple.com/design/human-interface-guidelines/color-wells)
+- [Human Interface Guidelines — Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility)
+
+---
+
+## 触控区域与 VoiceOver
+
+主题色块、预览卡片和自定义选择控件在 iOS / iPadOS 上的默认可点击区域应达到：
+
+```text
+44 × 44 pt
+```
+
+视觉色块可以更小，但 `contentShape`、padding 或外层 Button 的命中区域必须足够。
+
+标准 `Picker`、`ColorPicker`、`NavigationLink` 和 `Button` 应优先保留系统可访问性语义。自定义控件必须补充：
+
+- `accessibilityLabel`：描述它是什么。
+- `accessibilityValue`：描述当前颜色或选择状态。
+- `accessibilityHint`：仅在操作结果不明显时说明行为。
+- 合理的 VoiceOver 阅读和焦点顺序。
+
+不要把一个主题卡片拆成多个重复播报的装饰元素；装饰性渐变、阴影和背景图形不应成为独立的 VoiceOver 焦点。
+
+Apple 官方依据：
+
+- [Human Interface Guidelines — Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility)
+- [SwiftUI — Accessibility modifiers](https://developer.apple.com/documentation/swiftui/view-accessibility)
+
+---
+
+## Increase Contrast
+
+主题必须在系统开启 Increase Contrast 时保持可读。
+
+优先使用会自动响应系统设置的语义颜色。自定义 Theme 需要读取：
+
+```swift
+@Environment(\.colorSchemeContrast) private var colorSchemeContrast
+```
+
+并在 `.increased` 时提供足够清晰的：
+
+- 前景与背景差异。
+- Card 与页面背景边界。
+- Separator。
+- Selection border。
+- Disabled 与 Enabled 状态差异。
+
+不得只通过降低 opacity 表示次级内容，因为在复杂背景或自定义主题下可能失去可读性。
+
+Apple 官方依据：
+
+- [SwiftUI — ColorSchemeContrast](https://developer.apple.com/documentation/swiftui/colorschemecontrast)
+- [Human Interface Guidelines — Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility)
+
+---
+
+## 主题切换动画与 Reduce Motion
+
+主题切换反馈应：
+
+- 短暂。
+- 准确。
+- 不阻塞交互。
+- 不成为理解选中状态的唯一方式。
+
+可以使用轻量淡入淡出或颜色过渡，但不要在每次选择时执行：
+
+- 整页 Scale。
+- 大范围位移。
+- 3D 翻转。
+- 强弹簧。
+- Blur 进出。
+- 无法取消的长动画。
+
+必须读取：
+
+```swift
+@Environment(\.accessibilityReduceMotion) private var reduceMotion
+```
+
+Reduce Motion 开启时，应取消大范围运动，并改为淡入淡出或无动画。不要再创建一个 App 内“减少动态效果”开关来复制系统设置。
+
+Apple 官方依据：
+
+- [Human Interface Guidelines — Motion](https://developer.apple.com/design/human-interface-guidelines/motion)
+- [SwiftUI — accessibilityReduceMotion](https://developer.apple.com/documentation/swiftui/environmentvalues/accessibilityreducemotion)
+
+---
+
 # TabView 视觉规则
 
 顶层导航优先使用系统：
