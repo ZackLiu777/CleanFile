@@ -177,3 +177,8 @@
 "Today" = "今天";
 "Yesterday" = "昨天";
 "Unknown Date" = "日期未知";
+"Moved to Recently Deleted" = "已移至“最近删除”";
+"Items moved: %lld" = "已移动：%lld 项";
+"These items still use storage until permanently deleted in Photos." = "永久删除这些项目之前，设备可用空间可能不会变化。";
+"Some selected media is no longer available. Refresh and try again." = "部分所选媒体已不可用，请刷新后重试。";
+"Dismiss" = "关闭";

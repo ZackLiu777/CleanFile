@@ -10,6 +10,10 @@
 "conversion.home.audio.detail" = "Convierte audio o extráelo de un vídeo";
 "conversion.home.audio.tagline" = "Conversión M4A / AAC / WAV";
 "conversion.home.history.summary" = "%@ · %ld archivos convertidos";
+"conversion.home.history.size_comparison" = "%@ → %@";
+"conversion.home.history.smaller" = "La salida ocupa %@ menos";
+"conversion.home.history.larger" = "La salida ocupa %@ más";
+"conversion.home.history.unchanged" = "El tamaño de salida no cambió";
 "import.title" = "Convierte imágenes localmente";
 "import.subtitle" = "Los archivos se procesan en este dispositivo y nunca se suben.";
 "action.add_images" = "Añadir imágenes";

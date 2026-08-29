@@ -177,3 +177,8 @@
 "Today" = "Aujourd’hui";
 "Yesterday" = "Hier";
 "Unknown Date" = "Date inconnue";
+"Moved to Recently Deleted" = "Déplacé vers Supprimés récemment";
+"Items moved: %lld" = "Éléments déplacés : %lld";
+"These items still use storage until permanently deleted in Photos." = "Ces éléments peuvent continuer à occuper de l’espace jusqu’à leur suppression définitive dans Photos.";
+"Some selected media is no longer available. Refresh and try again." = "Certains médias sélectionnés ne sont plus disponibles. Actualisez, puis réessayez.";
+"Dismiss" = "Fermer";

@@ -177,3 +177,8 @@
 "Today" = "今天";
 "Yesterday" = "昨天";
 "Unknown Date" = "日期未知";
+"Moved to Recently Deleted" = "已移至「最近刪除」";
+"Items moved: %lld" = "已移動：%lld 個項目";
+"These items still use storage until permanently deleted in Photos." = "永久刪除這些項目之前，裝置可用空間可能不會改變。";
+"Some selected media is no longer available. Refresh and try again." = "部分所選媒體已無法使用，請重新整理後再試。";
+"Dismiss" = "關閉";

@@ -10,6 +10,10 @@
 "conversion.home.audio.detail" = "音频格式互转，也可从视频提取音频";
 "conversion.home.audio.tagline" = "M4A / AAC / WAV 互转";
 "conversion.home.history.summary" = "%@ · 转换过 %ld 个文件";
+"conversion.home.history.size_comparison" = "%@ → %@";
+"conversion.home.history.smaller" = "输出缩小 %@";
+"conversion.home.history.larger" = "输出增大 %@";
+"conversion.home.history.unchanged" = "输出大小未变化";
 "import.title" = "在本地转换图片";
 "import.subtitle" = "文件只在此设备上处理，不会上传。";
 "action.add_images" = "添加图片";

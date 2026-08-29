@@ -77,7 +77,7 @@ enum MediaAnalysisError: LocalizedError, Equatable, Sendable {
 enum MediaDeletionState: Equatable, Sendable {
     case idle
     case deleting(itemCount: Int)
-    case success(deletedCount: Int)
+    case success(deletedCount: Int, estimatedBytes: Int64)
     case failure(MediaDeletionError)
 
     var isDeleting: Bool {
@@ -90,6 +90,7 @@ enum MediaDeletionState: Equatable, Sendable {
 enum MediaDeletionError: LocalizedError, Equatable, Sendable {
     case photoAccessUnavailable
     case noItemsSelected
+    case itemsUnavailable
     case deletionFailed
 
     var errorDescription: String? {
@@ -98,6 +99,8 @@ enum MediaDeletionError: LocalizedError, Equatable, Sendable {
             String(localized: "Photo access is unavailable for deletion.")
         case .noItemsSelected:
             String(localized: "Select at least one item to delete.")
+        case .itemsUnavailable:
+            String(localized: "Some selected media is no longer available. Refresh and try again.")
         case .deletionFailed:
             String(localized: "The selected media could not be deleted.")
         }

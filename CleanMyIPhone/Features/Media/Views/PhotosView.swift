@@ -741,6 +741,7 @@ private struct MediaCategoryDetailView: View {
                 .background(Color.clear)
                 // 仅让网格背景延伸到系统栏后方；UICollectionView 仍通过 automatic inset 保持内容可操作。
                 .ignoresSafeArea(.all, edges: .all)
+                .appSoftScrollEdge()
             }
         }
         .navigationTitle(title)
@@ -768,33 +769,42 @@ private struct MediaCategoryDetailView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
-            if isSelecting {
-                HStack(spacing: 14) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("\(selectedIDs.count) selected")
-                            .font(.subheadline.weight(.semibold))
-                        Text("Estimated \(selectedMediaSizeText)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer(minLength: 8)
-
-                    Button(role: .destructive) {
-                        isDeleteConfirmationPresented = true
-                    } label: {
-                        if viewModel.deletionState.isDeleting {
-                            ProgressView()
-                        } else {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
-                    .buttonStyle(.glass)
-                    .foregroundStyle(theme.negativeRed)
-                    .disabled(selectedIDs.isEmpty || viewModel.deletionState.isDeleting)
+            VStack(spacing: 8) {
+                if case let .success(deletedCount, estimatedBytes) = viewModel.deletionState {
+                    deletionReceipt(
+                        deletedCount: deletedCount,
+                        estimatedBytes: estimatedBytes
+                    )
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+
+                if isSelecting {
+                    HStack(spacing: 14) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(selectedIDs.count) selected")
+                                .font(.subheadline.weight(.semibold))
+                            Text("Estimated \(selectedMediaSizeText)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer(minLength: 8)
+
+                        Button(role: .destructive) {
+                            isDeleteConfirmationPresented = true
+                        } label: {
+                            if viewModel.deletionState.isDeleting {
+                                ProgressView()
+                            } else {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        .buttonStyle(.glass)
+                        .foregroundStyle(theme.negativeRed)
+                        .disabled(selectedIDs.isEmpty || viewModel.deletionState.isDeleting)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                }
             }
         }
         .alert("Delete selected media?", isPresented: $isDeleteConfirmationPresented) {
@@ -813,15 +823,20 @@ private struct MediaCategoryDetailView: View {
             Text("The system will ask you to confirm deletion of \(selectedIDs.count) photo or video item(s).")
         }
         .alert(
-            deletionResultTitle ?? "",
+            String(localized: "Deletion Failed"),
             isPresented: Binding(
-                get: { deletionResultTitle != nil },
+                get: {
+                    if case .failure = viewModel.deletionState { return true }
+                    return false
+                },
                 set: { if !$0 { viewModel.clearDeletionResult() } }
             )
         ) {
-            Button("OK") { viewModel.clearDeletionResult() }
+            Button("Done") { viewModel.clearDeletionResult() }
         } message: {
-            Text(deletionResultMessage)
+            if case let .failure(error) = viewModel.deletionState {
+                Text(error.localizedDescription)
+            }
         }
         .fullScreenCover(
             isPresented: Binding(
@@ -849,7 +864,10 @@ private struct MediaCategoryDetailView: View {
                 for: preheatedAssetIDs,
                 targetSize: thumbnailTargetSize
             )
+            viewModel.clearDeletionResult()
         }
+        // 触觉挂在稳定页面层，确保回执首次插入时也能触发。
+        .sensoryFeedback(.success, trigger: deletionSuccessTrigger)
     }
 
     private var selectedMediaSizeText: String {
@@ -859,23 +877,72 @@ private struct MediaCategoryDetailView: View {
         )
     }
 
-    private var deletionResultTitle: String? {
-        switch viewModel.deletionState {
-        case .success: String(localized: "Deletion Complete")
-        case .failure: String(localized: "Deletion Failed")
-        default: nil
+    private var deletionSuccessTrigger: Int {
+        if case let .success(deletedCount, _) = viewModel.deletionState {
+            return deletedCount
         }
+        return 0
     }
 
-    private var deletionResultMessage: String {
-        switch viewModel.deletionState {
-        case .success(let count):
-            String.localizedStringWithFormat(String(localized: "%lld media item(s) deleted."), Int64(count))
-        case .failure(let error):
-            error.localizedDescription
-        default:
-            ""
+    /// 显示就地删除回执，并明确媒体进入“最近删除”后设备空间可能不会立即变化。
+    private func deletionReceipt(deletedCount: Int, estimatedBytes: Int64) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.title3)
+                .foregroundStyle(theme.positiveGreen)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Moved to Recently Deleted")
+                    .font(.subheadline.weight(.semibold))
+
+                HStack(spacing: 5) {
+                    Text(
+                        String.localizedStringWithFormat(
+                            String(localized: "Items moved: %lld"),
+                            Int64(deletedCount)
+                        )
+                    )
+                    Text("·")
+                    Text(
+                        String.localizedStringWithFormat(
+                            String(localized: "Estimated %@"),
+                            ByteCountFormatter.string(
+                                fromByteCount: estimatedBytes,
+                                countStyle: .file
+                            )
+                        )
+                    )
+                }
+                .font(.caption)
+                .foregroundStyle(theme.textSecondary)
+
+                Text("These items still use storage until permanently deleted in Photos.")
+                    .font(.caption2)
+                    .foregroundStyle(theme.textTertiary)
+            }
+
+            Spacer(minLength: 8)
+
+            Button {
+                viewModel.clearDeletionResult()
+            } label: {
+                Image(systemName: "xmark")
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(theme.textSecondary)
+            .accessibilityLabel("Dismiss")
         }
+        .padding(14)
+        .background(
+            theme.cardSurface,
+            in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(theme.divider, lineWidth: 1)
+        }
+        .padding(.horizontal, 16)
     }
 }
 

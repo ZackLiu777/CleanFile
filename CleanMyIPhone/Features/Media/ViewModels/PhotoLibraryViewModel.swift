@@ -363,24 +363,36 @@ final class PhotoLibraryViewModel: ObservableObject {
             withLocalIdentifiers: Array(assetIDs),
             options: nil
         )
-        guard fetchResult.count > 0 else {
-            deletionState = .failure(.deletionFailed)
+        // PhotoKit 可能在确认前移除部分资源；禁止把剩余资源静默当作完整批次删除。
+        guard fetchResult.count == assetIDs.count else {
+            deletionState = .failure(.itemsUnavailable)
             return
         }
 
+        let deletedIDs = Set((0..<fetchResult.count).map { fetchResult.object(at: $0).localIdentifier })
+        let estimatedBytes = estimatedByteCount(for: deletedIDs)
         deletionState = .deleting(itemCount: fetchResult.count)
         do {
             try await PHPhotoLibrary.shared().performChanges {
                 PHAssetChangeRequest.deleteAssets(fetchResult)
             }
-            let deletedIDs = Set((0..<fetchResult.count).map { fetchResult.object(at: $0).localIdentifier })
             assets.removeAll { deletedIDs.contains($0.localIdentifier) }
             rebuildAssetIndex()
             updateAnalysisAfterDeleting(deletedIDs)
             persistAnalysisState()
             storageSnapshot = Self.loadStorageSnapshot()
-            deletionState = .success(deletedCount: deletedIDs.count)
+            deletionState = .success(
+                deletedCount: deletedIDs.count,
+                estimatedBytes: estimatedBytes
+            )
         } catch {
+            let photoError = error as NSError
+            if photoError.domain == PHPhotosError.errorDomain,
+               photoError.code == PHPhotosError.Code.userCancelled.rawValue {
+                // 取消系统确认不是失败；回到可操作状态并保留当前选择。
+                deletionState = .idle
+                return
+            }
             deletionState = .failure(.deletionFailed)
         }
     }

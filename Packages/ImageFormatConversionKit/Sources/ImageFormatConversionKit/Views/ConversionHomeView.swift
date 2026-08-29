@@ -335,6 +335,8 @@ private enum ConversionHomeKind: String, CaseIterable, Identifiable, Hashable, S
 private struct ConversionHomeRecord: Sendable {
     let completedAt: Date
     let completedCount: Int
+    let sourceBytes: Int64?
+    let outputBytes: Int64?
 }
 
 private actor ConversionHomeHistoryLoader {
@@ -346,7 +348,7 @@ private actor ConversionHomeHistoryLoader {
         for kind in ConversionHomeKind.allCases {
             let records = await ConversionWorkspace.shared.load(kind.mediaKind)
 
-            let completed = records.compactMap { record -> (URL, Date)? in
+            let completed = records.compactMap { record -> (Date, Int64?, Int64?)? in
                 guard record.status == .completed else { return nil }
                 guard let outputPath = record.outputPath else { return nil }
 
@@ -357,22 +359,31 @@ private actor ConversionHomeHistoryLoader {
                 }
 
                 let values = try? outputURL.resourceValues(
-                    forKeys: [.contentModificationDateKey]
+                    forKeys: [.contentModificationDateKey, .fileSizeKey]
                 )
 
                 return (
-                    outputURL,
-                    values?.contentModificationDate ?? .distantPast
+                    values?.contentModificationDate ?? .distantPast,
+                    record.sourceBytes > 0 ? record.sourceBytes : nil,
+                    values?.fileSize.map(Int64.init).flatMap { $0 > 0 ? $0 : nil }
                 )
             }
 
-            guard let latest = completed.max(by: { $0.1 < $1.1 }) else {
+            guard let latest = completed.max(by: { $0.0 < $1.0 }) else {
                 continue
             }
 
+            let hasCompleteSizeHistory = completed.allSatisfy { $0.1 != nil && $0.2 != nil }
+
             result[kind] = ConversionHomeRecord(
-                completedAt: latest.1,
-                completedCount: completed.count
+                completedAt: latest.0,
+                completedCount: completed.count,
+                sourceBytes: hasCompleteSizeHistory
+                    ? completed.compactMap(\.1).reduce(0, +)
+                    : nil,
+                outputBytes: hasCompleteSizeHistory
+                    ? completed.compactMap(\.2).reduce(0, +)
+                    : nil
             )
         }
 
@@ -460,6 +471,17 @@ private struct ConversionHomeCard: View {
                     )
                     .font(.caption)
                     .foregroundStyle(theme.textSecondary)
+
+                    if let sizeComparison = sizeComparison(for: recentRecord) {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(sizeComparison.values)
+                                .font(.caption.monospacedDigit().weight(.medium))
+                                .foregroundStyle(theme.textPrimary)
+                            Text(sizeComparison.change)
+                                .font(.caption2)
+                                .foregroundStyle(theme.textSecondary)
+                        }
+                    }
                 }
             }
         }
@@ -487,6 +509,30 @@ private struct ConversionHomeCard: View {
                 style: .continuous
             )
         )
+    }
+
+    /// 将历史输入与真实输出文件体积转换为不暗示释放空间的中性反馈。
+    private func sizeComparison(for record: ConversionHomeRecord) -> (values: String, change: String)? {
+        guard let sourceBytes = record.sourceBytes, let outputBytes = record.outputBytes else { return nil }
+        let source = ByteCountFormatter.string(fromByteCount: sourceBytes, countStyle: .file)
+        let output = ByteCountFormatter.string(fromByteCount: outputBytes, countStyle: .file)
+        let values = L10n.format("conversion.home.history.size_comparison", source, output)
+
+        if outputBytes < sourceBytes {
+            let difference = ByteCountFormatter.string(
+                fromByteCount: sourceBytes - outputBytes,
+                countStyle: .file
+            )
+            return (values, L10n.format("conversion.home.history.smaller", difference))
+        }
+        if outputBytes > sourceBytes {
+            let difference = ByteCountFormatter.string(
+                fromByteCount: outputBytes - sourceBytes,
+                countStyle: .file
+            )
+            return (values, L10n.format("conversion.home.history.larger", difference))
+        }
+        return (values, L10n.string("conversion.home.history.unchanged"))
     }
 }
 

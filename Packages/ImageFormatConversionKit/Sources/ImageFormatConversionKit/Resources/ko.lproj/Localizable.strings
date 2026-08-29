@@ -10,6 +10,10 @@
 "conversion.home.audio.detail" = "오디오 변환 및 비디오에서 오디오 추출";
 "conversion.home.audio.tagline" = "M4A / AAC / WAV 변환";
 "conversion.home.history.summary" = "%@ · %ld개 파일 변환";
+"conversion.home.history.size_comparison" = "%@ → %@";
+"conversion.home.history.smaller" = "출력이 %@ 감소함";
+"conversion.home.history.larger" = "출력이 %@ 증가함";
+"conversion.home.history.unchanged" = "출력 크기가 변경되지 않음";
 "import.title" = "기기에서 이미지 변환";
 "import.subtitle" = "파일은 이 기기에서만 처리되며 업로드되지 않습니다.";
 "action.add_images" = "이미지 추가";

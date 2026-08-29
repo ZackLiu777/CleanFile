@@ -10,6 +10,10 @@
 "conversion.home.audio.detail" = "音声変換とビデオからの音声抽出";
 "conversion.home.audio.tagline" = "M4A / AAC / WAV 変換";
 "conversion.home.history.summary" = "%@ · %ld ファイルを変換";
+"conversion.home.history.size_comparison" = "%@ → %@";
+"conversion.home.history.smaller" = "出力が%@小さくなりました";
+"conversion.home.history.larger" = "出力が%@大きくなりました";
+"conversion.home.history.unchanged" = "出力サイズは変わりません";
 "import.title" = "端末内で画像を変換";
 "import.subtitle" = "ファイルはこの端末上だけで処理され、アップロードされません。";
 "action.add_images" = "画像を追加";

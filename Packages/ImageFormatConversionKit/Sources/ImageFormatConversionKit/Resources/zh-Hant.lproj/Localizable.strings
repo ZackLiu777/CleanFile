@@ -10,6 +10,10 @@
 "conversion.home.audio.detail" = "音訊格式互轉，也可從影片擷取音訊";
 "conversion.home.audio.tagline" = "M4A / AAC / WAV 互轉";
 "conversion.home.history.summary" = "%@ · 轉換過 %ld 個檔案";
+"conversion.home.history.size_comparison" = "%@ → %@";
+"conversion.home.history.smaller" = "輸出縮小 %@";
+"conversion.home.history.larger" = "輸出增大 %@";
+"conversion.home.history.unchanged" = "輸出大小未變化";
 "import.title" = "在本機轉換圖片";
 "import.subtitle" = "檔案只在此裝置上處理，不會上傳。";
 "action.add_images" = "加入圖片";

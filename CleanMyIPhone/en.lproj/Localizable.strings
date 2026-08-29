@@ -177,3 +177,8 @@
 "Today" = "Today";
 "Yesterday" = "Yesterday";
 "Unknown Date" = "Unknown Date";
+"Moved to Recently Deleted" = "Moved to Recently Deleted";
+"Items moved: %lld" = "Items moved: %lld";
+"These items still use storage until permanently deleted in Photos." = "These items still use storage until permanently deleted in Photos.";
+"Some selected media is no longer available. Refresh and try again." = "Some selected media is no longer available. Refresh and try again.";
+"Dismiss" = "Dismiss";
