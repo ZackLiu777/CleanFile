@@ -103,9 +103,8 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 
         private var batchSelectionStartIndexPath: IndexPath?
         private var batchSelectionStartLocation: CGPoint?
+        private var batchSelectionLastLocation: CGPoint?
         private var batchSelectionDirection: MediaBatchSelectionDirection?
-        private var batchSelectionOriginalStates = [String: Bool]()
-        private var batchSelectionAffectedIDs = Set<String>()
         private var isBatchSelectionActive = false
         private var isBatchSelectionRejected = false
         private var selectionFeedbackGenerator: UISelectionFeedbackGenerator?
@@ -665,16 +664,15 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             }
             batchSelectionStartIndexPath = indexPath
             batchSelectionStartLocation = location
+            batchSelectionLastLocation = location
             batchSelectionDirection = nil
-            batchSelectionOriginalStates.removeAll(keepingCapacity: true)
-            batchSelectionAffectedIDs.removeAll(keepingCapacity: true)
             isBatchSelectionActive = false
             isBatchSelectionRejected = false
             selectionFeedbackGenerator = UISelectionFeedbackGenerator(view: collectionView)
             selectionFeedbackGenerator?.prepare()
         }
 
-        /// 使用平移量和速度建立方向门槛，避免上、下滚动时误触批量选择。
+        /// 使用平移量和速度建立初始门槛；激活后改由连续轨迹决定每一段的选择语义。
         private func updateBatchSelection(
             gesture: UIPanGestureRecognizer,
             at location: CGPoint,
@@ -712,9 +710,9 @@ struct MediaInteractiveGrid: UIViewRepresentable {
                 guard reachedActivationThreshold else { return }
 
                 isBatchSelectionActive = true
-                reconcileBatchSelection(
-                    from: startIndexPath,
-                    through: startIndexPath,
+                batchSelectionLastLocation = startLocation
+                applyBatchSelection(
+                    to: [startIndexPath],
                     direction: batchSelectionDirection
                 )
                 selectionFeedbackGenerator?.selectionChanged()
@@ -723,117 +721,72 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 
             guard
                 isBatchSelectionActive,
-                let endpoint = collectionView.indexPathForItem(at: location),
-                endpoint.section == startIndexPath.section
+                let previousLocation = batchSelectionLastLocation,
+                let currentDirection = MediaBatchSelectionDirection.resolve(
+                    from: previousLocation,
+                    to: location
+                )
             else { return }
 
-            guard let currentDirection = continuousDirection(
-                from: startIndexPath,
-                to: endpoint,
-                startLocation: startLocation,
-                currentLocation: location,
-                in: collectionView
-            ) else { return }
             batchSelectionDirection = currentDirection
-            if reconcileBatchSelection(
-                from: startIndexPath,
-                through: endpoint,
-                direction: currentDirection
-            ) {
+            let traversedIndexPaths = batchSelectionIndexPaths(
+                from: previousLocation,
+                to: location,
+                limitedTo: startIndexPath.section,
+                in: collectionView
+            )
+            batchSelectionLastLocation = location
+            if applyBatchSelection(to: traversedIndexPaths, direction: currentDirection) {
                 playBatchSelectionFeedback()
             }
         }
 
-        /// 根据当前位置实时推导方向，允许一次手势内回拉、越过起点或切换行列方向。
-        private func continuousDirection(
-            from startIndexPath: IndexPath,
-            to endpoint: IndexPath,
-            startLocation: CGPoint,
-            currentLocation: CGPoint,
+        /// 沿两次回调之间的真实触摸轨迹采样单元格，让右转下、左转上都保持同一次手势。
+        private func batchSelectionIndexPaths(
+            from startLocation: CGPoint,
+            to endLocation: CGPoint,
+            limitedTo section: Int,
             in collectionView: UICollectionView
-        ) -> MediaBatchSelectionDirection? {
-            if endpoint == startIndexPath {
-                let horizontalDelta = currentLocation.x - startLocation.x
-                let verticalDelta = currentLocation.y - startLocation.y
-                if abs(horizontalDelta) >= abs(verticalDelta) {
-                    return horizontalDelta < 0 ? .left : .right
-                }
-                return verticalDelta < 0 ? .up : .down
+        ) -> [IndexPath] {
+            let deltaX = endLocation.x - startLocation.x
+            let deltaY = endLocation.y - startLocation.y
+            let distance = hypot(deltaX, deltaY)
+            let itemSize = (collectionView.collectionViewLayout as? MediaDensityFlowLayout)?.itemSize
+                ?? CGSize(width: 44, height: 44)
+            let sampleStride = max(6, min(itemSize.width, itemSize.height) * 0.3)
+            let sampleCount = max(1, Int(ceil(distance / sampleStride)))
+            var result = [IndexPath]()
+
+            for step in 0 ... sampleCount {
+                let progress = CGFloat(step) / CGFloat(sampleCount)
+                let point = CGPoint(
+                    x: startLocation.x + deltaX * progress,
+                    y: startLocation.y + deltaY * progress
+                )
+                guard
+                    let indexPath = collectionView.indexPathForItem(at: point),
+                    indexPath.section == section,
+                    result.last != indexPath
+                else { continue }
+                result.append(indexPath)
             }
-            if row(of: endpoint.item) == row(of: startIndexPath.item),
-               abs(currentLocation.y - startLocation.y) <= batchSelectionVerticalTolerance(
-                   in: collectionView
-               ) {
-                return endpoint.item < startIndexPath.item ? .left : .right
-            }
-            if column(of: endpoint.item) == column(of: startIndexPath.item),
-               abs(currentLocation.x - startLocation.x) <= batchSelectionHorizontalTolerance(
-                   in: collectionView
-               ) {
-                return row(of: endpoint.item) < row(of: startIndexPath.item) ? .up : .down
-            }
-            return nil
+            return result
         }
 
-        /// 将当前方向对应的范围应用到选择集，并恢复回拉后离开范围的资源原始状态。
+        /// 把当前轨迹段统一设置为选择或取消；已处于目标状态的资源不会重复刷新。
         @discardableResult
-        private func reconcileBatchSelection(
-            from startIndexPath: IndexPath,
-            through endpoint: IndexPath,
+        private func applyBatchSelection(
+            to indexPaths: [IndexPath],
             direction: MediaBatchSelectionDirection
         ) -> Bool {
-            let targetIndexPaths = batchSelectionIndexPaths(
-                from: startIndexPath,
-                through: endpoint,
-                direction: direction
-            )
-            let targetIDs = Set(targetIndexPaths.compactMap { assetID(at: $0) })
-            let shouldSelect = direction == .right || direction == .down
             var didChangeSelection = false
-
-            // 回拉时只恢复本次手势曾经触碰、但已不在当前范围内的资源。
-            for assetID in batchSelectionAffectedIDs.subtracting(targetIDs) {
-                guard let wasSelected = batchSelectionOriginalStates[assetID] else { continue }
-                let changed = setSelection(wasSelected, for: assetID)
-                didChangeSelection = changed || didChangeSelection
+            for assetID in indexPaths.compactMap({ assetID(at: $0) }) {
+                let changed = setSelection(direction.shouldSelect, for: assetID)
+                guard changed else { continue }
+                didChangeSelection = true
                 refreshCell(for: assetID)
             }
-
-            for assetID in targetIDs {
-                if batchSelectionOriginalStates[assetID] == nil {
-                    batchSelectionOriginalStates[assetID] = parent.selectedIDs.contains(assetID)
-                }
-                let changed = setSelection(shouldSelect, for: assetID)
-                didChangeSelection = changed || didChangeSelection
-                refreshCell(for: assetID)
-            }
-            batchSelectionAffectedIDs = targetIDs
             return didChangeSelection
-        }
-
-        /// 构造从起点到当前端点的连续同一行或同一列范围。
-        private func batchSelectionIndexPaths(
-            from startIndexPath: IndexPath,
-            through endpoint: IndexPath,
-            direction: MediaBatchSelectionDirection
-        ) -> [IndexPath] {
-            switch direction {
-            case .right, .left:
-                let lowerItem = min(startIndexPath.item, endpoint.item)
-                let upperItem = max(startIndexPath.item, endpoint.item)
-                return (lowerItem ... upperItem).map {
-                    IndexPath(item: $0, section: startIndexPath.section)
-                }
-            case .down, .up:
-                let lowerRow = min(row(of: startIndexPath.item), row(of: endpoint.item))
-                let upperRow = max(row(of: startIndexPath.item), row(of: endpoint.item))
-                return (lowerRow ... upperRow).map { rowIndex in
-                    IndexPath(
-                        item: rowIndex * density.columnCount + column(of: startIndexPath.item),
-                        section: startIndexPath.section
-                    )
-                }
-            }
         }
 
         /// 将单个资源设置为目标选择状态，并返回其状态是否真的发生变化。
@@ -850,30 +803,6 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             selectionFeedbackGenerator?.prepare()
         }
 
-        /// 根据稳定布局的列数计算行号，确保向右批选不会跨入下一行。
-        private func row(of item: Int) -> Int {
-            item / density.columnCount
-        }
-
-        /// 根据稳定布局的列数计算资源所在列。
-        private func column(of item: Int) -> Int {
-            item % density.columnCount
-        }
-
-        /// 根据当前单元格高度设置允许的轻微斜向误差，同时阻止明显上下滑动进入批选。
-        private func batchSelectionVerticalTolerance(in collectionView: UICollectionView) -> CGFloat {
-            let itemHeight = (collectionView.collectionViewLayout as? MediaDensityFlowLayout)?.itemSize.height
-                ?? 44
-            return max(12, itemHeight * 0.38)
-        }
-
-        /// 根据当前单元格宽度设置向下批选允许的轻微横向误差。
-        private func batchSelectionHorizontalTolerance(in collectionView: UICollectionView) -> CGFloat {
-            let itemWidth = (collectionView.collectionViewLayout as? MediaDensityFlowLayout)?.itemSize.width
-                ?? 44
-            return max(12, itemWidth * 0.38)
-        }
-
         /// 切换单个资源的选中状态。
         private func toggleSelection(_ assetID: String) {
             if parent.selectedIDs.contains(assetID) {
@@ -887,9 +816,8 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         private func resetBatchSelection() {
             batchSelectionStartIndexPath = nil
             batchSelectionStartLocation = nil
+            batchSelectionLastLocation = nil
             batchSelectionDirection = nil
-            batchSelectionOriginalStates.removeAll(keepingCapacity: true)
-            batchSelectionAffectedIDs.removeAll(keepingCapacity: true)
             isBatchSelectionActive = false
             isBatchSelectionRejected = false
             selectionFeedbackGenerator = nil
@@ -1102,12 +1030,33 @@ private final class MediaInteractiveGridHeaderView: UICollectionReusableView {
 
 // MARK: - Supporting models
 
-/// 锁定一次批选的主方向，避免手指轻微斜移时在行选与列选之间跳变。
-private enum MediaBatchSelectionDirection {
+/// 描述连续批选轨迹当前一段的操作方向；右/下选择，左/上取消。
+enum MediaBatchSelectionDirection: Equatable {
     case right
     case left
     case down
     case up
+
+    /// 返回当前方向对应的目标选择状态。
+    var shouldSelect: Bool {
+        self == .right || self == .down
+    }
+
+    /// 从相邻触摸点解析主方向，小幅抖动不会改变上一段已经应用的选择结果。
+    static func resolve(
+        from start: CGPoint,
+        to end: CGPoint,
+        minimumDistance: CGFloat = 2.5
+    ) -> MediaBatchSelectionDirection? {
+        let horizontalDistance = end.x - start.x
+        let verticalDistance = end.y - start.y
+        guard hypot(horizontalDistance, verticalDistance) >= minimumDistance else { return nil }
+
+        if abs(horizontalDistance) >= abs(verticalDistance) {
+            return horizontalDistance >= 0 ? .right : .left
+        }
+        return verticalDistance >= 0 ? .down : .up
+    }
 }
 
 /// 媒体相册的三档视觉密度：2 列、5 列和 8 列。

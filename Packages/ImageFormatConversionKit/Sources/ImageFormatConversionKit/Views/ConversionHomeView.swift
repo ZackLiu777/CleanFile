@@ -288,38 +288,6 @@ private enum ConversionHomeKind: String, CaseIterable, Identifiable, Hashable, S
         }
     }
 
-    var warmColors: [Color] {
-        switch self {
-        case .image:
-            [
-                Color(red: 0.80, green: 0.62, blue: 0.38),
-                Color(red: 0.62, green: 0.45, blue: 0.28)
-            ]
-        case .video:
-            [
-                Color(red: 0.77, green: 0.45, blue: 0.32),
-                Color(red: 0.59, green: 0.32, blue: 0.22)
-            ]
-        case .audio:
-            [
-                Color(red: 0.42, green: 0.56, blue: 0.50),
-                Color(red: 0.28, green: 0.41, blue: 0.36)
-            ]
-        }
-    }
-
-    var warmGradient: LinearGradient {
-        LinearGradient(
-            colors: warmColors,
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-
-    var warmShadow: Color {
-        warmColors[1].opacity(0.32)
-    }
-
     var mediaKind: ConversionMediaKind {
         switch self {
         case .image:
@@ -401,17 +369,17 @@ private struct ConversionHomeCard: View {
             HStack(spacing: 14) {
                 Image(systemName: kind.symbol)
                     .font(.system(size: 23, weight: .medium))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(theme.textPrimary)
                     .frame(width: 54, height: 54)
                     .background(
-                        kind.warmGradient,
+                        cardHighlightGradient,
                         in: RoundedRectangle(
                             cornerRadius: 16,
                             style: .continuous
                         )
                     )
                     .shadow(
-                        color: kind.warmShadow,
+                        color: theme.divider.opacity(0.34),
                         radius: 6,
                         x: 0,
                         y: 3
@@ -508,6 +476,15 @@ private struct ConversionHomeCard: View {
                 cornerRadius: 24,
                 style: .continuous
             )
+        )
+    }
+
+    /// 使用背景主题的两个语义表面绘制高亮块，使大卡与背景调色盘保持同一管理状态。
+    private var cardHighlightGradient: LinearGradient {
+        LinearGradient(
+            colors: [theme.cardHighlight, theme.cardElevated],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
         )
     }
 

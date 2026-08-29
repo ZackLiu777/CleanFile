@@ -5,6 +5,52 @@ import Testing
 
 @Suite("Media model behavior")
 struct MediaModelTests {
+    @Test("Continuous batch selection maps right and down to selection")
+    func batchSelectionPositiveDirectionsSelect() {
+        #expect(
+            MediaBatchSelectionDirection.resolve(
+                from: CGPoint(x: 10, y: 10),
+                to: CGPoint(x: 30, y: 12)
+            ) == .right
+        )
+        #expect(
+            MediaBatchSelectionDirection.resolve(
+                from: CGPoint(x: 30, y: 12),
+                to: CGPoint(x: 32, y: 42)
+            ) == .down
+        )
+        #expect(MediaBatchSelectionDirection.right.shouldSelect)
+        #expect(MediaBatchSelectionDirection.down.shouldSelect)
+    }
+
+    @Test("Continuous batch selection maps left and up to cancellation")
+    func batchSelectionNegativeDirectionsCancel() {
+        #expect(
+            MediaBatchSelectionDirection.resolve(
+                from: CGPoint(x: 30, y: 40),
+                to: CGPoint(x: 8, y: 38)
+            ) == .left
+        )
+        #expect(
+            MediaBatchSelectionDirection.resolve(
+                from: CGPoint(x: 8, y: 38),
+                to: CGPoint(x: 7, y: 9)
+            ) == .up
+        )
+        #expect(!MediaBatchSelectionDirection.left.shouldSelect)
+        #expect(!MediaBatchSelectionDirection.up.shouldSelect)
+    }
+
+    @Test("Continuous batch selection ignores finger jitter")
+    func batchSelectionIgnoresJitter() {
+        #expect(
+            MediaBatchSelectionDirection.resolve(
+                from: CGPoint(x: 10, y: 10),
+                to: CGPoint(x: 11, y: 11)
+            ) == nil
+        )
+    }
+
     @Test("Analysis progress limits large workloads to about one hundred updates")
     func analysisProgressIsThrottled() {
         let reported = (1 ... 10_000).filter {

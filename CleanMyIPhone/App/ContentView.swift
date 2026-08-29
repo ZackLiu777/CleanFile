@@ -76,6 +76,7 @@ private extension Theme {
             background: conversionBackground,
             cardSurface: cardSurface,
             cardElevated: cardElevated,
+            cardHighlight: backgroundSecondary,
             textPrimary: textPrimary,
             textSecondary: textSecondary,
             accent: accentPrimary,

@@ -21,6 +21,7 @@ public struct ConversionTheme: Sendable {
     public let background: ConversionBackground
     public let cardSurface: Color
     public let cardElevated: Color
+    public let cardHighlight: Color
     public let textPrimary: Color
     public let textSecondary: Color
     public let accent: Color
@@ -33,6 +34,7 @@ public struct ConversionTheme: Sendable {
         background: ConversionBackground,
         cardSurface: Color,
         cardElevated: Color,
+        cardHighlight: Color? = nil,
         textPrimary: Color,
         textSecondary: Color,
         accent: Color,
@@ -43,6 +45,8 @@ public struct ConversionTheme: Sendable {
         self.background = background
         self.cardSurface = cardSurface
         self.cardElevated = cardElevated
+        // 允许宿主提供由背景调色盘派生的高亮表面；旧调用方省略时保持原有层级。
+        self.cardHighlight = cardHighlight ?? cardElevated
         self.textPrimary = textPrimary
         self.textSecondary = textSecondary
         self.accent = accent
@@ -78,6 +82,7 @@ public struct ConversionTheme: Sendable {
         background: .solid(systemBackground),
         cardSurface: systemCard,
         cardElevated: systemElevatedCard,
+        cardHighlight: systemCard,
         textPrimary: systemText,
         textSecondary: systemSecondaryText,
         accent: .accentColor,
