@@ -11,6 +11,80 @@
 import Combine
 import Foundation
 
+private nonisolated struct PreparedFileState: Sendable {
+    let rootURL: URL
+    let selectedDirectoryName: String
+    let directoryBookmark: Data
+    let shouldRewriteBookmark: Bool
+    let skippedFileCount: Int
+    let files: [ScannedFile]
+    let summary: StorageSummary
+    let fileTree: FileNode
+    let largestFiles: [ScannedFile]
+}
+
+private nonisolated enum FileStateRestorer {
+    static func prepare(_ snapshot: FileStateSnapshot) -> PreparedFileState? {
+        guard !Task.isCancelled else { return nil }
+
+        var isStale = false
+        guard let restoredRoot = try? URL(
+            resolvingBookmarkData: snapshot.directoryBookmark,
+            options: [],
+            relativeTo: nil,
+            bookmarkDataIsStale: &isStale
+        ) else { return nil }
+
+        let bookmark = isStale
+            ? (try? restoredRoot.bookmarkData(
+                options: [],
+                includingResourceValuesForKeys: nil,
+                relativeTo: nil
+            )) ?? snapshot.directoryBookmark
+            : snapshot.directoryBookmark
+        var restoredFiles: [ScannedFile] = []
+        restoredFiles.reserveCapacity(snapshot.files.count)
+        var summaryAccumulator = StorageSummaryAccumulator()
+        var treeAccumulator = FileTreeAccumulator(rootURL: restoredRoot)
+        var largestFilesAccumulator = LargestFilesAccumulator(limit: 10)
+
+        for persistedFile in snapshot.files {
+            guard !Task.isCancelled else { return nil }
+            guard !persistedFile.relativePathComponents.isEmpty else { continue }
+
+            let restoredURL = persistedFile.relativePathComponents.reduce(restoredRoot) {
+                $0.appendingPathComponent($1)
+            }
+            let file = ScannedFile(
+                url: restoredURL,
+                name: persistedFile.name,
+                relativePathComponents: persistedFile.relativePathComponents,
+                category: persistedFile.category,
+                byteCount: persistedFile.byteCount,
+                hasKnownByteCount: persistedFile.hasKnownByteCount,
+                creationDate: persistedFile.creationDate,
+                modificationDate: persistedFile.modificationDate
+            )
+            restoredFiles.append(file)
+            summaryAccumulator.append(file)
+            treeAccumulator.append(file)
+            largestFilesAccumulator.append(file)
+        }
+
+        return PreparedFileState(
+            rootURL: restoredRoot,
+            selectedDirectoryName: snapshot.selectedDirectoryName,
+            directoryBookmark: bookmark,
+            shouldRewriteBookmark: isStale,
+            skippedFileCount: snapshot.skippedFileCount,
+            files: restoredFiles,
+            summary: summaryAccumulator.makeSummary(),
+            fileTree: treeAccumulator.makeTree(),
+            largestFiles: largestFilesAccumulator.sortedDescending()
+        )
+    }
+}
+
 @MainActor
 /// 封装 `FileScannerViewModel` 的引用语义、状态与业务行为。
 final class FileScannerViewModel: ObservableObject {
@@ -24,6 +98,8 @@ final class FileScannerViewModel: ObservableObject {
 
     private let scanner: MetadataFileScanner
     private var scanTask: Task<Void, Never>?
+    private var restoreTask: Task<Void, Never>?
+    private var hasAttemptedRestore = false
     private let deletionService = FileDeletionService()
     private let stateStore = AppStateStore.shared
     private var selectedDirectoryURL: URL?
@@ -33,19 +109,44 @@ final class FileScannerViewModel: ObservableObject {
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(scanner: MetadataFileScanner = MetadataFileScanner()) {
         self.scanner = scanner
-        Task { [weak self] in
-            guard let snapshot = await AppStateStore.shared.loadFileState() else { return }
-            self?.restore(snapshot)
-        }
     }
 
     /// 释放 ViewModel 时取消尚未结束的扫描，避免后台任务继续持有无效页面状态。
     deinit {
         scanTask?.cancel()
+        restoreTask?.cancel()
+    }
+
+    /// Restores the previous scan only when the storage experience is opened.
+    /// Decoding happens in the store actor and all O(n) reconstruction remains
+    /// off MainActor; the UI receives one prepared result at the end.
+    func loadIfNeeded() {
+        guard !hasAttemptedRestore else { return }
+        hasAttemptedRestore = true
+
+        restoreTask = Task { [weak self] in
+            guard let snapshot = await AppStateStore.shared.loadFileState() else { return }
+            guard !Task.isCancelled else { return }
+
+            let worker = Task.detached(priority: .userInitiated) {
+                FileStateRestorer.prepare(snapshot)
+            }
+            let prepared = await withTaskCancellationHandler {
+                await worker.value
+            } onCancel: {
+                worker.cancel()
+            }
+
+            guard let self, let prepared, !Task.isCancelled else { return }
+            self.applyRestoredState(prepared)
+        }
     }
 
     /// 执行 `scan` 分析流程，在遵守文件访问边界的前提下生成结果。
     func scan(directory: URL) {
+        hasAttemptedRestore = true
+        restoreTask?.cancel()
+        restoreTask = nil
         scanTask?.cancel()
         selectedDirectoryName = directory.lastPathComponent
         selectedDirectoryURL = directory
@@ -191,56 +292,25 @@ final class FileScannerViewModel: ObservableObject {
         persistStableState()
     }
 
-    /// 加载 `restore` 所需的数据，并将结果转换为当前层可消费的状态。
-    private func restore(_ snapshot: FileStateSnapshot) {
+    /// Applies already-prepared values without running O(n) work on MainActor.
+    private func applyRestoredState(_ prepared: PreparedFileState) {
         guard case .idle = state, selectedDirectoryURL == nil else { return }
-        var isStale = false
-        guard let restoredRoot = try? URL(
-            resolvingBookmarkData: snapshot.directoryBookmark,
-            options: [],
-            relativeTo: nil,
-            bookmarkDataIsStale: &isStale
-        ) else { return }
-
-        selectedDirectoryURL = restoredRoot
-        selectedDirectoryName = snapshot.selectedDirectoryName
-        selectedDirectoryBookmark = isStale
-            ? try? restoredRoot.bookmarkData(
-                options: [],
-                includingResourceValuesForKeys: nil,
-                relativeTo: nil
-            )
-            : snapshot.directoryBookmark
-        skippedFileCount = snapshot.skippedFileCount
-        files = snapshot.files.compactMap { file in
-            guard !file.relativePathComponents.isEmpty else { return nil }
-            let restoredURL = file.relativePathComponents.reduce(restoredRoot) {
-                $0.appendingPathComponent($1)
-            }
-            return ScannedFile(
-                url: restoredURL,
-                name: file.name,
-                relativePathComponents: file.relativePathComponents,
-                category: file.category,
-                byteCount: file.byteCount,
-                hasKnownByteCount: file.hasKnownByteCount,
-                creationDate: file.creationDate,
-                modificationDate: file.modificationDate
-            )
-        }
-
-        let restoredSummary = StorageSummary(files: files)
-        summary = restoredSummary
-        fileTree = FileTreeBuilder.build(rootURL: restoredRoot, files: files)
-        largestFiles = Array(files.sorted { $0.byteCount > $1.byteCount }.prefix(10))
+        selectedDirectoryURL = prepared.rootURL
+        selectedDirectoryName = prepared.selectedDirectoryName
+        selectedDirectoryBookmark = prepared.directoryBookmark
+        skippedFileCount = prepared.skippedFileCount
+        files = prepared.files
+        summary = prepared.summary
+        fileTree = prepared.fileTree
+        largestFiles = prepared.largestFiles
         if files.isEmpty {
             state = .empty
         } else if skippedFileCount > 0 {
-            state = .partialFailure(restoredSummary, skippedFileCount: skippedFileCount)
+            state = .partialFailure(prepared.summary, skippedFileCount: skippedFileCount)
         } else {
-            state = .success(restoredSummary)
+            state = .success(prepared.summary)
         }
-        if isStale { persistStableState() }
+        if prepared.shouldRewriteBookmark { persistStableState() }
     }
 
     /// 持久化 `persistStableState` 对应的数据，并保持后续恢复所需的信息完整。

@@ -1,6 +1,7 @@
 "Photos" = "写真";
 "Storage" = "ストレージ";
 "Convert" = "変換";
+"storage.heading" = "ストレージの内訳";
 "Settings" = "設定";
 "Access your photos" = "写真へのアクセス";
 "Allow access to display the images in your Photos library." = "写真ライブラリの画像を表示するにはアクセスを許可してください。";

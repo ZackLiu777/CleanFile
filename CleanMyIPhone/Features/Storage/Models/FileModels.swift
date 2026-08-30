@@ -85,6 +85,17 @@ nonisolated struct ScannedFile: Identifiable, Codable, Hashable, Sendable {
     let creationDate: Date?
     let modificationDate: Date?
 
+    private enum CodingKeys: String, CodingKey {
+        case url
+        case name
+        case relativePathComponents
+        case category
+        case byteCount
+        case hasKnownByteCount
+        case creationDate
+        case modificationDate
+    }
+
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     nonisolated init(
         url: URL,
@@ -127,6 +138,33 @@ nonisolated struct ScannedFile: Identifiable, Codable, Hashable, Sendable {
             modificationDate: resourceValues.contentModificationDate
         )
     }
+
+    nonisolated init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let url = try container.decode(URL.self, forKey: .url)
+        self.init(
+            url: url,
+            name: try container.decode(String.self, forKey: .name),
+            relativePathComponents: try container.decode([String].self, forKey: .relativePathComponents),
+            category: try container.decode(FileCategory.self, forKey: .category),
+            byteCount: try container.decode(Int64.self, forKey: .byteCount),
+            hasKnownByteCount: try container.decode(Bool.self, forKey: .hasKnownByteCount),
+            creationDate: try container.decodeIfPresent(Date.self, forKey: .creationDate),
+            modificationDate: try container.decodeIfPresent(Date.self, forKey: .modificationDate)
+        )
+    }
+
+    nonisolated func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(url, forKey: .url)
+        try container.encode(name, forKey: .name)
+        try container.encode(relativePathComponents, forKey: .relativePathComponents)
+        try container.encode(category, forKey: .category)
+        try container.encode(byteCount, forKey: .byteCount)
+        try container.encode(hasKnownByteCount, forKey: .hasKnownByteCount)
+        try container.encodeIfPresent(creationDate, forKey: .creationDate)
+        try container.encodeIfPresent(modificationDate, forKey: .modificationDate)
+    }
 }
 
 /// 定义 `FileDisplayOrder` 使用的有限状态或选项集合。
@@ -149,7 +187,14 @@ nonisolated enum FileDisplayOrder {
 enum RelativePathComponents: Sendable {
     /// Produces the file's hierarchy below the user-selected root without guessing.
     nonisolated static func make(fileURL: URL, relativeTo rootURL: URL) -> [String]? {
-        let rootComponents = rootURL.pathComponents
+        make(fileURL: fileURL, rootComponents: rootURL.pathComponents)
+    }
+
+    /// Reuses the selected root's components across a large directory walk.
+    nonisolated static func make(
+        fileURL: URL,
+        rootComponents: [String]
+    ) -> [String]? {
         let fileComponents = fileURL.pathComponents
 
         guard fileComponents.starts(with: rootComponents) else {
@@ -190,23 +235,63 @@ struct StorageSummary: Hashable, Sendable {
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     nonisolated init(files: [ScannedFile]) {
-        let grouped = files.reduce(into: [FileCategory: (fileCount: Int, byteCount: Int64, unknownByteCount: Int)]()) { result, file in
-            let current = result[file.category, default: (fileCount: 0, byteCount: 0, unknownByteCount: 0)]
-            result[file.category] = (
-                fileCount: current.fileCount + 1,
-                byteCount: current.byteCount + (file.hasKnownByteCount ? file.byteCount : 0),
-                unknownByteCount: current.unknownByteCount + (file.hasKnownByteCount ? 0 : 1)
-            )
+        var accumulator = StorageSummaryAccumulator()
+        for file in files {
+            accumulator.append(file)
+        }
+        self = accumulator.makeSummary()
+    }
+
+    nonisolated init(
+        fileCount: Int,
+        totalBytes: Int64,
+        unknownByteCountFileCount: Int,
+        categories: [StorageCategorySummary]
+    ) {
+        self.fileCount = fileCount
+        self.totalBytes = totalBytes
+        self.unknownByteCountFileCount = unknownByteCountFileCount
+        self.categories = categories
+    }
+
+    var nonEmptyCategories: [StorageCategorySummary] {
+        categories.filter { $0.fileCount > 0 }
+    }
+}
+
+/// Builds the dashboard summary during enumeration so completion does not
+/// traverse every scanned file several more times.
+nonisolated struct StorageSummaryAccumulator: Sendable {
+    private struct CategoryValues: Sendable {
+        var fileCount = 0
+        var byteCount: Int64 = 0
+        var unknownByteCount = 0
+    }
+
+    private var fileCount = 0
+    private var totalBytes: Int64 = 0
+    private var unknownByteCountFileCount = 0
+    private var grouped: [FileCategory: CategoryValues] = [:]
+
+    mutating func append(_ file: ScannedFile) {
+        fileCount += 1
+        var values = grouped[file.category, default: CategoryValues()]
+        values.fileCount += 1
+
+        if file.hasKnownByteCount {
+            totalBytes += file.byteCount
+            values.byteCount += file.byteCount
+        } else {
+            unknownByteCountFileCount += 1
+            values.unknownByteCount += 1
         }
 
-        let totalBytes = files.reduce(Int64.zero) {
-            $0 + ($1.hasKnownByteCount ? $1.byteCount : 0)
-        }
-        self.fileCount = files.count
-        self.totalBytes = totalBytes
-        self.unknownByteCountFileCount = files.filter { !$0.hasKnownByteCount }.count
-        self.categories = FileCategory.allCases.map { category in
-            let values = grouped[category, default: (fileCount: 0, byteCount: 0, unknownByteCount: 0)]
+        grouped[file.category] = values
+    }
+
+    func makeSummary() -> StorageSummary {
+        let categories = FileCategory.allCases.map { category in
+            let values = grouped[category, default: CategoryValues()]
             let percentage = totalBytes == 0 ? 0 : Double(values.byteCount) / Double(totalBytes)
             return StorageCategorySummary(
                 category: category,
@@ -216,10 +301,81 @@ struct StorageSummary: Hashable, Sendable {
                 percentage: percentage
             )
         }
+
+        return StorageSummary(
+            fileCount: fileCount,
+            totalBytes: totalBytes,
+            unknownByteCountFileCount: unknownByteCountFileCount,
+            categories: categories
+        )
+    }
+}
+
+/// Keeps only the largest files in a fixed-size min-heap. For the dashboard's
+/// ten entries this changes the scan-end full sort into O(n log 10) work.
+nonisolated struct LargestFilesAccumulator: Sendable {
+    private let limit: Int
+    private var heap: [ScannedFile] = []
+
+    init(limit: Int) {
+        self.limit = max(0, limit)
+        heap.reserveCapacity(self.limit)
     }
 
-    var nonEmptyCategories: [StorageCategorySummary] {
-        categories.filter { $0.fileCount > 0 }
+    mutating func append(_ file: ScannedFile) {
+        guard limit > 0, file.hasKnownByteCount else { return }
+
+        if heap.count < limit {
+            heap.append(file)
+            siftUp(from: heap.count - 1)
+            return
+        }
+
+        guard isLarger(file, than: heap[0]) else { return }
+        heap[0] = file
+        siftDown(from: 0)
+    }
+
+    func sortedDescending() -> [ScannedFile] {
+        heap.sorted { lhs, rhs in
+            if lhs.byteCount != rhs.byteCount {
+                return lhs.byteCount > rhs.byteCount
+            }
+            return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
+        }
+    }
+
+    private mutating func siftUp(from index: Int) {
+        var child = index
+        while child > 0 {
+            let parent = (child - 1) / 2
+            guard isLarger(heap[parent], than: heap[child]) else { return }
+            heap.swapAt(parent, child)
+            child = parent
+        }
+    }
+
+    private mutating func siftDown(from index: Int) {
+        var parent = index
+        while true {
+            let left = parent * 2 + 1
+            guard left < heap.count else { return }
+            let right = left + 1
+            var smallest = left
+            if right < heap.count, isLarger(heap[left], than: heap[right]) {
+                smallest = right
+            }
+            guard isLarger(heap[parent], than: heap[smallest]) else { return }
+            heap.swapAt(parent, smallest)
+            parent = smallest
+        }
+    }
+
+    private func isLarger(_ lhs: ScannedFile, than rhs: ScannedFile) -> Bool {
+        if lhs.byteCount != rhs.byteCount {
+            return lhs.byteCount > rhs.byteCount
+        }
+        return lhs.name.localizedStandardCompare(rhs.name) == .orderedDescending
     }
 }
 

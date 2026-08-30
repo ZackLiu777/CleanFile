@@ -1,6 +1,7 @@
 "Photos" = "사진";
 "Storage" = "저장 공간";
 "Convert" = "변환";
+"storage.heading" = "저장 공간 분포";
 "Settings" = "설정";
 "Access your photos" = "사진 접근";
 "Allow access to display the images in your Photos library." = "사진 보관함의 이미지를 표시하려면 접근을 허용하세요.";

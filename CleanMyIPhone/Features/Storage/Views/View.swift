@@ -9,35 +9,47 @@ import SwiftUI
 // MARK: - 1. 数据结构
 /// 定义 `DemoFileNode` 的值语义数据与相关行为。
 struct DemoFileNode: Identifiable {
-    let id = UUID()
+    let id: UUID
     let name: String
     let byteCount: Int64
-    var color: Color? = nil
-    var children: [DemoFileNode]? = nil
+    let color: Color?
+    let children: [DemoFileNode]?
+    let totalByteCount: Int64
+    let maximumDepth: Int
 
-    var totalByteCount: Int64 {
-        if let children, !children.isEmpty {
-            let childrenByteCount = children.reduce(Int64.zero) {
-                $0 + $1.totalByteCount
-            }
-            return max(byteCount, childrenByteCount)
-        }
-        return byteCount
+    init(
+        name: String,
+        byteCount: Int64,
+        color: Color? = nil,
+        children: [DemoFileNode]? = nil
+    ) {
+        id = UUID()
+        self.name = name
+        self.byteCount = byteCount
+        self.color = color
+        self.children = children
+        let childrenByteCount = children?.reduce(Int64.zero) {
+            $0 + $1.totalByteCount
+        } ?? 0
+        totalByteCount = max(byteCount, childrenByteCount)
+        maximumDepth = children?.isEmpty == false
+            ? 1 + (children?.map(\.maximumDepth).max() ?? 0)
+            : 0
     }
 
     var proportionalSize: Double {
         Double(totalByteCount)
-    }
-
-    var maximumDepth: Int {
-        guard let children, !children.isEmpty else { return 0 }
-        return 1 + (children.map(\.maximumDepth).max() ?? 0)
     }
 }
 
 @MainActor
 /// 定义 `SunburstTreeAdapter` 的值语义数据与相关行为。
 struct SunburstTreeAdapter {
+    private nonisolated static let defaultNodeBudget = 1_200
+    private nonisolated static let maximumChildrenPerNode = 24
+    private nonisolated static let maximumVisibleDepth = 8
+    private nonisolated static let minimumRootByteFraction = 0.000_1
+
     /// 定义 `AdaptedTree` 的值语义数据与相关行为。
     struct AdaptedTree {
         let rootNode: DemoFileNode
@@ -45,14 +57,24 @@ struct SunburstTreeAdapter {
     }
 
     /// 封装 `adapt` 对应的局部行为，供当前类型在统一入口下复用。
-    static func adapt(_ root: FileNode) -> AdaptedTree {
+    static func adapt(
+        _ root: FileNode,
+        nodeBudget: Int = defaultNodeBudget
+    ) -> AdaptedTree {
         var sourceNodes: [UUID: FileNode] = [:]
-        let children = root.children.enumerated().map { index, child in
-            let color = StorageVisualizationPalette.colors[
-                index % StorageVisualizationPalette.colors.count
-            ]
-            return adaptNode(child, color: color, sourceNodes: &sourceNodes)
-        }
+        let rootByteCount = max(0, root.byteCount)
+        let selectedNodeIDs = selectVisibleNodeIDs(
+            root: root,
+            nodeBudget: max(1, nodeBudget),
+            rootByteCount: rootByteCount
+        )
+        let children = adaptChildren(
+            of: root,
+            rootByteCount: rootByteCount,
+            inheritedColor: nil,
+            selectedNodeIDs: selectedNodeIDs,
+            sourceNodes: &sourceNodes
+        )
         let rootNode = DemoFileNode(
             name: root.name,
             byteCount: root.byteCount,
@@ -67,15 +89,17 @@ struct SunburstTreeAdapter {
     private static func adaptNode(
         _ node: FileNode,
         color: Color,
+        rootByteCount: Int64,
+        selectedNodeIDs: Set<String>,
         sourceNodes: inout [UUID: FileNode]
     ) -> DemoFileNode {
-        let children = node.children.map { child in
-            let childColor = color.饱和度调整(
-                satFactor: stableValue(for: child.id, salt: 17, range: 0.7...1.2),
-                brightFactor: stableValue(for: child.id, salt: 31, range: 0.8...1.2)
-            )
-            return adaptNode(child, color: childColor, sourceNodes: &sourceNodes)
-        }
+        let children = adaptChildren(
+            of: node,
+            rootByteCount: rootByteCount,
+            inheritedColor: color,
+            selectedNodeIDs: selectedNodeIDs,
+            sourceNodes: &sourceNodes
+        )
         let adaptedNode = DemoFileNode(
             name: node.name,
             byteCount: node.byteCount,
@@ -84,6 +108,121 @@ struct SunburstTreeAdapter {
         )
         sourceNodes[adaptedNode.id] = node
         return adaptedNode
+    }
+
+    private static func adaptChildren(
+        of parent: FileNode,
+        rootByteCount: Int64,
+        inheritedColor: Color?,
+        selectedNodeIDs: Set<String>,
+        sourceNodes: inout [UUID: FileNode]
+    ) -> [DemoFileNode] {
+        guard !parent.children.isEmpty else { return [] }
+
+        var adaptedChildren: [DemoFileNode] = []
+        let visibleChildren = parent.children
+            .prefix(maximumChildrenPerNode - 1)
+            .filter { selectedNodeIDs.contains($0.id) }
+        adaptedChildren.reserveCapacity(min(visibleChildren.count + 1, maximumChildrenPerNode))
+
+        for child in visibleChildren {
+            let childColor = if let inheritedColor {
+                inheritedColor.饱和度调整(
+                    satFactor: stableValue(for: child.id, salt: 17, range: 0.7...1.2),
+                    brightFactor: stableValue(for: child.id, salt: 31, range: 0.8...1.2)
+                )
+            } else {
+                StorageVisualizationPalette.colors[
+                    adaptedChildren.count % StorageVisualizationPalette.colors.count
+                ]
+            }
+            adaptedChildren.append(adaptNode(
+                child,
+                color: childColor,
+                rootByteCount: rootByteCount,
+                selectedNodeIDs: selectedNodeIDs,
+                sourceNodes: &sourceNodes
+            ))
+        }
+
+        if visibleChildren.count < parent.children.count {
+            let visibleByteCount = visibleChildren.reduce(Int64.zero) {
+                $0 + max(0, $1.byteCount)
+            }
+            let byteCount = max(0, parent.byteCount - visibleByteCount)
+            let aggregateSource = FileNode(
+                id: "\(parent.id)/aggregate-other",
+                name: String(localized: "Other"),
+                byteCount: byteCount,
+                children: [],
+                category: parent.category,
+                isDirectory: false,
+                isAggregate: true
+            )
+            let aggregateNode = DemoFileNode(
+                name: aggregateSource.name,
+                byteCount: byteCount,
+                color: inheritedColor ?? StorageVisualizationPalette.colors[
+                    adaptedChildren.count % StorageVisualizationPalette.colors.count
+                ]
+            )
+            sourceNodes[aggregateNode.id] = aggregateSource
+            adaptedChildren.append(aggregateNode)
+        }
+
+        return adaptedChildren
+    }
+
+    /// Selects concrete chart nodes breadth-first. This preserves all major
+    /// top-level branches while enforcing a hard relationship between UI work
+    /// and the visualization budget instead of the total file count.
+    private static func selectVisibleNodeIDs(
+        root: FileNode,
+        nodeBudget: Int,
+        rootByteCount: Int64
+    ) -> Set<String> {
+        var selectedNodeIDs: Set<String> = [root.id]
+        var currentLevel = [root]
+        var remainingNodeCount = max(0, nodeBudget - 1)
+        var depth = 1
+
+        while !currentLevel.isEmpty,
+              remainingNodeCount > 0,
+              depth <= maximumVisibleDepth {
+            let candidatesByParent = currentLevel.map { parent in
+                Array(parent.children.prefix(maximumChildrenPerNode - 1)).filter { child in
+                    depth <= 2
+                        || rootByteCount == 0
+                        || Double(max(0, child.byteCount)) / Double(rootByteCount)
+                            >= minimumRootByteFraction
+                }
+            }
+            var offsets = Array(repeating: 0, count: candidatesByParent.count)
+            var nextLevel: [FileNode] = []
+            var madeProgress = true
+
+            // Round-robin selection prevents one very deep first branch from
+            // consuming the entire global budget before its siblings appear.
+            while remainingNodeCount > 0, madeProgress {
+                madeProgress = false
+                for index in candidatesByParent.indices where remainingNodeCount > 0 {
+                    guard offsets[index] < candidatesByParent[index].count else { continue }
+                    let child = candidatesByParent[index][offsets[index]]
+                    offsets[index] += 1
+                    guard selectedNodeIDs.insert(child.id).inserted else { continue }
+                    remainingNodeCount -= 1
+                    madeProgress = true
+                    if child.isDirectory, !child.children.isEmpty {
+                        nextLevel.append(child)
+                    }
+                }
+            }
+
+            currentLevel = nextLevel
+            depth += 1
+        }
+
+        return selectedNodeIDs
     }
 
     /// 封装 `stableValue` 对应的局部行为，供当前类型在统一入口下复用。
@@ -534,10 +673,11 @@ private struct SunburstChartCanvas: View {
 
         var slices: [RootSlice] = []
         var currentStart = -90.0
+        let total = rootNode.proportionalSize
 
         for child in children {
-            let sweep = rootNode.proportionalSize > 0
-                ? 360 * child.proportionalSize / rootNode.proportionalSize
+            let sweep = total > 0
+                ? 360 * child.proportionalSize / total
                 : 0
             let childEnd = currentStart + sweep
             slices.append(RootSlice(
@@ -601,9 +741,10 @@ private enum SunburstChartHitTester {
         guard let children = rootNode.children, !children.isEmpty else { return nil }
 
         var currentStart = -90.0
+        let total = rootNode.proportionalSize
         for child in children {
-            let sweep = rootNode.proportionalSize > 0
-                ? 360 * child.proportionalSize / rootNode.proportionalSize
+            let sweep = total > 0
+                ? 360 * child.proportionalSize / total
                 : 0
             let end = currentStart + sweep
 
@@ -645,10 +786,11 @@ private enum SunburstChartHitTester {
            !children.isEmpty {
             var childStart = startAngle
             let totalSweep = endAngle - startAngle
+            let total = node.proportionalSize
 
             for child in children {
-                let sweep = node.proportionalSize > 0
-                    ? totalSweep * child.proportionalSize / node.proportionalSize
+                let sweep = total > 0
+                    ? totalSweep * child.proportionalSize / total
                     : 0
                 let childEnd = childStart + sweep
 
@@ -695,8 +837,6 @@ private final class SunburstChartViewModel: ObservableObject {
 
     /// 封装 `replaceRoot` 对应的局部行为，供当前类型在统一入口下复用。
     func replaceRoot(_ root: FileNode) {
-        guard root != currentRoot else { return }
-
         history = []
         apply(root)
     }
@@ -732,6 +872,14 @@ private final class SunburstChartViewModel: ObservableObject {
 
 /// 定义 `SunburstChartView` 的值语义数据与相关行为。
 struct SunburstChartView: View {
+    private struct RootSignature: Equatable {
+        let id: String
+        let byteCount: Int64
+        let childCount: Int
+        let firstChildID: String?
+        let lastChildID: String?
+    }
+
     let root: FileNode
     let revealProgress: Double
     @StateObject private var viewModel: SunburstChartViewModel
@@ -741,6 +889,16 @@ struct SunburstChartView: View {
         self.root = root
         self.revealProgress = revealProgress
         _viewModel = StateObject(wrappedValue: SunburstChartViewModel(root: root))
+    }
+
+    private var rootSignature: RootSignature {
+        RootSignature(
+            id: root.id,
+            byteCount: root.byteCount,
+            childCount: root.children.count,
+            firstChildID: root.children.first?.id,
+            lastChildID: root.children.last?.id
+        )
     }
 
     var body: some View {
@@ -754,8 +912,8 @@ struct SunburstChartView: View {
         // The surrounding cards use leading-aligned stacks. Expand the chart
         // wrapper to the available width so the square canvas stays centered.
         .frame(maxWidth: .infinity, alignment: .center)
-        .onChange(of: root) { _, newRoot in
-            viewModel.replaceRoot(newRoot)
+        .onChange(of: rootSignature) { _, _ in
+            viewModel.replaceRoot(root)
         }
     }
 }

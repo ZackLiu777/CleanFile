@@ -42,7 +42,19 @@ struct FileNode: Identifiable, Hashable, Sendable {
 
 /// 定义 `FileTreeBuilder` 的值语义数据与相关行为。
 struct FileTreeBuilder: Sendable {
-    /// 定义 `NodeAccumulator` 的值语义数据与相关行为。
+    /// 创建 `build` 所需的值或资源，统一封装构造细节。
+    nonisolated static func build(rootURL: URL, files: [ScannedFile]) -> FileNode {
+        var accumulator = FileTreeAccumulator(rootURL: rootURL)
+        for file in files {
+            accumulator.append(file)
+        }
+        return accumulator.makeTree()
+    }
+}
+
+/// Builds the hierarchy as files are discovered instead of performing a
+/// second full pass when enumeration has already finished.
+nonisolated struct FileTreeAccumulator: Sendable {
     private struct NodeAccumulator: Sendable {
         let id: String
         let name: String
@@ -52,15 +64,16 @@ struct FileTreeBuilder: Sendable {
         let isDirectory: Bool
     }
 
-    /// 创建 `build` 所需的值或资源，统一封装构造细节。
-    nonisolated static func build(rootURL: URL, files: [ScannedFile]) -> FileNode {
-        let rootID = "."
+    private let rootID = "."
+    private var nodes: [String: NodeAccumulator]
+
+    init(rootURL: URL) {
         let rootName = rootURL.lastPathComponent.isEmpty
             ? String(localized: "Selected Folder")
             : rootURL.lastPathComponent
 
-        var nodes = [
-            rootID: NodeAccumulator(
+        nodes = [
+            ".": NodeAccumulator(
                 id: rootID,
                 name: rootName,
                 byteCount: 0,
@@ -69,47 +82,49 @@ struct FileTreeBuilder: Sendable {
                 isDirectory: true
             )
         ]
+    }
 
-        for file in files {
-            let components = file.relativePathComponents
-            guard !components.isEmpty else { continue }
+    mutating func append(_ file: ScannedFile) {
+        let components = file.relativePathComponents
+        guard !components.isEmpty else { return }
 
-            var parentID = rootID
-            nodes[parentID]?.byteCount += file.hasKnownByteCount ? file.byteCount : 0
+        var parentID = rootID
+        nodes[parentID]?.byteCount += file.hasKnownByteCount ? file.byteCount : 0
 
-            for (index, component) in components.enumerated() {
-                let isLeaf = index == components.count - 1
-                let nodeID = parentID == rootID ? component : "\(parentID)/\(component)"
+        for (index, component) in components.enumerated() {
+            let isLeaf = index == components.count - 1
+            let nodeID = parentID == rootID ? component : "\(parentID)/\(component)"
 
-                if nodes[nodeID] == nil {
-                    nodes[nodeID] = NodeAccumulator(
-                        id: nodeID,
-                        name: component,
-                        byteCount: 0,
-                        childIDs: [],
-                        category: isLeaf ? file.category : nil,
-                        isDirectory: !isLeaf
-                    )
-                }
-
-                nodes[parentID]?.childIDs.insert(nodeID)
-
-                if isLeaf {
-                    nodes[nodeID]?.byteCount = file.hasKnownByteCount ? file.byteCount : 0
-                    nodes[nodeID]?.category = file.category
-                } else {
-                    nodes[nodeID]?.byteCount += file.hasKnownByteCount ? file.byteCount : 0
-                }
-
-                parentID = nodeID
+            if nodes[nodeID] == nil {
+                nodes[nodeID] = NodeAccumulator(
+                    id: nodeID,
+                    name: component,
+                    byteCount: 0,
+                    childIDs: [],
+                    category: isLeaf ? file.category : nil,
+                    isDirectory: !isLeaf
+                )
             }
-        }
 
-        return makeNode(id: rootID, nodes: nodes)
+            nodes[parentID]?.childIDs.insert(nodeID)
+
+            if isLeaf {
+                nodes[nodeID]?.byteCount = file.hasKnownByteCount ? file.byteCount : 0
+                nodes[nodeID]?.category = file.category
+            } else {
+                nodes[nodeID]?.byteCount += file.hasKnownByteCount ? file.byteCount : 0
+            }
+
+            parentID = nodeID
+        }
+    }
+
+    func makeTree() -> FileNode {
+        Self.makeNode(id: rootID, nodes: nodes)
     }
 
     /// 创建 `makeNode` 所需的值或资源，统一封装构造细节。
-    private nonisolated static func makeNode(
+    private static func makeNode(
         id: String,
         nodes: [String: NodeAccumulator]
     ) -> FileNode {

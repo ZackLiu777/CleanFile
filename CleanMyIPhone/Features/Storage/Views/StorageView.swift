@@ -29,7 +29,7 @@ struct StorageView: View {
 
                 ScrollView(.vertical, showsIndicators: false) {
                     LazyVStack(spacing: 16) {
-                        Text("Storage")
+                        Text("storage.heading")
                             .font(.largeTitle.bold())
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
@@ -83,10 +83,14 @@ struct StorageView: View {
             }
         }
         .onAppear {
+            if isTabActive {
+                viewModel.loadIfNeeded()
+            }
             animateStorageDashboardIfNeeded()
         }
         .onChange(of: isTabActive) { _, isActive in
             if isActive {
+                viewModel.loadIfNeeded()
                 animateStorageDashboardIfNeeded()
             } else {
                 resetStorageAnimations()
@@ -365,10 +369,9 @@ struct StorageView: View {
             await Task.yield()
             guard isTabActive, generation == animationGeneration else { return }
 
-            let depth = viewModel.fileTree.map(FileTreeDiagnostics.maximumDepth(of:)) ?? 1
-            // Keep deep trees legible without making the Tab feel slow. The
-            // flattened chart layer makes this a mask-only animation.
-            let sunburstDuration = min(max(0.43 + Double(depth) * 0.055, 0.55), 0.95)
+            // The chart itself has a bounded visible depth, so animation setup
+            // must not walk the complete persisted hierarchy on MainActor.
+            let sunburstDuration = 0.82
 
             withAnimation(.easeOut(duration: sunburstDuration)) {
                 sunburstRevealProgress = 1

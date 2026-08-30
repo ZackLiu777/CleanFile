@@ -1,6 +1,7 @@
 "Photos" = "照片";
 "Storage" = "儲存空間";
 "Convert" = "轉換";
+"storage.heading" = "儲存分布";
 "Settings" = "設定";
 "Access your photos" = "存取您的照片";
 "Allow access to display the images in your Photos library." = "允許存取以顯示照片圖庫中的圖片。";

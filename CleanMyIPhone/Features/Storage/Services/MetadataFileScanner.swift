@@ -8,23 +8,31 @@
 //  所属模块：CleanMyIPhone。
 //
 
+import Dispatch
 import Foundation
 
 /// 定义 `MetadataFileScanner` 的值语义数据与相关行为。
 struct MetadataFileScanner: Sendable {
-    private let metadataKeys: [URLResourceKey] = [
-        .nameKey,
+    private nonisolated static let metadataKeys: [URLResourceKey] = [
         .isDirectoryKey,
         .fileSizeKey,
-        .creationDateKey,
-        .contentModificationDateKey,
-        .typeIdentifierKey,
-        .isUbiquitousItemKey,
-        .ubiquitousItemDownloadingStatusKey
+        .typeIdentifierKey
     ]
 
     private let fileAccess: any FileAccessProviding
     private let progressInterval: Int
+    private let metadataKeySet: Set<URLResourceKey>
+
+    private struct DirectoryEnumeration: Sendable {
+        let files: [ScannedFile]
+        let failures: [FileScanFailure]
+        let summaryAccumulator: StorageSummaryAccumulator
+        let treeAccumulator: FileTreeAccumulator
+        let largestFilesAccumulator: LargestFilesAccumulator
+        let directoryCount: Int
+        let maximumDirectoryDepth: Int
+        let maximumRelativeDepth: Int
+    }
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     nonisolated init(
@@ -33,6 +41,7 @@ struct MetadataFileScanner: Sendable {
     ) {
         self.fileAccess = fileAccess
         self.progressInterval = max(1, progressInterval)
+        metadataKeySet = Set(Self.metadataKeys)
     }
 
     /// 执行 `scan` 分析流程，在遵守文件访问边界的前提下生成结果。
@@ -69,7 +78,7 @@ struct MetadataFileScanner: Sendable {
         return try fileAccess.withAccess(to: directory) {
             let coordinator = NSFileCoordinator()
             var coordinationError: NSError?
-            var scanResult: Result<FileScanResult, Error>?
+            var enumerationResult: Result<DirectoryEnumeration, Error>?
 
             coordinator.coordinate(
                 readingItemAt: directory,
@@ -79,13 +88,13 @@ struct MetadataFileScanner: Sendable {
                 do {
                     // File Provider may return a coordinated URL different from the
                     // URL selected by the user. All recursive reads use this URL.
-                    scanResult = .success(try enumerateDirectory(
+                    enumerationResult = .success(try enumerateDirectory(
                         at: coordinatedDirectory,
                         selectedDirectory: directory,
                         continuation: continuation
                     ))
                 } catch {
-                    scanResult = .failure(error)
+                    enumerationResult = .failure(error)
                 }
             }
 
@@ -93,11 +102,33 @@ struct MetadataFileScanner: Sendable {
                 throw coordinationError
             }
 
-            guard let scanResult else {
+            guard let enumerationResult else {
                 throw FileScanError.unableToEnumerate
             }
 
-            return try scanResult.get()
+            // CPU-only aggregation is deliberately finalized after coordinated
+            // file access has ended, so a provider is not held while sorting
+            // hierarchy nodes or producing diagnostics.
+            let enumeration = try enumerationResult.get()
+            let fileTree = enumeration.treeAccumulator.makeTree()
+
+            #if DEBUG
+            FileScanDiagnostics.log(
+                fileCount: enumeration.files.count,
+                fileTree: fileTree,
+                directoryCount: enumeration.directoryCount,
+                maximumDirectoryDepth: enumeration.maximumDirectoryDepth,
+                maximumRelativeDepth: enumeration.maximumRelativeDepth
+            )
+            #endif
+
+            return FileScanResult(
+                files: enumeration.files,
+                failures: enumeration.failures,
+                summary: enumeration.summaryAccumulator.makeSummary(),
+                fileTree: fileTree,
+                largestFiles: enumeration.largestFilesAccumulator.sortedDescending()
+            )
         }
     }
 
@@ -106,7 +137,7 @@ struct MetadataFileScanner: Sendable {
         at directory: URL,
         selectedDirectory: URL,
         continuation: AsyncThrowingStream<FileScanEvent, Error>.Continuation
-    ) throws -> FileScanResult {
+    ) throws -> DirectoryEnumeration {
         let directoryValues = try directory.resourceValues(forKeys: [.isDirectoryKey])
         guard directoryValues.isDirectory == true else {
             throw FileScanError.notDirectory
@@ -118,7 +149,14 @@ struct MetadataFileScanner: Sendable {
         var scannedByteCount: Int64 = 0
         var directoryCount = 1
         var maximumDirectoryDepth = 0
+        var maximumRelativeDepth = 0
+        var lastReportedFileCount = 0
+        var lastProgressUptime = DispatchTime.now().uptimeNanoseconds
+        var summaryAccumulator = StorageSummaryAccumulator()
+        var treeAccumulator = FileTreeAccumulator(rootURL: selectedDirectory)
+        var largestFilesAccumulator = LargestFilesAccumulator(limit: 10)
         let fileManager = FileManager()
+        let rootComponents = directory.pathComponents
 
         continuation.yield(.progress(ScanProgress(scannedFileCount: 0, scannedByteCount: 0)))
 
@@ -128,7 +166,7 @@ struct MetadataFileScanner: Sendable {
         // cloud-backed folder when that value is temporarily unavailable.
         guard let enumerator = fileManager.enumerator(
             at: directory,
-            includingPropertiesForKeys: metadataKeys,
+            includingPropertiesForKeys: Self.metadataKeys,
             options: [.skipsHiddenFiles],
             errorHandler: { url, _ in
                 failures.append(FileScanFailure(
@@ -146,7 +184,7 @@ struct MetadataFileScanner: Sendable {
 
             guard let relativePath = RelativePathComponents.make(
                 fileURL: url,
-                relativeTo: directory
+                rootComponents: rootComponents
             ) else {
                 failures.append(FileScanFailure(
                     fileName: url.lastPathComponent,
@@ -156,7 +194,7 @@ struct MetadataFileScanner: Sendable {
             }
 
             do {
-                let values = try url.resourceValues(forKeys: Set(metadataKeys))
+                let values = try url.resourceValues(forKeys: metadataKeySet)
                 let isDirectory = isDirectory(
                     at: url,
                     resourceValues: values,
@@ -178,14 +216,23 @@ struct MetadataFileScanner: Sendable {
                     relativePathComponents: relativePath
                 )
                 files.append(file)
+                summaryAccumulator.append(file)
+                treeAccumulator.append(file)
+                largestFilesAccumulator.append(file)
                 scannedFileCount += 1
                 scannedByteCount += file.byteCount
+                maximumRelativeDepth = max(maximumRelativeDepth, relativePath.count)
 
                 if scannedFileCount % progressInterval == 0 {
-                    continuation.yield(.progress(ScanProgress(
-                        scannedFileCount: scannedFileCount,
-                        scannedByteCount: scannedByteCount
-                    )))
+                    let currentUptime = DispatchTime.now().uptimeNanoseconds
+                    if currentUptime - lastProgressUptime >= 100_000_000 {
+                        continuation.yield(.progress(ScanProgress(
+                            scannedFileCount: scannedFileCount,
+                            scannedByteCount: scannedByteCount
+                        )))
+                        lastReportedFileCount = scannedFileCount
+                        lastProgressUptime = currentUptime
+                    }
                 }
             } catch let reason as FileScanFailureReason {
                 failures.append(FileScanFailure(
@@ -200,35 +247,22 @@ struct MetadataFileScanner: Sendable {
             }
         }
 
-        if scannedFileCount % progressInterval != 0 {
+        if lastReportedFileCount != scannedFileCount {
             continuation.yield(.progress(ScanProgress(
                 scannedFileCount: scannedFileCount,
                 scannedByteCount: scannedByteCount
             )))
         }
 
-        let largestFiles = files
-            .filter(\.hasKnownByteCount)
-            .sorted { $0.byteCount > $1.byteCount }
-            .prefix(10)
-        let fileTree = FileTreeBuilder.build(rootURL: selectedDirectory, files: files)
-
-        #if DEBUG
-        FileTreeDiagnostics.log(fileTree)
-        FileScanDiagnostics.log(
-            files: files,
-            fileTree: fileTree,
-            directoryCount: directoryCount,
-            maximumDirectoryDepth: maximumDirectoryDepth
-        )
-        #endif
-
-        return FileScanResult(
+        return DirectoryEnumeration(
             files: files,
             failures: failures,
-            summary: StorageSummary(files: files),
-            fileTree: fileTree,
-            largestFiles: Array(largestFiles)
+            summaryAccumulator: summaryAccumulator,
+            treeAccumulator: treeAccumulator,
+            largestFilesAccumulator: largestFilesAccumulator,
+            directoryCount: directoryCount,
+            maximumDirectoryDepth: maximumDirectoryDepth,
+            maximumRelativeDepth: maximumRelativeDepth
         )
     }
 
@@ -238,8 +272,8 @@ struct MetadataFileScanner: Sendable {
         resourceValues: URLResourceValues,
         fileManager: FileManager
     ) -> Bool {
-        if resourceValues.isDirectory == true {
-            return true
+        if let isDirectory = resourceValues.isDirectory {
+            return isDirectory
         }
 
         var directoryFlag = ObjCBool(false)
@@ -257,23 +291,19 @@ struct MetadataFileScanner: Sendable {
 private enum FileScanDiagnostics: Sendable {
     /// 封装 `log` 对应的局部行为，供当前类型在统一入口下复用。
     nonisolated static func log(
-        files: [ScannedFile],
+        fileCount: Int,
         fileTree: FileNode,
         directoryCount: Int,
-        maximumDirectoryDepth: Int
+        maximumDirectoryDepth: Int,
+        maximumRelativeDepth: Int
     ) {
-        let maximumRelativeDepth = files
-            .map(\.relativePathComponents.count)
-            .max() ?? 0
-
         debugPrint("""
         Folder Map Scan Diagnostics
-        SCAN files = \(files.count)
+        SCAN files = \(fileCount)
         SCAN max relative depth = \(maximumRelativeDepth)
         WALK directories = \(directoryCount)
         WALK max directory depth = \(maximumDirectoryDepth)
         TREE root children = \(fileTree.children.count)
-        TREE max depth = \(FileTreeDiagnostics.maximumDepth(of: fileTree))
         """)
     }
 }

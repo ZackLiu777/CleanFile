@@ -18,7 +18,9 @@ public struct ConversionHomeView: View {
     @State private var imageImportSession: ConversionImportSession
     @State private var videoImportSession: ConversionImportSession
     @State private var audioImportSession: ConversionImportSession
+    @State private var navigationPath: [ConversionHomeKind]
     @State private var isHomeContentVisible = false
+    @State private var isGuidePresented: Bool
     @State private var entranceGeneration = 0
     @State private var hasAppeared = false
     @Namespace private var navigationTransitionNamespace
@@ -36,10 +38,12 @@ public struct ConversionHomeView: View {
         _imageImportSession = State(initialValue: ConversionImportSession())
         _videoImportSession = State(initialValue: ConversionImportSession())
         _audioImportSession = State(initialValue: ConversionImportSession())
+        _navigationPath = State(initialValue: Self.initialNavigationPath())
+        _isGuidePresented = State(initialValue: Self.shouldPresentGuideOnLaunch())
     }
 
     public var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             VStack(spacing: 0) {
                 Text(L10n.string("converter.heading"))
                     .font(.largeTitle.bold())
@@ -102,6 +106,17 @@ public struct ConversionHomeView: View {
             }
             .background(converterBackground)
             .toolbar(.visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        isGuidePresented = true
+                    } label: {
+                        Image(systemName: "lightbulb.max.fill")
+                    }
+                    .accessibilityLabel(L10n.string("conversion.guide.button"))
+                    .accessibilityIdentifier("conversion.guide.button")
+                }
+            }
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: ConversionHomeKind.self) { kind in
                 ConversionToolDestination(
@@ -135,6 +150,11 @@ public struct ConversionHomeView: View {
                     cancelAndResetEntrance()
                 }
             }
+        }
+        .sheet(isPresented: $isGuidePresented) {
+            ConversionGuideView()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
         .environment(\.conversionTheme, theme)
         .tint(theme.accent)
@@ -201,6 +221,37 @@ public struct ConversionHomeView: View {
                 }
             }
         }
+    }
+
+    /// 提供只在 Debug 构建中生效的确定性截图入口，避免截图流程依赖坐标点击。
+    private static func initialNavigationPath() -> [ConversionHomeKind] {
+#if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let flagIndex = arguments.firstIndex(of: "--conversion-guide-screenshot") else {
+            return []
+        }
+        let valueIndex = arguments.index(after: flagIndex)
+        guard arguments.indices.contains(valueIndex) else { return [] }
+        guard let kind = ConversionHomeKind(rawValue: arguments[valueIndex]) else { return [] }
+        return [kind]
+#else
+        return []
+#endif
+    }
+
+    private static func shouldPresentGuideOnLaunch() -> Bool {
+#if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let flagIndex = arguments.firstIndex(of: "--conversion-guide-screenshot") else {
+            return false
+        }
+        let valueIndex = arguments.index(after: flagIndex)
+        guard arguments.indices.contains(valueIndex) else { return false }
+        let value = arguments[valueIndex]
+        return value == "guide" || value.hasPrefix("guide-")
+#else
+        return false
+#endif
     }
 }
 

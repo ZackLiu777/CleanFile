@@ -1,6 +1,7 @@
 "Photos" = "Photos";
 "Storage" = "Stockage";
 "Convert" = "Convertir";
+"storage.heading" = "Répartition du stockage";
 "Settings" = "Réglages";
 "Access your photos" = "Accéder à vos photos";
 "Allow access to display the images in your Photos library." = "Autorisez l’accès pour afficher les images de votre photothèque.";
