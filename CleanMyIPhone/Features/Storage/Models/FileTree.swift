@@ -54,93 +54,93 @@ struct FileTreeBuilder: Sendable {
 
 /// Builds the hierarchy as files are discovered instead of performing a
 /// second full pass when enumeration has already finished.
-nonisolated struct FileTreeAccumulator: Sendable {
-    private struct NodeAccumulator: Sendable {
+nonisolated struct FileTreeAccumulator: @unchecked Sendable {
+    /// The accumulator is confined to a single scan worker. Reference semantics
+    /// avoid copying a Set and a dictionary value for every path component.
+    private final class MutableNode {
         let id: String
         let name: String
         var byteCount: Int64
-        var childIDs: Set<String>
+        var childrenByName: [String: MutableNode]
         var category: FileCategory?
         let isDirectory: Bool
+
+        init(
+            id: String,
+            name: String,
+            byteCount: Int64 = 0,
+            category: FileCategory?,
+            isDirectory: Bool
+        ) {
+            self.id = id
+            self.name = name
+            self.byteCount = byteCount
+            childrenByName = [:]
+            self.category = category
+            self.isDirectory = isDirectory
+        }
     }
 
-    private let rootID = "."
-    private var nodes: [String: NodeAccumulator]
+    private let root: MutableNode
 
     init(rootURL: URL) {
         let rootName = rootURL.lastPathComponent.isEmpty
             ? String(localized: "Selected Folder")
             : rootURL.lastPathComponent
 
-        nodes = [
-            ".": NodeAccumulator(
-                id: rootID,
-                name: rootName,
-                byteCount: 0,
-                childIDs: [],
-                category: nil,
-                isDirectory: true
-            )
-        ]
+        root = MutableNode(
+            id: ".",
+            name: rootName,
+            category: nil,
+            isDirectory: true
+        )
     }
 
     mutating func append(_ file: ScannedFile) {
         let components = file.relativePathComponents
         guard !components.isEmpty else { return }
 
-        var parentID = rootID
-        nodes[parentID]?.byteCount += file.hasKnownByteCount ? file.byteCount : 0
+        let byteCount = file.hasKnownByteCount ? file.byteCount : 0
+        var parent = root
+        parent.byteCount += byteCount
 
         for (index, component) in components.enumerated() {
             let isLeaf = index == components.count - 1
-            let nodeID = parentID == rootID ? component : "\(parentID)/\(component)"
+            let child: MutableNode
 
-            if nodes[nodeID] == nil {
-                nodes[nodeID] = NodeAccumulator(
+            if let existingChild = parent.childrenByName[component] {
+                child = existingChild
+            } else {
+                let nodeID = parent.id == "." ? component : "\(parent.id)/\(component)"
+                let newChild = MutableNode(
                     id: nodeID,
                     name: component,
-                    byteCount: 0,
-                    childIDs: [],
                     category: isLeaf ? file.category : nil,
                     isDirectory: !isLeaf
                 )
+                parent.childrenByName[component] = newChild
+                child = newChild
             }
-
-            nodes[parentID]?.childIDs.insert(nodeID)
 
             if isLeaf {
-                nodes[nodeID]?.byteCount = file.hasKnownByteCount ? file.byteCount : 0
-                nodes[nodeID]?.category = file.category
+                child.byteCount = byteCount
+                child.category = file.category
             } else {
-                nodes[nodeID]?.byteCount += file.hasKnownByteCount ? file.byteCount : 0
+                child.byteCount += byteCount
             }
 
-            parentID = nodeID
+            parent = child
         }
     }
 
     func makeTree() -> FileNode {
-        Self.makeNode(id: rootID, nodes: nodes)
+        Self.makeNode(root)
     }
 
     /// 创建 `makeNode` 所需的值或资源，统一封装构造细节。
-    private static func makeNode(
-        id: String,
-        nodes: [String: NodeAccumulator]
-    ) -> FileNode {
-        guard let value = nodes[id] else {
-            return FileNode(
-                id: id,
-                name: id,
-                byteCount: 0,
-                children: [],
-                category: .other,
-                isDirectory: false
-            )
-        }
-
-        let children = value.childIDs
-            .map { makeNode(id: $0, nodes: nodes) }
+    private static func makeNode(_ value: MutableNode) -> FileNode {
+        let children = value.childrenByName.values
+            .map(makeNode)
             .sorted {
                 if $0.byteCount == $1.byteCount {
                     return $0.name.localizedStandardCompare($1.name) == .orderedAscending

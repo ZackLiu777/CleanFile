@@ -62,7 +62,9 @@ actor AppStateStore {
 
     /// 加载 `loadFileState` 所需的数据，并将结果转换为当前层可消费的状态。
     func loadFileState() -> FileStateSnapshot? {
-        load(FileStateSnapshot.self, name: .files)
+        let interval = StoragePerformance.begin("Storage Snapshot Load")
+        defer { StoragePerformance.end("Storage Snapshot Load", id: interval) }
+        return load(FileStateSnapshot.self, name: .files)
     }
 
     /// 持久化 `saveFileState` 对应的数据，并保持后续恢复所需的信息完整。

@@ -61,6 +61,8 @@ struct SunburstTreeAdapter {
         _ root: FileNode,
         nodeBudget: Int = defaultNodeBudget
     ) -> AdaptedTree {
+        let interval = StoragePerformance.begin("Storage Sunburst Adapt")
+        defer { StoragePerformance.end("Storage Sunburst Adapt", id: interval) }
         var sourceNodes: [UUID: FileNode] = [:]
         let rootByteCount = max(0, root.byteCount)
         let selectedNodeIDs = selectVisibleNodeIDs(
@@ -914,6 +916,9 @@ struct SunburstChartView: View {
         .frame(maxWidth: .infinity, alignment: .center)
         .onChange(of: rootSignature) { _, _ in
             viewModel.replaceRoot(root)
+        }
+        .onAppear {
+            StoragePerformance.event("Storage Sunburst Visible")
         }
     }
 }

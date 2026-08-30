@@ -80,6 +80,7 @@ struct MetadataFileScanner: Sendable {
             var coordinationError: NSError?
             var enumerationResult: Result<DirectoryEnumeration, Error>?
 
+            let enumerationInterval = StoragePerformance.begin("Storage Directory Enumerate")
             coordinator.coordinate(
                 readingItemAt: directory,
                 options: [],
@@ -97,6 +98,7 @@ struct MetadataFileScanner: Sendable {
                     enumerationResult = .failure(error)
                 }
             }
+            StoragePerformance.end("Storage Directory Enumerate", id: enumerationInterval)
 
             if let coordinationError {
                 throw coordinationError
@@ -110,6 +112,7 @@ struct MetadataFileScanner: Sendable {
             // file access has ended, so a provider is not held while sorting
             // hierarchy nodes or producing diagnostics.
             let enumeration = try enumerationResult.get()
+            let finalizeInterval = StoragePerformance.begin("Storage Scan Finalize")
             let fileTree = enumeration.treeAccumulator.makeTree()
 
             #if DEBUG
@@ -122,13 +125,15 @@ struct MetadataFileScanner: Sendable {
             )
             #endif
 
-            return FileScanResult(
+            let result = FileScanResult(
                 files: enumeration.files,
                 failures: enumeration.failures,
                 summary: enumeration.summaryAccumulator.makeSummary(),
                 fileTree: fileTree,
                 largestFiles: enumeration.largestFilesAccumulator.sortedDescending()
             )
+            StoragePerformance.end("Storage Scan Finalize", id: finalizeInterval)
+            return result
         }
     }
 

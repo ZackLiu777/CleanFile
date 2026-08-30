@@ -27,13 +27,17 @@ private nonisolated enum FileStateRestorer {
     static func prepare(_ snapshot: FileStateSnapshot) -> PreparedFileState? {
         guard !Task.isCancelled else { return nil }
 
+        let bookmarkInterval = StoragePerformance.begin("Storage Bookmark Resolve")
         var isStale = false
         guard let restoredRoot = try? URL(
             resolvingBookmarkData: snapshot.directoryBookmark,
             options: [],
             relativeTo: nil,
             bookmarkDataIsStale: &isStale
-        ) else { return nil }
+        ) else {
+            StoragePerformance.end("Storage Bookmark Resolve", id: bookmarkInterval)
+            return nil
+        }
 
         let bookmark = isStale
             ? (try? restoredRoot.bookmarkData(
@@ -42,19 +46,24 @@ private nonisolated enum FileStateRestorer {
                 relativeTo: nil
             )) ?? snapshot.directoryBookmark
             : snapshot.directoryBookmark
+        StoragePerformance.end("Storage Bookmark Resolve", id: bookmarkInterval)
+
+        let reconstructionInterval = StoragePerformance.begin("Storage State Reconstruct")
         var restoredFiles: [ScannedFile] = []
         restoredFiles.reserveCapacity(snapshot.files.count)
         var summaryAccumulator = StorageSummaryAccumulator()
         var treeAccumulator = FileTreeAccumulator(rootURL: restoredRoot)
         var largestFilesAccumulator = LargestFilesAccumulator(limit: 10)
 
-        for persistedFile in snapshot.files {
-            guard !Task.isCancelled else { return nil }
+        for (index, persistedFile) in snapshot.files.enumerated() {
+            if index.isMultiple(of: 128), Task.isCancelled {
+                StoragePerformance.end("Storage State Reconstruct", id: reconstructionInterval)
+                return nil
+            }
             guard !persistedFile.relativePathComponents.isEmpty else { continue }
 
-            let restoredURL = persistedFile.relativePathComponents.reduce(restoredRoot) {
-                $0.appendingPathComponent($1)
-            }
+            let relativePath = persistedFile.relativePathComponents.joined(separator: "/")
+            let restoredURL = restoredRoot.appending(path: relativePath)
             let file = ScannedFile(
                 url: restoredURL,
                 name: persistedFile.name,
@@ -70,8 +79,10 @@ private nonisolated enum FileStateRestorer {
             treeAccumulator.append(file)
             largestFilesAccumulator.append(file)
         }
+        StoragePerformance.end("Storage State Reconstruct", id: reconstructionInterval)
 
-        return PreparedFileState(
+        let finalizeInterval = StoragePerformance.begin("Storage State Finalize")
+        let prepared = PreparedFileState(
             rootURL: restoredRoot,
             selectedDirectoryName: snapshot.selectedDirectoryName,
             directoryBookmark: bookmark,
@@ -82,6 +93,9 @@ private nonisolated enum FileStateRestorer {
             fileTree: treeAccumulator.makeTree(),
             largestFiles: largestFilesAccumulator.sortedDescending()
         )
+        StoragePerformance.end("Storage State Finalize", id: finalizeInterval)
+
+        return prepared
     }
 }
 
@@ -311,6 +325,7 @@ final class FileScannerViewModel: ObservableObject {
             state = .success(prepared.summary)
         }
         if prepared.shouldRewriteBookmark { persistStableState() }
+        StoragePerformance.event("Storage State Published")
     }
 
     /// 持久化 `persistStableState` 对应的数据，并保持后续恢复所需的信息完整。
