@@ -63,6 +63,7 @@ struct ContentView: View {
                 }
                 .tag(AppTab.settings)
         }
+        .tabBarMinimizeBehavior(.onScrollDown)
         .tint(theme.accentPrimary)
         .toolbarBackground(.hidden, for: .tabBar)
         .sensoryFeedback(.selection, trigger: selectedTab)
