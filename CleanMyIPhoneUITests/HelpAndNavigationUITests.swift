@@ -52,7 +52,7 @@ final class HelpAndNavigationUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Use Storage"].waitForExistence(timeout: 5))
         XCTAssertTrue(reveal(app.staticTexts["Choose a folder"], in: app).exists)
         XCTAssertTrue(
-            reveal(app.links["Apple: Delete files or remove downloads"], in: app).exists
+            reveal(app.links["help.resource.storage.files"], in: app).exists
         )
     }
 

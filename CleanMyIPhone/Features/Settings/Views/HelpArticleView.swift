@@ -187,6 +187,7 @@ struct HelpArticleView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("help.resource.\(article.id).\(resource.id)")
                     .accessibilityHint("Opens Apple Support in your browser.")
                 }
             }

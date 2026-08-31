@@ -24,7 +24,7 @@ struct PhotosView: View {
             ZStack {
                 AppBackground()
 
-                ZStack(alignment: .topLeading) {
+                Group {
                     switch viewModel.authorizationStatus {
                     case .notDetermined:
                         permissionView(
@@ -60,9 +60,6 @@ struct PhotosView: View {
                         )
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("media.content")
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
