@@ -102,7 +102,7 @@ jobs:
             -only-testing:CleanMyIPhoneUITests \
             -derivedDataPath "$RUNNER_TEMP/CleanFileUIDerivedData" \
             -resultBundlePath "$RUNNER_TEMP/CleanFileUITests.xcresult" \
-            -enableCodeCoverage YES \
+            -parallel-testing-enabled NO \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Upload UI-test results

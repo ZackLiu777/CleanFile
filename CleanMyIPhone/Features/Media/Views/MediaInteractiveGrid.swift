@@ -3,7 +3,7 @@
 //  CleanMyIPhone
 //
 //  媒体分类详情页的原生交互式网格。
-//  使用 UICollectionViewTransitionLayout 让 2 / 5 / 8 列布局随捏合进度连续重排，
+//  使用离散密度档位与快照淡化切换 2 / 5 / 8 列布局，
 //  同时保留日期分组、预览入口、长按选择与滑动批量选择能力。
 //
 
@@ -95,11 +95,11 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 
         private var density = MediaGridDensity.large
         private var targetDensity: MediaGridDensity?
-        private var transitionLayout: UICollectionViewTransitionLayout?
-        private var transitionProgress: CGFloat = 0
-        private var transitionDirection: MediaGridTransitionDirection?
         private var isCompletingTransition = false
+        private var didChangeDensityDuringPinch = false
         private var pinchAnchor: MediaPinchAnchor?
+        private var densityAnimator: UIViewPropertyAnimator?
+        private weak var densitySnapshot: UIView?
 
         private var batchSelectionStartIndexPath: IndexPath?
         private var batchSelectionStartLocation: CGPoint?
@@ -156,8 +156,13 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 
         /// 终止尚未完成的布局过渡，避免数据刷新落在临时 TransitionLayout 上。
         func cancelLayoutTransitionIfNeeded() {
-            guard transitionLayout != nil, let collectionView else { return }
-            collectionView.cancelInteractiveTransition()
+            densityAnimator?.stopAnimation(true)
+            densityAnimator = nil
+            densitySnapshot?.removeFromSuperview()
+            densitySnapshot = nil
+            collectionView?.alpha = 1
+            collectionView?.transform = .identity
+            collectionView?.layer.removeAllAnimations()
             resetLayoutTransitionState()
         }
 
@@ -339,8 +344,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 
         /// 返回布局过渡正在指向的档位，使过渡末段出现的新单元格采用目标档视觉密度。
         private var displayedDensity: MediaGridDensity {
-            guard transitionProgress >= 0.5, let targetDensity else { return density }
-            return targetDensity
+            targetDensity ?? density
         }
 
         /// 从已经安装的稳定布局回读密度，防止布局完成回调与下一次手势到达顺序不同步。
@@ -349,7 +353,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             density = layout.density
             // UIKit 已换回稳定布局即表示交互过渡结束；同步清除可能晚一拍的桥接状态，
             // 避免刚缩放完成时 isCompletingTransition 继续阻断新的单指选择手势。
-            if transitionLayout != nil || isCompletingTransition {
+            if isCompletingTransition {
                 resetLayoutTransitionState()
             }
         }
@@ -402,116 +406,112 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 
         // MARK: Interactive pinch transition
 
-        /// 将捏合比例连续映射到 UICollectionViewTransitionLayout 的过渡进度。
+        /// 每次捏合只允许切换一个密度档位，避免连续布局插值反复重建 Hosting Cell。
         @objc private func handlePinch(_ gesture: UIPinchGestureRecognizer) {
-            guard let collectionView, !isCompletingTransition else { return }
+            guard let collectionView else { return }
 
             switch gesture.state {
-            case .began, .changed:
-                if transitionLayout == nil {
-                    beginLayoutTransitionIfNeeded(for: gesture, in: collectionView)
+            case .began:
+                synchronizeDensityWithInstalledLayout(in: collectionView)
+                didChangeDensityDuringPinch = false
+            case .changed:
+                guard !didChangeDensityDuringPinch, !isCompletingTransition else { return }
+                if gesture.scale <= 0.78 {
+                    applyAdjacentDensity(.denser, at: gesture.location(in: collectionView), in: collectionView)
+                } else if gesture.scale >= 1.28 {
+                    applyAdjacentDensity(.larger, at: gesture.location(in: collectionView), in: collectionView)
                 }
-                updateLayoutTransition(for: gesture, in: collectionView)
-            case .ended:
-                completeLayoutTransition(using: gesture.velocity, in: collectionView)
-            case .cancelled, .failed:
-                cancelLayoutTransition(in: collectionView)
+            case .ended, .cancelled, .failed:
+                didChangeDensityDuringPinch = false
             default:
                 break
             }
         }
 
-        /// 根据首次明确的捏合方向选择相邻档位，并记录手指下方资源作为视觉锚点。
-        private func beginLayoutTransitionIfNeeded(
-            for gesture: UIPinchGestureRecognizer,
+        /// 达到阈值后一次性安装相邻布局，并用快照交叉淡化隐藏 Cell 重建过程。
+        private func applyAdjacentDensity(
+            _ direction: MediaGridTransitionDirection,
+            at touchLocation: CGPoint,
             in collectionView: UICollectionView
         ) {
-            let direction: MediaGridTransitionDirection
-            if gesture.scale < 0.985 {
-                direction = .denser
-            } else if gesture.scale > 1.015 {
-                direction = .larger
-            } else {
-                return
-            }
-
             guard let nextDensity = density.adjacent(in: direction) else { return }
-            let touchLocation = gesture.location(in: collectionView)
+            didChangeDensityDuringPinch = true
+            isCompletingTransition = true
             pinchAnchor = makePinchAnchor(at: touchLocation, in: collectionView)
-            transitionDirection = direction
             targetDensity = nextDensity
-            transitionProgress = 0
-
             let nextLayout = MediaDensityFlowLayout(density: nextDensity)
-            transitionLayout = collectionView.startInteractiveTransition(
-                to: nextLayout
-            ) { [weak self] completed, finished in
-                guard let self else { return }
-                if completed, finished, let targetDensity = self.targetDensity {
-                    self.density = targetDensity
-                }
-                self.resetLayoutTransitionState()
-                self.refreshVisibleContent(in: collectionView)
-            }
+
+            animateDensityChange(
+                to: nextLayout,
+                density: nextDensity,
+                direction: direction,
+                touchLocation: touchLocation,
+                in: collectionView
+            )
         }
 
-        /// 更新插值进度并修正 contentOffset，使捏合中心的资源保持在手指下方。
-        private func updateLayoutTransition(
-            for gesture: UIPinchGestureRecognizer,
+        /// 旧布局仅作为静态快照参与动画，真实 UICollectionView 只安装一次目标布局。
+        private func animateDensityChange(
+            to nextLayout: MediaDensityFlowLayout,
+            density nextDensity: MediaGridDensity,
+            direction: MediaGridTransitionDirection,
+            touchLocation: CGPoint,
             in collectionView: UICollectionView
         ) {
-            guard
-                let transitionLayout,
-                let transitionDirection
-            else { return }
-
-            let rawProgress: CGFloat
-            switch transitionDirection {
-            case .denser:
-                rawProgress = (1 - gesture.scale) / 0.36
-            case .larger:
-                rawProgress = (gesture.scale - 1) / 0.46
+            guard let container = collectionView.superview,
+                  let snapshot = collectionView.snapshotView(afterScreenUpdates: false)
+            else {
+                collectionView.setCollectionViewLayout(nextLayout, animated: false)
+                collectionView.layoutIfNeeded()
+                density = nextDensity
+                refreshVisibleContent(in: collectionView)
+                preservePinchAnchor(at: touchLocation, in: collectionView)
+                finishDensityAnimation()
+                return
             }
-            let progress = min(max(rawProgress, 0), 1)
-            transitionProgress = progress
-            transitionLayout.transitionProgress = progress
-            transitionLayout.invalidateLayout()
+
+            snapshot.frame = collectionView.convert(collectionView.bounds, to: container)
+            snapshot.isUserInteractionEnabled = false
+            container.addSubview(snapshot)
+            densitySnapshot = snapshot
+
+            collectionView.setCollectionViewLayout(nextLayout, animated: false)
             collectionView.layoutIfNeeded()
-            preservePinchAnchor(at: gesture.location(in: collectionView), in: collectionView)
+            density = nextDensity
+            refreshVisibleContent(in: collectionView)
+            preservePinchAnchor(at: touchLocation, in: collectionView)
+
+            let oldScale: CGFloat = direction == .denser ? 0.94 : 1.06
+            let newStartScale: CGFloat = direction == .denser ? 1.04 : 0.96
+            collectionView.alpha = 0
+            collectionView.transform = CGAffineTransform(scaleX: newStartScale, y: newStartScale)
+
+            let timing = UISpringTimingParameters(dampingRatio: 0.88)
+            let animator = UIViewPropertyAnimator(duration: 0.34, timingParameters: timing)
+            densityAnimator = animator
+            animator.addAnimations {
+                snapshot.alpha = 0
+                snapshot.transform = CGAffineTransform(scaleX: oldScale, y: oldScale)
+                collectionView.alpha = 1
+                collectionView.transform = .identity
+            }
+            animator.addCompletion { [weak self, weak snapshot, weak collectionView] _ in
+                snapshot?.removeFromSuperview()
+                collectionView?.alpha = 1
+                collectionView?.transform = .identity
+                self?.finishDensityAnimation()
+            }
+            animator.startAnimation()
         }
 
-        /// 根据完成度和手势速度决定安装目标布局或回退原布局。
-        private func completeLayoutTransition(
-            using velocity: CGFloat,
-            in collectionView: UICollectionView
-        ) {
-            guard let direction = transitionDirection, transitionLayout != nil else {
-                resetLayoutTransitionState()
-                return
-            }
-            let directionalVelocity: CGFloat = switch direction {
-            case .denser: -velocity
-            case .larger: velocity
-            }
-            let shouldFinish = transitionProgress >= 0.38
-                || (transitionProgress >= 0.12 && directionalVelocity > 0.65)
-
-            isCompletingTransition = true
-            if shouldFinish {
-                collectionView.finishInteractiveTransition()
-            } else {
-                collectionView.cancelInteractiveTransition()
-            }
-        }
-
-        /// 在系统取消手势时恢复原布局，并清理临时过渡状态。
-        private func cancelLayoutTransition(in collectionView: UICollectionView) {
-            guard transitionLayout != nil else {
-                resetLayoutTransitionState()
-                return
-            }
-            isCompletingTransition = true
-            collectionView.cancelInteractiveTransition()
+        /// 收敛网格切换状态，保证下一次捏合从完整、不带 transform 的布局开始。
+        private func finishDensityAnimation() {
+            densityAnimator = nil
+            densitySnapshot?.removeFromSuperview()
+            densitySnapshot = nil
+            targetDensity = nil
+            isCompletingTransition = false
+            pinchAnchor = nil
         }
 
         /// 从手指位置构造归一化单元格锚点，用于布局尺寸变化后的视口补偿。
@@ -590,11 +590,9 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         /// 清理一次过渡的临时引用，允许下一次随机时机捏合从稳定布局重新开始。
         private func resetLayoutTransitionState() {
             targetDensity = nil
-            transitionLayout = nil
-            transitionProgress = 0
-            transitionDirection = nil
             isCompletingTransition = false
             pinchAnchor = nil
+            didChangeDensityDuringPinch = false
         }
 
         // MARK: Selection gestures

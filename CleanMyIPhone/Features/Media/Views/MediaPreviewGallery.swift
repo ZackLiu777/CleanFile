@@ -113,33 +113,13 @@ private struct ZoomablePhotoPreview: View {
     @State private var image: UIImage?
     @State private var state: MediaPreviewState = .loading
     @State private var requestID: PHImageRequestID?
-    @State private var baseScale: CGFloat = 1
-    @State private var gestureScale: CGFloat = 1
-    @State private var baseOffset: CGSize = .zero
-    @State private var gestureOffset: CGSize = .zero
 
     var body: some View {
         GeometryReader { proxy in
             ZStack {
                 Color.black
                 if let image {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFit()
-                        .scaleEffect(effectiveScale)
-                        .offset(effectiveOffset)
-                        .gesture(magnificationGesture)
-                        .simultaneousGesture(dragGesture)
-                        .onTapGesture(count: 2) {
-                            withAnimation(.spring(response: 0.3)) {
-                                baseScale = baseScale > 1 ? 1 : 2.5
-                                gestureScale = 1
-                                if baseScale == 1 {
-                                    baseOffset = .zero
-                                    gestureOffset = .zero
-                                }
-                            }
-                        }
+                    NativeZoomableImage(image: image)
                 } else if state == .loading {
                     ProgressView("Loading…")
                         .tint(.white)
@@ -148,6 +128,7 @@ private struct ZoomablePhotoPreview: View {
                     unavailableView
                 }
             }
+            .clipped()
             .task(id: asset.localIdentifier) {
                 requestImage(for: proxy.size)
             }
@@ -158,42 +139,6 @@ private struct ZoomablePhotoPreview: View {
                 image = viewModel.cachedThumbnail(for: asset.localIdentifier)
             }
         }
-    }
-
-    private var effectiveScale: CGFloat {
-        min(max(baseScale * gestureScale, 1), 5)
-    }
-
-    private var effectiveOffset: CGSize {
-        guard effectiveScale > 1 else { return .zero }
-        return CGSize(
-            width: baseOffset.width + gestureOffset.width,
-            height: baseOffset.height + gestureOffset.height
-        )
-    }
-
-    private var magnificationGesture: some Gesture {
-        MagnifyGesture()
-            .onChanged { gestureScale = $0.magnification }
-            .onEnded {
-                baseScale = min(max(baseScale * $0.magnification, 1), 5)
-                gestureScale = 1
-                if baseScale == 1 { baseOffset = .zero }
-            }
-    }
-
-    private var dragGesture: some Gesture {
-        DragGesture()
-            .onChanged { value in
-                guard effectiveScale > 1 else { return }
-                gestureOffset = value.translation
-            }
-            .onEnded { value in
-                guard effectiveScale > 1 else { return }
-                baseOffset.width += value.translation.width
-                baseOffset.height += value.translation.height
-                gestureOffset = .zero
-            }
     }
 
     private var unavailableView: some View {
@@ -221,6 +166,145 @@ private struct ZoomablePhotoPreview: View {
     private func cancelRequest() {
         if let requestID { viewModel.cancelThumbnail(requestID) }
         requestID = nil
+    }
+}
+
+/// 使用系统 UIScrollView 的原生缩放管线，避免 SwiftUI 分页与自定义手势竞争。
+private struct NativeZoomableImage: UIViewRepresentable {
+    let image: UIImage
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    func makeUIView(context: Context) -> ZoomScrollView {
+        let scrollView = ZoomScrollView()
+        scrollView.backgroundColor = .black
+        scrollView.minimumZoomScale = 1
+        scrollView.maximumZoomScale = 5
+        scrollView.bouncesZoom = true
+        scrollView.decelerationRate = .fast
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.contentInsetAdjustmentBehavior = .never
+        scrollView.delegate = context.coordinator
+
+        let imageView = UIImageView(image: image)
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+        imageView.isUserInteractionEnabled = true
+        scrollView.zoomContentView.addSubview(imageView)
+
+        context.coordinator.scrollView = scrollView
+        context.coordinator.imageView = imageView
+        scrollView.onLayout = { [weak coordinator = context.coordinator] bounds in
+            coordinator?.layoutContent(in: bounds)
+        }
+
+        let doubleTap = UITapGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleDoubleTap(_:))
+        )
+        doubleTap.numberOfTapsRequired = 2
+        scrollView.addGestureRecognizer(doubleTap)
+        return scrollView
+    }
+
+    func updateUIView(_ scrollView: ZoomScrollView, context: Context) {
+        if context.coordinator.imageView?.image !== image {
+            context.coordinator.imageView?.image = image
+            scrollView.setZoomScale(scrollView.minimumZoomScale, animated: false)
+        }
+        context.coordinator.layoutContent(in: scrollView.bounds)
+    }
+
+    final class Coordinator: NSObject, UIScrollViewDelegate {
+        weak var scrollView: UIScrollView?
+        weak var imageView: UIImageView?
+        private var laidOutSize: CGSize = .zero
+
+        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+            (scrollView as? ZoomScrollView)?.zoomContentView
+        }
+
+        func scrollViewDidZoom(_ scrollView: UIScrollView) {
+            centerZoomedContent(in: scrollView)
+        }
+
+        func layoutContent(in bounds: CGRect) {
+            guard bounds.width > 0, bounds.height > 0,
+                  let scrollView,
+                  let imageView,
+                  let contentView = (scrollView as? ZoomScrollView)?.zoomContentView
+            else { return }
+            guard bounds.size != laidOutSize else { return }
+
+            // 尺寸变化时先恢复 1x，避免修改已带 transform 的 zoom view frame。
+            scrollView.setZoomScale(scrollView.minimumZoomScale, animated: false)
+            laidOutSize = bounds.size
+            contentView.frame = CGRect(origin: .zero, size: bounds.size)
+            imageView.frame = contentView.bounds
+            scrollView.contentSize = bounds.size
+            centerZoomedContent(in: scrollView)
+        }
+
+        @objc func handleDoubleTap(_ recognizer: UITapGestureRecognizer) {
+            guard let scrollView else { return }
+            if scrollView.zoomScale > scrollView.minimumZoomScale + 0.01 {
+                scrollView.setZoomScale(scrollView.minimumZoomScale, animated: true)
+                return
+            }
+
+            let targetScale = min(2.5, scrollView.maximumZoomScale)
+            let point = recognizer.location(in: imageView)
+            let size = CGSize(
+                width: scrollView.bounds.width / targetScale,
+                height: scrollView.bounds.height / targetScale
+            )
+            scrollView.zoom(
+                to: CGRect(
+                    x: point.x - size.width / 2,
+                    y: point.y - size.height / 2,
+                    width: size.width,
+                    height: size.height
+                ),
+                animated: true
+            )
+        }
+
+        private func centerZoomedContent(in scrollView: UIScrollView) {
+            let horizontal = max(0, (scrollView.bounds.width - scrollView.contentSize.width) / 2)
+            let vertical = max(0, (scrollView.bounds.height - scrollView.contentSize.height) / 2)
+            scrollView.contentInset = UIEdgeInsets(
+                top: vertical,
+                left: horizontal,
+                bottom: vertical,
+                right: horizontal
+            )
+        }
+    }
+}
+
+/// 在尺寸变化时同步原生缩放内容，避免旋转或导航栏布局后使用过期 bounds。
+private final class ZoomScrollView: UIScrollView {
+    let zoomContentView = UIView()
+    var onLayout: ((CGRect) -> Void)?
+    private var previousBoundsSize: CGSize = .zero
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(zoomContentView)
+    }
+
+    required init?(coder: NSCoder) {
+        nil
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard bounds.size != previousBoundsSize else { return }
+        previousBoundsSize = bounds.size
+        onLayout?(bounds)
     }
 }
 
