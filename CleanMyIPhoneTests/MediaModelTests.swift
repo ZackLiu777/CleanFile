@@ -141,7 +141,7 @@ struct MediaModelTests {
             .flatMap(\.assetIDs)
 
         #expect(identifiers.count == assets.count)
-        #expect(Set(identifiers) == Set(assets.map(\.id)))
+        #expect(Set(identifiers) == Set(assets.map { $0.id }))
     }
 
     @Test("Storage files sort by known size descending and keep unknown sizes last")
@@ -153,7 +153,7 @@ struct MediaModelTests {
             scannedFile(name: "medium", bytes: 100)
         ]
 
-        #expect(FileDisplayOrder.bySizeDescending(files).map(\.name) == [
+        #expect(FileDisplayOrder.bySizeDescending(files).map { $0.name } == [
             "large", "medium", "small", "unknown"
         ])
     }
@@ -165,7 +165,7 @@ struct MediaModelTests {
             scannedFile(name: "Alpha", bytes: 100)
         ]
 
-        #expect(FileDisplayOrder.bySizeDescending(files).map(\.name) == ["Alpha", "Beta"])
+        #expect(FileDisplayOrder.bySizeDescending(files).map { $0.name } == ["Alpha", "Beta"])
     }
 
     @Test("Storage usage clamps negative used bytes to zero")
@@ -334,7 +334,7 @@ struct MediaModelTests {
         let updated = result.removingAssetIDs(["keeper"])
 
         #expect(updated.similarImageGroups.first?.suggestedKeeperID == "next")
-        #expect(updated.similarImageGroups.first?.items.map(\.id) == ["next", "last"])
+        #expect(updated.similarImageGroups.first?.items.map { $0.id } == ["next", "last"])
     }
 
     @Test("Removing assets updates every classification collection")

@@ -63,7 +63,7 @@ struct ThemeEdgeCaseTests {
         let sanitized = style.sanitized()
 
         #expect(sanitized.stops.count == AppCustomBackgroundStyle.maximumColorCount)
-        #expect(Set(sanitized.stops.map(\.id)).count == sanitized.stops.count)
+        #expect(Set(sanitized.stops.map { $0.id }).count == sanitized.stops.count)
     }
 
     @Test("Sanitizing repairs non-finite locations")
@@ -79,7 +79,7 @@ struct ThemeEdgeCaseTests {
 
         let locations = style.sanitized().stops.map(\.location)
 
-        #expect(locations.allSatisfy(\.isFinite))
+        #expect(locations.allSatisfy { $0.isFinite })
         #expect(locations.allSatisfy { $0 >= 0 && $0 <= 1 })
     }
 
@@ -119,7 +119,7 @@ struct ThemeEdgeCaseTests {
         )
         style.redistributeLocations()
 
-        #expect(style.stops.map(\.location) == [0, 0.5, 1])
+        #expect(style.stops.map { $0.location } == [0, 0.5, 1])
     }
 
     @Test("Gradient direction exposes distinct predictable endpoints")

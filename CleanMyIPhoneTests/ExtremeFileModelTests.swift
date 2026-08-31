@@ -142,8 +142,8 @@ struct ExtremeFileModelTests {
 
         let result = accumulator.sortedDescending()
         #expect(result.count == 10)
-        #expect(result.allSatisfy(\.hasKnownByteCount))
-        #expect(result.map(\.byteCount) == Array(stride(from: Int64(28), through: Int64(19), by: -1)))
+        #expect(result.allSatisfy { $0.hasKnownByteCount })
+        #expect(result.map { $0.byteCount } == Array(stride(from: Int64(28), through: Int64(19), by: -1)))
     }
 
     @Test("Largest-files ties use a deterministic localized name order")
@@ -153,7 +153,7 @@ struct ExtremeFileModelTests {
         accumulator.append(makeFile(name: "alpha", bytes: 42))
         accumulator.append(makeFile(name: "middle", bytes: 42))
 
-        #expect(accumulator.sortedDescending().map(\.name) == ["alpha", "middle", "zeta"])
+        #expect(accumulator.sortedDescending().map { $0.name } == ["alpha", "middle", "zeta"])
     }
 
     @Test("Storage summary preserves all category slots for an empty input")
@@ -161,7 +161,7 @@ struct ExtremeFileModelTests {
         let summary = StorageSummary(files: [])
 
         #expect(summary.fileCount == 0)
-        #expect(summary.categories.map(\.category) == FileCategory.allCases)
+        #expect(summary.categories.map { $0.category } == FileCategory.allCases)
         #expect(summary.nonEmptyCategories.isEmpty)
     }
 

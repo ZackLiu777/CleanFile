@@ -27,7 +27,7 @@ struct HelpContentTests {
             for section in article.sections {
                 #expect(!section.id.isEmpty)
                 #expect(!section.paragraphs.isEmpty || !section.steps.isEmpty)
-                #expect(Set(section.steps.map(\.id)).count == section.steps.count)
+                #expect(Set(section.steps.map { $0.id }).count == section.steps.count)
             }
         }
     }

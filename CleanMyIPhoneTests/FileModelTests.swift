@@ -102,7 +102,7 @@ struct FileModelTests {
     func nonEmptyCategoriesAreFiltered() {
         let summary = StorageSummary(files: [file("one.pdf", category: .pdf, bytes: 10)])
 
-        #expect(summary.nonEmptyCategories.map(\.category) == [.pdf])
+        #expect(summary.nonEmptyCategories.map { $0.category } == [.pdf])
     }
 
     @Test("Zero-byte files do not produce invalid percentages")

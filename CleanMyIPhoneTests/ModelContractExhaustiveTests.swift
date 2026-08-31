@@ -21,7 +21,7 @@ struct StorageModelContractExhaustiveTests {
 
         let sorted = FileDisplayOrder.bySizeDescending(files)
 
-        #expect(sorted.map(\.name) == ["large.mp4", "small.txt", "unknown.bin"])
+        #expect(sorted.map { $0.name } == ["large.mp4", "small.txt", "unknown.bin"])
     }
 
     @Test("Summary accumulator separates unknown bytes from known totals")
@@ -99,8 +99,8 @@ struct StorageModelContractExhaustiveTests {
             .failure(.deletionFailed)
         ]
 
-        #expect(scanStates.map(\.isScanning) == [false, true, false, false, false, false, false])
-        #expect(deletionStates.map(\.isDeleting) == [false, true, false, false, false])
+        #expect(scanStates.map { $0.isScanning } == [false, true, false, false, false, false, false])
+        #expect(deletionStates.map { $0.isDeleting } == [false, true, false, false, false])
     }
 
     @Test("Storage errors expose descriptions for every case")

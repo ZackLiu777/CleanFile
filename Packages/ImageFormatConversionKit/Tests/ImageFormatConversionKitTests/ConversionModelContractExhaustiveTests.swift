@@ -6,10 +6,10 @@ import Testing
 struct ConversionModelContractExhaustiveTests {
     @Test("Audio output formats expose stable extensions and lossless semantics")
     func audioFormatMetadataIsComplete() {
-        #expect(AudioOutputFormat.allCases.map(\.fileExtension) == ["m4a", "aac", "m4a", "wav", "aiff", "caf", "caf"])
+        #expect(AudioOutputFormat.allCases.map { $0.fileExtension } == ["m4a", "aac", "m4a", "wav", "aiff", "caf", "caf"])
         #expect(AudioOutputFormat.aac.isLossless == false)
         #expect(AudioOutputFormat.aacFile.isLossless == false)
-        #expect(AudioOutputFormat.allCases.dropFirst(2).allSatisfy(\.isLossless))
+        #expect(AudioOutputFormat.allCases.dropFirst(2).allSatisfy { $0.isLossless })
     }
 
     @Test("Audio conversion errors always provide localized descriptions")
@@ -31,10 +31,10 @@ struct ConversionModelContractExhaustiveTests {
 
     @Test("Video enum metadata and error descriptions are exhaustive")
     func videoMetadataIsComplete() {
-        #expect(VideoOutputContainer.allCases.map(\.fileExtension) == ["mp4", "mov", "m4v"])
-        #expect(VideoOutputContainer.allCases.map(\.id) == VideoOutputContainer.allCases)
-        #expect(VideoCodec.allCases.map(\.id) == VideoCodec.allCases)
-        #expect(VideoResolutionPreset.allCases.map(\.id) == VideoResolutionPreset.allCases)
+        #expect(VideoOutputContainer.allCases.map { $0.fileExtension } == ["mp4", "mov", "m4v"])
+        #expect(VideoOutputContainer.allCases.map { $0.id } == VideoOutputContainer.allCases)
+        #expect(VideoCodec.allCases.map { $0.id } == VideoCodec.allCases)
+        #expect(VideoResolutionPreset.allCases.map { $0.id } == VideoResolutionPreset.allCases)
 
         let errors: [VideoConversionError] = [
             .sourceNotReachable,
@@ -50,10 +50,10 @@ struct ConversionModelContractExhaustiveTests {
     @Test("Image output formats expose unique identifiers and capability flags")
     func imageFormatMetadataIsComplete() {
         let formats = ImageOutputFormat.allCases
-        #expect(Set(formats.map(\.fileExtension)).count == formats.count)
+        #expect(Set(formats.map { $0.fileExtension }).count == formats.count)
         #expect(formats.allSatisfy { !$0.typeIdentifier.isEmpty })
-        #expect(formats.filter(\.supportsQuality) == [.jpeg, .heic, .heif, .webp])
-        #expect(formats.filter(\.requiresOpaquePixels) == [.jpeg, .bmp])
+        #expect(formats.filter { $0.supportsQuality } == [.jpeg, .heic, .heif, .webp])
+        #expect(formats.filter { $0.requiresOpaquePixels } == [.jpeg, .bmp])
     }
 
     @Test("Every image conversion error has a non-empty description")

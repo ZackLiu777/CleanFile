@@ -41,7 +41,7 @@ struct MetadataFileScannerEdgeCaseTests {
         )
         let result = try #require(completedResult(in: events))
 
-        #expect(result.files.map(\.name) == ["visible.txt"])
+        #expect(result.files.map { $0.name } == ["visible.txt"])
         #expect(result.summary.fileCount == 1)
     }
 
