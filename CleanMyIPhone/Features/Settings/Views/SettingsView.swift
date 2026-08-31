@@ -77,20 +77,26 @@ struct SettingsView: View {
                 .appListCard()
 
                 Section("Permissions") {
-                    LabeledContent {
-                        Text(photoAccessDescription)
-                            .foregroundStyle(.secondary)
-                    } label: {
-                        Label("Photos", systemImage: "photo.on.rectangle")
-                    }
-
-                    Button {
-                        guard let url = URL(string: UIApplication.openSettingsURLString) else {
-                            return
+                    VStack(spacing: 0) {
+                        LabeledContent {
+                            Text(photoAccessDescription)
+                                .foregroundStyle(.secondary)
+                        } label: {
+                            Label("Photos", systemImage: "photo.on.rectangle")
                         }
-                        openURL(url)
-                    } label: {
-                        Label("Open System Settings", systemImage: "gear")
+                        .frame(minHeight: 50)
+
+                        Divider()
+
+                        Button {
+                            guard let url = URL(string: UIApplication.openSettingsURLString) else {
+                                return
+                            }
+                            openURL(url)
+                        } label: {
+                            Label("Open System Settings", systemImage: "gear")
+                                .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
+                        }
                     }
                 }
                 .appListCard()
@@ -102,8 +108,13 @@ struct SettingsView: View {
                 .appListCard()
 
                 Section("About") {
-                    LabeledContent("Version", value: appVersion)
-                    LabeledContent("Build", value: buildNumber)
+                    VStack(spacing: 0) {
+                        LabeledContent("Version", value: appVersion)
+                            .frame(minHeight: 50)
+                        Divider()
+                        LabeledContent("Build", value: buildNumber)
+                            .frame(minHeight: 50)
+                    }
                 }
                 .appListCard()
             }

@@ -1152,12 +1152,22 @@ private struct AppContentCardModifier: ViewModifier {
 
 private struct AppListCardModifier: ViewModifier {
     @Environment(\.appTheme) private var theme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
+    @ViewBuilder
     func body(content: Content) -> some View {
-        // `List` 会把 modifier 分发给 Section 的 header、footer 和每一行。
-        // 在这里施加 glassEffect 会让文字被分别包成胶囊，因此列表继续使用稳定的行背景；
-        // 只有边界明确的独立内容视图才通过 appContentCard 使用玻璃效果。
-        content.listRowBackground(theme.cardSurface)
+        if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
+            // 玻璃必须位于 Row 的完整背景边界；直接修饰 content 会把 Label、footer 等拆成独立胶囊。
+            content.listRowBackground(
+                Color.clear
+                    .glassEffect(
+                        .regular,
+                        in: .rect(cornerRadius: 20)
+                    )
+            )
+        } else {
+            content.listRowBackground(theme.cardSurface)
+        }
     }
 }
 

@@ -11,40 +11,65 @@ struct HelpView: View {
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        List {
-            Section {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 22) {
                 helpIntroduction
-                    .listRowInsets(
-                        EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
-                    )
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-            }
 
-            ForEach(HelpCatalog.categories) { category in
-                Section {
-                    ForEach(category.articles) { article in
-                        NavigationLink {
-                            HelpArticleView(article: article)
-                        } label: {
-                            articleLabel(article)
-                        }
-                        .accessibilityIdentifier("help.article.\(article.id)")
+                ForEach(HelpCatalog.categories) { category in
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(category.title)
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(theme.textPrimary)
+                            .accessibilityAddTraits(.isHeader)
+
+                        categoryCard(category)
                     }
-                } header: {
-                    Text(category.title)
-                        .accessibilityAddTraits(.isHeader)
                 }
-                .appListCard()
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 32)
         }
-        .contentMargins(.horizontal, 4, for: .scrollContent)
         .scrollIndicators(.hidden)
-        .scrollContentBackground(.hidden)
         .background(AppBackground())
         .appSoftScrollEdge()
         .navigationTitle("Help")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// 将同一分类的文章组合成一张连续卡片，复用转换设置页的内容卡片层级。
+    private func categoryCard(_ category: HelpCategory) -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(category.articles.enumerated()), id: \.element.id) { index, article in
+                NavigationLink {
+                    HelpArticleView(article: article)
+                } label: {
+                    HStack(alignment: .center, spacing: 10) {
+                        articleLabel(article)
+
+                        Spacer(minLength: 8)
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(theme.textSecondary)
+                            .accessibilityHidden(true)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("help.article.\(article.id)")
+
+                if index < category.articles.count - 1 {
+                    Divider()
+                        .overlay(theme.divider)
+                        .padding(.leading, 62)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appContentCard(cornerRadius: 22)
     }
 
     private var helpIntroduction: some View {

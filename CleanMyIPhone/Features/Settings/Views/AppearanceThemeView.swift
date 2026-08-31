@@ -54,28 +54,33 @@ struct AppearanceThemeView: View {
     /// 展示有限且经过策划的强调色，避免任意颜色破坏控件对比度。
     private var accentPaletteSection: some View {
         Section {
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 10) {
-                    ForEach(AppAccentPaletteID.allCases) { paletteID in
-                        ThemePaletteSwatch(
-                            title: paletteID.displayName,
-                            sample: .accent(accentColor(for: paletteID)),
-                            isSelected: themeSettings.selectedAccentPaletteID == paletteID
-                        ) {
-                            updateAccentPalette(paletteID)
+            VStack(spacing: 0) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 10) {
+                        ForEach(AppAccentPaletteID.allCases) { paletteID in
+                            ThemePaletteSwatch(
+                                title: paletteID.displayName,
+                                sample: .accent(accentColor(for: paletteID)),
+                                isSelected: themeSettings.selectedAccentPaletteID == paletteID
+                            ) {
+                                updateAccentPalette(paletteID)
+                            }
+                            .accessibilityIdentifier("appearance.accent.\(paletteID.rawValue)")
                         }
-                        .accessibilityIdentifier("appearance.accent.\(paletteID.rawValue)")
                     }
+                    .padding(.vertical, 12)
                 }
-                .padding(.vertical, 4)
-            }
 
-            ColorPicker(
-                "Edit App Color",
-                selection: customAccentBinding,
-                supportsOpacity: false
-            )
-            .accessibilityHint("Opens the system color picker and selects Custom.")
+                Divider()
+
+                ColorPicker(
+                    "Edit App Color",
+                    selection: customAccentBinding,
+                    supportsOpacity: false
+                )
+                .frame(minHeight: 50)
+                .accessibilityHint("Opens the system color picker and selects Custom.")
+            }
         } header: {
             Text("App Color")
         } footer: {
@@ -110,9 +115,8 @@ struct AppearanceThemeView: View {
                     }
                     .accessibilityIdentifier("appearance.background.custom")
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, 12)
             }
-
         } header: {
             Text("App Background")
         } footer: {
@@ -124,35 +128,43 @@ struct AppearanceThemeView: View {
     /// Keeps the advanced editor behind the existing Custom choice so the settings page stays calm.
     private var customBackgroundEditorSection: some View {
         Section {
-            ThemeBackgroundLayer(background: themeSettings.customBackgroundTheme.background)
-                .frame(height: 112)
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .strokeBorder(theme.divider.opacity(0.7), lineWidth: 0.5)
-                }
-                .accessibilityHidden(true)
+            VStack(spacing: 16) {
+                ThemeBackgroundLayer(background: themeSettings.customBackgroundTheme.background)
+                    .frame(height: 112)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .strokeBorder(theme.divider.opacity(0.7), lineWidth: 0.5)
+                    }
+                    .accessibilityHidden(true)
 
-            Picker("Background Style", selection: customBackgroundKindBinding) {
-                ForEach(AppCustomBackgroundKind.allCases) { kind in
-                    Text(kind.displayName).tag(kind)
+                Divider()
+
+                Picker("Background Style", selection: customBackgroundKindBinding) {
+                    ForEach(AppCustomBackgroundKind.allCases) { kind in
+                        Text(kind.displayName).tag(kind)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("appearance.background.style")
+
+                Divider()
+
+                switch themeSettings.customBackgroundStyle.kind {
+                case .solid:
+                    ColorPicker(
+                        "Edit Background Color",
+                        selection: customBackgroundBinding,
+                        supportsOpacity: false
+                    )
+                    .frame(minHeight: 50)
+                case .linear:
+                    linearGradientEditor
+                case .mesh:
+                    meshGradientEditor
                 }
             }
-            .pickerStyle(.segmented)
-            .accessibilityIdentifier("appearance.background.style")
-
-            switch themeSettings.customBackgroundStyle.kind {
-            case .solid:
-                ColorPicker(
-                    "Edit Background Color",
-                    selection: customBackgroundBinding,
-                    supportsOpacity: false
-                )
-            case .linear:
-                linearGradientEditor
-            case .mesh:
-                meshGradientEditor
-            }
+            .padding(.vertical, 8)
         } header: {
             Text("Custom Background")
         } footer: {
