@@ -166,14 +166,16 @@ struct MetadataFileScannerEdgeCaseTests {
             }
         }
 
-        #expect(gate.waitUntilWorkerEntered())
+        let workerDidEnter = await gate.waitUntilWorkerEntered()
+        #expect(workerDidEnter)
         consumer.cancel()
-        // AsyncThrowingStream cancellation may end iteration normally rather
-        // than throw. Awaiting the consumer ensures onTermination has run.
-        _ = await consumer.value
+        let workerObservedCancellation = await gate.waitForWorkerCancellation()
+        // Always release the test double so a failed cancellation assertion
+        // cannot leave its detached worker blocked after the test returns.
         gate.open()
+        _ = await consumer.value
 
-        #expect(gate.waitForWorkerCancellation())
+        #expect(workerObservedCancellation)
     }
 
     private func collectEvents(
@@ -213,39 +215,84 @@ private struct TemporaryScanWorkspace {
 }
 
 private final class ScanGate: @unchecked Sendable {
-    private let accessSemaphore = DispatchSemaphore(value: 0)
-    private let enteredSemaphore = DispatchSemaphore(value: 0)
-    private let observationSemaphore = DispatchSemaphore(value: 0)
     private let lock = NSLock()
+    private var workerEntered = false
+    private var releaseRequested = false
+    private var workerFinished = false
     private var workerObservedCancellation = false
 
-    func wait() {
-        enteredSemaphore.signal()
-        accessSemaphore.wait()
+    func wait() throws {
+        updateState { $0.workerEntered = true }
+
+        while !Task.isCancelled, !state.releaseRequested {
+            Thread.sleep(forTimeInterval: 0.001)
+        }
+
+        updateState {
+            $0.workerFinished = true
+            $0.workerObservedCancellation = Task.isCancelled
+        }
+        try Task.checkCancellation()
     }
 
     func open() {
-        accessSemaphore.signal()
+        updateState { $0.releaseRequested = true }
     }
 
-    func waitUntilWorkerEntered() -> Bool {
-        enteredSemaphore.wait(timeout: .now() + 5) == .success
-    }
-
-    func recordWorkerCancellation(_ isCancelled: Bool) {
-        lock.lock()
-        workerObservedCancellation = isCancelled
-        lock.unlock()
-        observationSemaphore.signal()
-    }
-
-    func waitForWorkerCancellation() -> Bool {
-        guard observationSemaphore.wait(timeout: .now() + 5) == .success else {
-            return false
+    func waitUntilWorkerEntered() async -> Bool {
+        let deadline = DispatchTime.now().uptimeNanoseconds + 3_000_000_000
+        while DispatchTime.now().uptimeNanoseconds < deadline {
+            if state.workerEntered { return true }
+            try? await Task.sleep(nanoseconds: 5_000_000)
         }
+        return state.workerEntered
+    }
+
+    func waitForWorkerCancellation() async -> Bool {
+        let deadline = DispatchTime.now().uptimeNanoseconds + 3_000_000_000
+        while DispatchTime.now().uptimeNanoseconds < deadline {
+            let snapshot = state
+            if snapshot.workerFinished {
+                return snapshot.workerObservedCancellation
+            }
+            try? await Task.sleep(nanoseconds: 5_000_000)
+        }
+        let snapshot = state
+        return snapshot.workerFinished && snapshot.workerObservedCancellation
+    }
+
+    private var state: State {
         lock.lock()
         defer { lock.unlock() }
-        return workerObservedCancellation
+        return State(
+            workerEntered: workerEntered,
+            releaseRequested: releaseRequested,
+            workerFinished: workerFinished,
+            workerObservedCancellation: workerObservedCancellation
+        )
+    }
+
+    private func updateState(_ update: (inout State) -> Void) {
+        lock.lock()
+        var value = State(
+            workerEntered: workerEntered,
+            releaseRequested: releaseRequested,
+            workerFinished: workerFinished,
+            workerObservedCancellation: workerObservedCancellation
+        )
+        update(&value)
+        workerEntered = value.workerEntered
+        releaseRequested = value.releaseRequested
+        workerFinished = value.workerFinished
+        workerObservedCancellation = value.workerObservedCancellation
+        lock.unlock()
+    }
+
+    private struct State {
+        var workerEntered: Bool
+        var releaseRequested: Bool
+        var workerFinished: Bool
+        var workerObservedCancellation: Bool
     }
 }
 
@@ -253,8 +300,7 @@ private struct BlockingFileAccess: FileAccessProviding, Sendable {
     let gate: ScanGate
 
     nonisolated func withAccess<T>(to url: URL, operation: () throws -> T) throws -> T {
-        gate.wait()
-        gate.recordWorkerCancellation(Task.isCancelled)
+        try gate.wait()
         return try operation()
     }
 }
