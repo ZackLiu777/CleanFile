@@ -158,21 +158,22 @@ struct MetadataFileScannerEdgeCaseTests {
             fileAccess: BlockingFileAccess(gate: gate),
             progressInterval: 1
         )
-        let consumer = Task<Bool, Never> {
+        let consumer = Task<Void, Never> {
             do {
                 for try await _ in scanner.scan(directory: workspace.root) {}
-                return false
             } catch {
-                return true
+                // The assertion below verifies worker cancellation directly.
             }
         }
 
-        try await Task.sleep(nanoseconds: 20_000_000)
+        #expect(gate.waitUntilWorkerEntered())
         consumer.cancel()
+        // AsyncThrowingStream cancellation may end iteration normally rather
+        // than throw. Awaiting the consumer ensures onTermination has run.
+        _ = await consumer.value
         gate.open()
-        let didStopWithCancellation = await consumer.value
 
-        #expect(didStopWithCancellation)
+        #expect(gate.waitForWorkerCancellation())
     }
 
     private func collectEvents(
@@ -212,14 +213,39 @@ private struct TemporaryScanWorkspace {
 }
 
 private final class ScanGate: @unchecked Sendable {
-    private let semaphore = DispatchSemaphore(value: 0)
+    private let accessSemaphore = DispatchSemaphore(value: 0)
+    private let enteredSemaphore = DispatchSemaphore(value: 0)
+    private let observationSemaphore = DispatchSemaphore(value: 0)
+    private let lock = NSLock()
+    private var workerObservedCancellation = false
 
     func wait() {
-        semaphore.wait()
+        enteredSemaphore.signal()
+        accessSemaphore.wait()
     }
 
     func open() {
-        semaphore.signal()
+        accessSemaphore.signal()
+    }
+
+    func waitUntilWorkerEntered() -> Bool {
+        enteredSemaphore.wait(timeout: .now() + 5) == .success
+    }
+
+    func recordWorkerCancellation(_ isCancelled: Bool) {
+        lock.lock()
+        workerObservedCancellation = isCancelled
+        lock.unlock()
+        observationSemaphore.signal()
+    }
+
+    func waitForWorkerCancellation() -> Bool {
+        guard observationSemaphore.wait(timeout: .now() + 5) == .success else {
+            return false
+        }
+        lock.lock()
+        defer { lock.unlock() }
+        return workerObservedCancellation
     }
 }
 
@@ -228,6 +254,7 @@ private struct BlockingFileAccess: FileAccessProviding, Sendable {
 
     nonisolated func withAccess<T>(to url: URL, operation: () throws -> T) throws -> T {
         gate.wait()
+        gate.recordWorkerCancellation(Task.isCancelled)
         return try operation()
     }
 }

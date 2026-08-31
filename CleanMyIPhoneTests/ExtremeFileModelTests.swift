@@ -70,9 +70,17 @@ struct ExtremeFileModelTests {
             rootComponents: rootComponents
         ) == nil)
         #expect(RelativePathComponents.make(
+            fileURL: root.appending(path: "folder/../../outside.txt"),
+            rootComponents: rootComponents
+        ) == nil)
+        #expect(RelativePathComponents.make(
             fileURL: root.appending(path: "./file.txt"),
             rootComponents: rootComponents
         ) == ["file.txt"])
+        #expect(RelativePathComponents.make(
+            fileURL: root.appending(path: "folder/../inside.txt"),
+            rootComponents: rootComponents
+        ) == ["inside.txt"])
     }
 
     @Test("Unknown byte counts never contribute to the file tree")

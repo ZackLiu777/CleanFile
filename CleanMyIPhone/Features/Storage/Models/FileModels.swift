@@ -187,7 +187,10 @@ nonisolated enum FileDisplayOrder {
 enum RelativePathComponents: Sendable {
     /// Produces the file's hierarchy below the user-selected root without guessing.
     nonisolated static func make(fileURL: URL, relativeTo rootURL: URL) -> [String]? {
-        make(fileURL: fileURL, rootComponents: rootURL.pathComponents)
+        make(
+            fileURL: fileURL,
+            rootComponents: rootURL.standardizedFileURL.pathComponents
+        )
     }
 
     /// Reuses the selected root's components across a large directory walk.
@@ -195,7 +198,10 @@ enum RelativePathComponents: Sendable {
         fileURL: URL,
         rootComponents: [String]
     ) -> [String]? {
-        let fileComponents = fileURL.pathComponents
+        // Normalize lexical "." and ".." segments before checking ancestry.
+        // An escaping path then loses the root prefix, while an in-root "./"
+        // segment remains a valid relative path.
+        let fileComponents = fileURL.standardizedFileURL.pathComponents
 
         guard fileComponents.starts(with: rootComponents) else {
             return nil

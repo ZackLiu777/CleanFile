@@ -76,6 +76,11 @@ struct MetadataFileScanner: Sendable {
         try Task.checkCancellation()
 
         return try fileAccess.withAccess(to: directory) {
+            // Security-scoped and File Provider access can block. Re-check as
+            // soon as access is acquired so a cancelled consumer cannot start
+            // coordination or enumeration afterward.
+            try Task.checkCancellation()
+
             let coordinator = NSFileCoordinator()
             var coordinationError: NSError?
             var enumerationResult: Result<DirectoryEnumeration, Error>?
@@ -161,7 +166,7 @@ struct MetadataFileScanner: Sendable {
         var treeAccumulator = FileTreeAccumulator(rootURL: selectedDirectory)
         var largestFilesAccumulator = LargestFilesAccumulator(limit: 10)
         let fileManager = FileManager()
-        let rootComponents = directory.pathComponents
+        let rootComponents = directory.standardizedFileURL.pathComponents
 
         continuation.yield(.progress(ScanProgress(scannedFileCount: 0, scannedByteCount: 0)))
 
