@@ -23,14 +23,19 @@ final class CleanMyIPhoneUITests: XCTestCase {
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testAppLaunchesWithPrimaryNavigation() throws {
         let app = XCUIApplication()
+        app.launchArguments = [
+            "--ui-testing-reset-state",
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_US"
+        ]
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
+        XCTAssertTrue(app.descendants(matching: .any)["tab.media"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["tab.storage"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["tab.convert"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["tab.settings"].exists)
     }
 
     @MainActor

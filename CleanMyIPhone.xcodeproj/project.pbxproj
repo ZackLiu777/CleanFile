@@ -44,6 +44,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		A20000000000000000000001 /* Packages/ImageFormatConversionKit/Tests/ImageFormatConversionKitTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Packages/ImageFormatConversionKit/Tests/ImageFormatConversionKitTests;
+			sourceTree = "<group>";
+		};
 		FF23C7563033FBD500B13EBA /* CleanMyIPhone */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -55,11 +60,6 @@
 		FF23C7663033FBD600B13EBA /* CleanMyIPhoneTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = CleanMyIPhoneTests;
-			sourceTree = "<group>";
-		};
-		A20000000000000000000001 /* ImageFormatConversionKitTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Packages/ImageFormatConversionKit/Tests/ImageFormatConversionKitTests;
 			sourceTree = "<group>";
 		};
 		FF23C7703033FBD600B13EBA /* CleanMyIPhoneUITests */ = {
@@ -100,7 +100,7 @@
 			children = (
 				FF23C7563033FBD500B13EBA /* CleanMyIPhone */,
 				FF23C7663033FBD600B13EBA /* CleanMyIPhoneTests */,
-				A20000000000000000000001 /* ImageFormatConversionKitTests */,
+				A20000000000000000000001 /* Packages/ImageFormatConversionKit/Tests/ImageFormatConversionKitTests */,
 				FF23C7703033FBD600B13EBA /* CleanMyIPhoneUITests */,
 				FF23C7553033FBD500B13EBA /* Products */,
 			);
@@ -156,8 +156,8 @@
 				FF23C7653033FBD600B13EBA /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
+				A20000000000000000000001 /* Packages/ImageFormatConversionKit/Tests/ImageFormatConversionKitTests */,
 				FF23C7663033FBD600B13EBA /* CleanMyIPhoneTests */,
-				A20000000000000000000001 /* ImageFormatConversionKitTests */,
 			);
 			name = CleanMyIPhoneTests;
 			productName = CleanMyIPhoneTests;

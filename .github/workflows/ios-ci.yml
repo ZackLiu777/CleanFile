@@ -102,10 +102,11 @@ jobs:
             -only-testing:CleanMyIPhoneUITests \
             -derivedDataPath "$RUNNER_TEMP/CleanFileUIDerivedData" \
             -resultBundlePath "$RUNNER_TEMP/CleanFileUITests.xcresult" \
+            -enableCodeCoverage YES \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Upload UI-test results
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: CleanFile-ui-test-results

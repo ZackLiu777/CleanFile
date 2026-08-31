@@ -70,6 +70,7 @@ struct StorageView: View {
                     } label: {
                         Label("Choose Folder", systemImage: "folder.badge.plus")
                     }
+                    .accessibilityIdentifier("storage.chooseFolder.toolbar")
                 }
             }
             .toolbar(.visible, for: .navigationBar)
@@ -123,6 +124,7 @@ struct StorageView: View {
                     isImporterPresented = true
                 }
                 .buttonStyle(.bordered)
+                .accessibilityIdentifier("storage.chooseFolder.card")
             }
 
             if viewModel.state.isScanning {
@@ -133,6 +135,7 @@ struct StorageView: View {
             }
         }
         .storageCard()
+        .accessibilityIdentifier("storage.status")
     }
 
     @ViewBuilder

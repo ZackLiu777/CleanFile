@@ -76,6 +76,7 @@ struct ConversionGuideView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                            .accessibilityIdentifier("conversion.guide.tool.\(tool.rawValue)")
                         }
                     }
 

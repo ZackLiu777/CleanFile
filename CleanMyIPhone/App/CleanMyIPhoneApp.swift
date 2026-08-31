@@ -16,7 +16,28 @@ import SwiftUI
 @main
 /// 定义 `CleanMyIPhoneApp` 的值语义数据与相关行为。
 struct CleanMyIPhoneApp: App {
-    @StateObject private var themeSettings = ThemeSettings()
+    @StateObject private var themeSettings: ThemeSettings
+
+    init() {
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-reset-state") {
+            let defaults = UserDefaults.standard
+            for key in [
+                "appAppearance",
+                "appTheme",
+                "appAccentPalette",
+                "appCustomAccentColor",
+                "appCustomBackgroundColor",
+                "appCustomBackgroundStyle",
+                "appUsesCustomBackground",
+                "appLiquidGlassCardsEnabled"
+            ] {
+                defaults.removeObject(forKey: key)
+            }
+        }
+#endif
+        _themeSettings = StateObject(wrappedValue: ThemeSettings())
+    }
 
     var body: some Scene {
         WindowGroup {

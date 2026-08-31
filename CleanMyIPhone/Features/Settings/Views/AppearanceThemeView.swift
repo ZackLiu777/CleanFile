@@ -64,6 +64,7 @@ struct AppearanceThemeView: View {
                         ) {
                             updateAccentPalette(paletteID)
                         }
+                        .accessibilityIdentifier("appearance.accent.\(paletteID.rawValue)")
                     }
                 }
                 .padding(.vertical, 4)
@@ -97,6 +98,7 @@ struct AppearanceThemeView: View {
                         ) {
                             updateBackgroundTheme(themeID)
                         }
+                        .accessibilityIdentifier("appearance.background.\(themeID.rawValue)")
                     }
 
                     ThemePaletteSwatch(
@@ -106,6 +108,7 @@ struct AppearanceThemeView: View {
                     ) {
                         selectCustomBackground()
                     }
+                    .accessibilityIdentifier("appearance.background.custom")
                 }
                 .padding(.vertical, 4)
             }
@@ -136,6 +139,7 @@ struct AppearanceThemeView: View {
                 }
             }
             .pickerStyle(.segmented)
+            .accessibilityIdentifier("appearance.background.style")
 
             switch themeSettings.customBackgroundStyle.kind {
             case .solid:
@@ -265,6 +269,7 @@ struct AppearanceThemeView: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
+                .accessibilityIdentifier("appearance.mode")
             }
         } header: {
             Text("Appearance")
@@ -281,6 +286,7 @@ struct AppearanceThemeView: View {
                 "Liquid Glass Cards",
                 isOn: $themeSettings.liquidGlassCardsEnabled
             )
+            .accessibilityIdentifier("appearance.liquidGlass")
         } header: {
             Text("Cards")
         } footer: {

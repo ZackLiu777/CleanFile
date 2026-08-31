@@ -21,12 +21,12 @@ final class HelpAndNavigationUITests: XCTestCase {
         let app = launchEnglishApp()
         openSettings(in: app)
 
-        let help = identifiedElement(in: app, identifier: "settings.help", fallback: "Help")
-        XCTAssertTrue(help.waitForExistence(timeout: 3))
+        let help = app.descendants(matching: .any)["settings.help"]
+        XCTAssertTrue(help.waitForExistence(timeout: 5))
         help.tap()
 
-        XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["How can we help?"].exists)
+        XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["How can we help?"].waitForExistence(timeout: 3))
     }
 
     @MainActor
@@ -35,7 +35,8 @@ final class HelpAndNavigationUITests: XCTestCase {
         openHelp(in: app)
 
         for title in ["Meet the App", "Use Media", "Use Storage", "Use Convert", "Common Questions"] {
-            XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 3), "Missing help entry " + title)
+            let entry = reveal(app.staticTexts[title], in: app)
+            XCTAssertTrue(entry.exists, "Missing help entry " + title)
         }
     }
 
@@ -44,13 +45,15 @@ final class HelpAndNavigationUITests: XCTestCase {
         let app = launchEnglishApp()
         openHelp(in: app)
 
-        let storageArticle = identifiedElement(in: app, identifier: "help.article.storage", fallback: "Use Storage")
-        XCTAssertTrue(storageArticle.waitForExistence(timeout: 3))
+        let storageArticle = app.descendants(matching: .any)["help.article.storage"]
+        XCTAssertTrue(storageArticle.waitForExistence(timeout: 5))
         storageArticle.tap()
 
-        XCTAssertTrue(app.navigationBars["Use Storage"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["Choose a folder"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["Apple: Delete files or remove downloads"].exists)
+        XCTAssertTrue(app.navigationBars["Use Storage"].waitForExistence(timeout: 5))
+        XCTAssertTrue(reveal(app.staticTexts["Choose a folder"], in: app).exists)
+        XCTAssertTrue(
+            reveal(app.links["Apple: Delete files or remove downloads"], in: app).exists
+        )
     }
 
     @MainActor
@@ -58,12 +61,12 @@ final class HelpAndNavigationUITests: XCTestCase {
         let app = launchEnglishApp()
         openHelp(in: app)
 
-        let mediaArticle = identifiedElement(in: app, identifier: "help.article.media", fallback: "Use Media")
-        XCTAssertTrue(mediaArticle.waitForExistence(timeout: 3))
+        let mediaArticle = app.descendants(matching: .any)["help.article.media"]
+        XCTAssertTrue(mediaArticle.waitForExistence(timeout: 5))
         mediaArticle.tap()
-        XCTAssertTrue(app.navigationBars["Use Media"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.navigationBars["Use Media"].waitForExistence(timeout: 5))
 
-        let helpBack = app.navigationBars.buttons["Help"]
+        let helpBack = app.navigationBars["Use Media"].buttons["Help"]
         XCTAssertTrue(helpBack.waitForExistence(timeout: 3))
         helpBack.tap()
         XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: 3))
@@ -74,18 +77,24 @@ final class HelpAndNavigationUITests: XCTestCase {
         let app = launchEnglishApp()
         openSettings(in: app)
 
-        let appearance = identifiedElement(in: app, identifier: "settings.appearance", fallback: "Appearance & Theme")
-        XCTAssertTrue(appearance.waitForExistence(timeout: 3))
+        let appearance = app.descendants(matching: .any)["settings.appearance"]
+        XCTAssertTrue(appearance.waitForExistence(timeout: 5))
         appearance.tap()
 
-        XCTAssertTrue(app.navigationBars["Appearance & Theme"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["Liquid Glass Cards"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.navigationBars["Appearance & Theme"].waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            reveal(app.switches["appearance.liquidGlass"], in: app).exists
+        )
     }
 
     @MainActor
     private func launchEnglishApp() -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        app.launchArguments = [
+            "--ui-testing-reset-state",
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_US"
+        ]
         app.launch()
         return app
     }
@@ -95,22 +104,22 @@ final class HelpAndNavigationUITests: XCTestCase {
         let settings = tabElement(in: app, identifier: "tab.settings")
         XCTAssertTrue(settings.waitForExistence(timeout: 5))
         settings.tap()
-        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
     }
 
     @MainActor
     private func openHelp(in app: XCUIApplication) {
         openSettings(in: app)
-        let help = identifiedElement(in: app, identifier: "settings.help", fallback: "Help")
-        XCTAssertTrue(help.waitForExistence(timeout: 3))
+        let help = app.descendants(matching: .any)["settings.help"]
+        XCTAssertTrue(help.waitForExistence(timeout: 5))
         help.tap()
-        XCTAssertTrue(app.staticTexts["How can we help?"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: 5))
     }
 
     @MainActor
     private func tabElement(in app: XCUIApplication, identifier: String) -> XCUIElement {
         let identified = app.descendants(matching: .any)[identifier]
-        if identified.exists {
+        if identified.waitForExistence(timeout: 2) {
             return identified
         }
 
@@ -125,17 +134,14 @@ final class HelpAndNavigationUITests: XCTestCase {
     }
 
     @MainActor
-    private func identifiedElement(
+    private func reveal(
+        _ element: XCUIElement,
         in app: XCUIApplication,
-        identifier: String,
-        fallback: String
+        maxSwipes: Int = 8
     ) -> XCUIElement {
-        let identified = app.descendants(matching: .any)[identifier]
-        if identified.exists {
-            return identified
+        for _ in 0..<maxSwipes where !element.exists || !element.isHittable {
+            app.swipeUp()
         }
-
-        let button = app.buttons[fallback]
-        return button.exists ? button : app.staticTexts[fallback]
+        return element
     }
 }

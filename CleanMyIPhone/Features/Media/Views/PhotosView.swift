@@ -60,6 +60,7 @@ struct PhotosView: View {
                         )
                     }
                 }
+                .accessibilityIdentifier("media.content")
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -81,6 +82,7 @@ struct PhotosView: View {
                     } label: {
                         Label("Media Actions", systemImage: "ellipsis")
                     }
+                    .accessibilityIdentifier("media.actions")
                 }
             }
             .toolbar(.visible, for: .navigationBar)

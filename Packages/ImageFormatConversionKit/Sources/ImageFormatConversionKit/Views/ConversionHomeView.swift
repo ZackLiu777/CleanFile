@@ -74,6 +74,7 @@ public struct ConversionHomeView: View {
                                     reduceMotion: reduceMotion
                                 )
                             )
+                            .accessibilityIdentifier("conversion.home.\(kind.rawValue)")
                             .modifier(
                                 ConversionHomeStaggeredAppear(
                                     isVisible: isHomeContentVisible,
