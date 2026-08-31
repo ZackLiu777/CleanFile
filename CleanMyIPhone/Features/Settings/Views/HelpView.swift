@@ -29,6 +29,7 @@ struct HelpView: View {
                         } label: {
                             articleLabel(article)
                         }
+                        .accessibilityIdentifier("help.article.\(article.id)")
                     }
                 } header: {
                     Text(category.title)

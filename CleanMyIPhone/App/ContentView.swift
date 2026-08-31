@@ -36,6 +36,7 @@ struct ContentView: View {
             )
                 .tabItem {
                     Label("Media", systemImage: "photo.on.rectangle")
+                        .accessibilityIdentifier("tab.media")
                 }
                 .tag(AppTab.photos)
 
@@ -45,6 +46,7 @@ struct ContentView: View {
             )
                 .tabItem {
                     Label("Storage", systemImage: "externaldrive")
+                        .accessibilityIdentifier("tab.storage")
                 }
                 .tag(AppTab.storage)
 
@@ -54,12 +56,14 @@ struct ContentView: View {
             )
                 .tabItem {
                     Label("Convert", systemImage: "arrow.triangle.2.circlepath")
+                        .accessibilityIdentifier("tab.convert")
                 }
                 .tag(AppTab.conversion)
 
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
+                        .accessibilityIdentifier("tab.settings")
                 }
                 .tag(AppTab.settings)
         }

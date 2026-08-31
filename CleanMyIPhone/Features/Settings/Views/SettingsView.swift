@@ -47,6 +47,7 @@ struct SettingsView: View {
                             Image(systemName: "paintpalette")
                                 .foregroundStyle(theme.accentPrimary)
                         }
+                        .accessibilityIdentifier("settings.appearance")
                     }
                 } header: {
                     Text("Personalization")
@@ -70,6 +71,7 @@ struct SettingsView: View {
                             Image(systemName: "questionmark.circle")
                                 .foregroundStyle(theme.accentPrimary)
                         }
+                        .accessibilityIdentifier("settings.help")
                     }
                 }
                 .appListCard()
