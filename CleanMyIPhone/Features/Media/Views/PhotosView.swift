@@ -720,30 +720,37 @@ private struct MediaCategoryDetailView: View {
     }
 
     var body: some View {
-        Group {
-            if visibleAssetIDs.isEmpty {
-                ContentUnavailableView(
-                    "No Items",
-                    systemImage: "photo.on.rectangle",
-                    description: Text("No media matched this category.")
-                )
-            } else {
-                MediaInteractiveGrid(
-                    sections: dateSections,
-                    selectedIDs: $selectedIDs,
-                    isSelecting: isSelecting,
-                    viewModel: viewModel,
-                    accentColor: theme.accentPrimary,
-                    onOpen: { previewAssetID = $0 },
-                    onBeginSelecting: { assetID in
-                        isSelecting = true
-                        selectedIDs.insert(assetID)
-                    }
-                )
-                .background(Color.clear)
-                // 仅让网格背景延伸到系统栏后方；UICollectionView 仍通过 automatic inset 保持内容可操作。
-                .ignoresSafeArea(.all, edges: .all)
-                .appSoftScrollEdge()
+        ZStack {
+            // UICollectionView 保持透明，由页面统一承载当前主题的单色、渐变或 Mesh 背景。
+            AppBackground()
+                .accessibilityHidden(true)
+
+            Group {
+                if visibleAssetIDs.isEmpty {
+                    ContentUnavailableView(
+                        "No Items",
+                        systemImage: "photo.on.rectangle",
+                        description: Text("No media matched this category.")
+                    )
+                } else {
+                    MediaInteractiveGrid(
+                        sections: dateSections,
+                        selectedIDs: $selectedIDs,
+                        isSelecting: isSelecting,
+                        viewModel: viewModel,
+                        accentColor: theme.accentPrimary,
+                        onOpen: { previewAssetID = $0 },
+                        onBeginSelecting: { assetID in
+                            isSelecting = true
+                            selectedIDs.insert(assetID)
+                        }
+                    )
+                    .background(Color.clear)
+                    // 仅让网格背景延伸到系统栏后方；UICollectionView 仍通过 automatic inset 保持内容可操作。
+                    .ignoresSafeArea(.all, edges: .all)
+                    // 网格经过顶部导航和底部浮动控件时使用柔和边缘；不改变其他页面的 Automatic 策略。
+                    .appSoftScrollEdge()
+                }
             }
         }
         .navigationTitle(title)
