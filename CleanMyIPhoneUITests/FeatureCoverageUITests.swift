@@ -10,7 +10,7 @@ final class FeatureCoverageUITests: XCTestCase {
         let app = launchEnglishApp()
 
         XCTAssertTrue(tab(in: app, id: "tab.media", label: "Media").waitForExistence(timeout: 5))
-        XCTAssertTrue(app.descendants(matching: .any)["media.content"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.otherElements["media.content"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.descendants(matching: .any)["media.actions"].waitForExistence(timeout: 3))
 
         tab(in: app, id: "tab.storage", label: "Storage").tap()
@@ -29,7 +29,7 @@ final class FeatureCoverageUITests: XCTestCase {
             ("conversion.home.video", "Convert Video"),
             ("conversion.home.audio", "Convert Audio")
         ] {
-            let tool = app.descendants(matching: .any)[id]
+            let tool = app.buttons[id]
             XCTAssertTrue(tool.waitForExistence(timeout: 5), "Missing conversion tool \(id)")
             tool.tap()
             XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5))
@@ -130,7 +130,7 @@ final class FeatureCoverageUITests: XCTestCase {
 
         for articleID in articleIDs {
             let article = reveal(
-                app.descendants(matching: .any)["help.article.\(articleID)"],
+                app.buttons["help.article.\(articleID)"],
                 in: app,
                 maxSwipes: 10
             )
@@ -153,7 +153,7 @@ final class FeatureCoverageUITests: XCTestCase {
     @MainActor
     private func launchAppearance(in app: XCUIApplication) -> XCUIApplication {
         tab(in: app, id: "tab.settings", label: "Settings").tap()
-        let appearance = app.descendants(matching: .any)["settings.appearance"]
+        let appearance = app.buttons["settings.appearance"]
         XCTAssertTrue(appearance.waitForExistence(timeout: 5))
         appearance.tap()
         XCTAssertTrue(app.navigationBars["Appearance & Theme"].waitForExistence(timeout: 5))
@@ -163,7 +163,7 @@ final class FeatureCoverageUITests: XCTestCase {
     @MainActor
     private func openHelp(in app: XCUIApplication) {
         tab(in: app, id: "tab.settings", label: "Settings").tap()
-        let help = app.descendants(matching: .any)["settings.help"]
+        let help = app.buttons["settings.help"]
         XCTAssertTrue(help.waitForExistence(timeout: 5))
         help.tap()
         XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: 5))
@@ -171,8 +171,10 @@ final class FeatureCoverageUITests: XCTestCase {
 
     @MainActor
     private func tab(in app: XCUIApplication, id: String, label: String) -> XCUIElement {
-        let identified = app.descendants(matching: .any)[id]
-        return identified.exists ? identified : app.tabBars.buttons[label]
+        let identified = app.buttons[id]
+        return identified.waitForExistence(timeout: 2)
+            ? identified
+            : app.tabBars.buttons[label]
     }
 
     @MainActor

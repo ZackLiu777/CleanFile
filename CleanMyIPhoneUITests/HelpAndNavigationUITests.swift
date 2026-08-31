@@ -21,7 +21,7 @@ final class HelpAndNavigationUITests: XCTestCase {
         let app = launchEnglishApp()
         openSettings(in: app)
 
-        let help = app.descendants(matching: .any)["settings.help"]
+        let help = app.buttons["settings.help"]
         XCTAssertTrue(help.waitForExistence(timeout: 5))
         help.tap()
 
@@ -45,7 +45,7 @@ final class HelpAndNavigationUITests: XCTestCase {
         let app = launchEnglishApp()
         openHelp(in: app)
 
-        let storageArticle = app.descendants(matching: .any)["help.article.storage"]
+        let storageArticle = app.buttons["help.article.storage"]
         XCTAssertTrue(storageArticle.waitForExistence(timeout: 5))
         storageArticle.tap()
 
@@ -61,7 +61,7 @@ final class HelpAndNavigationUITests: XCTestCase {
         let app = launchEnglishApp()
         openHelp(in: app)
 
-        let mediaArticle = app.descendants(matching: .any)["help.article.media"]
+        let mediaArticle = app.buttons["help.article.media"]
         XCTAssertTrue(mediaArticle.waitForExistence(timeout: 5))
         mediaArticle.tap()
         XCTAssertTrue(app.navigationBars["Use Media"].waitForExistence(timeout: 5))
@@ -77,7 +77,7 @@ final class HelpAndNavigationUITests: XCTestCase {
         let app = launchEnglishApp()
         openSettings(in: app)
 
-        let appearance = app.descendants(matching: .any)["settings.appearance"]
+        let appearance = app.buttons["settings.appearance"]
         XCTAssertTrue(appearance.waitForExistence(timeout: 5))
         appearance.tap()
 
@@ -104,13 +104,16 @@ final class HelpAndNavigationUITests: XCTestCase {
         let settings = tabElement(in: app, identifier: "tab.settings")
         XCTAssertTrue(settings.waitForExistence(timeout: 5))
         settings.tap()
-        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+        let settingsScreen = app.otherElements["settings.screen"]
+        if !settingsScreen.waitForExistence(timeout: 3) {
+            XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 5))
+        }
     }
 
     @MainActor
     private func openHelp(in app: XCUIApplication) {
         openSettings(in: app)
-        let help = app.descendants(matching: .any)["settings.help"]
+        let help = app.buttons["settings.help"]
         XCTAssertTrue(help.waitForExistence(timeout: 5))
         help.tap()
         XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: 5))

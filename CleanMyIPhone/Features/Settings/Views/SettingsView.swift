@@ -47,8 +47,8 @@ struct SettingsView: View {
                             Image(systemName: "paintpalette")
                                 .foregroundStyle(theme.accentPrimary)
                         }
-                        .accessibilityIdentifier("settings.appearance")
                     }
+                    .accessibilityIdentifier("settings.appearance")
                 } header: {
                     Text("Personalization")
                 } footer: {
@@ -71,8 +71,8 @@ struct SettingsView: View {
                             Image(systemName: "questionmark.circle")
                                 .foregroundStyle(theme.accentPrimary)
                         }
-                        .accessibilityIdentifier("settings.help")
                     }
+                    .accessibilityIdentifier("settings.help")
                 }
                 .appListCard()
 
@@ -131,6 +131,7 @@ struct SettingsView: View {
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
         }
+        .accessibilityIdentifier("settings.screen")
     }
 
     private var photoAccessDescription: LocalizedStringKey {
