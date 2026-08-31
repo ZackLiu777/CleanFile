@@ -934,14 +934,7 @@ private struct MediaCategoryDetailView: View {
             .accessibilityLabel("Dismiss")
         }
         .padding(14)
-        .background(
-            theme.cardSurface,
-            in: RoundedRectangle(cornerRadius: 18, style: .continuous)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(theme.divider, lineWidth: 1)
-        }
+        .appContentCard(cornerRadius: 18)
         .padding(.horizontal, 16)
     }
 }

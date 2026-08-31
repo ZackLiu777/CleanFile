@@ -11,9 +11,76 @@ import AppKit
 #endif
 
 /// 定义 `ConversionBackground` 使用的有限状态或选项集合。
+public struct ConversionGradientStop: Sendable {
+    public let color: Color
+    public let location: Double
+
+    public init(color: Color, location: Double) {
+        self.color = color
+        self.location = min(max(location, 0), 1)
+    }
+}
+
 public enum ConversionBackground: Sendable {
     case solid(Color)
+    /// Legacy color-only case kept for source compatibility with existing package clients.
     case linearGradient(colors: [Color], startPoint: UnitPoint, endPoint: UnitPoint)
+    /// Position-aware case used by the app's custom background editor.
+    case linearGradientStops(stops: [ConversionGradientStop], startPoint: UnitPoint, endPoint: UnitPoint)
+    case meshGradient(colors: [Color])
+}
+
+/// One renderer prevents the package's five screens from drifting apart as background modes grow.
+struct ConversionBackgroundView: View {
+    let background: ConversionBackground
+
+    @ViewBuilder
+    var body: some View {
+        switch background {
+        case let .solid(color):
+            color
+        case let .linearGradient(colors, startPoint, endPoint):
+            LinearGradient(
+                colors: colors,
+                startPoint: startPoint,
+                endPoint: endPoint
+            )
+        case let .linearGradientStops(stops, startPoint, endPoint):
+            LinearGradient(
+                stops: stops.map {
+                    Gradient.Stop(color: $0.color, location: CGFloat($0.location))
+                },
+                startPoint: startPoint,
+                endPoint: endPoint
+            )
+        case let .meshGradient(colors):
+            if #available(iOS 18.0, macOS 15.0, *) {
+                MeshGradient(
+                    width: 3,
+                    height: 3,
+                    points: [
+                        SIMD2<Float>(0, 0), SIMD2<Float>(0.5, 0), SIMD2<Float>(1, 0),
+                        SIMD2<Float>(0, 0.5), SIMD2<Float>(0.5, 0.5), SIMD2<Float>(1, 0.5),
+                        SIMD2<Float>(0, 1), SIMD2<Float>(0.5, 1), SIMD2<Float>(1, 1)
+                    ],
+                    colors: normalizedMeshColors(colors),
+                    smoothsColors: true,
+                    colorSpace: .perceptual
+                )
+            } else {
+                LinearGradient(
+                    colors: normalizedMeshColors(colors),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
+        }
+    }
+
+    private func normalizedMeshColors(_ colors: [Color]) -> [Color] {
+        let fallback = colors.last ?? .clear
+        return Array((colors + Array(repeating: fallback, count: 9)).prefix(9))
+    }
 }
 
 /// 定义 `ConversionTheme` 的值语义数据与相关行为。
@@ -28,6 +95,7 @@ public struct ConversionTheme: Sendable {
     public let destructive: Color
     public let divider: Color
     public let liquidGlassEnabled: Bool
+    public let liquidGlassCardsEnabled: Bool
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     public init(
@@ -40,7 +108,8 @@ public struct ConversionTheme: Sendable {
         accent: Color,
         destructive: Color,
         divider: Color,
-        liquidGlassEnabled: Bool
+        liquidGlassEnabled: Bool,
+        liquidGlassCardsEnabled: Bool = false
     ) {
         self.background = background
         self.cardSurface = cardSurface
@@ -53,6 +122,7 @@ public struct ConversionTheme: Sendable {
         self.destructive = destructive
         self.divider = divider
         self.liquidGlassEnabled = liquidGlassEnabled
+        self.liquidGlassCardsEnabled = liquidGlassCardsEnabled
     }
 
 #if os(iOS)

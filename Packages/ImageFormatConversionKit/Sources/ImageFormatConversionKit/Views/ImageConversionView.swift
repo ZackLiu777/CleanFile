@@ -122,13 +122,8 @@ public struct ImageConversionView: View {
 
     @ViewBuilder
     private var converterBackground: some View {
-        switch theme.background {
-        case let .solid(color):
-            color.ignoresSafeArea()
-        case let .linearGradient(colors, startPoint, endPoint):
-            LinearGradient(colors: colors, startPoint: startPoint, endPoint: endPoint)
-                .ignoresSafeArea()
-        }
+        ConversionBackgroundView(background: theme.background)
+            .ignoresSafeArea()
     }
 }
 
@@ -905,14 +900,70 @@ struct PrimaryConversionButton: View {
 /// 定义 `ConverterCardModifier` 的值语义数据与相关行为。
 private struct ConverterCardModifier: ViewModifier {
     @Environment(\.conversionTheme) private var theme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    let cornerRadius: CGFloat
 
     /// 封装 `body` 对应的局部行为，供当前类型在统一入口下复用。
+    @ViewBuilder
     func body(content: Content) -> some View {
+        #if os(iOS)
+        if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
+            content.glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+        } else {
+            fallbackCard(content)
+        }
+        #else
+        fallbackCard(content)
+        #endif
+    }
+
+    private func fallbackCard(_ content: Content) -> some View {
         content
-            .background(theme.cardSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(
+                theme.cardSurface,
+                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            )
             .overlay {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .strokeBorder(theme.divider.opacity(0.65), lineWidth: 0.5)
+            }
+    }
+}
+
+private struct ConverterAccentCardModifier: ViewModifier {
+    @Environment(\.conversionTheme) private var theme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    let cornerRadius: CGFloat
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        #if os(iOS)
+        if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
+            content.glassEffect(
+                .regular.tint(theme.accent.opacity(0.12)),
+                in: .rect(cornerRadius: cornerRadius)
+            )
+        } else {
+            fallbackCard(content)
+        }
+        #else
+        fallbackCard(content)
+        #endif
+    }
+
+    private func fallbackCard(_ content: Content) -> some View {
+        content
+            .background(
+                LinearGradient(
+                    colors: [theme.accent.opacity(0.14), theme.cardSurface],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(theme.divider.opacity(0.55), lineWidth: 0.5)
             }
     }
 }
@@ -920,8 +971,12 @@ private struct ConverterCardModifier: ViewModifier {
 /// 扩展 `View`，集中实现当前文件所需的附加能力。
 extension View {
     /// 执行 `converterCard` 转换流程，并按当前配置生成输出结果。
-    func converterCard() -> some View {
-        modifier(ConverterCardModifier())
+    func converterCard(cornerRadius: CGFloat = 14) -> some View {
+        modifier(ConverterCardModifier(cornerRadius: cornerRadius))
+    }
+
+    func converterAccentCard(cornerRadius: CGFloat = 20) -> some View {
+        modifier(ConverterAccentCardModifier(cornerRadius: cornerRadius))
     }
 
     /// 执行 `converterSoftScrollEdge` 转换流程，并按当前配置生成输出结果。

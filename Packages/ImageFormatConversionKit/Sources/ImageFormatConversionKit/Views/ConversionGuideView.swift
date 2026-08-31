@@ -140,17 +140,8 @@ struct ConversionGuideView: View {
 
     @ViewBuilder
     private var converterBackground: some View {
-        switch theme.background {
-        case let .solid(color):
-            color.ignoresSafeArea()
-        case let .linearGradient(colors, startPoint, endPoint):
-            LinearGradient(
-                colors: colors,
-                startPoint: startPoint,
-                endPoint: endPoint
-            )
+        ConversionBackgroundView(background: theme.background)
             .ignoresSafeArea()
-        }
     }
 }
 
@@ -392,18 +383,7 @@ private struct ConversionGuidePrivacyCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(18)
-        .background(
-            LinearGradient(
-                colors: [theme.accent.opacity(0.14), theme.cardSurface],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ),
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .strokeBorder(theme.divider.opacity(0.55), lineWidth: 0.5)
-        }
+        .converterAccentCard()
         .accessibilityElement(children: .combine)
     }
 }

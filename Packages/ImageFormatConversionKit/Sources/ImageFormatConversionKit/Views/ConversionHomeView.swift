@@ -163,17 +163,8 @@ public struct ConversionHomeView: View {
 
     @ViewBuilder
     private var converterBackground: some View {
-        switch theme.background {
-        case let .solid(color):
-            color.ignoresSafeArea()
-        case let .linearGradient(colors, startPoint, endPoint):
-            LinearGradient(
-                colors: colors,
-                startPoint: startPoint,
-                endPoint: endPoint
-            )
+        ConversionBackgroundView(background: theme.background)
             .ignoresSafeArea()
-        }
     }
 
     private func playEntrance() {
@@ -412,6 +403,7 @@ private actor ConversionHomeHistoryLoader {
 
 private struct ConversionHomeCard: View {
     @Environment(\.conversionTheme) private var theme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let kind: ConversionHomeKind
     let recentRecord: ConversionHomeRecord?
 
@@ -509,18 +501,12 @@ private struct ConversionHomeCard: View {
             maxWidth: .infinity,
             alignment: .leading
         )
-        .background(
-            RoundedRectangle(
-                cornerRadius: 24,
-                style: .continuous
-            )
-            .fill(theme.cardSurface)
-            .shadow(
-                color: .black.opacity(0.05),
-                radius: 12,
-                x: 0,
-                y: 5
-            )
+        .converterCard(cornerRadius: 24)
+        .shadow(
+            color: usesGlassCard ? .clear : .black.opacity(0.05),
+            radius: 12,
+            x: 0,
+            y: 5
         )
         .contentShape(
             RoundedRectangle(
@@ -528,6 +514,10 @@ private struct ConversionHomeCard: View {
                 style: .continuous
             )
         )
+    }
+
+    private var usesGlassCard: Bool {
+        theme.liquidGlassCardsEnabled && !reduceTransparency
     }
 
     /// 使用背景主题的两个语义表面绘制高亮块，使大卡与背景调色盘保持同一管理状态。
@@ -653,17 +643,8 @@ private struct ConversionToolDestination: View {
 
     @ViewBuilder
     private var converterBackground: some View {
-        switch theme.background {
-        case let .solid(color):
-            color.ignoresSafeArea()
-        case let .linearGradient(colors, startPoint, endPoint):
-            LinearGradient(
-                colors: colors,
-                startPoint: startPoint,
-                endPoint: endPoint
-            )
+        ConversionBackgroundView(background: theme.background)
             .ignoresSafeArea()
-        }
     }
 }
 

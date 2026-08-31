@@ -176,6 +176,187 @@ struct AppThemeColor: Codable, Equatable, Sendable {
     }
 }
 
+/// The user-facing ways a custom app background can be composed.
+enum AppCustomBackgroundKind: String, CaseIterable, Codable, Hashable, Identifiable, Sendable {
+    case solid
+    case linear
+    case mesh
+
+    var id: Self { self }
+
+    var displayName: LocalizedStringKey {
+        switch self {
+        case .solid: "Solid Color"
+        case .linear: "Linear Gradient"
+        case .mesh: "Freeform Blend"
+        }
+    }
+}
+
+/// A small, explicit direction set keeps the editor predictable and Codable.
+enum AppLinearGradientDirection: String, CaseIterable, Codable, Hashable, Identifiable, Sendable {
+    case topToBottom
+    case leftToRight
+    case diagonalDown
+    case diagonalUp
+
+    var id: Self { self }
+
+    var displayName: LocalizedStringKey {
+        switch self {
+        case .topToBottom: "Top to Bottom"
+        case .leftToRight: "Left to Right"
+        case .diagonalDown: "Diagonal Down"
+        case .diagonalUp: "Diagonal Up"
+        }
+    }
+
+    var points: (start: UnitPoint, end: UnitPoint) {
+        switch self {
+        case .topToBottom: (.top, .bottom)
+        case .leftToRight: (.leading, .trailing)
+        case .diagonalDown: (.topLeading, .bottomTrailing)
+        case .diagonalUp: (.bottomLeading, .topTrailing)
+        }
+    }
+}
+
+/// Stable identity prevents color wells from being recreated when a gradient stop is inserted.
+struct AppBackgroundColorStop: Identifiable, Codable, Equatable, Sendable {
+    let id: UUID
+    var color: AppThemeColor
+    var location: Double
+
+    init(id: UUID = UUID(), color: AppThemeColor, location: Double) {
+        self.id = id
+        self.color = color
+        self.location = min(max(location, 0), 1)
+    }
+}
+
+/// Persisted custom-background value. SwiftUI `Color` never crosses the persistence boundary.
+struct AppCustomBackgroundStyle: Codable, Equatable, Sendable {
+    static let maximumColorCount = 9
+
+    var kind: AppCustomBackgroundKind
+    var stops: [AppBackgroundColorStop]
+    var direction: AppLinearGradientDirection
+
+    static func solid(_ color: AppThemeColor) -> AppCustomBackgroundStyle {
+        AppCustomBackgroundStyle(
+            kind: .solid,
+            stops: [AppBackgroundColorStop(color: color, location: 0)],
+            direction: .diagonalDown
+        )
+    }
+
+    var primaryColor: AppThemeColor { stops.first?.color ?? .cream }
+
+    var activeStops: [AppBackgroundColorStop] {
+        switch kind {
+        case .solid: Array(stops.prefix(1))
+        case .linear: Array(stops.prefix(Self.maximumColorCount))
+        case .mesh: Array(stops.prefix(9))
+        }
+    }
+
+    /// Repairs incomplete or future/corrupt values without allowing unbounded view state.
+    func sanitized() -> AppCustomBackgroundStyle {
+        var result = self
+        if result.stops.isEmpty {
+            result.stops = [AppBackgroundColorStop(color: .cream, location: 0)]
+        }
+        if result.stops.count > Self.maximumColorCount {
+            result.stops = Array(result.stops.prefix(Self.maximumColorCount))
+        }
+        var seenIDs = Set<UUID>()
+        for index in result.stops.indices {
+            let stop = result.stops[index]
+            if seenIDs.insert(stop.id).inserted == false {
+                // A duplicated persisted ID would make SwiftUI reuse the wrong ColorPicker.
+                result.stops[index] = AppBackgroundColorStop(
+                    color: stop.color,
+                    location: stop.location
+                )
+            }
+        }
+        for index in result.stops.indices {
+            let location = result.stops[index].location
+            result.stops[index].location = location.isFinite ? min(max(location, 0), 1) : 0
+        }
+
+        result.ensureMinimumColors(for: result.kind, preferredLinearCount: 2)
+        if result.kind == .linear {
+            result.stops.sort { $0.location < $1.location }
+            let hasUnsafeSpacing = zip(result.stops, result.stops.dropFirst())
+                .contains { $0.1.location - $0.0.location < 0.02 }
+            if hasUnsafeSpacing {
+                result.redistributeLocations()
+            }
+        }
+        return result
+    }
+
+    /// Preserves earlier edits when switching modes and only creates missing color slots.
+    func prepared(for kind: AppCustomBackgroundKind) -> AppCustomBackgroundStyle {
+        var result = sanitized()
+        result.kind = kind
+        let previousCount = result.stops.count
+        result.ensureMinimumColors(for: kind, preferredLinearCount: 5)
+
+        if kind == .linear, result.stops.count != previousCount {
+            result.redistributeLocations()
+        }
+        return result
+    }
+
+    private mutating func ensureMinimumColors(
+        for kind: AppCustomBackgroundKind,
+        preferredLinearCount: Int
+    ) {
+        let minimumCount: Int
+        switch kind {
+        case .solid: minimumCount = 1
+        case .linear: minimumCount = preferredLinearCount
+        case .mesh: minimumCount = 9
+        }
+
+        let seed = stops.first?.color ?? .cream
+        let targets: [AppThemeColor] = [
+            .brandPink,
+            AppThemeColor(red: 0.76, green: 0.86, blue: 0.92),
+            AppThemeColor(red: 0.72, green: 0.82, blue: 0.70),
+            AppThemeColor(red: 0.91, green: 0.78, blue: 0.58),
+            AppThemeColor(red: 0.76, green: 0.67, blue: 0.84),
+            AppThemeColor(red: 0.47, green: 0.75, blue: 0.72),
+            AppThemeColor(red: 0.94, green: 0.70, blue: 0.67),
+            seed.preferredForeground
+        ]
+
+        while stops.count < minimumCount, stops.count < Self.maximumColorCount {
+            let index = stops.count - 1
+            let target = targets[index % targets.count]
+            let amount = 0.18 + (Double(index % 3) * 0.07)
+            stops.append(
+                AppBackgroundColorStop(
+                    color: seed.blended(toward: target, amount: amount),
+                    location: Double(stops.count) / Double(max(minimumCount - 1, 1))
+                )
+            )
+        }
+    }
+
+    mutating func redistributeLocations() {
+        guard stops.count > 1 else {
+            stops[0].location = 0
+            return
+        }
+        for index in stops.indices {
+            stops[index].location = Double(index) / Double(stops.count - 1)
+        }
+    }
+}
+
 /// 定义应用强调色调色盘；`automatic` 保留所选背景主题原有的协调色。
 enum AppAccentPaletteID: String, CaseIterable, Identifiable, Sendable {
     case automatic
@@ -223,7 +404,14 @@ enum AppAccentPaletteID: String, CaseIterable, Identifiable, Sendable {
 /// 定义 `ThemeBackground` 使用的有限状态或选项集合。
 enum ThemeBackground: Sendable {
     case solid(Color)
-    case linearGradient(colors: [Color], startPoint: UnitPoint, endPoint: UnitPoint)
+    case linearGradient(stops: [AppBackgroundColorStop], startPoint: UnitPoint, endPoint: UnitPoint)
+    case meshGradient(colors: [Color])
+}
+
+private struct ResolvedCustomBackground {
+    let background: ThemeBackground
+    let representativeColor: AppThemeColor
+    let foregroundColor: AppThemeColor
 }
 
 /// 定义 `Theme` 的值语义数据与相关行为。
@@ -249,6 +437,7 @@ struct Theme: Sendable {
     var buttonPrimaryBackground: Color
     let buttonDisabledForeground: Color
     let liquidGlassEnabled: Bool
+    var liquidGlassCardsEnabled: Bool
     let preferredColorScheme: ColorScheme?
 
     /// 计算 `fileCategoryColor` 所需的派生值，避免展示层重复实现相同规则。
@@ -274,6 +463,13 @@ struct Theme: Sendable {
         return resolved
     }
 
+    /// Applies the user's card-material preference independently of the selected color theme.
+    func applyingLiquidGlassCards(_ isEnabled: Bool) -> Theme {
+        var resolved = self
+        resolved.liquidGlassCardsEnabled = isEnabled
+        return resolved
+    }
+
     static let system = Theme(
         background: .solid(Color(uiColor: .systemGroupedBackground)),
         backgroundPrimary: Color(uiColor: .systemGroupedBackground),
@@ -296,6 +492,7 @@ struct Theme: Sendable {
         buttonPrimaryBackground: Color(red: 0xE8 / 255, green: 0xA3 / 255, blue: 0x9C / 255),
         buttonDisabledForeground: Color(uiColor: .tertiaryLabel),
         liquidGlassEnabled: true,
+        liquidGlassCardsEnabled: false,
         preferredColorScheme: nil
     )
 
@@ -321,6 +518,7 @@ struct Theme: Sendable {
         buttonPrimaryBackground: Color(red: 0.333, green: 0.459, blue: 0.510),
         buttonDisabledForeground: Color(red: 0.62, green: 0.66, blue: 0.68),
         liquidGlassEnabled: false,
+        liquidGlassCardsEnabled: false,
         preferredColorScheme: .light
     )
 
@@ -346,6 +544,7 @@ struct Theme: Sendable {
         buttonPrimaryBackground: Color(red: 0.396, green: 0.478, blue: 0.400),
         buttonDisabledForeground: Color(red: 0.61, green: 0.65, blue: 0.60),
         liquidGlassEnabled: false,
+        liquidGlassCardsEnabled: false,
         preferredColorScheme: .light
     )
 
@@ -371,6 +570,7 @@ struct Theme: Sendable {
         buttonPrimaryBackground: Color(red: 0.776, green: 0.678, blue: 0.502),
         buttonDisabledForeground: Color(red: 0.32, green: 0.33, blue: 0.33),
         liquidGlassEnabled: false,
+        liquidGlassCardsEnabled: false,
         preferredColorScheme: .dark
     )
 
@@ -396,12 +596,20 @@ struct Theme: Sendable {
         buttonPrimaryBackground: Color(red: 0.69, green: 0.53, blue: 0.35),
         buttonDisabledForeground: Color(red: 0.80, green: 0.76, blue: 0.68),
         liquidGlassEnabled: false,
+        liquidGlassCardsEnabled: false,
         preferredColorScheme: .light
     )
 
-    /// 从任意背景色派生一套完整语义 Theme，确保文字、卡片与分隔线不会随背景失去可读性。
+    /// Preserves the original single-color API for persisted-data migration and tests.
     static func custom(background: AppThemeColor) -> Theme {
-        let foreground = background.preferredForeground
+        custom(backgroundStyle: .solid(background))
+    }
+
+    /// Resolves every custom composition into one complete semantic theme.
+    static func custom(backgroundStyle: AppCustomBackgroundStyle) -> Theme {
+        let resolved = resolveCustomBackground(backgroundStyle.sanitized())
+        let background = resolved.representativeColor
+        let foreground = resolved.foregroundColor
         let secondaryText = background.contrastingVariant(
             toward: foreground,
             minimumRatio: 4.5
@@ -417,7 +625,7 @@ struct Theme: Sendable {
         let isDarkBackground = foreground == .white
 
         return Theme(
-            background: .solid(background.color),
+            background: resolved.background,
             backgroundPrimary: background.color,
             backgroundSecondary: background.blended(toward: foreground, amount: 0.035).color,
             backgroundGrouped: background.color,
@@ -438,8 +646,97 @@ struct Theme: Sendable {
             buttonPrimaryBackground: AppThemeColor.brandPink.color,
             buttonDisabledForeground: tertiaryText.color,
             liquidGlassEnabled: false,
+            liquidGlassCardsEnabled: false,
             preferredColorScheme: isDarkBackground ? .dark : .light
         )
+    }
+
+    /// A mixed light/dark palette may have no single readable foreground. Apply one uniform,
+    /// minimal wash to the full palette, then derive all semantic tokens from the result.
+    private static func resolveCustomBackground(
+        _ style: AppCustomBackgroundStyle
+    ) -> ResolvedCustomBackground {
+        let activeStops = style.activeStops
+        let sourceColors = activeStops.map(\.color)
+        let blackWash = requiredWash(
+            for: sourceColors,
+            foreground: .black,
+            washTarget: .white
+        )
+        let whiteWash = requiredWash(
+            for: sourceColors,
+            foreground: .white,
+            washTarget: .black
+        )
+        let foreground: AppThemeColor
+        let washTarget: AppThemeColor
+        let washAmount: Double
+
+        if blackWash < whiteWash
+            || (blackWash == whiteWash && style.primaryColor.preferredForeground == .black)
+        {
+            foreground = .black
+            washTarget = .white
+            washAmount = blackWash
+        } else {
+            foreground = .white
+            washTarget = .black
+            washAmount = whiteWash
+        }
+
+        let resolvedColors = sourceColors.map {
+            $0.blended(toward: washTarget, amount: washAmount)
+        }
+        let count = Double(max(resolvedColors.count, 1))
+        let representative = AppThemeColor(
+            red: resolvedColors.reduce(0) { $0 + $1.red } / count,
+            green: resolvedColors.reduce(0) { $0 + $1.green } / count,
+            blue: resolvedColors.reduce(0) { $0 + $1.blue } / count
+        )
+
+        let background: ThemeBackground
+        switch style.kind {
+        case .solid:
+            background = .solid((resolvedColors.first ?? .cream).color)
+        case .linear:
+            let points = style.direction.points
+            let stops = zip(activeStops, resolvedColors).map { stop, color in
+                AppBackgroundColorStop(
+                    id: stop.id,
+                    color: color,
+                    location: stop.location
+                )
+            }
+            background = .linearGradient(
+                stops: stops,
+                startPoint: points.start,
+                endPoint: points.end
+            )
+        case .mesh:
+            background = .meshGradient(colors: Array(resolvedColors.prefix(9)).map(\.color))
+        }
+
+        return ResolvedCustomBackground(
+            background: background,
+            representativeColor: representative,
+            foregroundColor: foreground
+        )
+    }
+
+    private static func requiredWash(
+        for colors: [AppThemeColor],
+        foreground: AppThemeColor,
+        washTarget: AppThemeColor
+    ) -> Double {
+        for step in 0 ... 100 {
+            let amount = Double(step) / 100
+            let isReadable = colors.allSatisfy {
+                $0.blended(toward: washTarget, amount: amount)
+                    .contrastRatio(with: foreground) >= 4.5
+            }
+            if isReadable { return amount }
+        }
+        return 1
     }
 
 }
@@ -485,10 +782,16 @@ final class ThemeSettings: ObservableObject {
             )
         }
     }
-    @Published private(set) var customBackgroundColor: AppThemeColor {
+    @Published private(set) var customBackgroundStyle: AppCustomBackgroundStyle {
         didSet {
             Self.persist(
-                customBackgroundColor,
+                customBackgroundStyle,
+                forKey: Self.customBackgroundStyleKey,
+                in: userDefaults
+            )
+            // Keep the legacy value current so older builds can still recover the primary color.
+            Self.persist(
+                customBackgroundStyle.primaryColor,
                 forKey: Self.customBackgroundColorKey,
                 in: userDefaults
             )
@@ -499,12 +802,20 @@ final class ThemeSettings: ObservableObject {
             userDefaults.set(usesCustomBackground, forKey: Self.usesCustomBackgroundKey)
         }
     }
+    @Published var liquidGlassCardsEnabled: Bool {
+        didSet {
+            userDefaults.set(liquidGlassCardsEnabled, forKey: Self.liquidGlassCardsKey)
+        }
+    }
 
     var theme: Theme {
-        baseTheme.applyingAccent(selectedAccentColor)
+        baseTheme
+            .applyingAccent(selectedAccentColor)
+            .applyingLiquidGlassCards(liquidGlassCardsEnabled)
     }
     var effectiveColorScheme: ColorScheme? { theme.preferredColorScheme ?? appearance.colorScheme }
-    var customBackgroundTheme: Theme { Theme.custom(background: customBackgroundColor) }
+    var customBackgroundColor: AppThemeColor { customBackgroundStyle.primaryColor }
+    var customBackgroundTheme: Theme { Theme.custom(backgroundStyle: customBackgroundStyle) }
     var accentPickerColor: Color {
         selectedAccentPaletteID == .custom
             ? customAccentColor.color
@@ -519,7 +830,9 @@ final class ThemeSettings: ObservableObject {
     private static let accentPaletteKey = "appAccentPalette"
     private static let customAccentColorKey = "appCustomAccentColor"
     private static let customBackgroundColorKey = "appCustomBackgroundColor"
+    private static let customBackgroundStyleKey = "appCustomBackgroundStyle"
     private static let usesCustomBackgroundKey = "appUsesCustomBackground"
+    private static let liquidGlassCardsKey = "appLiquidGlassCardsEnabled"
     private let userDefaults: UserDefaults
     private var baseTheme: Theme {
         usesCustomBackground ? customBackgroundTheme : selectedThemeID.theme
@@ -554,6 +867,11 @@ final class ThemeSettings: ObservableObject {
             from: userDefaults,
             fallback: .cream
         )
+        let storedCustomBackgroundStyle = Self.restoreBackgroundStyle(
+            forKey: Self.customBackgroundStyleKey,
+            from: userDefaults,
+            fallback: .solid(storedCustomBackgroundColor)
+        )
 
         // Pure Black used to be a separate theme. Preserve its visible result
         // by moving those users to the native theme with Dark appearance.
@@ -561,18 +879,16 @@ final class ThemeSettings: ObservableObject {
         selectedThemeID = migratedTheme
         selectedAccentPaletteID = storedAccentPalette
         customAccentColor = storedCustomAccentColor
-        customBackgroundColor = storedCustomBackgroundColor
+        customBackgroundStyle = storedCustomBackgroundStyle
         usesCustomBackground = userDefaults.bool(forKey: Self.usesCustomBackgroundKey)
+        liquidGlassCardsEnabled = userDefaults.bool(forKey: Self.liquidGlassCardsKey)
 
         if userDefaults.string(forKey: Self.accentPaletteKey) != storedAccentPalette.rawValue {
             userDefaults.set(storedAccentPalette.rawValue, forKey: Self.accentPaletteKey)
         }
         Self.persist(storedCustomAccentColor, forKey: Self.customAccentColorKey, in: userDefaults)
-        Self.persist(
-            storedCustomBackgroundColor,
-            forKey: Self.customBackgroundColorKey,
-            in: userDefaults
-        )
+        Self.persist(storedCustomBackgroundStyle, forKey: Self.customBackgroundStyleKey, in: userDefaults)
+        Self.persist(storedCustomBackgroundStyle.primaryColor, forKey: Self.customBackgroundColorKey, in: userDefaults)
 
         if storedTheme != nil, storedTheme != migratedTheme.rawValue {
             userDefaults.set(migratedTheme.rawValue, forKey: Self.themeKey)
@@ -606,10 +922,90 @@ final class ThemeSettings: ObservableObject {
 
     /// 保存 ColorPicker 产生的任意背景色，并用它重新派生整套语义主题。
     func updateCustomBackgroundColor(_ color: Color) {
-        customBackgroundColor = AppThemeColor.resolved(
+        var style = customBackgroundStyle
+        let fallback = style.stops.first?.color ?? .cream
+        style.stops[0].color = AppThemeColor.resolved(from: color, fallback: fallback)
+        customBackgroundStyle = style
+        usesCustomBackground = true
+    }
+
+    /// Changes composition mode while preserving all previously edited colors where possible.
+    func selectCustomBackgroundKind(_ kind: AppCustomBackgroundKind) {
+        customBackgroundStyle = customBackgroundStyle.prepared(for: kind)
+        usesCustomBackground = true
+    }
+
+    func updateCustomBackgroundColor(_ color: Color, stopID: UUID) {
+        guard let index = customBackgroundStyle.stops.firstIndex(where: { $0.id == stopID }) else {
+            return
+        }
+        var style = customBackgroundStyle
+        style.stops[index].color = AppThemeColor.resolved(
             from: color,
-            fallback: customBackgroundColor
+            fallback: style.stops[index].color
         )
+        customBackgroundStyle = style
+        usesCustomBackground = true
+    }
+
+    func updateCustomGradientLocation(_ location: Double, stopID: UUID) {
+        guard customBackgroundStyle.kind == .linear,
+              let index = customBackgroundStyle.stops.firstIndex(where: { $0.id == stopID })
+        else {
+            return
+        }
+
+        var style = customBackgroundStyle
+        let lowerBound = index == style.stops.startIndex
+            ? 0
+            : style.stops[index - 1].location + 0.02
+        let upperBound = index == style.stops.index(before: style.stops.endIndex)
+            ? 1
+            : style.stops[index + 1].location - 0.02
+        style.stops[index].location = min(max(location, lowerBound), upperBound)
+        customBackgroundStyle = style
+        usesCustomBackground = true
+    }
+
+    func updateCustomGradientDirection(_ direction: AppLinearGradientDirection) {
+        var style = customBackgroundStyle
+        style.direction = direction
+        customBackgroundStyle = style
+        usesCustomBackground = true
+    }
+
+    func addCustomGradientColor() {
+        guard customBackgroundStyle.kind == .linear,
+              customBackgroundStyle.stops.count < AppCustomBackgroundStyle.maximumColorCount
+        else {
+            return
+        }
+
+        var style = customBackgroundStyle
+        style.stops.sort { $0.location < $1.location }
+        guard let insertion = zip(style.stops, style.stops.dropFirst())
+            .max(by: { ($0.1.location - $0.0.location) < ($1.1.location - $1.0.location) })
+        else {
+            return
+        }
+
+        let location = (insertion.0.location + insertion.1.location) / 2
+        let color = insertion.0.color.blended(toward: insertion.1.color, amount: 0.5)
+        style.stops.append(AppBackgroundColorStop(color: color, location: location))
+        style.stops.sort { $0.location < $1.location }
+        customBackgroundStyle = style
+        usesCustomBackground = true
+    }
+
+    func removeCustomGradientColor(stopID: UUID) {
+        guard customBackgroundStyle.kind == .linear,
+              customBackgroundStyle.stops.count > 2
+        else {
+            return
+        }
+        var style = customBackgroundStyle
+        style.stops.removeAll { $0.id == stopID }
+        customBackgroundStyle = style
         usesCustomBackground = true
     }
 
@@ -642,6 +1038,19 @@ final class ThemeSettings: ObservableObject {
         return color
     }
 
+    private static func restoreBackgroundStyle(
+        forKey key: String,
+        from userDefaults: UserDefaults,
+        fallback: AppCustomBackgroundStyle
+    ) -> AppCustomBackgroundStyle {
+        guard let data = userDefaults.data(forKey: key),
+              let style = try? JSONDecoder().decode(AppCustomBackgroundStyle.self, from: data)
+        else {
+            return fallback
+        }
+        return style.sanitized()
+    }
+
     /// 将结构化颜色编码到 UserDefaults，避免依赖 UIColor 或 SwiftUI Color 的非稳定归档格式。
     private static func persist(
         _ color: AppThemeColor,
@@ -649,6 +1058,16 @@ final class ThemeSettings: ObservableObject {
         in userDefaults: UserDefaults
     ) {
         guard let data = try? JSONEncoder().encode(color) else { return }
+        userDefaults.set(data, forKey: key)
+    }
+
+
+    private static func persist(
+        _ style: AppCustomBackgroundStyle,
+        forKey key: String,
+        in userDefaults: UserDefaults
+    ) {
+        guard let data = try? JSONEncoder().encode(style.sanitized()) else { return }
         userDefaults.set(data, forKey: key)
     }
 }
@@ -659,29 +1078,86 @@ struct AppBackground: View {
 
     @ViewBuilder
     var body: some View {
-        switch theme.background {
+        ThemeBackgroundLayer(background: theme.background)
+            .ignoresSafeArea()
+    }
+}
+
+/// Shared renderer keeps full-screen backgrounds, previews, and swatches visually identical.
+struct ThemeBackgroundLayer: View {
+    let background: ThemeBackground
+
+    @ViewBuilder
+    var body: some View {
+        switch background {
         case let .solid(color):
-            color.ignoresSafeArea()
-        case let .linearGradient(colors, startPoint, endPoint):
-            LinearGradient(colors: colors, startPoint: startPoint, endPoint: endPoint)
-                .ignoresSafeArea()
+            color
+        case let .linearGradient(stops, startPoint, endPoint):
+            LinearGradient(
+                stops: stops.map {
+                    Gradient.Stop(color: $0.color.color, location: CGFloat($0.location))
+                },
+                startPoint: startPoint,
+                endPoint: endPoint
+            )
+        case let .meshGradient(colors):
+            MeshGradient(
+                width: 3,
+                height: 3,
+                points: [
+                    SIMD2<Float>(0, 0), SIMD2<Float>(0.5, 0), SIMD2<Float>(1, 0),
+                    SIMD2<Float>(0, 0.5), SIMD2<Float>(0.5, 0.5), SIMD2<Float>(1, 0.5),
+                    SIMD2<Float>(0, 1), SIMD2<Float>(0.5, 1), SIMD2<Float>(1, 1)
+                ],
+                colors: normalizedMeshColors(colors),
+                smoothsColors: true,
+                colorSpace: .perceptual
+            )
         }
+    }
+
+    private func normalizedMeshColors(_ colors: [Color]) -> [Color] {
+        let fallback = colors.last ?? .clear
+        return Array((colors + Array(repeating: fallback, count: 9)).prefix(9))
     }
 }
 
 /// 定义 `AppContentCardModifier` 的值语义数据与相关行为。
 private struct AppContentCardModifier: ViewModifier {
     @Environment(\.appTheme) private var theme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let cornerRadius: CGFloat
 
     /// 封装 `body` 对应的局部行为，供当前类型在统一入口下复用。
+    @ViewBuilder
     func body(content: Content) -> some View {
-        content
-            .background(theme.cardSurface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(theme.divider.opacity(0.65), lineWidth: 0.5)
-            }
+        if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
+            content.glassEffect(
+                .regular,
+                in: .rect(cornerRadius: cornerRadius)
+            )
+        } else {
+            content
+                .background(
+                    theme.cardSurface,
+                    in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(theme.divider.opacity(0.65), lineWidth: 0.5)
+                }
+        }
+    }
+}
+
+private struct AppListCardModifier: ViewModifier {
+    @Environment(\.appTheme) private var theme
+
+    func body(content: Content) -> some View {
+        // `List` 会把 modifier 分发给 Section 的 header、footer 和每一行。
+        // 在这里施加 glassEffect 会让文字被分别包成胶囊，因此列表继续使用稳定的行背景；
+        // 只有边界明确的独立内容视图才通过 appContentCard 使用玻璃效果。
+        content.listRowBackground(theme.cardSurface)
     }
 }
 
@@ -690,6 +1166,11 @@ extension View {
     /// 封装 `appContentCard` 对应的局部行为，供当前类型在统一入口下复用。
     func appContentCard(cornerRadius: CGFloat = 20) -> some View {
         modifier(AppContentCardModifier(cornerRadius: cornerRadius))
+    }
+
+    /// Keeps grouped-list rows on a stable surface; SwiftUI sections are not single card shapes.
+    func appListCard() -> some View {
+        modifier(AppListCardModifier())
     }
 
     /// 封装 `appSoftScrollEdge` 对应的局部行为，供当前类型在统一入口下复用。

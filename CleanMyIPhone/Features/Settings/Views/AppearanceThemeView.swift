@@ -22,6 +22,10 @@ struct AppearanceThemeView: View {
             previewSection
             accentPaletteSection
             backgroundPaletteSection
+            if themeSettings.usesCustomBackground {
+                customBackgroundEditorSection
+            }
+            glassCardSection
             appearanceSection
         }
         .contentMargins(.horizontal, 4, for: .scrollContent)
@@ -33,6 +37,8 @@ struct AppearanceThemeView: View {
         .navigationBarTitleDisplayMode(.inline)
         .sensoryFeedback(.selection, trigger: themeSettings.selectedAccentPaletteID)
         .sensoryFeedback(.selection, trigger: themeSettings.selectedThemeID)
+        .sensoryFeedback(.selection, trigger: themeSettings.customBackgroundStyle.kind)
+        .sensoryFeedback(.selection, trigger: themeSettings.liquidGlassCardsEnabled)
     }
 
     /// 提供小型即时预览，使用户在离开设置页前理解配色关系。
@@ -74,7 +80,7 @@ struct AppearanceThemeView: View {
         } footer: {
             Text("Choose a preset or create any color with the system color picker.")
         }
-        .listRowBackground(theme.cardSurface)
+        .appListCard()
     }
 
     /// 将背景作为完整 Theme 选择，确保文字、卡片、分隔线与系统明暗同步变化。
@@ -104,18 +110,142 @@ struct AppearanceThemeView: View {
                 .padding(.vertical, 4)
             }
 
-            ColorPicker(
-                "Edit Background Color",
-                selection: customBackgroundBinding,
-                supportsOpacity: false
-            )
-            .accessibilityHint("Opens the system color picker and selects Custom.")
         } header: {
             Text("App Background")
         } footer: {
             Text("Custom backgrounds automatically derive readable text, cards, and dividers.")
         }
-        .listRowBackground(theme.cardSurface)
+        .appListCard()
+    }
+
+    /// Keeps the advanced editor behind the existing Custom choice so the settings page stays calm.
+    private var customBackgroundEditorSection: some View {
+        Section {
+            ThemeBackgroundLayer(background: themeSettings.customBackgroundTheme.background)
+                .frame(height: 112)
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(theme.divider.opacity(0.7), lineWidth: 0.5)
+                }
+                .accessibilityHidden(true)
+
+            Picker("Background Style", selection: customBackgroundKindBinding) {
+                ForEach(AppCustomBackgroundKind.allCases) { kind in
+                    Text(kind.displayName).tag(kind)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            switch themeSettings.customBackgroundStyle.kind {
+            case .solid:
+                ColorPicker(
+                    "Edit Background Color",
+                    selection: customBackgroundBinding,
+                    supportsOpacity: false
+                )
+            case .linear:
+                linearGradientEditor
+            case .mesh:
+                meshGradientEditor
+            }
+        } header: {
+            Text("Custom Background")
+        } footer: {
+            Text("The app automatically protects text contrast when custom colors are combined.")
+        }
+        .appListCard()
+    }
+
+    private var linearGradientEditor: some View {
+        Group {
+            Picker("Gradient Direction", selection: gradientDirectionBinding) {
+                ForEach(AppLinearGradientDirection.allCases) { direction in
+                    Text(direction.displayName).tag(direction)
+                }
+            }
+
+            ForEach(Array(themeSettings.customBackgroundStyle.stops.enumerated()), id: \.element.id) {
+                index,
+                stop in
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("Color \(index + 1)")
+                        Spacer()
+                        ColorPicker(
+                            "Color \(index + 1)",
+                            selection: customColorBinding(for: stop),
+                            supportsOpacity: false
+                        )
+                        .labelsHidden()
+
+                        Button(role: .destructive) {
+                            themeSettings.removeCustomGradientColor(stopID: stop.id)
+                        } label: {
+                            Image(systemName: "trash")
+                                .frame(minWidth: 44, minHeight: 44)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(themeSettings.customBackgroundStyle.stops.count <= 2)
+                        .accessibilityLabel("Remove Color")
+                    }
+
+                    HStack(spacing: 12) {
+                        Text("Stop Position")
+                            .font(.caption)
+                            .foregroundStyle(theme.textSecondary)
+                        Slider(value: customLocationBinding(for: stop), in: 0 ... 1)
+                        Text(stop.location, format: .percent.precision(.fractionLength(0)))
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(theme.textSecondary)
+                            .frame(width: 42, alignment: .trailing)
+                    }
+                }
+            }
+
+            if themeSettings.customBackgroundStyle.stops.count
+                < AppCustomBackgroundStyle.maximumColorCount
+            {
+                Button {
+                    themeSettings.addCustomGradientColor()
+                } label: {
+                    Label("Add Color", systemImage: "plus.circle")
+                }
+            }
+        }
+    }
+
+    private var meshGradientEditor: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Freeform Colors")
+                .font(.subheadline.weight(.semibold))
+
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3),
+                spacing: 10
+            ) {
+                ForEach(Array(themeSettings.customBackgroundStyle.stops.prefix(9).enumerated()), id: \.element.id) {
+                    index,
+                    stop in
+                    VStack(spacing: 5) {
+                        ColorPicker(
+                            "Color \(index + 1)",
+                            selection: customColorBinding(for: stop),
+                            supportsOpacity: false
+                        )
+                        .labelsHidden()
+                        .frame(minWidth: 44, minHeight: 44)
+                        .accessibilityLabel(Text("Color \(index + 1)"))
+
+                        Text("\(index + 1)")
+                            .font(.caption2.monospacedDigit())
+                            .foregroundStyle(theme.textSecondary)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 58)
+                }
+            }
+        }
+        .padding(.vertical, 4)
     }
 
     /// 使用标准 Picker 表达互斥外观；固定明暗背景继续保护其既有对比关系。
@@ -141,7 +271,22 @@ struct AppearanceThemeView: View {
         } footer: {
             Text(appearanceFooter)
         }
-        .listRowBackground(theme.cardSurface)
+        .appListCard()
+    }
+
+    /// Controls card material independently from the selected color palette.
+    private var glassCardSection: some View {
+        Section {
+            Toggle(
+                "Liquid Glass Cards",
+                isOn: $themeSettings.liquidGlassCardsEnabled
+            )
+        } header: {
+            Text("Cards")
+        } footer: {
+            Text("Use system glass surfaces for content cards throughout the app.")
+        }
+        .appListCard()
     }
 
     /// 自动强调色取自当前背景主题，其余选项使用自身的策划颜色。
@@ -192,6 +337,44 @@ struct AppearanceThemeView: View {
         Binding(
             get: { themeSettings.backgroundPickerColor },
             set: { themeSettings.updateCustomBackgroundColor($0) }
+        )
+    }
+
+    private var customBackgroundKindBinding: Binding<AppCustomBackgroundKind> {
+        Binding(
+            get: { themeSettings.customBackgroundStyle.kind },
+            set: { kind in
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.16)) {
+                    themeSettings.selectCustomBackgroundKind(kind)
+                }
+            }
+        )
+    }
+
+    private var gradientDirectionBinding: Binding<AppLinearGradientDirection> {
+        Binding(
+            get: { themeSettings.customBackgroundStyle.direction },
+            set: { themeSettings.updateCustomGradientDirection($0) }
+        )
+    }
+
+    private func customColorBinding(for stop: AppBackgroundColorStop) -> Binding<Color> {
+        Binding(
+            get: {
+                themeSettings.customBackgroundStyle.stops
+                    .first(where: { $0.id == stop.id })?.color.color ?? stop.color.color
+            },
+            set: { themeSettings.updateCustomBackgroundColor($0, stopID: stop.id) }
+        )
+    }
+
+    private func customLocationBinding(for stop: AppBackgroundColorStop) -> Binding<Double> {
+        Binding(
+            get: {
+                themeSettings.customBackgroundStyle.stops
+                    .first(where: { $0.id == stop.id })?.location ?? stop.location
+            },
+            set: { themeSettings.updateCustomGradientLocation($0, stopID: stop.id) }
         )
     }
 
@@ -265,14 +448,7 @@ private struct AppearanceThemePreview: View {
             }
         }
         .padding(18)
-        .background(
-            theme.cardSurface,
-            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .strokeBorder(theme.divider.opacity(0.72), lineWidth: 0.7)
-        }
+        .appContentCard(cornerRadius: 24)
     }
 
     /// 构造带形状标记的示例指标，确保信息不只依赖颜色区分。
@@ -340,8 +516,8 @@ private struct ThemePaletteSwatch: View {
                 Circle()
                     .fill(color)
             case let .background(sampleTheme):
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(sampleTheme.backgroundPrimary)
+                ThemeBackgroundLayer(background: sampleTheme.background)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .overlay(alignment: .center) {
                         RoundedRectangle(cornerRadius: 7, style: .continuous)
                             .fill(sampleTheme.cardSurface)

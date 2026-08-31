@@ -83,7 +83,8 @@ private extension Theme {
             accent: accentPrimary,
             destructive: negativeRed,
             divider: divider,
-            liquidGlassEnabled: liquidGlassEnabled
+            liquidGlassEnabled: liquidGlassEnabled,
+            liquidGlassCardsEnabled: liquidGlassCardsEnabled
         )
     }
 
@@ -91,8 +92,16 @@ private extension Theme {
         switch background {
         case let .solid(color):
             .solid(color)
-        case let .linearGradient(colors, startPoint, endPoint):
-            .linearGradient(colors: colors, startPoint: startPoint, endPoint: endPoint)
+        case let .linearGradient(stops, startPoint, endPoint):
+            .linearGradientStops(
+                stops: stops.map {
+                    ConversionGradientStop(color: $0.color.color, location: $0.location)
+                },
+                startPoint: startPoint,
+                endPoint: endPoint
+            )
+        case let .meshGradient(colors):
+            .meshGradient(colors: colors)
         }
     }
 }

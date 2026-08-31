@@ -53,7 +53,26 @@ struct SettingsView: View {
                 } footer: {
                     Text("Choose app colors, background, and appearance in one place.")
                 }
-                .listRowBackground(theme.cardSurface)
+                .appListCard()
+
+                Section("Support") {
+                    NavigationLink {
+                        HelpView()
+                    } label: {
+                        Label {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Help")
+                                Text("Learn how to use the app and safely free up iPhone storage.")
+                                    .font(.caption)
+                                    .foregroundStyle(theme.textSecondary)
+                            }
+                        } icon: {
+                            Image(systemName: "questionmark.circle")
+                                .foregroundStyle(theme.accentPrimary)
+                        }
+                    }
+                }
+                .appListCard()
 
                 Section("Permissions") {
                     LabeledContent {
@@ -72,19 +91,19 @@ struct SettingsView: View {
                         Label("Open System Settings", systemImage: "gear")
                     }
                 }
-                .listRowBackground(theme.cardSurface)
+                .appListCard()
 
                 Section("Privacy") {
                     Label("Media and file analysis stays on this device.", systemImage: "lock.shield")
                         .foregroundStyle(.secondary)
                 }
-                .listRowBackground(theme.cardSurface)
+                .appListCard()
 
                 Section("About") {
                     LabeledContent("Version", value: appVersion)
                     LabeledContent("Build", value: buildNumber)
                 }
-                .listRowBackground(theme.cardSurface)
+                .appListCard()
             }
             .contentMargins(.horizontal, 4, for: .scrollContent)
             .contentMargins(.top, -24, for: .scrollContent)
