@@ -15,7 +15,7 @@ struct HelpArticleView: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 16) {
                 articleHeader
 
                 if let notice = article.notice {

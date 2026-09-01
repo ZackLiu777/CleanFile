@@ -12,7 +12,7 @@ struct HelpView: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 22) {
                 helpIntroduction
 
                 ForEach(HelpCatalog.categories) { category in

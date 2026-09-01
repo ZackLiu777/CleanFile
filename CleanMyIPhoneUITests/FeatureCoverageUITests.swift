@@ -10,7 +10,9 @@ final class FeatureCoverageUITests: XCTestCase {
         let app = launchEnglishApp()
 
         XCTAssertTrue(tab(in: app, id: "tab.media", label: "Media").waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["media.actions"].waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            app.descendants(matching: .any)["media.actions"].waitForExistence(timeout: 5)
+        )
 
         tab(in: app, id: "tab.storage", label: "Storage").tap()
         XCTAssertTrue(app.descendants(matching: .any)["storage.status"].waitForExistence(timeout: 3))
@@ -78,11 +80,17 @@ final class FeatureCoverageUITests: XCTestCase {
         }
 
         toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
-        assertSwitch(toggle, changesFrom: originalValue)
+        let changedToggle = switchElement(in: app, valueDifferentFrom: originalValue)
+        XCTAssertTrue(
+            changedToggle.waitForExistence(timeout: 3),
+            "Liquid Glass switch accessibility value did not update"
+        )
 
-        let changedValue = toggle.value as? String
-        toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
-        assertSwitch(toggle, changesFrom: changedValue, returningTo: originalValue)
+        changedToggle.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+        XCTAssertTrue(
+            switchElement(in: app, valueEqualTo: originalValue).waitForExistence(timeout: 3),
+            "Liquid Glass switch did not return to its original value"
+        )
     }
 
     @MainActor
@@ -195,26 +203,18 @@ final class FeatureCoverageUITests: XCTestCase {
     }
 
     @MainActor
-    private func assertSwitch(
-        _ toggle: XCUIElement,
-        changesFrom previousValue: String?,
-        returningTo expectedValue: String? = nil
-    ) {
-        let predicate: NSPredicate
-        if let expectedValue {
-            predicate = NSPredicate(format: "value == %@", expectedValue)
-        } else if let previousValue {
-            predicate = NSPredicate(format: "value != %@", previousValue)
-        } else {
-            XCTFail("Switch did not expose an accessibility value")
-            return
-        }
+    private func switchElement(in app: XCUIApplication, valueDifferentFrom value: String) -> XCUIElement {
+        app.switches
+            .matching(identifier: "appearance.liquidGlass")
+            .matching(NSPredicate(format: "value != %@", value))
+            .firstMatch
+    }
 
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: toggle)
-        XCTAssertEqual(
-            XCTWaiter.wait(for: [expectation], timeout: 2),
-            .completed,
-            "Switch accessibility value did not update"
-        )
+    @MainActor
+    private func switchElement(in app: XCUIApplication, valueEqualTo value: String) -> XCUIElement {
+        app.switches
+            .matching(identifier: "appearance.liquidGlass")
+            .matching(NSPredicate(format: "value == %@", value))
+            .firstMatch
     }
 }
