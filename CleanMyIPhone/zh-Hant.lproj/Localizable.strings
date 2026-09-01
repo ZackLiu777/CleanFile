@@ -381,3 +381,9 @@
 "iOS does not let one app browse another app's private files, system caches, or the entire iPhone file system. When a category is outside the app's access, Help shows the safe system path instead." = "iOS does not let one app browse another app's private files, system caches, or the entire iPhone file system. When a category is outside the app's access, Help shows the safe system path instead.";
 "iOS keeps each app's documents and caches private. Use iPhone Storage and the controls inside each app instead." = "iOS keeps each app's documents and caches private. Use iPhone Storage and the controls inside each app instead.";
 "iPhone Storage measures space on this device. iCloud storage measures data kept in your iCloud account. Freeing one does not always free the other." = "iPhone Storage measures space on this device. iCloud storage measures data kept in your iCloud account. Freeing one does not always free the other.";
+"Display Options" = "顯示選項";
+"Interface Animations" = "介面動畫";
+"Show Media Dates" = "顯示媒體日期";
+"Control dashboard animations and date headings in media detail grids." = "控制媒體「我的空間」、儲存旭日圖、轉換卡片動畫，以及媒體詳細網格中的日期標題。";
+"Calculating size…" = "正在計算大小…";
+"Size unavailable" = "大小無法取得";

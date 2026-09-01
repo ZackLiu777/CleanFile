@@ -26,6 +26,7 @@ struct AppearanceThemeView: View {
                 customBackgroundEditorSection
             }
             glassCardSection
+            displayOptionsSection
             appearanceSection
         }
         .contentMargins(.horizontal, 4, for: .scrollContent)
@@ -304,6 +305,22 @@ struct AppearanceThemeView: View {
             Text("Cards")
         } footer: {
             Text("Use system glass surfaces for content cards throughout the app.")
+        }
+        .appListCard()
+    }
+
+    /// Groups optional presentation details without duplicating iOS Reduce Motion.
+    private var displayOptionsSection: some View {
+        Section {
+            Toggle("Interface Animations", isOn: $themeSettings.interfaceAnimationsEnabled)
+                .accessibilityIdentifier("appearance.interfaceAnimations")
+
+            Toggle("Show Media Dates", isOn: $themeSettings.mediaDateHeadersEnabled)
+                .accessibilityIdentifier("appearance.mediaDates")
+        } header: {
+            Text("Display Options")
+        } footer: {
+            Text("Control dashboard animations and date headings in media detail grids.")
         }
         .appListCard()
     }

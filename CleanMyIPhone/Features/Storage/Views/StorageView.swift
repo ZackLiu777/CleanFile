@@ -15,6 +15,7 @@ import UniformTypeIdentifiers
 struct StorageView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @EnvironmentObject private var themeSettings: ThemeSettings
     @ObservedObject var viewModel: FileScannerViewModel
     let isTabActive: Bool
     @State private var isImporterPresented = false
@@ -98,6 +99,9 @@ struct StorageView: View {
             }
         }
         .onChange(of: viewModel.summary) { _, _ in
+            animateStorageDashboardIfNeeded()
+        }
+        .onChange(of: themeSettings.interfaceAnimationsEnabled) { _, _ in
             animateStorageDashboardIfNeeded()
         }
     }
@@ -361,7 +365,7 @@ struct StorageView: View {
         sunburstRevealProgress = 0
         summaryBarProgress = 0
 
-        guard !reduceMotion else {
+        guard themeSettings.interfaceAnimationsEnabled, !reduceMotion else {
             sunburstRevealProgress = 1
             summaryBarProgress = 1
             return

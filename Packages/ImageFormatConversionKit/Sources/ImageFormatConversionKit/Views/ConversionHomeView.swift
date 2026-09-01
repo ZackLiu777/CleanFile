@@ -11,6 +11,7 @@ import SwiftUI
 public struct ConversionHomeView: View {
     private let theme: ConversionTheme
     private let isTabActive: Bool
+    private let animationsEnabled: Bool
     @State private var recentRecords: [ConversionHomeKind: ConversionHomeRecord] = [:]
     @State private var imageViewModel: ImageConversionViewModel
     @State private var videoViewModel: VideoConversionViewModel
@@ -28,10 +29,12 @@ public struct ConversionHomeView: View {
 
     public init(
         theme: ConversionTheme = .system,
-        isTabActive: Bool = true
+        isTabActive: Bool = true,
+        animationsEnabled: Bool = true
     ) {
         self.theme = theme
         self.isTabActive = isTabActive
+        self.animationsEnabled = animationsEnabled
         _imageViewModel = State(initialValue: ImageConversionViewModel())
         _videoViewModel = State(initialValue: VideoConversionViewModel())
         _audioViewModel = State(initialValue: AudioConversionViewModel())
@@ -66,12 +69,12 @@ public struct ConversionHomeView: View {
                                 .conversionMatchedTransitionSource(
                                     id: kind,
                                     in: navigationTransitionNamespace,
-                                    enabled: !reduceMotion
+                                    enabled: animationsEnabled && !reduceMotion
                                 )
                             }
                             .buttonStyle(
                                 ConversionHomeCardButtonStyle(
-                                    reduceMotion: reduceMotion
+                                    reduceMotion: reduceMotion || !animationsEnabled
                                 )
                             )
                             .accessibilityIdentifier("conversion.home.\(kind.rawValue)")
@@ -79,7 +82,7 @@ public struct ConversionHomeView: View {
                                 ConversionHomeStaggeredAppear(
                                     isVisible: isHomeContentVisible,
                                     index: index,
-                                    reduceMotion: reduceMotion
+                                    reduceMotion: reduceMotion || !animationsEnabled
                                 )
                             )
                         }
@@ -96,7 +99,7 @@ public struct ConversionHomeView: View {
                             ConversionHomeStaggeredAppear(
                                 isVisible: isHomeContentVisible,
                                 index: ConversionHomeKind.allCases.count,
-                                reduceMotion: reduceMotion
+                                reduceMotion: reduceMotion || !animationsEnabled
                             )
                         )
                     }
@@ -132,7 +135,7 @@ public struct ConversionHomeView: View {
                 .conversionNavigationTransition(
                     sourceID: kind,
                     in: navigationTransitionNamespace,
-                    enabled: !reduceMotion
+                    enabled: animationsEnabled && !reduceMotion
                 )
             }
             .onAppear {
@@ -174,7 +177,7 @@ public struct ConversionHomeView: View {
         let generation = entranceGeneration
         resetEntranceWithoutAnimation()
 
-        guard !reduceMotion else {
+        guard animationsEnabled, !reduceMotion else {
             isHomeContentVisible = true
             return
         }
@@ -205,7 +208,7 @@ public struct ConversionHomeView: View {
             let loadedRecords = await ConversionHomeHistoryLoader.shared.load()
             guard !Task.isCancelled else { return }
 
-            if reduceMotion {
+            if reduceMotion || !animationsEnabled {
                 recentRecords = loadedRecords
             } else {
                 withAnimation(ConversionMotion.contentUpdate) {

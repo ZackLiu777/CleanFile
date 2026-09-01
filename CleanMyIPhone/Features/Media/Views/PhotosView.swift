@@ -10,11 +10,13 @@
 
 import Photos
 import SwiftUI
-import UIKit
+//import UIKit
 
 /// 定义 `PhotosView` 的值语义数据与相关行为。
 struct PhotosView: View {
     @Environment(\.appTheme) private var theme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @EnvironmentObject private var themeSettings: ThemeSettings
     @ObservedObject var viewModel: PhotoLibraryViewModel
     let isTabActive: Bool
     @State private var animatedStorageFraction = 0.0
@@ -101,6 +103,9 @@ struct PhotosView: View {
             }
         }
         .onChange(of: viewModel.storageSnapshot) { _, _ in
+            animateStorageBarIfNeeded()
+        }
+        .onChange(of: themeSettings.interfaceAnimationsEnabled) { _, _ in
             animateStorageBarIfNeeded()
         }
     }
@@ -236,7 +241,8 @@ struct PhotosView: View {
                 storage: storage,
                 photoBytes: viewModel.estimatedPhotoLibraryBytes,
                 videoBytes: viewModel.estimatedVideoLibraryBytes,
-                animatedUsedFraction: animatedStorageFraction
+                animatedUsedFraction: animatedStorageFraction,
+                animationsEnabled: themeSettings.interfaceAnimationsEnabled && !reduceMotion
             )
         }
     }
@@ -244,6 +250,10 @@ struct PhotosView: View {
     /// 启动 `animateStorageBarIfNeeded` 动画，并确保展示状态与当前页面生命周期一致。
     private func animateStorageBarIfNeeded() {
         guard isTabActive, let storage = viewModel.storageSnapshot else { return }
+        guard themeSettings.interfaceAnimationsEnabled, !reduceMotion else {
+            animatedStorageFraction = storage.usedFraction
+            return
+        }
         animatedStorageFraction = 0
 
         Task { @MainActor in
@@ -332,6 +342,7 @@ private struct MediaDashboardResultsView: View {
             )
         }
         .onDisappear {
+            viewModel.cancelExactByteCountRequests()
             viewModel.stopCachingThumbnails(
                 for: Array(previewCacheIDs).prefix(80),
                 targetSize: thumbnailTargetSize
@@ -466,6 +477,7 @@ private struct MediaStorageOverview: View {
     let photoBytes: Int64
     let videoBytes: Int64
     let animatedUsedFraction: Double
+    let animationsEnabled: Bool
 
     private var visiblePhotoBytes: Int64 { min(max(photoBytes, 0), storage.usedBytes) }
     private var visibleVideoBytes: Int64 {
@@ -523,7 +535,10 @@ private struct MediaStorageOverview: View {
                 }
                 .frame(maxHeight: .infinity, alignment: .center)
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .animation(.spring(duration: 0.72, bounce: 0.16), value: animatedUsedFraction)
+                .animation(
+                    animationsEnabled ? .spring(duration: 0.72, bounce: 0.16) : nil,
+                    value: animatedUsedFraction
+                )
             }
             .frame(height: 42)
             .background(
@@ -683,6 +698,7 @@ private struct MediaCategoryCard: View {
 /// 定义 `MediaCategoryDetailView` 的值语义数据与相关行为。
 private struct MediaCategoryDetailView: View {
     @Environment(\.appTheme) private var theme
+    @EnvironmentObject private var themeSettings: ThemeSettings
     let title: String
     let assetIDs: [String]
     @ObservedObject var viewModel: PhotoLibraryViewModel
@@ -709,6 +725,17 @@ private struct MediaCategoryDetailView: View {
         dateSections.flatMap(\.assetIDs)
     }
 
+    private var displayedSections: [MediaDateSection] {
+        guard !themeSettings.mediaDateHeadersEnabled else { return dateSections }
+        return [
+            MediaDateSection(
+                id: "all-media",
+                day: nil,
+                assetIDs: chronologicallySortedAssetIDs
+            )
+        ]
+    }
+
     private var preheatedAssetIDs: ArraySlice<String> {
         chronologicallySortedAssetIDs.prefix(60)
     }
@@ -733,7 +760,8 @@ private struct MediaCategoryDetailView: View {
                     )
                 } else {
                     MediaInteractiveGrid(
-                        sections: dateSections,
+                        sections: displayedSections,
+                        showsDateHeaders: themeSettings.mediaDateHeadersEnabled,
                         selectedIDs: $selectedIDs,
                         isSelecting: isSelecting,
                         viewModel: viewModel,

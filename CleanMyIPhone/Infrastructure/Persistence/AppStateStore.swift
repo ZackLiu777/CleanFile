@@ -16,6 +16,16 @@ nonisolated struct MediaStateSnapshot: Codable, Sendable {
     let isPartial: Bool
 }
 
+/// Stores verified PhotoKit resource sizes. Modification dates invalidate stale entries.
+nonisolated struct MediaSizeIndexSnapshot: Codable, Sendable {
+    let entries: [String: MediaSizeIndexEntry]
+}
+
+nonisolated struct MediaSizeIndexEntry: Codable, Sendable {
+    let modificationDate: Date?
+    let byteCount: Int64
+}
+
 /// 定义 `FileStateSnapshot` 的值语义数据与相关行为。
 nonisolated struct FileStateSnapshot: Codable, Sendable {
     let directoryBookmark: Data
@@ -31,6 +41,7 @@ actor AppStateStore {
     /// 定义 `SnapshotName` 使用的有限状态或选项集合。
     private enum SnapshotName: String {
         case media = "media-state.json"
+        case mediaSizes = "media-size-index.json"
         case files = "file-state.json"
     }
 
@@ -58,6 +69,14 @@ actor AppStateStore {
     /// 持久化 `saveMediaState` 对应的数据，并保持后续恢复所需的信息完整。
     func saveMediaState(_ snapshot: MediaStateSnapshot?) {
         save(snapshot, name: .media)
+    }
+
+    func loadMediaSizeIndex() -> MediaSizeIndexSnapshot? {
+        load(MediaSizeIndexSnapshot.self, name: .mediaSizes)
+    }
+
+    func saveMediaSizeIndex(_ snapshot: MediaSizeIndexSnapshot?) {
+        save(snapshot, name: .mediaSizes)
     }
 
     /// 加载 `loadFileState` 所需的数据，并将结果转换为当前层可消费的状态。

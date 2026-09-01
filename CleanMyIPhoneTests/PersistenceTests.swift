@@ -120,7 +120,22 @@ struct ThemePersistenceTests {
         #expect(settings.selectedThemeID == .system)
         #expect(settings.selectedAccentPaletteID == .automatic)
         #expect(settings.effectiveColorScheme == nil)
+        #expect(settings.interfaceAnimationsEnabled)
+        #expect(settings.mediaDateHeadersEnabled)
         #expect(defaults.string(forKey: "appAccentPalette") == "automatic")
+    }
+
+    @Test("Display preferences persist and restore")
+    func displayPreferencesPersist() {
+        let defaults = isolatedDefaults()
+        let settings = ThemeSettings(userDefaults: defaults)
+
+        settings.interfaceAnimationsEnabled = false
+        settings.mediaDateHeadersEnabled = false
+        let restored = ThemeSettings(userDefaults: defaults)
+
+        #expect(!restored.interfaceAnimationsEnabled)
+        #expect(!restored.mediaDateHeadersEnabled)
     }
 
     @Test("Theme restores a persisted dark value")

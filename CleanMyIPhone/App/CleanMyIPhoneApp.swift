@@ -30,7 +30,9 @@ struct CleanMyIPhoneApp: App {
                 "appCustomBackgroundColor",
                 "appCustomBackgroundStyle",
                 "appUsesCustomBackground",
-                "appLiquidGlassCardsEnabled"
+                "appLiquidGlassCardsEnabled",
+                "appInterfaceAnimationsEnabled",
+                "appMediaDateHeadersEnabled"
             ] {
                 defaults.removeObject(forKey: key)
             }

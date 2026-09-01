@@ -24,6 +24,7 @@ private enum AppTab: String, Hashable {
 /// 定义 `ContentView` 的值语义数据与相关行为。
 struct ContentView: View {
     @Environment(\.appTheme) private var theme
+    @EnvironmentObject private var themeSettings: ThemeSettings
     @StateObject private var mediaViewModel = PhotoLibraryViewModel()
     @StateObject private var fileViewModel = FileScannerViewModel()
     @AppStorage("selectedAppTab") private var selectedTab: AppTab = .photos
@@ -52,7 +53,8 @@ struct ContentView: View {
 
             ConversionHomeView(
                 theme: theme.conversionTheme,
-                isTabActive: selectedTab == .conversion
+                isTabActive: selectedTab == .conversion,
+                animationsEnabled: themeSettings.interfaceAnimationsEnabled
             )
                 .tabItem {
                     Label("Convert", systemImage: "arrow.triangle.2.circlepath")

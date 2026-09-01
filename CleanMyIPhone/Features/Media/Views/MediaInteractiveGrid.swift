@@ -9,13 +9,14 @@
 
 import Photos
 import SwiftUI
-import UIKit
+//import UIKit
 
 // MARK: - MediaInteractiveGrid
 
 /// 将支持交互式布局过渡的 UICollectionView 接入 SwiftUI 媒体详情页。
 struct MediaInteractiveGrid: UIViewRepresentable {
     let sections: [MediaDateSection]
+    let showsDateHeaders: Bool
     @Binding var selectedIDs: Set<String>
     let isSelecting: Bool
     @ObservedObject var viewModel: PhotoLibraryViewModel
@@ -32,7 +33,10 @@ struct MediaInteractiveGrid: UIViewRepresentable {
     func makeUIView(context: Context) -> UICollectionView {
         let collectionView = UICollectionView(
             frame: .zero,
-            collectionViewLayout: MediaDensityFlowLayout(density: .large)
+            collectionViewLayout: MediaDensityFlowLayout(
+                density: .large,
+                showsDateHeaders: showsDateHeaders
+            )
         )
         // UIKit 默认可能将滚动容器视为不透明；显式关闭后才能透出 SwiftUI 的主题背景。
         collectionView.isOpaque = false
@@ -67,6 +71,9 @@ struct MediaInteractiveGrid: UIViewRepresentable {
     func updateUIView(_ collectionView: UICollectionView, context: Context) {
         context.coordinator.parent = self
         let newSignature = context.coordinator.makeSectionSignature(from: sections)
+        if let layout = collectionView.collectionViewLayout as? MediaDensityFlowLayout {
+            layout.setShowsDateHeaders(showsDateHeaders)
+        }
 
         if newSignature != context.coordinator.sectionSignature {
             context.coordinator.cancelLayoutTransitionIfNeeded()
@@ -332,6 +339,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         /// 配置分区标题；标题使用系统本地化日期格式，数量沿用当前页面文案。
         private func configure(_ header: UICollectionReusableView, forSection index: Int) {
             guard
+                parent.showsDateHeaders,
                 parent.sections.indices.contains(index),
                 let header = header as? MediaInteractiveGridHeaderView
             else { return }
@@ -439,7 +447,10 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             isCompletingTransition = true
             pinchAnchor = makePinchAnchor(at: touchLocation, in: collectionView)
             targetDensity = nextDensity
-            let nextLayout = MediaDensityFlowLayout(density: nextDensity)
+            let nextLayout = MediaDensityFlowLayout(
+                density: nextDensity,
+                showsDateHeaders: parent.showsDateHeaders
+            )
 
             animateDensityChange(
                 to: nextLayout,
@@ -828,16 +839,18 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 /// 根据当前集合视图宽度计算固定列数，作为交互式过渡的起点和终点布局。
 private final class MediaDensityFlowLayout: UICollectionViewFlowLayout {
     let density: MediaGridDensity
+    private var showsDateHeaders: Bool
 
     /// 保存目标密度，并设置各档位一致的基础间距和日期标题高度。
-    init(density: MediaGridDensity) {
+    init(density: MediaGridDensity, showsDateHeaders: Bool) {
         self.density = density
+        self.showsDateHeaders = showsDateHeaders
         super.init()
         scrollDirection = .vertical
         minimumLineSpacing = density.spacing
         minimumInteritemSpacing = density.spacing
         sectionInset = .zero
-        headerReferenceSize = CGSize(width: 1, height: 42)
+        headerReferenceSize = CGSize(width: 1, height: showsDateHeaders ? 42 : 0)
     }
 
     /// 支持 UIKit 从归档恢复布局；程序化页面不会走到该入口。
@@ -855,8 +868,17 @@ private final class MediaDensityFlowLayout: UICollectionViewFlowLayout {
         let availableWidth = max(collectionView.bounds.width - spacingWidth, 1)
         let side = floor(availableWidth / CGFloat(density.columnCount))
         itemSize = CGSize(width: side, height: side)
-        headerReferenceSize = CGSize(width: collectionView.bounds.width, height: 42)
+        headerReferenceSize = CGSize(
+            width: collectionView.bounds.width,
+            height: showsDateHeaders ? 42 : 0
+        )
         super.prepare()
+    }
+
+    func setShowsDateHeaders(_ isVisible: Bool) {
+        guard showsDateHeaders != isVisible else { return }
+        showsDateHeaders = isVisible
+        invalidateLayout()
     }
 
     /// 只在集合视图宽度改变时使布局失效，滚动时避免重复计算全部单元格。
@@ -928,18 +950,13 @@ private struct MediaInteractiveGridCellContent: View {
         }
     }
 
-    /// 在 2 列模式显示文件名和估算体积，较密网格隐藏文字以保证缩略图可读性。
+    /// 在 2 列模式显示文件名和真实资源体积，较密网格隐藏文字以保证缩略图可读性。
     private var assetInformation: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(viewModel.displayName(for: assetID))
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)
-            Text(
-                ByteCountFormatter.string(
-                    fromByteCount: viewModel.estimatedByteCount(for: assetID),
-                    countStyle: .file
-                )
-            )
+            Text(byteCountText)
             .font(.caption)
             .foregroundStyle(.white.opacity(0.76))
         }
@@ -955,6 +972,19 @@ private struct MediaInteractiveGridCellContent: View {
                 endPoint: .bottom
             )
         )
+        .onAppear {
+            viewModel.requestExactByteCount(for: assetID)
+        }
+    }
+
+    private var byteCountText: String {
+        if let byteCount = viewModel.exactByteCount(for: assetID) {
+            return ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
+        }
+        if viewModel.isExactByteCountUnavailable(for: assetID) {
+            return String(localized: "Size unavailable")
+        }
+        return String(localized: "Calculating size…")
     }
 
     /// 根据选中状态显示圆形标记，并随密度缩放以避免遮挡小缩略图。

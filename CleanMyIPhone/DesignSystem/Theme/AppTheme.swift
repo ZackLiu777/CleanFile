@@ -807,6 +807,16 @@ final class ThemeSettings: ObservableObject {
             userDefaults.set(liquidGlassCardsEnabled, forKey: Self.liquidGlassCardsKey)
         }
     }
+    @Published var interfaceAnimationsEnabled: Bool {
+        didSet {
+            userDefaults.set(interfaceAnimationsEnabled, forKey: Self.interfaceAnimationsKey)
+        }
+    }
+    @Published var mediaDateHeadersEnabled: Bool {
+        didSet {
+            userDefaults.set(mediaDateHeadersEnabled, forKey: Self.mediaDateHeadersKey)
+        }
+    }
 
     var theme: Theme {
         baseTheme
@@ -833,6 +843,8 @@ final class ThemeSettings: ObservableObject {
     private static let customBackgroundStyleKey = "appCustomBackgroundStyle"
     private static let usesCustomBackgroundKey = "appUsesCustomBackground"
     private static let liquidGlassCardsKey = "appLiquidGlassCardsEnabled"
+    private static let interfaceAnimationsKey = "appInterfaceAnimationsEnabled"
+    private static let mediaDateHeadersKey = "appMediaDateHeadersEnabled"
     private let userDefaults: UserDefaults
     private var baseTheme: Theme {
         usesCustomBackground ? customBackgroundTheme : selectedThemeID.theme
@@ -882,6 +894,8 @@ final class ThemeSettings: ObservableObject {
         customBackgroundStyle = storedCustomBackgroundStyle
         usesCustomBackground = userDefaults.bool(forKey: Self.usesCustomBackgroundKey)
         liquidGlassCardsEnabled = userDefaults.bool(forKey: Self.liquidGlassCardsKey)
+        interfaceAnimationsEnabled = userDefaults.object(forKey: Self.interfaceAnimationsKey) as? Bool ?? true
+        mediaDateHeadersEnabled = userDefaults.object(forKey: Self.mediaDateHeadersKey) as? Bool ?? true
 
         if userDefaults.string(forKey: Self.accentPaletteKey) != storedAccentPalette.rawValue {
             userDefaults.set(storedAccentPalette.rawValue, forKey: Self.accentPaletteKey)
