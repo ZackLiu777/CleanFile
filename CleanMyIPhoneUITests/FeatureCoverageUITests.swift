@@ -124,10 +124,13 @@ final class FeatureCoverageUITests: XCTestCase {
         XCTAssertTrue(appearance.exists)
 
         for label in ["Light", "Dark", "System"] {
-            let option = appearance.buttons[label]
+            let option = app.segmentedControls["appearance.mode"].buttons[label]
             XCTAssertTrue(option.exists, "Missing appearance option \(label)")
             option.tap()
-            XCTAssertTrue(option.isSelected)
+            XCTAssertTrue(
+                selectedAppearanceOption(label, in: app).waitForExistence(timeout: 3),
+                "Appearance option \(label) did not become selected"
+            )
         }
     }
 
@@ -193,10 +196,10 @@ final class FeatureCoverageUITests: XCTestCase {
 
     @MainActor
     private func mediaActionsButton(in app: XCUIApplication) -> XCUIElement {
-        let identified = app.buttons["media.actions"]
+        let identified = app.descendants(matching: .any)["media.actions"]
         return identified.waitForExistence(timeout: 2)
             ? identified
-            : app.buttons["Media Actions"]
+            : app.descendants(matching: .any)["Media Actions"]
     }
 
     @MainActor
@@ -224,6 +227,15 @@ final class FeatureCoverageUITests: XCTestCase {
         app.switches
             .matching(identifier: "appearance.liquidGlass")
             .matching(NSPredicate(format: "value == %@", value))
+            .firstMatch
+    }
+
+    @MainActor
+    private func selectedAppearanceOption(_ label: String, in app: XCUIApplication) -> XCUIElement {
+        app.segmentedControls["appearance.mode"]
+            .buttons
+            .matching(identifier: label)
+            .matching(NSPredicate(format: "selected == true"))
             .firstMatch
     }
 }
