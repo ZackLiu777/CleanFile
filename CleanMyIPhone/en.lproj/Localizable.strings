@@ -3,6 +3,10 @@
 "Convert" = "Convert";
 "storage.heading" = "Storage Distribution";
 "Settings" = "Settings";
+"Language" = "Language";
+"App Language" = "App Language";
+"Follow System" = "Follow System";
+"Language changes apply immediately throughout the app." = "Language changes apply immediately throughout the app.";
 "Access your photos" = "Access your photos";
 "Allow access to display the images in your Photos library." = "Allow access to display the images in your Photos library.";
 "Allow Photo Access" = "Allow Photo Access";

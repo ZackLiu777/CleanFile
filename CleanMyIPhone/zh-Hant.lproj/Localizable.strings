@@ -3,6 +3,10 @@
 "Convert" = "轉換";
 "storage.heading" = "儲存分布";
 "Settings" = "設定";
+"Language" = "語言";
+"App Language" = "App 語言";
+"Follow System" = "跟隨系統";
+"Language changes apply immediately throughout the app." = "語言變更會立即套用至整個 App。";
 "Access your photos" = "存取您的照片";
 "Allow access to display the images in your Photos library." = "允許存取以顯示照片圖庫中的圖片。";
 "Allow Photo Access" = "允許存取照片";

@@ -9,7 +9,9 @@ final class FeatureCoverageUITests: XCTestCase {
     func testMediaAndStorageExposeTheirPrimaryActions() throws {
         let app = launchEnglishApp()
 
-        XCTAssertTrue(tab(in: app, id: "tab.media", label: "Media").waitForExistence(timeout: 5))
+        let mediaTab = tab(in: app, id: "tab.media", label: "Media")
+        XCTAssertTrue(mediaTab.waitForExistence(timeout: 5))
+        mediaTab.tap()
         XCTAssertTrue(
             mediaActionsButton(in: app).waitForExistence(timeout: 5),
             "Missing Media Actions menu"
@@ -80,16 +82,15 @@ final class FeatureCoverageUITests: XCTestCase {
             return
         }
 
-        toggle.tap()
-        let changedToggle = switchElement(in: app, valueDifferentFrom: originalValue)
+        tapSwitch(toggle)
         XCTAssertTrue(
-            changedToggle.waitForExistence(timeout: 3),
+            waitForSwitch(toggle, toDifferFrom: originalValue),
             "Liquid Glass switch accessibility value did not update"
         )
 
-        changedToggle.tap()
+        tapSwitch(toggle)
         XCTAssertTrue(
-            switchElement(in: app, valueEqualTo: originalValue).waitForExistence(timeout: 3),
+            waitForSwitch(toggle, toEqual: originalValue),
             "Liquid Glass switch did not return to its original value"
         )
     }
@@ -215,19 +216,38 @@ final class FeatureCoverageUITests: XCTestCase {
     }
 
     @MainActor
-    private func switchElement(in app: XCUIApplication, valueDifferentFrom value: String) -> XCUIElement {
-        app.switches
-            .matching(identifier: "appearance.liquidGlass")
-            .matching(NSPredicate(format: "value != %@", value))
-            .firstMatch
+    private func tapSwitch(_ element: XCUIElement) {
+        element.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)
+        ).tap()
     }
 
     @MainActor
-    private func switchElement(in app: XCUIApplication, valueEqualTo value: String) -> XCUIElement {
-        app.switches
-            .matching(identifier: "appearance.liquidGlass")
-            .matching(NSPredicate(format: "value == %@", value))
-            .firstMatch
+    private func waitForSwitch(_ element: XCUIElement, toDifferFrom value: String) -> Bool {
+        waitForSwitch(element) { $0 != value }
+    }
+
+    @MainActor
+    private func waitForSwitch(_ element: XCUIElement, toEqual value: String) -> Bool {
+        waitForSwitch(element) { $0 == value }
+    }
+
+    @MainActor
+    private func waitForSwitch(
+        _ element: XCUIElement,
+        condition: @escaping (String) -> Bool
+    ) -> Bool {
+        let predicate = NSPredicate { object, _ in
+            guard let switchElement = object as? XCUIElement,
+                  let value = switchElement.value as? String else {
+                return false
+            }
+            return condition(value)
+        }
+        return XCTWaiter.wait(
+            for: [XCTNSPredicateExpectation(predicate: predicate, object: element)],
+            timeout: 3
+        ) == .completed
     }
 
     @MainActor

@@ -3,6 +3,10 @@
 "Convert" = "변환";
 "storage.heading" = "저장 공간 분포";
 "Settings" = "설정";
+"Language" = "언어";
+"App Language" = "앱 언어";
+"Follow System" = "시스템 설정 따르기";
+"Language changes apply immediately throughout the app." = "언어 변경 사항이 앱 전체에 즉시 적용됩니다.";
 "Access your photos" = "사진 접근";
 "Allow access to display the images in your Photos library." = "사진 보관함의 이미지를 표시하려면 접근을 허용하세요.";
 "Allow Photo Access" = "사진 접근 허용";

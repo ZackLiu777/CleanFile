@@ -277,9 +277,7 @@ struct ConversionGuideToolDetailView: View {
 
     private var screenshotHero: some View {
         ZStack(alignment: .bottomLeading) {
-            Image(tool.imageName, bundle: .module)
-                .resizable()
-                .scaledToFill()
+            ConversionGuideLocalizedPreview(imageName: tool.imageName)
                 .frame(maxWidth: .infinity)
                 .frame(height: 250, alignment: .top)
                 .clipped()

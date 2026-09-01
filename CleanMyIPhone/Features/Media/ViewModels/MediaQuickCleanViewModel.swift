@@ -103,52 +103,52 @@ final class MediaQuickCleanViewModel: ObservableObject {
         categories = [
             makeCategory(
                 id: .similarPhotos,
-                title: String(localized: "Similar Photos"),
+                title: AppL10n.string("Similar Photos"),
                 systemImage: "photo.stack",
                 assetIDs: similarDeletions
             ),
             makeCategory(
                 id: .screenshots,
-                title: String(localized: "Screenshots"),
+                title: AppL10n.string("Screenshots"),
                 systemImage: "iphone",
                 assetIDs: Set(result.screenshotIDs)
             ),
             makeCategory(
                 id: .videos,
-                title: String(localized: "Videos"),
+                title: AppL10n.string("Videos"),
                 systemImage: "video.fill",
                 assetIDs: Set(result.videoIDs)
             ),
             makeCategory(
                 id: .livePhotos,
-                title: String(localized: "Live Photos"),
+                title: AppL10n.string("Live Photos"),
                 systemImage: "livephoto",
                 assetIDs: Set(result.livePhotoIDs)
             ),
             makeVideoCategory(
                 id: .screenRecordings,
-                title: String(localized: "Screen Recordings"),
+                title: AppL10n.string("Screen Recordings"),
                 systemImage: "record.circle",
                 category: .screenRecording,
                 videos: classifiedVideos
             ),
             makeVideoCategory(
                 id: .longVideos,
-                title: String(localized: "Long Videos"),
+                title: AppL10n.string("Long Videos"),
                 systemImage: "clock",
                 category: .longDuration,
                 videos: classifiedVideos
             ),
             makeVideoCategory(
                 id: .fourKVideos,
-                title: String(localized: "4K Videos"),
+                title: AppL10n.string("4K Videos"),
                 systemImage: "4k.tv",
                 category: .fourK,
                 videos: classifiedVideos
             ),
             makeVideoCategory(
                 id: .slowMotionVideos,
-                title: String(localized: "Slow-motion Videos"),
+                title: AppL10n.string("Slow-motion Videos"),
                 systemImage: "slowmo",
                 category: .slowMotion,
                 videos: classifiedVideos

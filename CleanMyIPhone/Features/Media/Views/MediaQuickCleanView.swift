@@ -231,7 +231,7 @@ struct MediaQuickCleanView: View {
 
     private func categoryDetail(_ category: MediaQuickCleanViewModel.Category) -> String {
         let count = String.localizedStringWithFormat(
-            String(localized: "%lld items"),
+            AppL10n.string("%lld items"),
             Int64(category.assetIDs.count)
         )
         let size = ByteCountFormatter.string(
@@ -243,7 +243,7 @@ struct MediaQuickCleanView: View {
 
     private var selectedCountText: String {
         String.localizedStringWithFormat(
-            String(localized: "%lld items selected"),
+            AppL10n.string("%lld items selected"),
             Int64(viewModel.selectedAssetIDs.count)
         )
     }
@@ -254,7 +254,7 @@ struct MediaQuickCleanView: View {
             countStyle: .file
         )
         return String.localizedStringWithFormat(
-            String(localized: "Approximately %@"),
+            AppL10n.string("Approximately %@"),
             size
         )
     }
@@ -262,7 +262,7 @@ struct MediaQuickCleanView: View {
     private func handleDeletionResult() {
         if case let .success(deletedCount, estimatedBytes) = photoLibrary.deletionState {
             let count = String.localizedStringWithFormat(
-                String(localized: "%lld items"),
+                AppL10n.string("%lld items"),
                 Int64(deletedCount)
             )
             let size = ByteCountFormatter.string(
@@ -270,7 +270,7 @@ struct MediaQuickCleanView: View {
                 countStyle: .file
             )
             completionMessage = String.localizedStringWithFormat(
-                String(localized: "%@ moved to Recently Deleted · ~%@"),
+                AppL10n.string("%@ moved to Recently Deleted · ~%@"),
                 count,
                 size
             )

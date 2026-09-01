@@ -17,6 +17,7 @@ import SwiftUI
 /// 定义 `CleanMyIPhoneApp` 的值语义数据与相关行为。
 struct CleanMyIPhoneApp: App {
     @StateObject private var themeSettings: ThemeSettings
+    @StateObject private var languageSettings: AppLanguageSettings
 
     init() {
 #if DEBUG
@@ -32,20 +33,26 @@ struct CleanMyIPhoneApp: App {
                 "appUsesCustomBackground",
                 "appLiquidGlassCardsEnabled",
                 "appInterfaceAnimationsEnabled",
-                "appMediaDateHeadersEnabled"
+                "appMediaDateHeadersEnabled",
+                "selectedAppTab"
             ] {
                 defaults.removeObject(forKey: key)
             }
+            defaults.removeObject(forKey: AppLanguageSettings.defaultsKey)
         }
 #endif
         _themeSettings = StateObject(wrappedValue: ThemeSettings())
+        _languageSettings = StateObject(wrappedValue: AppLanguageSettings())
     }
 
     var body: some Scene {
         WindowGroup {
             rootView
+                .id(languageSettings.language.rawValue)
                 .environmentObject(themeSettings)
+                .environmentObject(languageSettings)
                 .environment(\.appTheme, themeSettings.theme)
+                .environment(\.locale, languageSettings.language.locale)
                 .preferredColorScheme(themeSettings.effectiveColorScheme)
                 .tint(themeSettings.theme.accentPrimary)
                 .foregroundStyle(themeSettings.theme.textPrimary)

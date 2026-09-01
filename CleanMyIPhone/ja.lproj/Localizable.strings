@@ -3,6 +3,10 @@
 "Convert" = "変換";
 "storage.heading" = "ストレージの内訳";
 "Settings" = "設定";
+"Language" = "言語";
+"App Language" = "アプリの言語";
+"Follow System" = "システム設定に従う";
+"Language changes apply immediately throughout the app." = "言語の変更はアプリ全体にすぐ反映されます。";
 "Access your photos" = "写真へのアクセス";
 "Allow access to display the images in your Photos library." = "写真ライブラリの画像を表示するにはアクセスを許可してください。";
 "Allow Photo Access" = "写真へのアクセスを許可";

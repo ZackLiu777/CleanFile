@@ -270,9 +270,7 @@ private struct ConversionGuideScreenshotCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Image(imageName, bundle: .module)
-                .resizable()
-                .scaledToFill()
+            ConversionGuideLocalizedPreview(imageName: imageName)
                 .frame(maxWidth: .infinity)
                 .frame(height: 230, alignment: .top)
                 .clipped()

@@ -3,6 +3,10 @@
 "Convert" = "Convertir";
 "storage.heading" = "Distribución del almacenamiento";
 "Settings" = "Ajustes";
+"Language" = "Idioma";
+"App Language" = "Idioma de la app";
+"Follow System" = "Seguir el sistema";
+"Language changes apply immediately throughout the app." = "Los cambios de idioma se aplican inmediatamente en toda la app.";
 "Access your photos" = "Accede a tus fotos";
 "Allow access to display the images in your Photos library." = "Permite el acceso para mostrar las imágenes de tu fototeca.";
 "Allow Photo Access" = "Permitir acceso a Fotos";

@@ -154,7 +154,7 @@ struct SunburstTreeAdapter {
             let byteCount = max(0, parent.byteCount - visibleByteCount)
             let aggregateSource = FileNode(
                 id: "\(parent.id)/aggregate-other",
-                name: String(localized: "Other"),
+                name: AppL10n.string("Other"),
                 byteCount: byteCount,
                 children: [],
                 category: parent.category,

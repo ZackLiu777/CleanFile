@@ -376,22 +376,22 @@ private struct MediaDashboardResultsView: View {
     private var cleanupCategories: [MediaCategorySummary] {
         [
             MediaCategorySummary(
-                title: String(localized: "Similar Photos"),
+                title: AppL10n.string("Similar Photos"),
                 assetIDs: result.similarImageIDs,
                 systemImage: "photo.stack"
             ),
             MediaCategorySummary(
-                title: String(localized: "Videos"),
+                title: AppL10n.string("Videos"),
                 assetIDs: result.videoIDs,
                 systemImage: "video.fill"
             ),
             MediaCategorySummary(
-                title: String(localized: "Screenshots"),
+                title: AppL10n.string("Screenshots"),
                 assetIDs: result.screenshotIDs,
                 systemImage: "iphone"
             ),
             MediaCategorySummary(
-                title: String(localized: "Live Photos"),
+                title: AppL10n.string("Live Photos"),
                 assetIDs: result.livePhotoIDs,
                 systemImage: "livephoto"
             )
@@ -451,7 +451,7 @@ private struct MediaDashboardResultsView: View {
 
     /// 封装 `itemCount` 对应的局部行为，供当前类型在统一入口下复用。
     private func itemCount(_ count: Int) -> String {
-        String.localizedStringWithFormat(String(localized: "%lld items"), Int64(count))
+        String.localizedStringWithFormat(AppL10n.string("%lld items"), Int64(count))
     }
 
     /// 解析 `categoryDetail` 对应的业务语义，并返回稳定的分类或映射结果。
@@ -498,22 +498,22 @@ private struct MediaStorageOverview: View {
     private var segments: [MediaStorageSegment] {
         [
             MediaStorageSegment(
-                title: String(localized: "Photos"),
+                title: AppL10n.string("Photos"),
                 bytes: visiblePhotoBytes,
                 color: theme.positiveGreen.opacity(0.82)
             ),
             MediaStorageSegment(
-                title: String(localized: "Videos"),
+                title: AppL10n.string("Videos"),
                 bytes: visibleVideoBytes,
                 color: theme.fileCategoryColor(.document).opacity(0.82)
             ),
             MediaStorageSegment(
-                title: String(localized: "System & Apps"),
+                title: AppL10n.string("System & Apps"),
                 bytes: otherUsedBytes,
                 color: theme.warningOrange.opacity(0.72)
             ),
             MediaStorageSegment(
-                title: String(localized: "Available"),
+                title: AppL10n.string("Available"),
                 bytes: storage.availableBytes,
                 color: theme.textTertiary.opacity(0.42)
             )
@@ -620,7 +620,7 @@ private struct MediaStorageOverview: View {
 
     private var storageSummary: String {
         String.localizedStringWithFormat(
-            String(localized: "%lld%% used · %@ of %@"),
+            AppL10n.string("%lld%% used · %@ of %@"),
             Int64((storage.usedFraction * 100).rounded()),
             byteCountText(storage.usedBytes),
             byteCountText(storage.totalBytes)
@@ -867,7 +867,7 @@ private struct MediaCategoryDetailView: View {
             Text("The system will ask you to confirm deletion of \(selectedIDs.count) photo or video item(s).")
         }
         .alert(
-            String(localized: "Deletion Failed"),
+            AppL10n.string("Deletion Failed"),
             isPresented: Binding(
                 get: {
                     if case .failure = viewModel.deletionState { return true }
@@ -942,14 +942,14 @@ private struct MediaCategoryDetailView: View {
                 HStack(spacing: 5) {
                     Text(
                         String.localizedStringWithFormat(
-                            String(localized: "Items moved: %lld"),
+                            AppL10n.string("Items moved: %lld"),
                             Int64(deletedCount)
                         )
                     )
                     Text("·")
                     Text(
                         String.localizedStringWithFormat(
-                            String(localized: "Estimated %@"),
+                            AppL10n.string("Estimated %@"),
                             ByteCountFormatter.string(
                                 fromByteCount: estimatedBytes,
                                 countStyle: .file

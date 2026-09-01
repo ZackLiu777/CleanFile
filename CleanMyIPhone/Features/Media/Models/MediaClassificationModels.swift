@@ -66,9 +66,9 @@ enum MediaAnalysisError: LocalizedError, Equatable, Sendable {
     var errorDescription: String? {
         switch self {
         case .photoAccessUnavailable:
-            String(localized: "Photo access is unavailable for analysis.")
+            AppL10n.string("Photo access is unavailable for analysis.")
         case .unexpected:
-            String(localized: "Media analysis could not be completed.")
+            AppL10n.string("Media analysis could not be completed.")
         }
     }
 }
@@ -96,13 +96,13 @@ enum MediaDeletionError: LocalizedError, Equatable, Sendable {
     var errorDescription: String? {
         switch self {
         case .photoAccessUnavailable:
-            String(localized: "Photo access is unavailable for deletion.")
+            AppL10n.string("Photo access is unavailable for deletion.")
         case .noItemsSelected:
-            String(localized: "Select at least one item to delete.")
+            AppL10n.string("Select at least one item to delete.")
         case .itemsUnavailable:
-            String(localized: "Some selected media is no longer available. Refresh and try again.")
+            AppL10n.string("Some selected media is no longer available. Refresh and try again.")
         case .deletionFailed:
-            String(localized: "The selected media could not be deleted.")
+            AppL10n.string("The selected media could not be deleted.")
         }
     }
 }
@@ -117,11 +117,11 @@ nonisolated enum VideoCategory: String, CaseIterable, Codable, Hashable, Sendabl
 
     var displayName: String {
         switch self {
-        case .longDuration: String(localized: "Long Videos")
-        case .fourK: String(localized: "4K Videos")
-        case .screenRecording: String(localized: "Screen Recordings")
-        case .slowMotion: String(localized: "Slow-motion Videos")
-        case .timeLapse: String(localized: "Time-lapse Videos")
+        case .longDuration: AppL10n.string("Long Videos")
+        case .fourK: AppL10n.string("4K Videos")
+        case .screenRecording: AppL10n.string("Screen Recordings")
+        case .slowMotion: AppL10n.string("Slow-motion Videos")
+        case .timeLapse: AppL10n.string("Time-lapse Videos")
         }
     }
 }

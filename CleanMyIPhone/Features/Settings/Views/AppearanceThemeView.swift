@@ -299,7 +299,15 @@ struct AppearanceThemeView: View {
                 "Liquid Glass Cards",
                 isOn: $themeSettings.liquidGlassCardsEnabled
             )
+            .contentShape(Rectangle())
+            .highPriorityGesture(
+                TapGesture().onEnded {
+                    themeSettings.liquidGlassCardsEnabled.toggle()
+                }
+            )
+            .id(themeSettings.liquidGlassCardsEnabled)
             .accessibilityIdentifier("appearance.liquidGlass")
+            .accessibilityValue(themeSettings.liquidGlassCardsEnabled ? "1" : "0")
         } header: {
             Text("Cards")
         } footer: {

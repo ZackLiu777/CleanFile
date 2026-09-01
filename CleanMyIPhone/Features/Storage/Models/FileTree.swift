@@ -85,7 +85,7 @@ nonisolated struct FileTreeAccumulator: @unchecked Sendable {
 
     init(rootURL: URL) {
         let rootName = rootURL.lastPathComponent.isEmpty
-            ? String(localized: "Selected Folder")
+            ? AppL10n.string("Selected Folder")
             : rootURL.lastPathComponent
 
         root = MutableNode(

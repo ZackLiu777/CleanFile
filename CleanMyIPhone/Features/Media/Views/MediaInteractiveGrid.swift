@@ -396,20 +396,20 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 
         /// 将日期转换为用户当前区域的 Today、Yesterday 或完整日期标题。
         private func dateTitle(_ day: Date?) -> String {
-            guard let day else { return String(localized: "Unknown Date") }
+            guard let day else { return AppL10n.string("Unknown Date") }
             let calendar = Calendar.current
             if calendar.isDateInToday(day) {
-                return String(localized: "Today")
+                return AppL10n.string("Today")
             }
             if calendar.isDateInYesterday(day) {
-                return String(localized: "Yesterday")
+                return AppL10n.string("Yesterday")
             }
             return day.formatted(.dateTime.year().month(.wide).day())
         }
 
         /// 使用项目既有本地化格式生成分区资源数量。
         private func itemCount(_ count: Int) -> String {
-            String.localizedStringWithFormat(String(localized: "%lld items"), Int64(count))
+            String.localizedStringWithFormat(AppL10n.string("%lld items"), Int64(count))
         }
 
         // MARK: Interactive pinch transition
@@ -982,9 +982,9 @@ private struct MediaInteractiveGridCellContent: View {
             return ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
         }
         if viewModel.isExactByteCountUnavailable(for: assetID) {
-            return String(localized: "Size unavailable")
+            return AppL10n.string("Size unavailable")
         }
-        return String(localized: "Calculating size…")
+        return AppL10n.string("Calculating size…")
     }
 
     /// 根据选中状态显示圆形标记，并随密度缩放以避免遮挡小缩略图。

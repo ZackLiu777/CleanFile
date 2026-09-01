@@ -139,6 +139,7 @@ struct StorageView: View {
             }
         }
         .storageCard()
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("storage.status")
     }
 
@@ -427,7 +428,7 @@ struct StorageView: View {
 
     /// 计算 `fileCountText` 所需的派生值，避免展示层重复实现相同规则。
     private func fileCountText(_ count: Int) -> String {
-        String.localizedStringWithFormat(String(localized: "%lld files"), Int64(count))
+        String.localizedStringWithFormat(AppL10n.string("%lld files"), Int64(count))
     }
 }
 
@@ -562,7 +563,7 @@ private struct ScannedFilesView: View {
                 .appSoftScrollEdge()
             }
         }
-        .navigationTitle(category?.displayName ?? String(localized: "Scanned Files"))
+        .navigationTitle(category?.displayName ?? AppL10n.string("Scanned Files"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -631,9 +632,9 @@ private struct ScannedFilesView: View {
 
     private var deletionResultTitle: String? {
         switch viewModel.deletionState {
-        case .success: String(localized: "Deletion Complete")
-        case .partialFailure: String(localized: "Deletion Partly Completed")
-        case .failure: String(localized: "Deletion Failed")
+        case .success: AppL10n.string("Deletion Complete")
+        case .partialFailure: AppL10n.string("Deletion Partly Completed")
+        case .failure: AppL10n.string("Deletion Failed")
         default: nil
         }
     }
@@ -650,10 +651,10 @@ private struct ScannedFilesView: View {
     private var deletionResultMessage: String {
         switch viewModel.deletionState {
         case .success(let count):
-            String.localizedStringWithFormat(String(localized: "%lld file(s) deleted."), Int64(count))
+            String.localizedStringWithFormat(AppL10n.string("%lld file(s) deleted."), Int64(count))
         case .partialFailure(let deletedCount, let failedCount):
             String.localizedStringWithFormat(
-                String(localized: "%1$lld file(s) deleted; %2$lld could not be deleted."),
+                AppL10n.string("%1$lld file(s) deleted; %2$lld could not be deleted."),
                 Int64(deletedCount),
                 Int64(failedCount)
             )

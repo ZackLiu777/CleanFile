@@ -16,6 +16,7 @@ import UIKit
 struct SettingsView: View {
     @Environment(\.appTheme) private var theme
     @EnvironmentObject private var themeSettings: ThemeSettings
+    @EnvironmentObject private var languageSettings: AppLanguageSettings
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
     @State private var photoAuthorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
@@ -53,6 +54,33 @@ struct SettingsView: View {
                     Text("Personalization")
                 } footer: {
                     Text("Choose app colors, background, and appearance in one place.")
+                }
+                .appListCard()
+
+                Section {
+                    Picker(
+                        "App Language",
+                        selection: Binding(
+                            get: { languageSettings.language },
+                            set: { languageSettings.select($0) }
+                        )
+                    ) {
+                        ForEach(AppLanguage.allCases) { language in
+                            if language == .system {
+                                Text("Follow System")
+                                    .tag(language)
+                            } else {
+                                Text(verbatim: language.displayName)
+                                    .tag(language)
+                            }
+                        }
+                    }
+                    .pickerStyle(.navigationLink)
+                    .accessibilityIdentifier("settings.language")
+                } header: {
+                    Text("Language")
+                } footer: {
+                    Text("Language changes apply immediately throughout the app.")
                 }
                 .appListCard()
 

@@ -23,13 +23,13 @@ nonisolated enum FileCategory: String, CaseIterable, Codable, Hashable, Sendable
 
     var displayName: String {
         switch self {
-        case .video: String(localized: "Videos")
-        case .image: String(localized: "Images")
-        case .audio: String(localized: "Audio")
-        case .document: String(localized: "Documents")
-        case .pdf: String(localized: "PDFs")
-        case .archive: String(localized: "Archives")
-        case .other: String(localized: "Other")
+        case .video: AppL10n.string("Videos")
+        case .image: AppL10n.string("Images")
+        case .audio: AppL10n.string("Audio")
+        case .document: AppL10n.string("Documents")
+        case .pdf: AppL10n.string("PDFs")
+        case .archive: AppL10n.string("Archives")
+        case .other: AppL10n.string("Other")
         }
     }
 
@@ -428,11 +428,11 @@ enum FileScanError: LocalizedError, Equatable, Sendable {
 
     var errorDescription: String? {
         switch self {
-        case .cancelled: String(localized: "The scan was cancelled.")
-        case .notDirectory: String(localized: "Please choose a folder.")
-        case .unableToEnumerate: String(localized: "The selected folder could not be read.")
-        case .securityScopeUnavailable: String(localized: "Access to the selected folder could not be obtained.")
-        case .selectionFailed: String(localized: "The selected folder could not be opened.")
+        case .cancelled: AppL10n.string("The scan was cancelled.")
+        case .notDirectory: AppL10n.string("Please choose a folder.")
+        case .unableToEnumerate: AppL10n.string("The selected folder could not be read.")
+        case .securityScopeUnavailable: AppL10n.string("Access to the selected folder could not be obtained.")
+        case .selectionFailed: AppL10n.string("The selected folder could not be opened.")
         }
     }
 }
@@ -482,10 +482,10 @@ enum FileDeletionError: LocalizedError, Equatable, Sendable {
 
     var errorDescription: String? {
         switch self {
-        case .noItemsSelected: String(localized: "Select at least one file to delete.")
-        case .folderAccessUnavailable: String(localized: "Access to the selected folder is no longer available.")
-        case .invalidSelection: String(localized: "One or more selected files are outside the analyzed folder.")
-        case .deletionFailed: String(localized: "The selected files could not be deleted.")
+        case .noItemsSelected: AppL10n.string("Select at least one file to delete.")
+        case .folderAccessUnavailable: AppL10n.string("Access to the selected folder is no longer available.")
+        case .invalidSelection: AppL10n.string("One or more selected files are outside the analyzed folder.")
+        case .deletionFailed: AppL10n.string("The selected files could not be deleted.")
         }
     }
 }
