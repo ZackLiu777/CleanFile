@@ -61,15 +61,76 @@ struct PersistenceTests {
             skippedFileCount: 4
         )
 
+        let encoded = try JSONEncoder().encode(snapshot)
         let decoded = try JSONDecoder().decode(
             FileStateSnapshot.self,
-            from: JSONEncoder().encode(snapshot)
+            from: encoded
         )
 
         #expect(decoded.directoryBookmark == Data([1, 2, 3]))
         #expect(decoded.selectedDirectoryName == "Documents")
-        #expect(decoded.files == [file])
+        #expect(decoded.files == [PersistedScannedFile(file)])
         #expect(decoded.skippedFileCount == 4)
+        #expect(!decoded.requiresRewrite)
+        #expect(!String(decoding: encoded, as: UTF8.self).contains("provider/transient-id"))
+    }
+
+    @Test("Legacy file snapshots remain readable after compact persistence")
+    func legacyFileSnapshotRemainsReadable() throws {
+        let file = ScannedFile(
+            url: URL(fileURLWithPath: "/provider/legacy-id"),
+            name: "legacy.mov",
+            relativePathComponents: ["Videos", "legacy.mov"],
+            category: .video,
+            byteCount: 42,
+            hasKnownByteCount: true
+        )
+        let legacy = LegacyFileStateSnapshot(
+            directoryBookmark: Data([4, 5, 6]),
+            selectedDirectoryName: "Videos",
+            files: [file],
+            skippedFileCount: 0
+        )
+
+        let decoded = try JSONDecoder().decode(
+            FileStateSnapshot.self,
+            from: JSONEncoder().encode(legacy)
+        )
+
+        #expect(decoded.files == [PersistedScannedFile(file)])
+        #expect(decoded.requiresRewrite)
+    }
+
+    @Test("Storage dashboard snapshot round-trips without file records")
+    func storageDashboardRoundTrip() throws {
+        let summary = StorageSummary(
+            fileCount: 20_000,
+            totalBytes: 8_000_000,
+            unknownByteCountFileCount: 2,
+            categories: [
+                StorageCategorySummary(
+                    category: .image,
+                    fileCount: 20_000,
+                    byteCount: 8_000_000,
+                    unknownByteCount: 2,
+                    percentage: 1
+                )
+            ]
+        )
+        let snapshot = StorageDashboardSnapshot(
+            selectedDirectoryName: "Archive",
+            summary: summary,
+            skippedFileCount: 3
+        )
+
+        let decoded = try JSONDecoder().decode(
+            StorageDashboardSnapshot.self,
+            from: JSONEncoder().encode(snapshot)
+        )
+
+        #expect(decoded.selectedDirectoryName == "Archive")
+        #expect(decoded.summary == summary)
+        #expect(decoded.skippedFileCount == 3)
     }
 
     @Test("All file categories retain stable persisted raw values")
@@ -105,6 +166,13 @@ struct PersistenceTests {
             try JSONDecoder().decode(FileStateSnapshot.self, from: malformed)
         }
     }
+}
+
+private struct LegacyFileStateSnapshot: Codable {
+    let directoryBookmark: Data
+    let selectedDirectoryName: String
+    let files: [ScannedFile]
+    let skippedFileCount: Int
 }
 
 @MainActor

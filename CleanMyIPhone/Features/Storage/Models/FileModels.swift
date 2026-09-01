@@ -222,7 +222,7 @@ enum RelativePathComponents: Sendable {
 }
 
 /// 定义 `StorageCategorySummary` 的值语义数据与相关行为。
-struct StorageCategorySummary: Identifiable, Hashable, Sendable {
+nonisolated struct StorageCategorySummary: Identifiable, Codable, Hashable, Sendable {
     let category: FileCategory
     let fileCount: Int
     let byteCount: Int64
@@ -233,7 +233,7 @@ struct StorageCategorySummary: Identifiable, Hashable, Sendable {
 }
 
 /// 定义 `StorageSummary` 的值语义数据与相关行为。
-struct StorageSummary: Hashable, Sendable {
+nonisolated struct StorageSummary: Codable, Hashable, Sendable {
     let fileCount: Int
     let totalBytes: Int64
     let unknownByteCountFileCount: Int

@@ -148,32 +148,39 @@ struct StorageView: View {
             Text("Status")
                 .font(.headline)
 
-            switch viewModel.state {
-            case .idle:
-                Label("Choose a folder to begin scanning.", systemImage: "folder.badge.plus")
-                    .foregroundStyle(.secondary)
-            case .scanning(let progress):
+            if viewModel.isRestoringStoredFiles {
                 ProgressView()
                     .tint(theme.accentPrimary)
-                Text("Scanned \(progress.scannedFileCount) files")
+                Text("Loading…")
                     .foregroundStyle(.secondary)
-            case .success:
-                Label("Scan completed.", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(theme.accentPrimary)
-            case .empty:
-                Label("No readable files found.", systemImage: "folder")
-                    .foregroundStyle(.secondary)
-            case .partialFailure(_, let skippedFileCount):
-                Label(
-                    "Scan completed with \(skippedFileCount) inaccessible file(s).",
-                    systemImage: "exclamationmark.triangle"
-                )
-            case .cancelled:
-                Label("Scan cancelled.", systemImage: "pause.circle")
-                    .foregroundStyle(.secondary)
-            case .failure(let error):
-                Label(error.localizedDescription, systemImage: "xmark.circle")
-                    .foregroundStyle(theme.negativeRed)
+            } else {
+                switch viewModel.state {
+                case .idle:
+                    Label("Choose a folder to begin scanning.", systemImage: "folder.badge.plus")
+                        .foregroundStyle(.secondary)
+                case .scanning(let progress):
+                    ProgressView()
+                        .tint(theme.accentPrimary)
+                    Text("Scanned \(progress.scannedFileCount) files")
+                        .foregroundStyle(.secondary)
+                case .success:
+                    Label("Scan completed.", systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(theme.accentPrimary)
+                case .empty:
+                    Label("No readable files found.", systemImage: "folder")
+                        .foregroundStyle(.secondary)
+                case .partialFailure(_, let skippedFileCount):
+                    Label(
+                        "Scan completed with \(skippedFileCount) inaccessible file(s).",
+                        systemImage: "exclamationmark.triangle"
+                    )
+                case .cancelled:
+                    Label("Scan cancelled.", systemImage: "pause.circle")
+                        .foregroundStyle(.secondary)
+                case .failure(let error):
+                    Label(error.localizedDescription, systemImage: "xmark.circle")
+                        .foregroundStyle(theme.negativeRed)
+                }
             }
         }
         .storageCard()
@@ -502,7 +509,9 @@ private struct ScannedFilesView: View {
 
     var body: some View {
         Group {
-            if displayedFiles.isEmpty {
+            if displayedFiles.isEmpty, viewModel.isRestoringStoredFiles {
+                ProgressView("Loading…")
+            } else if displayedFiles.isEmpty {
                 ContentUnavailableView(
                     "No Files",
                     systemImage: "folder",

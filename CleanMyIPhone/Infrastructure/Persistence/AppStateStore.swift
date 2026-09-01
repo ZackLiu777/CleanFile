@@ -28,9 +28,61 @@ nonisolated struct MediaSizeIndexEntry: Codable, Sendable {
 
 /// 定义 `FileStateSnapshot` 的值语义数据与相关行为。
 nonisolated struct FileStateSnapshot: Codable, Sendable {
+    static let currentSchemaVersion = 2
+
+    let schemaVersion: Int?
     let directoryBookmark: Data
     let selectedDirectoryName: String
-    let files: [ScannedFile]
+    let files: [PersistedScannedFile]
+    let skippedFileCount: Int
+
+    init(
+        directoryBookmark: Data,
+        selectedDirectoryName: String,
+        files: [ScannedFile],
+        skippedFileCount: Int
+    ) {
+        schemaVersion = Self.currentSchemaVersion
+        self.directoryBookmark = directoryBookmark
+        self.selectedDirectoryName = selectedDirectoryName
+        self.files = files.map(PersistedScannedFile.init)
+        self.skippedFileCount = skippedFileCount
+    }
+
+    var requiresRewrite: Bool {
+        schemaVersion != Self.currentSchemaVersion
+    }
+}
+
+/// A compact persisted file record. The absolute provider URL is intentionally
+/// omitted because it is transient and is rebuilt from the root bookmark and
+/// validated relative components during restoration.
+nonisolated struct PersistedScannedFile: Codable, Hashable, Sendable {
+    let name: String
+    let relativePathComponents: [String]
+    let category: FileCategory
+    let byteCount: Int64
+    let hasKnownByteCount: Bool
+    let creationDate: Date?
+    let modificationDate: Date?
+
+    init(_ file: ScannedFile) {
+        name = file.name
+        relativePathComponents = file.relativePathComponents
+        category = file.category
+        byteCount = file.byteCount
+        hasKnownByteCount = file.hasKnownByteCount
+        creationDate = file.creationDate
+        modificationDate = file.modificationDate
+    }
+}
+
+/// Small dashboard cache loaded before the full file index. Keeping it in a
+/// separate file lets the storage tab render without decoding tens of
+/// thousands of file records first.
+nonisolated struct StorageDashboardSnapshot: Codable, Sendable {
+    let selectedDirectoryName: String
+    let summary: StorageSummary
     let skippedFileCount: Int
 }
 
@@ -43,6 +95,7 @@ actor AppStateStore {
         case media = "media-state.json"
         case mediaSizes = "media-size-index.json"
         case files = "file-state.json"
+        case fileDashboard = "file-dashboard.json"
     }
 
     private let encoder = JSONEncoder()
@@ -89,6 +142,16 @@ actor AppStateStore {
     /// 持久化 `saveFileState` 对应的数据，并保持后续恢复所需的信息完整。
     func saveFileState(_ snapshot: FileStateSnapshot?) {
         save(snapshot, name: .files)
+    }
+
+    func loadStorageDashboard() -> StorageDashboardSnapshot? {
+        let interval = StoragePerformance.begin("Storage Dashboard Load")
+        defer { StoragePerformance.end("Storage Dashboard Load", id: interval) }
+        return load(StorageDashboardSnapshot.self, name: .fileDashboard)
+    }
+
+    func saveStorageDashboard(_ snapshot: StorageDashboardSnapshot?) {
+        save(snapshot, name: .fileDashboard)
     }
 
     /// 加载 `load` 所需的数据，并将结果转换为当前层可消费的状态。

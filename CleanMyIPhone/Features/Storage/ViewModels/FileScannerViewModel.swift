@@ -15,7 +15,7 @@ private nonisolated struct PreparedFileState: Sendable {
     let rootURL: URL
     let selectedDirectoryName: String
     let directoryBookmark: Data
-    let shouldRewriteBookmark: Bool
+    let shouldRewriteSnapshot: Bool
     let skippedFileCount: Int
     let files: [ScannedFile]
     let summary: StorageSummary
@@ -86,7 +86,7 @@ private nonisolated enum FileStateRestorer {
             rootURL: restoredRoot,
             selectedDirectoryName: snapshot.selectedDirectoryName,
             directoryBookmark: bookmark,
-            shouldRewriteBookmark: isStale,
+            shouldRewriteSnapshot: isStale || snapshot.requiresRewrite,
             skippedFileCount: snapshot.skippedFileCount,
             files: restoredFiles,
             summary: summaryAccumulator.makeSummary(),
@@ -109,6 +109,7 @@ final class FileScannerViewModel: ObservableObject {
     @Published private(set) var largestFiles: [ScannedFile] = []
     @Published private(set) var selectedDirectoryName: String?
     @Published private(set) var deletionState: FileDeletionState = .idle
+    @Published private(set) var isRestoringStoredFiles = false
 
     private let scanner: MetadataFileScanner
     private var scanTask: Task<Void, Never>?
@@ -119,6 +120,7 @@ final class FileScannerViewModel: ObservableObject {
     private var selectedDirectoryURL: URL?
     private var selectedDirectoryBookmark: Data?
     private var skippedFileCount = 0
+    private var restoredDashboardAvailable = false
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(scanner: MetadataFileScanner = MetadataFileScanner()) {
@@ -137,8 +139,16 @@ final class FileScannerViewModel: ObservableObject {
     func loadIfNeeded() {
         guard !hasAttemptedRestore else { return }
         hasAttemptedRestore = true
+        isRestoringStoredFiles = true
 
         restoreTask = Task { [weak self] in
+            defer { self?.isRestoringStoredFiles = false }
+            let dashboard = await AppStateStore.shared.loadStorageDashboard()
+            guard !Task.isCancelled else { return }
+            if let dashboard {
+                self?.applyCachedDashboard(dashboard)
+            }
+
             guard let snapshot = await AppStateStore.shared.loadFileState() else { return }
             guard !Task.isCancelled else { return }
 
@@ -161,6 +171,7 @@ final class FileScannerViewModel: ObservableObject {
         hasAttemptedRestore = true
         restoreTask?.cancel()
         restoreTask = nil
+        isRestoringStoredFiles = false
         scanTask?.cancel()
         selectedDirectoryName = directory.lastPathComponent
         selectedDirectoryURL = directory
@@ -170,7 +181,10 @@ final class FileScannerViewModel: ObservableObject {
             relativeTo: nil
         )
         skippedFileCount = 0
-        Task { await stateStore.saveFileState(nil) }
+        Task {
+            await stateStore.saveStorageDashboard(nil)
+            await stateStore.saveFileState(nil)
+        }
         files = []
         summary = nil
         fileTree = nil
@@ -308,7 +322,7 @@ final class FileScannerViewModel: ObservableObject {
 
     /// Applies already-prepared values without running O(n) work on MainActor.
     private func applyRestoredState(_ prepared: PreparedFileState) {
-        guard case .idle = state, selectedDirectoryURL == nil else { return }
+        guard selectedDirectoryURL == nil else { return }
         selectedDirectoryURL = prepared.rootURL
         selectedDirectoryName = prepared.selectedDirectoryName
         selectedDirectoryBookmark = prepared.directoryBookmark
@@ -324,8 +338,34 @@ final class FileScannerViewModel: ObservableObject {
         } else {
             state = .success(prepared.summary)
         }
-        if prepared.shouldRewriteBookmark { persistStableState() }
+        isRestoringStoredFiles = false
+        if prepared.shouldRewriteSnapshot {
+            persistStableState()
+        } else if !restoredDashboardAvailable {
+            persistDashboardState()
+        }
         StoragePerformance.event("Storage State Published")
+    }
+
+    /// Publishes only the inexpensive dashboard state. Full file URLs and the
+    /// directory tree continue restoring in the background.
+    private func applyCachedDashboard(_ dashboard: StorageDashboardSnapshot) {
+        guard selectedDirectoryURL == nil else { return }
+        restoredDashboardAvailable = true
+        selectedDirectoryName = dashboard.selectedDirectoryName
+        summary = dashboard.summary
+        skippedFileCount = dashboard.skippedFileCount
+        if dashboard.summary.fileCount == 0 {
+            state = .empty
+        } else if dashboard.skippedFileCount > 0 {
+            state = .partialFailure(
+                dashboard.summary,
+                skippedFileCount: dashboard.skippedFileCount
+            )
+        } else {
+            state = .success(dashboard.summary)
+        }
+        StoragePerformance.event("Storage Dashboard Published")
     }
 
     /// 持久化 `persistStableState` 对应的数据，并保持后续恢复所需的信息完整。
@@ -337,6 +377,26 @@ final class FileScannerViewModel: ObservableObject {
             files: files,
             skippedFileCount: skippedFileCount
         )
-        Task { await stateStore.saveFileState(snapshot) }
+        let dashboard = summary.map {
+            StorageDashboardSnapshot(
+                selectedDirectoryName: selectedDirectoryName,
+                summary: $0,
+                skippedFileCount: skippedFileCount
+            )
+        }
+        Task {
+            await stateStore.saveStorageDashboard(dashboard)
+            await stateStore.saveFileState(snapshot)
+        }
+    }
+
+    private func persistDashboardState() {
+        guard let selectedDirectoryName, let summary else { return }
+        let dashboard = StorageDashboardSnapshot(
+            selectedDirectoryName: selectedDirectoryName,
+            summary: summary,
+            skippedFileCount: skippedFileCount
+        )
+        Task { await stateStore.saveStorageDashboard(dashboard) }
     }
 }

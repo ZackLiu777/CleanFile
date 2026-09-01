@@ -64,7 +64,15 @@ struct PhotosView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    NavigationLink {
+                        MediaQuickCleanView(photoLibrary: viewModel)
+                    } label: {
+                        Label("Quick Cleanup", systemImage: "trash")
+                    }
+                    .disabled(viewModel.assets.isEmpty || viewModel.isLoading)
+                    .accessibilityIdentifier("media.quickClean.open")
+
                     Menu {
                         if viewModel.analysisState.isAnalyzing {
                             Button("Cancel Analysis", systemImage: "xmark.circle", role: .cancel) {
