@@ -299,6 +299,7 @@ struct AppearanceThemeView: View {
                 isOn: $themeSettings.liquidGlassCardsEnabled
             )
             .accessibilityIdentifier("appearance.liquidGlass")
+            .accessibilityValue(themeSettings.liquidGlassCardsEnabled ? "1" : "0")
         } header: {
             Text("Cards")
         } footer: {

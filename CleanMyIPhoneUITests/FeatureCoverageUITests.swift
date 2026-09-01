@@ -11,7 +11,8 @@ final class FeatureCoverageUITests: XCTestCase {
 
         XCTAssertTrue(tab(in: app, id: "tab.media", label: "Media").waitForExistence(timeout: 5))
         XCTAssertTrue(
-            app.descendants(matching: .any)["media.actions"].waitForExistence(timeout: 5)
+            mediaActionsButton(in: app).waitForExistence(timeout: 5),
+            "Missing Media Actions menu"
         )
 
         tab(in: app, id: "tab.storage", label: "Storage").tap()
@@ -79,14 +80,14 @@ final class FeatureCoverageUITests: XCTestCase {
             return
         }
 
-        toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+        toggle.tap()
         let changedToggle = switchElement(in: app, valueDifferentFrom: originalValue)
         XCTAssertTrue(
             changedToggle.waitForExistence(timeout: 3),
             "Liquid Glass switch accessibility value did not update"
         )
 
-        changedToggle.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+        changedToggle.tap()
         XCTAssertTrue(
             switchElement(in: app, valueEqualTo: originalValue).waitForExistence(timeout: 3),
             "Liquid Glass switch did not return to its original value"
@@ -188,6 +189,14 @@ final class FeatureCoverageUITests: XCTestCase {
         return identified.waitForExistence(timeout: 2)
             ? identified
             : app.tabBars.buttons[label]
+    }
+
+    @MainActor
+    private func mediaActionsButton(in app: XCUIApplication) -> XCUIElement {
+        let identified = app.buttons["media.actions"]
+        return identified.waitForExistence(timeout: 2)
+            ? identified
+            : app.buttons["Media Actions"]
     }
 
     @MainActor
