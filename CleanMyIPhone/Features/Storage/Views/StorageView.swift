@@ -19,6 +19,7 @@ struct StorageView: View {
     @ObservedObject var viewModel: FileScannerViewModel
     let isTabActive: Bool
     @State private var isImporterPresented = false
+    @State private var isSourceImporterPresented = false
     @State private var sunburstRevealProgress = 0.0
     @State private var summaryBarProgress = 0.0
     @State private var animationGeneration = 0
@@ -65,7 +66,14 @@ struct StorageView: View {
                 .appSoftScrollEdge()
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button {
+                        isSourceImporterPresented = true
+                    } label: {
+                        Label("Add Files", systemImage: "plus")
+                    }
+                    .accessibilityIdentifier("storage.addSources.toolbar")
+
                     Button {
                         isImporterPresented = true
                     } label: {
@@ -82,6 +90,13 @@ struct StorageView: View {
                 allowsMultipleSelection: false
             ) { result in
                 handleImport(result)
+            }
+            .fileImporter(
+                isPresented: $isSourceImporterPresented,
+                allowedContentTypes: [.data],
+                allowsMultipleSelection: true
+            ) { result in
+                handleSourceImport(result)
             }
         }
         .onAppear {
@@ -114,7 +129,9 @@ struct StorageView: View {
                     .foregroundStyle(theme.accentPrimary)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Analyzed Folder")
+                    Text(viewModel.isSourceSelection
+                        ? LocalizedStringKey("Analyzed Files")
+                        : LocalizedStringKey("Analyzed Folder"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Text(viewModel.selectedDirectoryName ?? "No folder selected")
@@ -130,6 +147,15 @@ struct StorageView: View {
                 .buttonStyle(.bordered)
                 .accessibilityIdentifier("storage.chooseFolder.card")
             }
+
+            Button {
+                isSourceImporterPresented = true
+            } label: {
+                Label("Add Files", systemImage: "doc.badge.plus")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .accessibilityIdentifier("storage.addSources.card")
 
             if viewModel.state.isScanning {
                 Button("Cancel Scan", role: .cancel) {
@@ -419,6 +445,19 @@ struct StorageView: View {
                 return
             }
             viewModel.scan(directory: url)
+        case .failure(let error):
+            viewModel.reportSelectionFailure(error: error)
+        }
+    }
+
+    private func handleSourceImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard !urls.isEmpty else {
+                viewModel.reportSelectionFailure()
+                return
+            }
+            viewModel.scan(sources: urls)
         case .failure(let error):
             viewModel.reportSelectionFailure(error: error)
         }

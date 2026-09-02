@@ -35,6 +35,8 @@ public actor AudioConversionEngine {
         _ request: AudioConversionRequest,
         progress: @escaping @Sendable (Double) async -> Void
     ) async throws -> URL {
+        let performanceID = ConversionPerformance.begin("Conversion Audio Total")
+        defer { ConversionPerformance.end("Conversion Audio Total", id: performanceID) }
         let source = request.sourceURL.standardizedFileURL
         let directory = request.destinationDirectory.standardizedFileURL
         let sourceAccess = source.startAccessingSecurityScopedResource()
@@ -91,6 +93,7 @@ public actor AudioConversionEngine {
             if let extractedPCM { try? manager.removeItem(at: extractedPCM) }
         }
 
+        let encodeID = ConversionPerformance.begin("Conversion Audio Encode")
         do {
             let input = try AVAudioFile(forReading: conversionSource)
             let inputFormat = input.processingFormat
@@ -127,14 +130,13 @@ public actor AudioConversionEngine {
                     throw AudioConversionError.invalidAudio
                 }
 
-                var supplied = false
+                let inputSupply = AudioInputSupply()
                 var conversionError: NSError?
                 let status = converter.convert(to: outputBuffer, error: &conversionError) { _, state in
-                    if supplied {
+                    guard inputSupply.claim() else {
                         state.pointee = .noDataNow
                         return nil
                     }
-                    supplied = true
                     guard let inputBuffer = AVAudioPCMBuffer(
                         pcmFormat: inputFormat,
                         frameCapacity: capacity
@@ -166,14 +168,20 @@ public actor AudioConversionEngine {
                 if status == .endOfStream { break }
             }
         } catch is CancellationError {
+            ConversionPerformance.end("Conversion Audio Encode", id: encodeID)
             throw AudioConversionError.cancelled
         } catch let error as AudioConversionError {
+            ConversionPerformance.end("Conversion Audio Encode", id: encodeID)
             throw error
         } catch {
+            ConversionPerformance.end("Conversion Audio Encode", id: encodeID)
             throw AudioConversionError.conversionFailed(error.localizedDescription)
         }
+        ConversionPerformance.end("Conversion Audio Encode", id: encodeID)
 
         try Task.checkCancellation()
+        let commitID = ConversionPerformance.begin("Conversion Output Commit")
+        defer { ConversionPerformance.end("Conversion Output Commit", id: commitID) }
         do {
             try manager.moveItem(at: temporary, to: output)
         } catch {
@@ -257,5 +265,21 @@ public actor AudioConversionEngine {
             if !FileManager.default.fileExists(atPath: candidate.path) { return candidate }
         }
         return directory.appendingPathComponent(UUID().uuidString).appendingPathExtension(ext)
+    }
+}
+
+/// `AVAudioConverter` may invoke its input block from concurrently executing
+/// code. A locked one-shot state preserves the existing per-conversion-call
+/// supply rule without capturing mutable local variables.
+private final class AudioInputSupply: @unchecked Sendable {
+    private let lock = NSLock()
+    private var isAvailable = true
+
+    func claim() -> Bool {
+        lock.withLock {
+            guard isAvailable else { return false }
+            isAvailable = false
+            return true
+        }
     }
 }

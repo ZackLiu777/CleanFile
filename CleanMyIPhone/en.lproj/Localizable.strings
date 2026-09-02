@@ -425,3 +425,6 @@
 "Start with Photos, apps, Messages, or downloads that can make a meaningful difference." = "Start with Photos, apps, Messages, or downloads that can make a meaningful difference.";
 "Use Media for your authorized Photos library, Storage for a selected folder, and the system guide for everything else." = "Use Media for your authorized Photos library, Storage for a selected folder, and the system guide for everything else.";
 "Recently Deleted and system storage calculations can delay the visible change. Do not rely on a fixed update time." = "Recently Deleted and system storage calculations can delay the visible change. Do not rely on a fixed update time.";
+"Add Files" = "Add Files";
+"Analyzed Files" = "Analyzed Files";
+"%lld selected files" = "%lld selected files";

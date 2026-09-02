@@ -70,10 +70,151 @@ struct MetadataFileScanner: Sendable {
         }
     }
 
+    /// Scans an explicit collection selected by the user. Each source keeps an
+    /// independent security scope so File Provider locations are never assumed
+    /// to share a common root. Sources are processed serially to avoid forcing
+    /// several cloud providers to hydrate content at the same time.
+    nonisolated func scan(sources: [URL]) -> AsyncThrowingStream<FileScanEvent, Error> {
+        AsyncThrowingStream { continuation in
+            let worker = Task.detached(priority: .userInitiated) {
+                do {
+                    let result = try self.scanSourcesSynchronously(
+                        sources: sources,
+                        continuation: continuation
+                    )
+                    continuation.yield(.completed(result))
+                    continuation.finish()
+                } catch is CancellationError {
+                    continuation.finish(throwing: FileScanError.cancelled)
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+
+            continuation.onTermination = { _ in worker.cancel() }
+        }
+    }
+
+    private nonisolated func scanSourcesSynchronously(
+        sources: [URL],
+        continuation: AsyncThrowingStream<FileScanEvent, Error>.Continuation
+    ) throws -> FileScanResult {
+        guard !sources.isEmpty else { throw FileScanError.selectionFailed }
+
+        var files: [ScannedFile] = []
+        var failures: [FileScanFailure] = []
+        var seenURLs = Set<URL>()
+        var scannedByteCount: Int64 = 0
+
+        for (index, source) in sources.enumerated() {
+            try Task.checkCancellation()
+            do {
+                let sourceFiles: [ScannedFile]
+                let sourceIsDirectory = try isDirectorySource(source)
+                if sourceIsDirectory {
+                    let directoryResult = try scanSynchronously(
+                        directory: source,
+                        continuation: continuation,
+                        progressOffset: files.count,
+                        progressByteOffset: scannedByteCount
+                    )
+                    sourceFiles = directoryResult.files
+                    failures.append(contentsOf: directoryResult.failures)
+                } else {
+                    sourceFiles = [try scanSingleFile(source)]
+                }
+
+                let sourceName = source.lastPathComponent.isEmpty
+                    ? String(index + 1)
+                    : source.lastPathComponent
+                let uniqueSourceName = sources.count > 1
+                    ? "\(sourceName) · \(index + 1)"
+                    : sourceName
+
+                for file in sourceFiles {
+                    let normalizedURL = file.url.standardizedFileURL
+                    guard seenURLs.insert(normalizedURL).inserted else { continue }
+                    let relativeComponents = sourceIsDirectory
+                        ? [uniqueSourceName] + file.relativePathComponents
+                        : [uniqueSourceName]
+                    let scopedFile = ScannedFile(
+                        url: file.url,
+                        name: file.name,
+                        relativePathComponents: relativeComponents,
+                        category: file.category,
+                        byteCount: file.byteCount,
+                        hasKnownByteCount: file.hasKnownByteCount,
+                        creationDate: file.creationDate,
+                        modificationDate: file.modificationDate
+                    )
+                    files.append(scopedFile)
+                    if scopedFile.hasKnownByteCount { scannedByteCount += scopedFile.byteCount }
+                }
+
+                continuation.yield(.progress(ScanProgress(
+                    scannedFileCount: files.count,
+                    scannedByteCount: scannedByteCount
+                )))
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                failures.append(FileScanFailure(
+                    fileName: source.lastPathComponent,
+                    reason: .inaccessible
+                ))
+            }
+        }
+
+        let virtualRoot = URL(fileURLWithPath: "/Selected Sources", isDirectory: true)
+        var summaryAccumulator = StorageSummaryAccumulator()
+        var treeAccumulator = FileTreeAccumulator(rootURL: virtualRoot)
+        var largestAccumulator = LargestFilesAccumulator(limit: 10)
+        for file in files {
+            summaryAccumulator.append(file)
+            treeAccumulator.append(file)
+            largestAccumulator.append(file)
+        }
+
+        return FileScanResult(
+            files: files,
+            failures: failures,
+            summary: summaryAccumulator.makeSummary(),
+            fileTree: treeAccumulator.makeTree(),
+            largestFiles: largestAccumulator.sortedDescending()
+        )
+    }
+
+    private nonisolated func scanSingleFile(_ file: URL) throws -> ScannedFile {
+        try fileAccess.withAccess(to: file) {
+            try Task.checkCancellation()
+            let values = try file.resourceValues(forKeys: metadataKeySet)
+            guard values.isDirectory != true else { throw FileScanError.notDirectory }
+            return ScannedFile(
+                url: file,
+                name: file.lastPathComponent,
+                relativePathComponents: [file.lastPathComponent],
+                category: FileCategory.classify(fileExtension: file.pathExtension),
+                byteCount: Int64(values.fileSize ?? 0),
+                hasKnownByteCount: values.fileSize != nil
+            )
+        }
+    }
+
+    private nonisolated func isDirectorySource(_ source: URL) throws -> Bool {
+        try fileAccess.withAccess(to: source) {
+            try Task.checkCancellation()
+            let values = try source.resourceValues(forKeys: [.isDirectoryKey])
+            if let isDirectory = values.isDirectory { return isDirectory }
+            return source.hasDirectoryPath
+        }
+    }
+
     /// 执行 `scanSynchronously` 分析流程，在遵守文件访问边界的前提下生成结果。
     private nonisolated func scanSynchronously(
         directory: URL,
-        continuation: AsyncThrowingStream<FileScanEvent, Error>.Continuation
+        continuation: AsyncThrowingStream<FileScanEvent, Error>.Continuation,
+        progressOffset: Int = 0,
+        progressByteOffset: Int64 = 0
     ) throws -> FileScanResult {
         try Task.checkCancellation()
 
@@ -99,7 +240,9 @@ struct MetadataFileScanner: Sendable {
                     enumerationResult = .success(try enumerateDirectory(
                         at: coordinatedDirectory,
                         selectedDirectory: directory,
-                        continuation: continuation
+                        continuation: continuation,
+                        progressOffset: progressOffset,
+                        progressByteOffset: progressByteOffset
                     ))
                 } catch {
                     enumerationResult = .failure(error)
@@ -148,7 +291,9 @@ struct MetadataFileScanner: Sendable {
     private nonisolated func enumerateDirectory(
         at directory: URL,
         selectedDirectory: URL,
-        continuation: AsyncThrowingStream<FileScanEvent, Error>.Continuation
+        continuation: AsyncThrowingStream<FileScanEvent, Error>.Continuation,
+        progressOffset: Int,
+        progressByteOffset: Int64
     ) throws -> DirectoryEnumeration {
         let directoryValues = try directory.resourceValues(forKeys: [.isDirectoryKey])
         guard directoryValues.isDirectory == true else {
@@ -170,7 +315,10 @@ struct MetadataFileScanner: Sendable {
         let fileManager = FileManager()
         let rootComponents = directory.standardizedFileURL.pathComponents
 
-        continuation.yield(.progress(ScanProgress(scannedFileCount: 0, scannedByteCount: 0)))
+        continuation.yield(.progress(ScanProgress(
+            scannedFileCount: progressOffset,
+            scannedByteCount: progressByteOffset
+        )))
 
         // DirectoryEnumerator performs the recursive walk itself. This is
         // important for File Provider URLs: deciding whether to recurse from a
@@ -239,8 +387,8 @@ struct MetadataFileScanner: Sendable {
                     let currentUptime = DispatchTime.now().uptimeNanoseconds
                     if currentUptime - lastProgressUptime >= 100_000_000 {
                         continuation.yield(.progress(ScanProgress(
-                            scannedFileCount: scannedFileCount,
-                            scannedByteCount: scannedByteCount
+                            scannedFileCount: progressOffset + scannedFileCount,
+                            scannedByteCount: progressByteOffset + scannedByteCount
                         )))
                         lastReportedFileCount = scannedFileCount
                         lastProgressUptime = currentUptime
@@ -261,8 +409,8 @@ struct MetadataFileScanner: Sendable {
 
         if lastReportedFileCount != scannedFileCount {
             continuation.yield(.progress(ScanProgress(
-                scannedFileCount: scannedFileCount,
-                scannedByteCount: scannedByteCount
+                scannedFileCount: progressOffset + scannedFileCount,
+                scannedByteCount: progressByteOffset + scannedByteCount
             )))
         }
 

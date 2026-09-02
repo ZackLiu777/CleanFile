@@ -425,3 +425,6 @@
 "Start with Photos, apps, Messages, or downloads that can make a meaningful difference." = "Commencez par des photos, des applications, des messages ou des téléchargements qui peuvent faire une différence significative.";
 "Use Media for your authorized Photos library, Storage for a selected folder, and the system guide for everything else." = "Utilisez Média pour votre bibliothèque de photos autorisée, Stockage pour un dossier sélectionné et le guide système pour tout le reste.";
 "Recently Deleted and system storage calculations can delay the visible change. Do not rely on a fixed update time." = "L'album Supprimées récemment et le calcul du stockage système peuvent retarder les changements visibles. Ne comptez pas sur un délai de mise à jour fixe.";
+"Add Files" = "Ajouter des fichiers";
+"Analyzed Files" = "Fichiers analysés";
+"%lld selected files" = "%lld fichiers sélectionnés";

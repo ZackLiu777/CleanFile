@@ -19,28 +19,45 @@ actor FileDeletionService {
         files: [ScannedFile],
         selectedRoot: URL
     ) throws -> FileDeletionResult {
-        guard !files.isEmpty else { throw FileDeletionError.noItemsSelected }
+        try delete(files: files, selectedRoots: [selectedRoot])
+    }
 
-        let root = selectedRoot.standardizedFileURL
-        guard files.allSatisfy({ Self.isDescendant($0.url, of: root) }) else {
+    func delete(
+        files: [ScannedFile],
+        selectedRoots: [URL]
+    ) throws -> FileDeletionResult {
+        guard !files.isEmpty else { throw FileDeletionError.noItemsSelected }
+        let roots = selectedRoots.map(\.standardizedFileURL)
+        guard !roots.isEmpty,
+              files.allSatisfy({ file in
+                  roots.contains { Self.contains(file.url, root: $0) }
+              }) else {
             throw FileDeletionError.invalidSelection
         }
-        guard root.startAccessingSecurityScopedResource() else {
-            throw FileDeletionError.folderAccessUnavailable
-        }
-        defer { root.stopAccessingSecurityScopedResource() }
 
         var deletedURLs = Set<URL>()
         var failedFileCount = 0
-        for file in files {
-            do {
-                try Task.checkCancellation()
-                try fileManager.removeItem(at: file.url)
-                deletedURLs.insert(file.url)
-            } catch is CancellationError {
-                throw CancellationError()
-            } catch {
-                failedFileCount += 1
+        for root in roots {
+            let matchingFiles = files.filter {
+                !deletedURLs.contains($0.url) && Self.contains($0.url, root: root)
+            }
+            guard !matchingFiles.isEmpty else { continue }
+            guard root.startAccessingSecurityScopedResource() else {
+                failedFileCount += matchingFiles.count
+                continue
+            }
+            defer { root.stopAccessingSecurityScopedResource() }
+
+            for file in matchingFiles where !deletedURLs.contains(file.url) {
+                do {
+                    try Task.checkCancellation()
+                    try fileManager.removeItem(at: file.url)
+                    deletedURLs.insert(file.url)
+                } catch is CancellationError {
+                    throw CancellationError()
+                } catch {
+                    failedFileCount += 1
+                }
             }
         }
 
@@ -51,10 +68,13 @@ actor FileDeletionService {
     }
 
     /// 判断 `isDescendant` 条件是否成立，供调用方选择正确的处理分支。
-    private nonisolated static func isDescendant(_ candidate: URL, of root: URL) -> Bool {
+    private nonisolated static func contains(_ candidate: URL, root: URL) -> Bool {
         let rootComponents = root.standardizedFileURL.pathComponents
         let candidateComponents = candidate.standardizedFileURL.pathComponents
-        return candidateComponents.count > rootComponents.count
-            && candidateComponents.starts(with: rootComponents)
+        guard candidateComponents.starts(with: rootComponents) else { return false }
+        if candidateComponents.count == rootComponents.count {
+            return !root.hasDirectoryPath
+        }
+        return true
     }
 }

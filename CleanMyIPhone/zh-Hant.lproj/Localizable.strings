@@ -425,3 +425,6 @@
 "Start with Photos, apps, Messages, or downloads that can make a meaningful difference." = "從可以產生有意義的變化的照片、應用程式、訊息或下載開始。";
 "Use Media for your authorized Photos library, Storage for a selected folder, and the system guide for everything else." = "將媒體用於您的授權照片庫，將儲存用於選定的資料夾，並將系統指南用於其他所有內容。";
 "Recently Deleted and system storage calculations can delay the visible change. Do not rely on a fixed update time." = "「最近刪除」和系統儲存空間重新計算都可能延遲可見變化，請勿依賴固定的更新時間。";
+"Add Files" = "加入檔案";
+"Analyzed Files" = "已分析檔案";
+"%lld selected files" = "已選擇 %lld 個檔案";

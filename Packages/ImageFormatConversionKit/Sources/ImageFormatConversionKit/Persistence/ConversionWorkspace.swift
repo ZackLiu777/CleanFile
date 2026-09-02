@@ -80,6 +80,8 @@ actor ConversionWorkspace {
         kind: ConversionMediaKind,
         progress: @escaping @Sendable (Int64, Int64) async -> Void
     ) async throws -> (URL, Int64) {
+        let performanceID = ConversionPerformance.begin("Conversion Import Stage")
+        defer { ConversionPerformance.end("Conversion Import Stage", id: performanceID) }
         let source = sourceURL.standardizedFileURL
         var sourceBytes = fileSize(source)
         if isDescendant(source, of: importsURL) {
@@ -161,6 +163,8 @@ actor ConversionWorkspace {
 
     /// 加载 `load` 所需的数据，并将结果转换为当前层可消费的状态。
     func load(_ kind: ConversionMediaKind) -> [PersistedConversionItem] {
+        let performanceID = ConversionPerformance.begin("Conversion Manifest Load")
+        defer { ConversionPerformance.end("Conversion Manifest Load", id: performanceID) }
         let url = manifestURL(kind)
         guard let data = try? Data(contentsOf: url),
               let records = try? JSONDecoder().decode([PersistedConversionItem].self, from: data)
@@ -170,6 +174,8 @@ actor ConversionWorkspace {
 
     /// 持久化 `save` 对应的数据，并保持后续恢复所需的信息完整。
     func save(_ records: [PersistedConversionItem], kind: ConversionMediaKind) {
+        let performanceID = ConversionPerformance.begin("Conversion Manifest Save")
+        defer { ConversionPerformance.end("Conversion Manifest Save", id: performanceID) }
         do {
             try fileManager.createDirectory(at: manifestsURL, withIntermediateDirectories: true)
             let data = try JSONEncoder().encode(records)

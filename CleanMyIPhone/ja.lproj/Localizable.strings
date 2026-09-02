@@ -425,3 +425,6 @@
 "Start with Photos, apps, Messages, or downloads that can make a meaningful difference." = "有意義な変化をもたらすことができる写真、アプリ、メッセージ、ダウンロードから始めましょう。";
 "Use Media for your authorized Photos library, Storage for a selected folder, and the system guide for everything else." = "承認された写真ライブラリにはメディアを使用し、選択したフォルダーにはストレージを使用し、その他すべてにはシステム ガイドを使用します。";
 "Recently Deleted and system storage calculations can delay the visible change. Do not rely on a fixed update time." = "最近削除されたデータやシステム ストレージの計算により、表示される変更が遅れる可能性があります。固定された更新時間に依存しないでください。";
+"Add Files" = "ファイルを追加";
+"Analyzed Files" = "解析済みファイル";
+"%lld selected files" = "%lld 個のファイルを選択";

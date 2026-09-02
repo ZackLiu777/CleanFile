@@ -18,6 +18,8 @@ public actor VideoConversionEngine {
         _ request: VideoConversionRequest,
         progress: @escaping @Sendable (Double) async -> Void
     ) async throws -> VideoConversionResult {
+        let performanceID = ConversionPerformance.begin("Conversion Video Total")
+        defer { ConversionPerformance.end("Conversion Video Total", id: performanceID) }
         if request.codec == .hevc,
            request.resolution == .hd || request.resolution == .sd {
             throw VideoConversionError.unsupportedSettings
@@ -75,6 +77,7 @@ public actor VideoConversionEngine {
 
         await progress(0)
 
+        let exportID = ConversionPerformance.begin("Conversion Video Export")
         do {
             try await withTaskCancellationHandler {
                 try await exporter.export(to: temporaryURL, as: fileType(request.container))
@@ -82,13 +85,18 @@ public actor VideoConversionEngine {
                 exporterCancellation.cancel()
             }
         } catch is CancellationError {
+            ConversionPerformance.end("Conversion Video Export", id: exportID)
             throw VideoConversionError.cancelled
         } catch {
+            ConversionPerformance.end("Conversion Video Export", id: exportID)
             if Task.isCancelled { throw VideoConversionError.cancelled }
             throw VideoConversionError.exportFailed(error.localizedDescription)
         }
+        ConversionPerformance.end("Conversion Video Export", id: exportID)
 
         try Task.checkCancellation()
+        let commitID = ConversionPerformance.begin("Conversion Output Commit")
+        defer { ConversionPerformance.end("Conversion Output Commit", id: commitID) }
         do {
             try fileManager.moveItem(at: temporaryURL, to: outputURL)
         } catch {

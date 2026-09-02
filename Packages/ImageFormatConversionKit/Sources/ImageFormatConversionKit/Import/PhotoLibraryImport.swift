@@ -58,6 +58,8 @@ enum PhotoLibraryImport {
         type: T.Type,
         progress progressHandler: @escaping @Sendable (Double) -> Void
     ) async throws -> T? {
+        let performanceID = ConversionPerformance.begin("Conversion PhotoKit Transfer")
+        defer { ConversionPerformance.end("Conversion PhotoKit Transfer", id: performanceID) }
         let operation = TransferProgressOperation()
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
@@ -91,6 +93,8 @@ enum PhotoLibraryImport {
 
     /// 封装 `copy` 对应的局部行为，供当前类型在统一入口下复用。
     static func copy(_ sourceURL: URL) throws -> URL {
+        let performanceID = ConversionPerformance.begin("Conversion Provider Copy")
+        defer { ConversionPerformance.end("Conversion Provider Copy", id: performanceID) }
         let destination = try destinationURL(fileName: sourceURL.lastPathComponent)
         let fileManager = FileManager.default
         try fileManager.copyItem(at: sourceURL, to: destination)

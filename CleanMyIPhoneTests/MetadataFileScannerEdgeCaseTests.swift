@@ -66,6 +66,33 @@ struct MetadataFileScannerEdgeCaseTests {
         #expect(FileTreeDiagnostics.maximumDepth(of: result.fileTree) == 3)
     }
 
+    @Test("Multiple selected files and folders produce one de-duplicated result")
+    func mixedSourcesAreCombinedWithoutDuplicates() async throws {
+        let workspace = try TemporaryScanWorkspace()
+        defer { workspace.remove() }
+        let folder = workspace.root.appending(path: "Folder", directoryHint: .isDirectory)
+        try workspace.fileManager.createDirectory(at: folder, withIntermediateDirectories: false)
+        let nestedFile = folder.appending(path: "inside.pdf")
+        let standaloneFile = workspace.root.appending(path: "photo.jpg")
+        try Data(repeating: 1, count: 7).write(to: nestedFile)
+        try Data(repeating: 2, count: 11).write(to: standaloneFile)
+
+        let scanner = MetadataFileScanner(
+            fileAccess: UnrestrictedFileAccess(),
+            progressInterval: 1
+        )
+        var events: [FileScanEvent] = []
+        for try await event in scanner.scan(sources: [folder, nestedFile, standaloneFile]) {
+            events.append(event)
+        }
+        let result = try #require(completedResult(in: events))
+
+        #expect(result.files.count == 2)
+        #expect(result.summary.totalBytes == 18)
+        #expect(Set(result.files.map(\.url)) == [nestedFile, standaloneFile])
+        #expect(result.fileTree.children.count == 2)
+    }
+
     @Test("A non-directory selection fails with the explicit not-directory error")
     func nonDirectorySelectionFailsClearly() async throws {
         let workspace = try TemporaryScanWorkspace()

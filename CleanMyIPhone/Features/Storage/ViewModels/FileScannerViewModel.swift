@@ -147,6 +147,8 @@ final class FileScannerViewModel: ObservableObject {
     @Published private(set) var fileTree: FileNode?
     @Published private(set) var largestFiles: [ScannedFile] = []
     @Published private(set) var selectedDirectoryName: String?
+    @Published private(set) var selectedSourceCount = 0
+    @Published private(set) var isSourceSelection = false
     @Published private(set) var deletionState: FileDeletionState = .idle
     @Published private(set) var isRestoringStoredFiles = false
 
@@ -159,6 +161,7 @@ final class FileScannerViewModel: ObservableObject {
     private let deletionService = FileDeletionService()
     private let stateStore = AppStateStore.shared
     private var selectedDirectoryURL: URL?
+    private var selectedSourceURLs: [URL] = []
     private var selectedDirectoryBookmark: Data?
     private var skippedFileCount = 0
     private var restoredDashboardAvailable = false
@@ -220,6 +223,9 @@ final class FileScannerViewModel: ObservableObject {
         scanTask?.cancel()
         selectedDirectoryName = directory.lastPathComponent
         selectedDirectoryURL = directory
+        selectedSourceURLs = [directory]
+        selectedSourceCount = 1
+        isSourceSelection = false
         selectedDirectoryBookmark = try? directory.bookmarkData(
             options: [],
             includingResourceValuesForKeys: nil,
@@ -238,6 +244,59 @@ final class FileScannerViewModel: ObservableObject {
         state = .scanning(ScanProgress(scannedFileCount: 0, scannedByteCount: 0))
 
         let events = scanner.scan(directory: directory)
+        consume(events)
+    }
+
+    /// Starts a session-scoped analysis of explicitly selected files and
+    /// folders. The original single-folder flow and its persisted snapshot are
+    /// intentionally left unchanged.
+    func scan(sources: [URL]) {
+        let uniqueSources = sources.reduce(into: [URL]()) { result, source in
+            let normalized = source.standardizedFileURL
+            if !result.contains(where: { $0.standardizedFileURL == normalized }) {
+                result.append(source)
+            }
+        }
+        guard !uniqueSources.isEmpty else {
+            reportSelectionFailure()
+            return
+        }
+        hasAttemptedRestore = true
+        restoreTask?.cancel()
+        restoreTask = nil
+        persistenceGeneration &+= 1
+        persistenceTask?.cancel()
+        persistenceTask = nil
+        isRestoringStoredFiles = false
+        scanTask?.cancel()
+        selectedSourceURLs = uniqueSources
+        selectedSourceCount = uniqueSources.count
+        isSourceSelection = true
+        selectedDirectoryURL = nil
+        selectedDirectoryBookmark = nil
+        selectedDirectoryName = uniqueSources.count == 1
+            ? uniqueSources[0].lastPathComponent
+            : String.localizedStringWithFormat(
+                AppL10n.string("%lld selected files"),
+                Int64(uniqueSources.count)
+            )
+        skippedFileCount = 0
+        files = []
+        filesRevision &+= 1
+        summary = nil
+        fileTree = nil
+        largestFiles = []
+        state = .scanning(ScanProgress(scannedFileCount: 0, scannedByteCount: 0))
+
+        Task {
+            await stateStore.saveStorageDashboard(nil)
+            await stateStore.saveFileState(nil)
+        }
+
+        consume(scanner.scan(sources: uniqueSources))
+    }
+
+    private func consume(_ events: AsyncThrowingStream<FileScanEvent, Error>) {
         scanTask = Task { [weak self] in
             do {
                 for try await event in events {
@@ -278,7 +337,7 @@ final class FileScannerViewModel: ObservableObject {
             deletionState = .failure(.noItemsSelected)
             return
         }
-        guard let selectedDirectoryURL else {
+        guard !selectedSourceURLs.isEmpty else {
             deletionState = .failure(.folderAccessUnavailable)
             return
         }
@@ -293,7 +352,7 @@ final class FileScannerViewModel: ObservableObject {
         do {
             let result = try await deletionService.delete(
                 files: knownFiles,
-                selectedRoot: selectedDirectoryURL
+                selectedRoots: selectedSourceURLs
             )
             await applyDeletion(result)
         } catch let error as FileDeletionError {
@@ -337,10 +396,13 @@ final class FileScannerViewModel: ObservableObject {
 
     /// 更新 `applyDeletion` 对应的数据，使界面状态与底层结果保持一致。
     private func applyDeletion(_ result: FileDeletionResult) async {
-        guard let selectedDirectoryURL else {
+        guard !selectedSourceURLs.isEmpty else {
             deletionState = .failure(.folderAccessUnavailable)
             return
         }
+
+        let treeRootURL = selectedDirectoryURL
+            ?? URL(fileURLWithPath: "/Selected Sources", isDirectory: true)
 
         let currentFiles = files
         let worker = Task.detached(priority: .userInitiated) {
@@ -349,7 +411,7 @@ final class FileScannerViewModel: ObservableObject {
             return DerivedFileStateBuilder.prepare(
                 files: currentFiles,
                 excluding: result.deletedURLs,
-                rootURL: selectedDirectoryURL
+                rootURL: treeRootURL
             )
         }
         let prepared = await withTaskCancellationHandler {
@@ -387,6 +449,9 @@ final class FileScannerViewModel: ObservableObject {
     private func applyRestoredState(_ prepared: PreparedFileState) {
         guard selectedDirectoryURL == nil else { return }
         selectedDirectoryURL = prepared.rootURL
+        selectedSourceURLs = [prepared.rootURL]
+        selectedSourceCount = 1
+        isSourceSelection = false
         selectedDirectoryName = prepared.selectedDirectoryName
         selectedDirectoryBookmark = prepared.directoryBookmark
         skippedFileCount = prepared.skippedFileCount

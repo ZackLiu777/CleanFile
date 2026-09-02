@@ -33,8 +33,11 @@ final class FeatureCoverageUITests: XCTestCase {
             ("conversion.home.video", "Convert Video"),
             ("conversion.home.audio", "Convert Audio")
         ] {
-            let tool = app.buttons[id]
-            XCTAssertTrue(tool.waitForExistence(timeout: 5), "Missing conversion tool \(id)")
+            let tool = reveal(app.buttons[id], in: app)
+            XCTAssertTrue(
+                tool.exists && tool.isHittable,
+                "Missing conversion tool \(id)"
+            )
             tool.tap()
             XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5))
 

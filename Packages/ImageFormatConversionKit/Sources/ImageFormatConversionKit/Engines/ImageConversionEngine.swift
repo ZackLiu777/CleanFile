@@ -275,6 +275,8 @@ private enum ImageConversionWorker {
         _ request: ImageConversionRequest,
         destinationURL: URL
     ) throws -> ImageConversionResult {
+        let performanceID = ConversionPerformance.begin("Conversion Image Total")
+        defer { ConversionPerformance.end("Conversion Image Total", id: performanceID) }
         let clock = ContinuousClock()
         let startedAt = clock.now
         let fileManager = FileManager()
@@ -352,13 +354,16 @@ private enum ImageConversionWorker {
             kCGImageSourceShouldCacheImmediately: true
         ]
 
+        let decodeID = ConversionPerformance.begin("Conversion Image Decode")
         guard var decodedImage = CGImageSourceCreateThumbnailAtIndex(
             source,
             0,
             thumbnailOptions as CFDictionary
         ) else {
+            ConversionPerformance.end("Conversion Image Decode", id: decodeID)
             throw ImageConversionError.cannotDecode(sourceURL)
         }
+        ConversionPerformance.end("Conversion Image Decode", id: decodeID)
 
         if request.outputFormat.requiresOpaquePixels {
             decodedImage = try flattened(decodedImage, color: request.flattenColor)
@@ -389,13 +394,18 @@ private enum ImageConversionWorker {
             request: request,
             outputImage: decodedImage
         )
+        let encodeID = ConversionPerformance.begin("Conversion Image Encode")
         CGImageDestinationAddImage(destination, decodedImage, outputProperties as CFDictionary)
 
         guard CGImageDestinationFinalize(destination) else {
+            ConversionPerformance.end("Conversion Image Encode", id: encodeID)
             throw ImageConversionError.cannotFinalizeDestination(destinationURL)
         }
+        ConversionPerformance.end("Conversion Image Encode", id: encodeID)
 
         try Task.checkCancellation()
+        let commitID = ConversionPerformance.begin("Conversion Output Commit")
+        defer { ConversionPerformance.end("Conversion Output Commit", id: commitID) }
         do {
             let destinationExists = fileManager.fileExists(atPath: destinationURL.path)
             if destinationExists {
