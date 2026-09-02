@@ -49,6 +49,41 @@ nonisolated struct FileStateSnapshot: Codable, Sendable {
         self.skippedFileCount = skippedFileCount
     }
 
+    /// Builds large snapshots cooperatively so a superseded scan does not keep
+    /// converting an obsolete index in the background.
+    static func prepare(
+        directoryBookmark: Data,
+        selectedDirectoryName: String,
+        files: [ScannedFile],
+        skippedFileCount: Int
+    ) -> FileStateSnapshot? {
+        var persistedFiles: [PersistedScannedFile] = []
+        persistedFiles.reserveCapacity(files.count)
+        for (index, file) in files.enumerated() {
+            if index.isMultiple(of: 256), Task.isCancelled { return nil }
+            persistedFiles.append(PersistedScannedFile(file))
+        }
+        return FileStateSnapshot(
+            directoryBookmark: directoryBookmark,
+            selectedDirectoryName: selectedDirectoryName,
+            persistedFiles: persistedFiles,
+            skippedFileCount: skippedFileCount
+        )
+    }
+
+    private init(
+        directoryBookmark: Data,
+        selectedDirectoryName: String,
+        persistedFiles: [PersistedScannedFile],
+        skippedFileCount: Int
+    ) {
+        schemaVersion = Self.currentSchemaVersion
+        self.directoryBookmark = directoryBookmark
+        self.selectedDirectoryName = selectedDirectoryName
+        files = persistedFiles
+        self.skippedFileCount = skippedFileCount
+    }
+
     var requiresRewrite: Bool {
         schemaVersion != Self.currentSchemaVersion
     }
@@ -141,6 +176,8 @@ actor AppStateStore {
 
     /// 持久化 `saveFileState` 对应的数据，并保持后续恢复所需的信息完整。
     func saveFileState(_ snapshot: FileStateSnapshot?) {
+        let interval = StoragePerformance.begin("Storage Snapshot Save")
+        defer { StoragePerformance.end("Storage Snapshot Save", id: interval) }
         save(snapshot, name: .files)
     }
 

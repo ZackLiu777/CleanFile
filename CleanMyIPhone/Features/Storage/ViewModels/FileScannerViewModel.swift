@@ -11,7 +11,7 @@
 import Combine
 import Foundation
 
-private nonisolated struct PreparedFileState: Sendable {
+nonisolated struct PreparedFileState: Sendable {
     let rootURL: URL
     let selectedDirectoryName: String
     let directoryBookmark: Data
@@ -23,7 +23,7 @@ private nonisolated struct PreparedFileState: Sendable {
     let largestFiles: [ScannedFile]
 }
 
-private nonisolated enum FileStateRestorer {
+nonisolated enum FileStateRestorer {
     static func prepare(_ snapshot: FileStateSnapshot) -> PreparedFileState? {
         guard !Task.isCancelled else { return nil }
 
@@ -114,6 +114,8 @@ final class FileScannerViewModel: ObservableObject {
     private let scanner: MetadataFileScanner
     private var scanTask: Task<Void, Never>?
     private var restoreTask: Task<Void, Never>?
+    private var persistenceTask: Task<Void, Never>?
+    private var persistenceGeneration = 0
     private var hasAttemptedRestore = false
     private let deletionService = FileDeletionService()
     private let stateStore = AppStateStore.shared
@@ -131,6 +133,7 @@ final class FileScannerViewModel: ObservableObject {
     deinit {
         scanTask?.cancel()
         restoreTask?.cancel()
+        persistenceTask?.cancel()
     }
 
     /// Restores the previous scan only when the storage experience is opened.
@@ -171,6 +174,9 @@ final class FileScannerViewModel: ObservableObject {
         hasAttemptedRestore = true
         restoreTask?.cancel()
         restoreTask = nil
+        persistenceGeneration &+= 1
+        persistenceTask?.cancel()
+        persistenceTask = nil
         isRestoringStoredFiles = false
         scanTask?.cancel()
         selectedDirectoryName = directory.lastPathComponent
@@ -371,12 +377,8 @@ final class FileScannerViewModel: ObservableObject {
     /// 持久化 `persistStableState` 对应的数据，并保持后续恢复所需的信息完整。
     private func persistStableState() {
         guard let selectedDirectoryName, let selectedDirectoryBookmark else { return }
-        let snapshot = FileStateSnapshot(
-            directoryBookmark: selectedDirectoryBookmark,
-            selectedDirectoryName: selectedDirectoryName,
-            files: files,
-            skippedFileCount: skippedFileCount
-        )
+        let files = files
+        let skippedFileCount = skippedFileCount
         let dashboard = summary.map {
             StorageDashboardSnapshot(
                 selectedDirectoryName: selectedDirectoryName,
@@ -384,9 +386,38 @@ final class FileScannerViewModel: ObservableObject {
                 skippedFileCount: skippedFileCount
             )
         }
-        Task {
-            await stateStore.saveStorageDashboard(dashboard)
-            await stateStore.saveFileState(snapshot)
+
+        persistenceGeneration &+= 1
+        let generation = persistenceGeneration
+        persistenceTask?.cancel()
+        persistenceTask = Task { [weak self] in
+            guard let self else { return }
+            await self.stateStore.saveStorageDashboard(dashboard)
+            guard !Task.isCancelled, generation == self.persistenceGeneration else { return }
+
+            // Mapping a large scan into its compact persisted representation is
+            // O(n). Keep that work away from MainActor so completing a scan does
+            // not freeze navigation while the cache is prepared.
+            let worker = Task.detached(priority: .utility) {
+                let interval = StoragePerformance.begin("Storage Snapshot Prepare")
+                defer { StoragePerformance.end("Storage Snapshot Prepare", id: interval) }
+                return FileStateSnapshot.prepare(
+                    directoryBookmark: selectedDirectoryBookmark,
+                    selectedDirectoryName: selectedDirectoryName,
+                    files: files,
+                    skippedFileCount: skippedFileCount
+                )
+            }
+            let snapshot = await withTaskCancellationHandler {
+                await worker.value
+            } onCancel: {
+                worker.cancel()
+            }
+
+            guard let snapshot,
+                  !Task.isCancelled,
+                  generation == self.persistenceGeneration else { return }
+            await self.stateStore.saveFileState(snapshot)
         }
     }
 

@@ -93,6 +93,8 @@ final class PhotoLibraryViewModel: ObservableObject {
     /// 加载 `loadIfNeeded` 所需的数据，并将结果转换为当前层可消费的状态。
     func loadIfNeeded() async {
         guard !hasLoadedLibrary else { return }
+        let interval = MediaPerformance.begin("Media Initial Load")
+        defer { MediaPerformance.end("Media Initial Load", id: interval) }
         hasLoadedLibrary = true
         async let stateSnapshot = stateStore.loadMediaState()
         async let sizeSnapshot = stateStore.loadMediaSizeIndex()
@@ -536,6 +538,8 @@ final class PhotoLibraryViewModel: ObservableObject {
 
     /// 加载 `fetchAssets` 所需的数据，并将结果转换为当前层可消费的状态。
     private func fetchAssets() {
+        let interval = MediaPerformance.begin("Media Fetch Assets")
+        defer { MediaPerformance.end("Media Fetch Assets", id: interval) }
         isLoading = true
 
         let options = PHFetchOptions()
@@ -555,6 +559,8 @@ final class PhotoLibraryViewModel: ObservableObject {
 
     /// 封装 `rebuildAssetIndex` 对应的局部行为，供当前类型在统一入口下复用。
     private func rebuildAssetIndex() {
+        let interval = MediaPerformance.begin("Media Rebuild Index")
+        defer { MediaPerformance.end("Media Rebuild Index", id: interval) }
         assetsByIdentifier = Dictionary(
             uniqueKeysWithValues: assets.map { ($0.localIdentifier, $0) }
         )
@@ -568,6 +574,8 @@ final class PhotoLibraryViewModel: ObservableObject {
     }
 
     private func recalculateLibraryByteCounts() {
+        let interval = MediaPerformance.begin("Media Recalculate Sizes")
+        defer { MediaPerformance.end("Media Recalculate Sizes", id: interval) }
         let calibration = makeMediaSizeCalibration()
         estimatedPhotoLibraryBytes = assets.lazy
             .filter { $0.mediaType == .image }

@@ -13,10 +13,12 @@ import Foundation
 
 /// 定义 `MetadataFileScanner` 的值语义数据与相关行为。
 struct MetadataFileScanner: Sendable {
+    // Type identifiers are intentionally omitted from the recursive walk.
+    // File Provider may need an additional metadata round-trip to resolve them;
+    // extension-based classification is sufficient for the storage overview.
     private nonisolated static let metadataKeys: [URLResourceKey] = [
         .isDirectoryKey,
-        .fileSizeKey,
-        .typeIdentifierKey
+        .fileSizeKey
     ]
 
     private let fileAccess: any FileAccessProviding

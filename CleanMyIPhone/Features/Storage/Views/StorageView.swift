@@ -149,7 +149,10 @@ struct StorageView: View {
             Text("Status")
                 .font(.headline)
 
-            if viewModel.isRestoringStoredFiles {
+            // The compact dashboard cache is deliberately published before the
+            // full 20k+ file index. Do not replace that usable cached state with
+            // a blocking spinner while details restore in the background.
+            if viewModel.isRestoringStoredFiles, viewModel.summary == nil {
                 ProgressView()
                     .tint(theme.accentPrimary)
                 Text("Loading…")
