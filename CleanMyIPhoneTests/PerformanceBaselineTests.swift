@@ -163,6 +163,184 @@ struct PerformanceBaselineTests {
         #expect(restored.largestFiles.count == 10)
     }
 
+    @Test("One-hundred-thousand persisted files expose snapshot scaling")
+    func oneHundredThousandFileSnapshotScaling() throws {
+        let fileManager = FileManager()
+        let root = fileManager.temporaryDirectory
+            .appending(path: "CleanFile-Large-Restore-\(UUID().uuidString)", directoryHint: .isDirectory)
+        try fileManager.createDirectory(at: root, withIntermediateDirectories: false)
+        defer { try? fileManager.removeItem(at: root) }
+        let bookmark = try root.bookmarkData(
+            options: [],
+            includingResourceValuesForKeys: nil,
+            relativeTo: nil
+        )
+        let files = (0 ..< 100_000).map { index in
+            let directory = "folder-\(index % 1_000)"
+            let name = "item-\(index).dat"
+            return ScannedFile(
+                url: root.appending(path: "\(directory)/\(name)"),
+                name: name,
+                relativePathComponents: [directory, name],
+                category: FileCategory.allCases[index % FileCategory.allCases.count],
+                byteCount: Int64(index + 1)
+            )
+        }
+
+        var started = DispatchTime.now().uptimeNanoseconds
+        let snapshot = try #require(FileStateSnapshot.prepare(
+            directoryBookmark: bookmark,
+            selectedDirectoryName: root.lastPathComponent,
+            files: files,
+            skippedFileCount: 0
+        ))
+        let prepareDuration = Self.milliseconds(since: started)
+
+        let legacySnapshot = LegacyPerformanceFileStateSnapshot(
+            directoryBookmark: bookmark,
+            selectedDirectoryName: root.lastPathComponent,
+            files: files.map(LegacyPerformancePersistedFile.init),
+            skippedFileCount: 0
+        )
+        started = DispatchTime.now().uptimeNanoseconds
+        let legacyEncoded = try JSONEncoder().encode(legacySnapshot)
+        let legacyEncodeDuration = Self.milliseconds(since: started)
+
+        started = DispatchTime.now().uptimeNanoseconds
+        let encoded = try JSONEncoder().encode(snapshot)
+        let encodeDuration = Self.milliseconds(since: started)
+
+        started = DispatchTime.now().uptimeNanoseconds
+        let legacyDecoded = try JSONDecoder().decode(FileStateSnapshot.self, from: legacyEncoded)
+        let legacyDecodeDuration = Self.milliseconds(since: started)
+
+        started = DispatchTime.now().uptimeNanoseconds
+        let decoded = try JSONDecoder().decode(FileStateSnapshot.self, from: encoded)
+        let decodeDuration = Self.milliseconds(since: started)
+
+        started = DispatchTime.now().uptimeNanoseconds
+        let restored = try #require(FileStateRestorer.prepare(decoded))
+        let restoreDuration = Self.milliseconds(since: started)
+
+        print(String(
+            format: "PERF_BASELINE storage-large-snapshot files=%d snapshot_bytes=%d prepare_ms=%.2f encode_ms=%.2f decode_ms=%.2f restore_ms=%.2f",
+            files.count,
+            encoded.count,
+            prepareDuration,
+            encodeDuration,
+            decodeDuration,
+            restoreDuration
+        ))
+        let sizeImprovement = Double(legacyEncoded.count - encoded.count)
+            / Double(legacyEncoded.count) * 100
+        let encodeImprovement = (legacyEncodeDuration - encodeDuration)
+            / legacyEncodeDuration * 100
+        let decodeImprovement = (legacyDecodeDuration - decodeDuration)
+            / legacyDecodeDuration * 100
+        print(String(
+            format: "PERF_COMPARISON storage-compact-snapshot files=%d legacy_bytes=%d compact_bytes=%d size_improvement_percent=%.1f legacy_encode_ms=%.2f compact_encode_ms=%.2f encode_improvement_percent=%.1f legacy_decode_ms=%.2f compact_decode_ms=%.2f decode_improvement_percent=%.1f",
+            files.count,
+            legacyEncoded.count,
+            encoded.count,
+            sizeImprovement,
+            legacyEncodeDuration,
+            encodeDuration,
+            encodeImprovement,
+            legacyDecodeDuration,
+            decodeDuration,
+            decodeImprovement
+        ))
+
+        #expect(restored.files.count == files.count)
+        #expect(restored.summary.fileCount == files.count)
+        #expect(restored.fileTree.children.count == 1_000)
+        #expect(restored.largestFiles.count == 10)
+        #expect(legacyDecoded.files == decoded.files)
+    }
+
+    @Test("Rejected chunked persistence experiment compares buffer and codec costs")
+    func chunkedPersistenceComparison() throws {
+        // This remains as evidence only. Production reverted to the compact
+        // monolithic snapshot after real-device scans became slower and hotter.
+        let root = URL(fileURLWithPath: "/chunked-persistence", isDirectory: true)
+        let files = (0 ..< 100_000).map { index in
+            let directory = "folder-\(index % 1_000)"
+            let name = "item-\(index).dat"
+            return ScannedFile(
+                url: root.appending(path: "\(directory)/\(name)"),
+                name: name,
+                relativePathComponents: [directory, name],
+                category: FileCategory.allCases[index % FileCategory.allCases.count],
+                byteCount: Int64(index + 1)
+            )
+        }
+        let snapshot = try #require(FileStateSnapshot.prepare(
+            directoryBookmark: Data([1, 2, 3]),
+            selectedDirectoryName: "chunked-persistence",
+            files: files,
+            skippedFileCount: 0
+        ))
+        let encoder = JSONEncoder()
+        let decoder = JSONDecoder()
+
+        var started = DispatchTime.now().uptimeNanoseconds
+        let monolithicData = try encoder.encode(snapshot)
+        let monolithicEncodeDuration = Self.milliseconds(since: started)
+        started = DispatchTime.now().uptimeNanoseconds
+        let monolithicDecoded = try decoder.decode(FileStateSnapshot.self, from: monolithicData)
+        let monolithicDecodeDuration = Self.milliseconds(since: started)
+
+        let chunkSize = 10_000
+        var chunkData: [Data] = []
+        chunkData.reserveCapacity((snapshot.files.count + chunkSize - 1) / chunkSize)
+        started = DispatchTime.now().uptimeNanoseconds
+        var chunkStart = 0
+        while chunkStart < snapshot.files.count {
+            let chunkEnd = min(chunkStart + chunkSize, snapshot.files.count)
+            chunkData.append(try encoder.encode(Array(snapshot.files[chunkStart ..< chunkEnd])))
+            chunkStart = chunkEnd
+        }
+        let chunkedEncodeDuration = Self.milliseconds(since: started)
+
+        started = DispatchTime.now().uptimeNanoseconds
+        var chunkedDecodedFiles: [PersistedScannedFile] = []
+        chunkedDecodedFiles.reserveCapacity(snapshot.files.count)
+        for data in chunkData {
+            chunkedDecodedFiles.append(contentsOf: try decoder.decode(
+                [PersistedScannedFile].self,
+                from: data
+            ))
+        }
+        let chunkedDecodeDuration = Self.milliseconds(since: started)
+        let chunkedByteCount = chunkData.reduce(0) { $0 + $1.count }
+        let maximumChunkByteCount = chunkData.map(\.count).max() ?? 0
+        let peakBufferImprovement = Double(monolithicData.count - maximumChunkByteCount)
+            / Double(monolithicData.count) * 100
+        let encodeChange = (monolithicEncodeDuration - chunkedEncodeDuration)
+            / monolithicEncodeDuration * 100
+        let decodeChange = (monolithicDecodeDuration - chunkedDecodeDuration)
+            / monolithicDecodeDuration * 100
+
+        print(String(
+            format: "PERF_COMPARISON storage-chunked-persistence files=%d chunks=%d monolithic_bytes=%d chunked_total_bytes=%d maximum_chunk_bytes=%d peak_buffer_improvement_percent=%.1f monolithic_encode_ms=%.2f chunked_encode_ms=%.2f encode_improvement_percent=%.1f monolithic_decode_ms=%.2f chunked_decode_ms=%.2f decode_improvement_percent=%.1f",
+            files.count,
+            chunkData.count,
+            monolithicData.count,
+            chunkedByteCount,
+            maximumChunkByteCount,
+            peakBufferImprovement,
+            monolithicEncodeDuration,
+            chunkedEncodeDuration,
+            encodeChange,
+            monolithicDecodeDuration,
+            chunkedDecodeDuration,
+            decodeChange
+        ))
+
+        #expect(chunkedDecodedFiles == monolithicDecoded.files)
+        #expect(chunkData.count == 10)
+    }
+
     @Test("One-million metadata records keep bounded summary aggregation")
     func oneMillionMetadataAggregation() {
         let root = URL(fileURLWithPath: "/million-record-baseline", isDirectory: true)
@@ -198,6 +376,168 @@ struct PerformanceBaselineTests {
         #expect(resultLargest.first?.byteCount == 1_000_000)
     }
 
+    @Test("Deletion rebuild compares foreground baseline and background preparation paths")
+    func deletionRebuildComparison() throws {
+        let root = URL(fileURLWithPath: "/deletion-comparison", isDirectory: true)
+        let files = (0 ..< 20_000).map { index in
+            let directory = "folder-\(index % 200)"
+            let name = "item-\(index).dat"
+            return ScannedFile(
+                url: root.appending(path: "\(directory)/\(name)"),
+                name: name,
+                relativePathComponents: [directory, name],
+                category: FileCategory.allCases[index % FileCategory.allCases.count],
+                byteCount: Int64(index + 1)
+            )
+        }
+        let deletedURLs = Set(files.enumerated().compactMap { index, file in
+            index.isMultiple(of: 5) ? file.url : nil
+        })
+
+        var started = DispatchTime.now().uptimeNanoseconds
+        let legacyFiles = files.filter { !deletedURLs.contains($0.url) }
+        let legacySummary = StorageSummary(files: legacyFiles)
+        let legacyLargest = Array(
+            legacyFiles.sorted { $0.byteCount > $1.byteCount }.prefix(10)
+        )
+        let legacyTree = FileTreeBuilder.build(rootURL: root, files: legacyFiles)
+        let legacyDuration = Self.milliseconds(since: started)
+
+        started = DispatchTime.now().uptimeNanoseconds
+        let optimized = try #require(DerivedFileStateBuilder.prepare(
+            files: files,
+            excluding: deletedURLs,
+            rootURL: root
+        ))
+        let optimizedDuration = Self.milliseconds(since: started)
+        let improvement = legacyDuration > 0
+            ? (legacyDuration - optimizedDuration) / legacyDuration * 100
+            : 0
+
+        print(String(
+            format: "PERF_COMPARISON storage-deletion-rebuild files=%d baseline_ms=%.2f optimized_ms=%.2f improvement_percent=%.1f",
+            files.count,
+            legacyDuration,
+            optimizedDuration,
+            improvement
+        ))
+
+        #expect(optimized.files == legacyFiles)
+        #expect(optimized.summary == legacySummary)
+        #expect(optimized.largestFiles == legacyLargest)
+        #expect(optimized.fileTree == legacyTree)
+    }
+
+    @Test("File selection compares repeated body sorting and cached display order")
+    func fileSelectionDisplayOrderComparison() {
+        let root = URL(fileURLWithPath: "/file-list-comparison", isDirectory: true)
+        let files = (0 ..< 20_000).map { index in
+            let name = "item-\(index).dat"
+            return ScannedFile(
+                url: root.appending(path: name),
+                name: name,
+                relativePathComponents: [name],
+                category: .other,
+                byteCount: Int64((index * 7_919) % 20_000)
+            )
+        }
+        let interactionCount = 50
+
+        var baselineSelection = Set<URL>()
+        var baselineChecksum: Int64 = 0
+        var started = DispatchTime.now().uptimeNanoseconds
+        for interaction in 0 ..< interactionCount {
+            let displayedFiles = FileDisplayOrder.bySizeDescending(files)
+            let selectedFile = displayedFiles[interaction]
+            baselineSelection.insert(selectedFile.url)
+            baselineChecksum &+= selectedFile.byteCount
+        }
+        let baselineDuration = Self.milliseconds(since: started)
+
+        started = DispatchTime.now().uptimeNanoseconds
+        let cachedDisplayOrder = FileDisplayOrder.bySizeDescending(files)
+        var optimizedSelection = Set<URL>()
+        var optimizedChecksum: Int64 = 0
+        for interaction in 0 ..< interactionCount {
+            let selectedFile = cachedDisplayOrder[interaction]
+            optimizedSelection.insert(selectedFile.url)
+            optimizedChecksum &+= selectedFile.byteCount
+        }
+        let optimizedDuration = Self.milliseconds(since: started)
+        let improvement = baselineDuration > 0
+            ? (baselineDuration - optimizedDuration) / baselineDuration * 100
+            : 0
+
+        print(String(
+            format: "PERF_COMPARISON storage-file-selection files=%d interactions=%d baseline_ms=%.2f optimized_ms=%.2f improvement_percent=%.1f",
+            files.count,
+            interactionCount,
+            baselineDuration,
+            optimizedDuration,
+            improvement
+        ))
+
+        #expect(optimizedSelection == baselineSelection)
+        #expect(optimizedChecksum == baselineChecksum)
+    }
+
+    @Test("Selected size compares repeated reduction and incremental accounting")
+    func selectedSizeAccountingComparison() {
+        let root = URL(fileURLWithPath: "/selected-size-comparison", isDirectory: true)
+        let files = (0 ..< 20_000).map { index in
+            let name = "item-\(index).dat"
+            return ScannedFile(
+                url: root.appending(path: name),
+                name: name,
+                relativePathComponents: [name],
+                category: .other,
+                byteCount: Int64(index + 1),
+                hasKnownByteCount: !index.isMultiple(of: 17)
+            )
+        }
+        let interactionCount = 500
+
+        var baselineSelectedURLs = Set<URL>()
+        var baselineByteCount: Int64 = 0
+        var started = DispatchTime.now().uptimeNanoseconds
+        for interaction in 0 ..< interactionCount {
+            baselineSelectedURLs.insert(files[interaction].url)
+            baselineByteCount = files.reduce(into: Int64.zero) { total, file in
+                if baselineSelectedURLs.contains(file.url), file.hasKnownByteCount {
+                    total += file.byteCount
+                }
+            }
+        }
+        let baselineDuration = Self.milliseconds(since: started)
+
+        var optimizedSelectedURLs = Set<URL>()
+        var optimizedByteCount: Int64 = 0
+        started = DispatchTime.now().uptimeNanoseconds
+        for interaction in 0 ..< interactionCount {
+            let file = files[interaction]
+            optimizedSelectedURLs.insert(file.url)
+            if file.hasKnownByteCount {
+                optimizedByteCount += file.byteCount
+            }
+        }
+        let optimizedDuration = Self.milliseconds(since: started)
+        let improvement = baselineDuration > 0
+            ? (baselineDuration - optimizedDuration) / baselineDuration * 100
+            : 0
+
+        print(String(
+            format: "PERF_COMPARISON storage-selected-size files=%d interactions=%d baseline_ms=%.2f optimized_ms=%.2f improvement_percent=%.1f",
+            files.count,
+            interactionCount,
+            baselineDuration,
+            optimizedDuration,
+            improvement
+        ))
+
+        #expect(optimizedSelectedURLs == baselineSelectedURLs)
+        #expect(optimizedByteCount == baselineByteCount)
+    }
+
     private static func milliseconds(since started: UInt64) -> Double {
         Double(DispatchTime.now().uptimeNanoseconds - started) / 1_000_000
     }
@@ -231,5 +571,33 @@ struct PerformanceBaselineTests {
             byteCount,
             durationMilliseconds
         )
+    }
+}
+
+private struct LegacyPerformanceFileStateSnapshot: Encodable {
+    let schemaVersion = 2
+    let directoryBookmark: Data
+    let selectedDirectoryName: String
+    let files: [LegacyPerformancePersistedFile]
+    let skippedFileCount: Int
+}
+
+private struct LegacyPerformancePersistedFile: Encodable {
+    let name: String
+    let relativePathComponents: [String]
+    let category: FileCategory
+    let byteCount: Int64
+    let hasKnownByteCount: Bool
+    let creationDate: Date?
+    let modificationDate: Date?
+
+    init(_ file: ScannedFile) {
+        name = file.name
+        relativePathComponents = file.relativePathComponents
+        category = file.category
+        byteCount = file.byteCount
+        hasKnownByteCount = file.hasKnownByteCount
+        creationDate = file.creationDate
+        modificationDate = file.modificationDate
     }
 }

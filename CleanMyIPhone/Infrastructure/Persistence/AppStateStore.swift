@@ -28,7 +28,7 @@ nonisolated struct MediaSizeIndexEntry: Codable, Sendable {
 
 /// 定义 `FileStateSnapshot` 的值语义数据与相关行为。
 nonisolated struct FileStateSnapshot: Codable, Sendable {
-    static let currentSchemaVersion = 2
+    static let currentSchemaVersion = 3
 
     let schemaVersion: Int?
     let directoryBookmark: Data
@@ -101,6 +101,28 @@ nonisolated struct PersistedScannedFile: Codable, Hashable, Sendable {
     let creationDate: Date?
     let modificationDate: Date?
 
+    /// Compact keys materially reduce large indexes because these field names
+    /// occur once for every file. Decoding still accepts the schema-v2 names.
+    private enum CodingKeys: String, CodingKey {
+        case name = "n"
+        case relativePathComponents = "p"
+        case category = "c"
+        case byteCount = "b"
+        case hasKnownByteCount = "k"
+        case creationDate = "cd"
+        case modificationDate = "md"
+    }
+
+    private enum LegacyCodingKeys: String, CodingKey {
+        case name
+        case relativePathComponents
+        case category
+        case byteCount
+        case hasKnownByteCount
+        case creationDate
+        case modificationDate
+    }
+
     init(_ file: ScannedFile) {
         name = file.name
         relativePathComponents = file.relativePathComponents
@@ -109,6 +131,29 @@ nonisolated struct PersistedScannedFile: Codable, Hashable, Sendable {
         hasKnownByteCount = file.hasKnownByteCount
         creationDate = file.creationDate
         modificationDate = file.modificationDate
+    }
+
+    init(from decoder: Decoder) throws {
+        let compact = try decoder.container(keyedBy: CodingKeys.self)
+        if compact.contains(.name) {
+            name = try compact.decode(String.self, forKey: .name)
+            relativePathComponents = try compact.decode([String].self, forKey: .relativePathComponents)
+            category = try compact.decode(FileCategory.self, forKey: .category)
+            byteCount = try compact.decode(Int64.self, forKey: .byteCount)
+            hasKnownByteCount = try compact.decode(Bool.self, forKey: .hasKnownByteCount)
+            creationDate = try compact.decodeIfPresent(Date.self, forKey: .creationDate)
+            modificationDate = try compact.decodeIfPresent(Date.self, forKey: .modificationDate)
+            return
+        }
+
+        let legacy = try decoder.container(keyedBy: LegacyCodingKeys.self)
+        name = try legacy.decode(String.self, forKey: .name)
+        relativePathComponents = try legacy.decode([String].self, forKey: .relativePathComponents)
+        category = try legacy.decode(FileCategory.self, forKey: .category)
+        byteCount = try legacy.decode(Int64.self, forKey: .byteCount)
+        hasKnownByteCount = try legacy.decode(Bool.self, forKey: .hasKnownByteCount)
+        creationDate = try legacy.decodeIfPresent(Date.self, forKey: .creationDate)
+        modificationDate = try legacy.decodeIfPresent(Date.self, forKey: .modificationDate)
     }
 }
 
@@ -174,7 +219,6 @@ actor AppStateStore {
         return load(FileStateSnapshot.self, name: .files)
     }
 
-    /// 持久化 `saveFileState` 对应的数据，并保持后续恢复所需的信息完整。
     func saveFileState(_ snapshot: FileStateSnapshot?) {
         let interval = StoragePerformance.begin("Storage Snapshot Save")
         defer { StoragePerformance.end("Storage Snapshot Save", id: interval) }
@@ -218,4 +262,5 @@ actor AppStateStore {
             // Persistence failure must not interrupt scanning, analysis, or deletion.
         }
     }
+
 }

@@ -494,7 +494,10 @@ private struct ScannedFilesView: View {
     @ObservedObject var viewModel: FileScannerViewModel
     let category: FileCategory?
     @State private var selectedURLs = Set<URL>()
+    @State private var selectedKnownByteCount: Int64 = 0
     @State private var isDeleteConfirmationPresented = false
+    @State private var displayedFiles: [ScannedFile] = []
+    @State private var isPreparingDisplayedFiles = true
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(viewModel: FileScannerViewModel, category: FileCategory? = nil) {
@@ -502,18 +505,10 @@ private struct ScannedFilesView: View {
         self.category = category
     }
 
-    private var displayedFiles: [ScannedFile] {
-        let filteredFiles = if let category {
-            viewModel.files.filter { $0.category == category }
-        } else {
-            viewModel.files
-        }
-        return FileDisplayOrder.bySizeDescending(filteredFiles)
-    }
-
     var body: some View {
         Group {
-            if displayedFiles.isEmpty, viewModel.isRestoringStoredFiles {
+            if displayedFiles.isEmpty,
+               viewModel.isRestoringStoredFiles || isPreparingDisplayedFiles {
                 ProgressView("Loading…")
             } else if displayedFiles.isEmpty {
                 ContentUnavailableView(
@@ -524,11 +519,7 @@ private struct ScannedFilesView: View {
             } else {
                 List(displayedFiles) { file in
                     Button {
-                        if selectedURLs.contains(file.url) {
-                            selectedURLs.remove(file.url)
-                        } else {
-                            selectedURLs.insert(file.url)
-                        }
+                        toggleSelection(of: file)
                     } label: {
                         HStack(spacing: 12) {
                             Image(systemName: selectedURLs.contains(file.url)
@@ -568,13 +559,23 @@ private struct ScannedFilesView: View {
         }
         .navigationTitle(category?.displayName ?? AppL10n.string("Scanned Files"))
         .navigationBarTitleDisplayMode(.inline)
+        .task(id: FileDisplayRequest(
+            filesRevision: viewModel.filesRevision,
+            category: category
+        )) {
+            await prepareDisplayedFiles()
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(selectedURLs.count == displayedFiles.count ? "Deselect All" : "Select All") {
                     if selectedURLs.count == displayedFiles.count {
                         selectedURLs.removeAll()
+                        selectedKnownByteCount = 0
                     } else {
                         selectedURLs = Set(displayedFiles.map(\.url))
+                        selectedKnownByteCount = displayedFiles.reduce(into: Int64.zero) {
+                            if $1.hasKnownByteCount { $0 += $1.byteCount }
+                        }
                     }
                 }
                 .disabled(displayedFiles.isEmpty || viewModel.deletionState.isDeleting)
@@ -614,7 +615,8 @@ private struct ScannedFilesView: View {
                 let urls = selectedURLs
                 Task {
                     await viewModel.deleteFiles(withURLs: urls)
-                    selectedURLs.formIntersection(Set(displayedFiles.map(\.url)))
+                    selectedURLs.formIntersection(Set(viewModel.files.map(\.url)))
+                    recalculateSelectedKnownByteCount()
                 }
             }
         } message: {
@@ -642,13 +644,58 @@ private struct ScannedFilesView: View {
         }
     }
 
-    private var selectedFileSizeText: String {
-        let byteCount = displayedFiles.reduce(Int64.zero) { total, file in
-            selectedURLs.contains(file.url) && file.hasKnownByteCount
-                ? total + file.byteCount
-                : total
+    @MainActor
+    private func prepareDisplayedFiles() async {
+        let sourceFiles = viewModel.files
+        let category = category
+        isPreparingDisplayedFiles = true
+
+        let worker = Task.detached(priority: .userInitiated) {
+            let interval = StoragePerformance.begin("Storage File List Prepare")
+            defer { StoragePerformance.end("Storage File List Prepare", id: interval) }
+            let filteredFiles = if let category {
+                sourceFiles.filter { $0.category == category }
+            } else {
+                sourceFiles
+            }
+            return FileDisplayOrder.bySizeDescending(filteredFiles)
         }
-        return ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
+        let preparedFiles = await withTaskCancellationHandler {
+            await worker.value
+        } onCancel: {
+            worker.cancel()
+        }
+
+        guard !Task.isCancelled else { return }
+        displayedFiles = preparedFiles
+        selectedURLs.formIntersection(Set(preparedFiles.map(\.url)))
+        recalculateSelectedKnownByteCount()
+        isPreparingDisplayedFiles = false
+    }
+
+    private func toggleSelection(of file: ScannedFile) {
+        if selectedURLs.remove(file.url) != nil {
+            if file.hasKnownByteCount {
+                selectedKnownByteCount -= file.byteCount
+            }
+        } else {
+            selectedURLs.insert(file.url)
+            if file.hasKnownByteCount {
+                selectedKnownByteCount += file.byteCount
+            }
+        }
+    }
+
+    private func recalculateSelectedKnownByteCount() {
+        selectedKnownByteCount = displayedFiles.reduce(into: Int64.zero) { total, file in
+            if selectedURLs.contains(file.url), file.hasKnownByteCount {
+                total += file.byteCount
+            }
+        }
+    }
+
+    private var selectedFileSizeText: String {
+        ByteCountFormatter.string(fromByteCount: selectedKnownByteCount, countStyle: .file)
     }
 
     private var deletionResultMessage: String {
@@ -667,6 +714,11 @@ private struct ScannedFilesView: View {
             ""
         }
     }
+}
+
+private struct FileDisplayRequest: Hashable {
+    let filesRevision: Int
+    let category: FileCategory?
 }
 
 /// 扩展 `View`，集中实现当前文件所需的附加能力。

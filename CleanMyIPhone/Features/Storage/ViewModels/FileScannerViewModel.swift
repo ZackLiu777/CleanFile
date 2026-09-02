@@ -99,11 +99,50 @@ nonisolated enum FileStateRestorer {
     }
 }
 
+nonisolated struct PreparedDerivedFileState: Sendable {
+    let files: [ScannedFile]
+    let summary: StorageSummary
+    let fileTree: FileNode
+    let largestFiles: [ScannedFile]
+}
+
+nonisolated enum DerivedFileStateBuilder {
+    /// Rebuilds deletion results independently from MainActor because a selected
+    /// category may contain tens of thousands of files. The stages deliberately
+    /// mirror the faster contiguous collection operations measured by the
+    /// performance suite instead of forcing an interleaved single pass.
+    static func prepare(
+        files: [ScannedFile],
+        excluding deletedURLs: Set<URL>,
+        rootURL: URL
+    ) -> PreparedDerivedFileState? {
+        guard !Task.isCancelled else { return nil }
+        let retainedFiles = files.filter { !deletedURLs.contains($0.url) }
+        guard !Task.isCancelled else { return nil }
+        let summary = StorageSummary(files: retainedFiles)
+        guard !Task.isCancelled else { return nil }
+        let largestFiles = Array(
+            retainedFiles.sorted { $0.byteCount > $1.byteCount }.prefix(10)
+        )
+        guard !Task.isCancelled else { return nil }
+        let fileTree = FileTreeBuilder.build(rootURL: rootURL, files: retainedFiles)
+        guard !Task.isCancelled else { return nil }
+
+        return PreparedDerivedFileState(
+            files: retainedFiles,
+            summary: summary,
+            fileTree: fileTree,
+            largestFiles: largestFiles
+        )
+    }
+}
+
 @MainActor
 /// 封装 `FileScannerViewModel` 的引用语义、状态与业务行为。
 final class FileScannerViewModel: ObservableObject {
     @Published private(set) var state: ScanState = .idle
     @Published private(set) var files: [ScannedFile] = []
+    @Published private(set) var filesRevision = 0
     @Published private(set) var summary: StorageSummary?
     @Published private(set) var fileTree: FileNode?
     @Published private(set) var largestFiles: [ScannedFile] = []
@@ -192,6 +231,7 @@ final class FileScannerViewModel: ObservableObject {
             await stateStore.saveFileState(nil)
         }
         files = []
+        filesRevision &+= 1
         summary = nil
         fileTree = nil
         largestFiles = []
@@ -255,7 +295,7 @@ final class FileScannerViewModel: ObservableObject {
                 files: knownFiles,
                 selectedRoot: selectedDirectoryURL
             )
-            applyDeletion(result)
+            await applyDeletion(result)
         } catch let error as FileDeletionError {
             deletionState = .failure(error)
         } catch is CancellationError {
@@ -278,6 +318,7 @@ final class FileScannerViewModel: ObservableObject {
             state = .scanning(progress)
         case .completed(let result):
             files = result.files
+            filesRevision &+= 1
             summary = result.summary
             fileTree = result.fileTree
             largestFiles = result.largestFiles
@@ -295,9 +336,40 @@ final class FileScannerViewModel: ObservableObject {
     }
 
     /// 更新 `applyDeletion` 对应的数据，使界面状态与底层结果保持一致。
-    private func applyDeletion(_ result: FileDeletionResult) {
-        files.removeAll { result.deletedURLs.contains($0.url) }
-        rebuildDerivedState()
+    private func applyDeletion(_ result: FileDeletionResult) async {
+        guard let selectedDirectoryURL else {
+            deletionState = .failure(.folderAccessUnavailable)
+            return
+        }
+
+        let currentFiles = files
+        let worker = Task.detached(priority: .userInitiated) {
+            let interval = StoragePerformance.begin("Storage Deletion Rebuild")
+            defer { StoragePerformance.end("Storage Deletion Rebuild", id: interval) }
+            return DerivedFileStateBuilder.prepare(
+                files: currentFiles,
+                excluding: result.deletedURLs,
+                rootURL: selectedDirectoryURL
+            )
+        }
+        let prepared = await withTaskCancellationHandler {
+            await worker.value
+        } onCancel: {
+            worker.cancel()
+        }
+        guard let prepared, !Task.isCancelled else {
+            deletionState = .idle
+            return
+        }
+
+        files = prepared.files
+        filesRevision &+= 1
+        summary = prepared.summary
+        fileTree = prepared.fileTree
+        largestFiles = prepared.largestFiles
+        state = prepared.files.isEmpty ? .empty : .success(prepared.summary)
+        skippedFileCount = 0
+        persistStableState()
 
         if result.failedFileCount == 0 {
             deletionState = .success(deletedCount: result.deletedURLs.count)
@@ -311,21 +383,6 @@ final class FileScannerViewModel: ObservableObject {
         }
     }
 
-    /// 封装 `rebuildDerivedState` 对应的局部行为，供当前类型在统一入口下复用。
-    private func rebuildDerivedState() {
-        let updatedSummary = StorageSummary(files: files)
-        summary = updatedSummary
-        largestFiles = Array(
-            files.sorted { $0.byteCount > $1.byteCount }.prefix(10)
-        )
-        if let selectedDirectoryURL {
-            fileTree = FileTreeBuilder.build(rootURL: selectedDirectoryURL, files: files)
-        }
-        state = files.isEmpty ? .empty : .success(updatedSummary)
-        skippedFileCount = 0
-        persistStableState()
-    }
-
     /// Applies already-prepared values without running O(n) work on MainActor.
     private func applyRestoredState(_ prepared: PreparedFileState) {
         guard selectedDirectoryURL == nil else { return }
@@ -334,6 +391,7 @@ final class FileScannerViewModel: ObservableObject {
         selectedDirectoryBookmark = prepared.directoryBookmark
         skippedFileCount = prepared.skippedFileCount
         files = prepared.files
+        filesRevision &+= 1
         summary = prepared.summary
         fileTree = prepared.fileTree
         largestFiles = prepared.largestFiles
@@ -395,9 +453,6 @@ final class FileScannerViewModel: ObservableObject {
             await self.stateStore.saveStorageDashboard(dashboard)
             guard !Task.isCancelled, generation == self.persistenceGeneration else { return }
 
-            // Mapping a large scan into its compact persisted representation is
-            // O(n). Keep that work away from MainActor so completing a scan does
-            // not freeze navigation while the cache is prepared.
             let worker = Task.detached(priority: .utility) {
                 let interval = StoragePerformance.begin("Storage Snapshot Prepare")
                 defer { StoragePerformance.end("Storage Snapshot Prepare", id: interval) }
@@ -413,7 +468,6 @@ final class FileScannerViewModel: ObservableObject {
             } onCancel: {
                 worker.cancel()
             }
-
             guard let snapshot,
                   !Task.isCancelled,
                   generation == self.persistenceGeneration else { return }
