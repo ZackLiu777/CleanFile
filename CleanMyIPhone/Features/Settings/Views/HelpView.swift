@@ -18,7 +18,7 @@ struct HelpView: View {
                 ForEach(HelpCatalog.categories) { category in
                     VStack(alignment: .leading, spacing: 10) {
                         Text(category.title)
-                            .font(.title3.weight(.bold))
+                            .appTypeface(.title3.weight(.bold), size: 20, relativeTo: .title3, weight: .bold)
                             .foregroundStyle(theme.textPrimary)
                             .accessibilityAddTraits(.isHeader)
 
@@ -50,7 +50,7 @@ struct HelpView: View {
                         Spacer(minLength: 8)
 
                         Image(systemName: "chevron.right")
-                            .font(.caption.weight(.semibold))
+                            .appTypeface(.caption.weight(.semibold), size: 12, relativeTo: .caption, weight: .semibold)
                             .foregroundStyle(theme.textSecondary)
                             .accessibilityHidden(true)
                     }
@@ -75,17 +75,17 @@ struct HelpView: View {
     private var helpIntroduction: some View {
         VStack(alignment: .leading, spacing: 12) {
             Image(systemName: "questionmark.circle.fill")
-                .font(.system(size: 34, weight: .semibold))
+                .appTypeface(.system(size: 34, weight: .semibold), size: 34, relativeTo: .body, weight: .semibold)
                 .foregroundStyle(theme.accentPrimary)
                 .accessibilityHidden(true)
 
             Text("How can we help?")
-                .font(.title2.bold())
+                .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
                 .foregroundStyle(theme.textPrimary)
                 .accessibilityAddTraits(.isHeader)
 
             Text("Learn the app, understand what uses storage, and make careful cleanup decisions.")
-                .font(.body)
+                .appTypeface(.body, size: 17, relativeTo: .body, weight: .regular)
                 .foregroundStyle(theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -97,7 +97,7 @@ struct HelpView: View {
     private func articleLabel(_ article: HelpArticle) -> some View {
         HStack(alignment: .center, spacing: 12) {
             Image(systemName: article.systemImage)
-                .font(.system(size: 17, weight: .semibold))
+                .appTypeface(.system(size: 17, weight: .semibold), size: 17, relativeTo: .body, weight: .semibold)
                 .foregroundStyle(theme.accentPrimary)
                 .frame(width: 34, height: 34)
                 .background(theme.accentPrimary.opacity(0.12), in: Circle())
@@ -105,11 +105,11 @@ struct HelpView: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(article.title)
-                    .font(.body.weight(.semibold))
+                    .appTypeface(.body.weight(.semibold), size: 17, relativeTo: .body, weight: .semibold)
                     .foregroundStyle(theme.textPrimary)
 
                 Text(article.summary)
-                    .font(.caption)
+                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }

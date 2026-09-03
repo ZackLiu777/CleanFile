@@ -104,7 +104,7 @@ struct MediaQuickCleanView: View {
                 }
 
                 Text("Sizes are approximate. Categories can overlap, and selected items are counted once.")
-                    .font(.footnote)
+                    .appTypeface(.footnote, size: 13, relativeTo: .footnote, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, 4)
@@ -118,7 +118,7 @@ struct MediaQuickCleanView: View {
     private var summaryCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             Label("Review Cleanup Suggestions", systemImage: "sparkles")
-                .font(.title2.bold())
+                .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
                 .foregroundStyle(theme.textPrimary)
             Text("Select one or more categories. Similar-photo groups always keep the recommended photo.")
                 .foregroundStyle(theme.textSecondary)
@@ -135,7 +135,7 @@ struct MediaQuickCleanView: View {
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: category.systemImage)
-                    .font(.title3.weight(.semibold))
+                    .appTypeface(.title3.weight(.semibold), size: 20, relativeTo: .title3, weight: .semibold)
                     .foregroundStyle(isSelected ? theme.accentPrimary : theme.textSecondary)
                     .frame(width: 44, height: 44)
                     .background(
@@ -145,17 +145,17 @@ struct MediaQuickCleanView: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(category.title)
-                        .font(.headline)
+                        .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                         .foregroundStyle(theme.textPrimary)
                     Text(categoryDetail(category))
-                        .font(.subheadline)
+                        .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                         .foregroundStyle(theme.textSecondary)
                 }
 
                 Spacer(minLength: 8)
 
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.title2)
+                    .appTypeface(.title2, size: 22, relativeTo: .title2, weight: .regular)
                     .foregroundStyle(isSelected ? theme.accentPrimary : theme.textTertiary)
                     .accessibilityHidden(true)
             }
@@ -181,10 +181,10 @@ struct MediaQuickCleanView: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(selectedCountText)
-                    .font(.subheadline.weight(.semibold))
+                    .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
                     .foregroundStyle(theme.textPrimary)
                 Text(estimatedSelectedSizeText)
-                    .font(.caption)
+                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
             }
 

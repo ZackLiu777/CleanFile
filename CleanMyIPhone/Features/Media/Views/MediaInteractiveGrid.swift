@@ -15,6 +15,7 @@ import SwiftUI
 
 /// 将支持交互式布局过渡的 UICollectionView 接入 SwiftUI 媒体详情页。
 struct MediaInteractiveGrid: UIViewRepresentable {
+    @EnvironmentObject private var themeSettings: ThemeSettings
     let sections: [MediaDateSection]
     let showsDateHeaders: Bool
     @Binding var selectedIDs: Set<String>
@@ -313,6 +314,8 @@ struct MediaInteractiveGrid: UIViewRepresentable {
                     viewModel: parent.viewModel,
                     accentColor: parent.accentColor
                 )
+                .fontDesign(parent.themeSettings.fontStyle.inheritedDesign)
+                .appFontFamily(parent.themeSettings.fontStyle.fontName)
             }
             .margins(.all, 0)
             .background {
@@ -337,6 +340,8 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             else { return }
             let section = parent.sections[index]
             header.configure(
+                fontDesign: parent.themeSettings.fontStyle.uiDesign,
+                fontName: parent.themeSettings.fontStyle.fontName,
                 title: dateTitle(section.day),
                 itemCount: itemCount(section.assetIDs.count)
             )
@@ -948,10 +953,10 @@ private struct MediaInteractiveGridCellContent: View {
     private var assetInformation: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(viewModel.displayName(for: assetID))
-                .font(.subheadline.weight(.semibold))
+                .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
                 .lineLimit(1)
             Text(byteCountText)
-            .font(.caption)
+            .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
             .foregroundStyle(.white.opacity(0.76))
         }
         .foregroundStyle(.white)
@@ -1044,7 +1049,18 @@ private final class MediaInteractiveGridHeaderView: UICollectionReusableView {
     }
 
     /// 更新复用标题中的日期和项目数量。
-    func configure(title: String, itemCount: String) {
+    func configure(fontDesign: UIFontDescriptor.SystemDesign, fontName: String?, title: String, itemCount: String) {
+        for (label, style) in [(titleLabel, UIFont.TextStyle.headline), (itemCountLabel, .caption1)] {
+            let font = UIFont.preferredFont(forTextStyle: style)
+            label.font = UIFont(descriptor: font.fontDescriptor.withDesign(fontDesign) ?? font.fontDescriptor, size: 0)
+            if let fontName, let custom = UIFont(name: fontName, size: style == .headline ? 17 : 12) {
+                let descriptor = style == .headline
+                    ? custom.fontDescriptor.withSymbolicTraits(.traitBold) ?? custom.fontDescriptor
+                    : custom.fontDescriptor
+                label.font = UIFontMetrics(forTextStyle: style).scaledFont(for: UIFont(descriptor: descriptor, size: custom.pointSize))
+            }
+            label.adjustsFontForContentSizeCategory = true
+        }
         titleLabel.text = title
         itemCountLabel.text = itemCount
     }

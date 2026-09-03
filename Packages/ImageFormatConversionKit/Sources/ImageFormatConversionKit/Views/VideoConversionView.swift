@@ -93,7 +93,7 @@ struct VideoConversionView: View {
     private var importCard: some View {
         VStack(spacing: 12) {
             Image(systemName: "film.stack").font(.system(size: 34)).foregroundStyle(.tint)
-            Text(L10n.string("video.import.title")).font(.headline)
+            Text(L10n.string("video.import.title")).appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
             Button { importerPresented = true } label: {
                 Label(L10n.string("action.choose_files"), systemImage: "folder")
                     .frame(maxWidth: .infinity)
@@ -323,7 +323,7 @@ struct VideoConversionView: View {
             VStack(spacing: 10) {
                 ProgressView(value: (Double(viewModel.completed) + viewModel.currentProgress) / Double(max(viewModel.total, 1)))
                 HStack {
-                    Text("\(viewModel.completed) / \(viewModel.total)").font(.footnote).foregroundStyle(.secondary)
+                    Text("\(viewModel.completed) / \(viewModel.total)").appTypeface(.footnote, size: 13, relativeTo: .footnote).foregroundStyle(.secondary)
                     Spacer()
                     Button(L10n.string("action.cancel"), role: .cancel) { viewModel.cancel() }
                 }

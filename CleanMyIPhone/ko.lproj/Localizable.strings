@@ -428,3 +428,14 @@
 "Add Files" = "파일 추가";
 "Analyzed Files" = "분석한 파일";
 "%lld selected files" = "%lld개 파일 선택됨";
+"appearance.font.title" = "글꼴";
+"appearance.font.system" = "시스템 기본";
+"appearance.font.rounded" = "둥근 글꼴";
+"appearance.font.serif" = "세리프";
+"appearance.font.monospaced" = "고정폭";
+"appearance.font.detail" = "앱 텍스트에 적용됩니다. 일부 언어는 시스템 대체 글꼴을 사용하며 숫자 정렬과 시스템 대화상자의 스타일은 유지됩니다.";
+"appearance.font.avenirNext" = "Avenir Next";
+"appearance.font.helveticaNeue" = "Helvetica Neue";
+"appearance.font.georgia" = "Georgia";
+"appearance.font.palatino" = "Palatino";
+"appearance.font.languageNote" = "글꼴은 주로 영어 표시에 적용됩니다. 다른 언어는 시스템 대체 글꼴을 사용하여 다르게 보일 수 있습니다. 시스템 대화상자의 글꼴은 유지됩니다.";

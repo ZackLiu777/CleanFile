@@ -49,7 +49,7 @@ public struct ConversionHomeView: View {
         NavigationStack(path: $navigationPath) {
             VStack(spacing: 0) {
                 Text(L10n.string("converter.heading"))
-                    .font(.largeTitle.bold())
+                    .appTypeface(.largeTitle.bold(), size: 34, relativeTo: .largeTitle, weight: .bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, -12)
@@ -91,7 +91,7 @@ public struct ConversionHomeView: View {
                             L10n.string("import.subtitle"),
                             systemImage: "lock.shield"
                         )
-                        .font(.caption)
+                        .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                         .foregroundStyle(theme.textSecondary)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 2)
@@ -429,18 +429,18 @@ private struct ConversionHomeCard: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 14) {
                 Image(systemName: kind.symbol)
-                    .font(.system(size: 23, weight: .medium))
+                    .appTypeface(.system(size: 23, weight: .medium), size: 23, relativeTo: .body, weight: .medium)
                     .foregroundStyle(theme.textPrimary)
                     .frame(width: 54, height: 54)
                     .modifier(ConversionHomeInsetSurface(cornerRadius: 16))
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(kind.title)
-                        .font(.title3.weight(.semibold))
+                        .appTypeface(.title3.weight(.semibold), size: 20, relativeTo: .title3, weight: .semibold)
                         .foregroundStyle(theme.textPrimary)
 
                     Text(kind.detail)
-                        .font(.footnote)
+                        .appTypeface(.footnote, size: 13, relativeTo: .footnote, weight: .regular)
                         .foregroundStyle(theme.textSecondary)
                         .lineLimit(2)
                 }
@@ -448,7 +448,7 @@ private struct ConversionHomeCard: View {
                 Spacer(minLength: 6)
 
                 Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
+                    .appTypeface(.footnote.weight(.semibold), size: 13, relativeTo: .footnote, weight: .semibold)
                     .foregroundStyle(
                         theme.textSecondary.opacity(0.62)
                     )
@@ -457,7 +457,7 @@ private struct ConversionHomeCard: View {
             HStack(spacing: 7) {
                 ForEach(kind.formats, id: \.self) { format in
                     Text(format)
-                        .font(.caption2.weight(.semibold))
+                        .appTypeface(.caption2.weight(.semibold), size: 11, relativeTo: .caption2, weight: .semibold)
                         .foregroundStyle(theme.textSecondary)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 4)
@@ -483,7 +483,7 @@ private struct ConversionHomeCard: View {
                         ),
                         systemImage: "clock.arrow.circlepath"
                     )
-                    .font(.caption)
+                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
 
                     if let sizeComparison = sizeComparison(for: recentRecord) {
@@ -492,7 +492,7 @@ private struct ConversionHomeCard: View {
                                 .font(.caption.monospacedDigit().weight(.medium))
                                 .foregroundStyle(theme.textPrimary)
                             Text(sizeComparison.change)
-                                .font(.caption2)
+                                .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
                                 .foregroundStyle(theme.textSecondary)
                         }
                     }

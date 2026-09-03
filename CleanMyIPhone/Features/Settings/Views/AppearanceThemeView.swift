@@ -27,6 +27,7 @@ struct AppearanceThemeView: View {
             }
             glassCardSection
             displayOptionsSection
+            fontSection
             appearanceSection
         }
         .contentMargins(.horizontal, 4, for: .scrollContent)
@@ -209,7 +210,7 @@ struct AppearanceThemeView: View {
 
                     HStack(spacing: 12) {
                         Text("Stop Position")
-                            .font(.caption)
+                            .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                             .foregroundStyle(theme.textSecondary)
                         Slider(value: customLocationBinding(for: stop), in: 0 ... 1)
                         Text(stop.location, format: .percent.precision(.fractionLength(0)))
@@ -235,7 +236,7 @@ struct AppearanceThemeView: View {
     private var meshGradientEditor: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Freeform Colors")
-                .font(.subheadline.weight(.semibold))
+                .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
 
             LazyVGrid(
                 columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3),
@@ -334,6 +335,22 @@ struct AppearanceThemeView: View {
             Text("Display Options")
         } footer: {
             Text("Control dashboard animations and date headings in media detail grids.")
+        }
+        .appListCard()
+    }
+
+    private var fontSection: some View {
+        Section {
+            Picker("appearance.font.title", selection: $themeSettings.fontStyle) {
+                ForEach(AppFontStyle.availableCases) { style in
+                    Text(LocalizedStringKey(style.titleKey)).tag(style)
+                }
+            }
+            .accessibilityIdentifier("appearance.fontStyle")
+        } header: {
+            Text("appearance.font.title")
+        } footer: {
+            Text("appearance.font.languageNote")
         }
         .appListCard()
     }
@@ -452,17 +469,17 @@ private struct AppearanceThemePreview: View {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Live Preview")
-                        .font(.caption.weight(.semibold))
+                        .appTypeface(.caption.weight(.semibold), size: 12, relativeTo: .caption, weight: .semibold)
                         .foregroundStyle(theme.textSecondary)
                     Text(verbatim: "CleanFile")
-                        .font(.title2.bold())
+                        .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
                         .foregroundStyle(theme.textPrimary)
                 }
 
                 Spacer()
 
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.title2)
+                    .appTypeface(.title2, size: 22, relativeTo: .title2, weight: .regular)
                     .foregroundStyle(theme.accentPrimary)
             }
 
@@ -508,7 +525,7 @@ private struct AppearanceThemePreview: View {
                 .frame(width: 8, height: 8)
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
-                    .font(.caption2)
+                    .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
                     .foregroundStyle(theme.textTertiary)
                 Text(value)
                     .font(.caption.monospacedDigit().weight(.semibold))
@@ -541,7 +558,7 @@ private struct ThemePaletteSwatch: View {
                 paletteSample
 
                 Text(title)
-                    .font(.caption2)
+                    .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
                     .foregroundStyle(isSelected ? theme.textPrimary : theme.textSecondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
@@ -588,7 +605,7 @@ private struct ThemePaletteSwatch: View {
 
             if isSelected {
                 Image(systemName: "checkmark")
-                    .font(.caption2.bold())
+                    .appTypeface(.caption2.bold(), size: 11, relativeTo: .caption2, weight: .bold)
                     .foregroundStyle(theme.textPrimary)
                     .frame(width: 19, height: 19)
                     .background(theme.cardSurface, in: Circle())

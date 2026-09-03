@@ -428,3 +428,14 @@
 "Add Files" = "加入檔案";
 "Analyzed Files" = "已分析檔案";
 "%lld selected files" = "已選擇 %lld 個檔案";
+"appearance.font.title" = "字體";
+"appearance.font.system" = "系統預設";
+"appearance.font.rounded" = "圓角";
+"appearance.font.serif" = "襯線";
+"appearance.font.monospaced" = "等寬";
+"appearance.font.detail" = "套用於 App 文字。部分語言使用系統替代字體；數字對齊與系統對話框保留各自樣式。";
+"appearance.font.avenirNext" = "Avenir Next";
+"appearance.font.helveticaNeue" = "Helvetica Neue";
+"appearance.font.georgia" = "Georgia";
+"appearance.font.palatino" = "Palatino";
+"appearance.font.languageNote" = "字體主要針對英文顯示。其他語言可能使用系統替代字體，效果有所不同；系統對話框保留原有字體。";

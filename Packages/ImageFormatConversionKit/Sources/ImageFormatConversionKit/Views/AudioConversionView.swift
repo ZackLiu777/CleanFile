@@ -93,7 +93,7 @@ struct AudioConversionView: View {
     private var importCard: some View {
         VStack(spacing: 12) {
             Image(systemName: "waveform").font(.system(size: 34)).foregroundStyle(.tint)
-            Text(L10n.string("audio.import.title")).font(.headline)
+            Text(L10n.string("audio.import.title")).appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
             Button { mediaImporterPresented = true } label: {
                 Label(L10n.string("audio.action.add_media"), systemImage: "doc.badge.plus")
                     .frame(maxWidth: .infinity)
@@ -172,7 +172,7 @@ struct AudioConversionView: View {
             }
             if viewModel.outputFormat.isLossless {
                 Label(L10n.string("audio.lossless"), systemImage: "waveform.badge.checkmark")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .appTypeface(.caption, size: 12, relativeTo: .caption).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             row(L10n.string("settings.output")) {
@@ -263,7 +263,7 @@ struct AudioConversionView: View {
             VStack(spacing: 10) {
                 ProgressView(value: (Double(viewModel.completed) + viewModel.itemProgress) / Double(max(viewModel.total, 1)))
                 HStack {
-                    Text("\(viewModel.completed) / \(viewModel.total)").font(.footnote).foregroundStyle(.secondary)
+                    Text("\(viewModel.completed) / \(viewModel.total)").appTypeface(.footnote, size: 13, relativeTo: .footnote).foregroundStyle(.secondary)
                     Spacer()
                     Button(L10n.string("action.cancel"), role: .cancel) { viewModel.cancel() }
                 }

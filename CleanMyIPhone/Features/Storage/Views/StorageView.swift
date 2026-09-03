@@ -32,7 +32,7 @@ struct StorageView: View {
                 ScrollView(.vertical, showsIndicators: false) {
                     LazyVStack(spacing: 16) {
                         Text("storage.heading")
-                            .font(.largeTitle.bold())
+                            .appTypeface(.largeTitle.bold(), size: 34, relativeTo: .largeTitle, weight: .bold)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
                             .padding(.bottom, -16)
@@ -53,14 +53,14 @@ struct StorageView: View {
                                 } label: {
                                     HStack(spacing: 14) {
                                         Image(systemName: "trash")
-                                            .font(.title2)
+                                            .appTypeface(.title2, size: 22, relativeTo: .title2, weight: .regular)
                                             .foregroundStyle(theme.accentPrimary)
                                             .frame(width: 44, height: 44)
                                         Text("Review and Delete Files")
-                                            .font(.headline)
+                                            .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                         Image(systemName: "chevron.right")
-                                            .font(.footnote.weight(.semibold))
+                                            .appTypeface(.footnote.weight(.semibold), size: 13, relativeTo: .footnote, weight: .semibold)
                                     }
                                     .foregroundStyle(theme.textPrimary)
                                     .padding(16)
@@ -137,17 +137,17 @@ struct StorageView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Image(systemName: "folder.fill")
-                    .font(.title2)
+                    .appTypeface(.title2, size: 22, relativeTo: .title2, weight: .regular)
                     .foregroundStyle(theme.accentPrimary)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(viewModel.isSourceSelection
                         ? LocalizedStringKey("Analyzed Files")
                         : LocalizedStringKey("Analyzed Folder"))
-                        .font(.caption)
+                        .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                         .foregroundStyle(.secondary)
                     Text(viewModel.selectedDirectoryName ?? "No folder selected")
-                        .font(.headline)
+                        .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                         .lineLimit(1)
                 }
 
@@ -185,7 +185,7 @@ struct StorageView: View {
     private var statusCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Status")
-                .font(.headline)
+                .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
 
             // The compact dashboard cache is deliberately published before the
             // full 20k+ file index. Do not replace that usable cached state with
@@ -233,7 +233,7 @@ struct StorageView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Label("Folder Map", systemImage: "circle.hexagongrid")
-                    .font(.headline)
+                    .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                 Spacer()
                 NavigationLink {
                     FolderMapView(root: root)
@@ -258,7 +258,7 @@ struct StorageView: View {
     private func summaryCard(_ summary: StorageSummary) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Storage Summary")
-                .font(.title2.bold())
+                .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
 
             HStack(spacing: 20) {
                 metric(title: "Files", value: "\(summary.fileCount)")
@@ -270,7 +270,7 @@ struct StorageView: View {
                     "Size unavailable for \(summary.unknownByteCountFileCount) iCloud file(s)",
                     systemImage: "icloud"
                 )
-                .font(.caption)
+                .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                 .foregroundStyle(.secondary)
             }
 
@@ -280,7 +280,7 @@ struct StorageView: View {
                 } label: {
                     HStack(spacing: 12) {
                         Image(systemName: categorySymbol(category.category))
-                            .font(.system(size: 15, weight: .semibold))
+                            .appTypeface(.system(size: 15, weight: .semibold), size: 15, relativeTo: .body, weight: .semibold)
                             .foregroundStyle(storageColor(category.category))
                             .frame(width: 30, height: 30)
                             .background(
@@ -291,7 +291,7 @@ struct StorageView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             HStack(alignment: .firstTextBaseline) {
                                 Text(category.category.displayName)
-                                    .font(.body.weight(.medium))
+                                    .appTypeface(.body.weight(.medium), size: 17, relativeTo: .body, weight: .medium)
                                     .foregroundStyle(theme.textPrimary)
                                 Spacer(minLength: 8)
                                 Text(byteCountText(category.byteCount))
@@ -303,12 +303,12 @@ struct StorageView: View {
 
                             HStack {
                                 Text(fileCountText(category.fileCount))
-                                    .font(.caption)
+                                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                                     .foregroundStyle(theme.textTertiary)
                                 Spacer()
                                 if category.unknownByteCount > 0 {
                                     Image(systemName: "icloud")
-                                        .font(.caption2)
+                                        .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
                                         .foregroundStyle(theme.textTertiary)
                                         .accessibilityLabel("Size unavailable for some iCloud files")
                                 }
@@ -316,7 +316,7 @@ struct StorageView: View {
                         }
 
                         Image(systemName: "chevron.right")
-                            .font(.caption.weight(.semibold))
+                            .appTypeface(.caption.weight(.semibold), size: 12, relativeTo: .caption, weight: .semibold)
                             .foregroundStyle(theme.textTertiary)
                     }
                     .padding(.vertical, 5)
@@ -332,10 +332,10 @@ struct StorageView: View {
     private func metric(title: LocalizedStringKey, value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.caption)
+                .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                 .foregroundStyle(.secondary)
             Text(value)
-                .font(.title3.weight(.semibold))
+                .appTypeface(.title3.weight(.semibold), size: 20, relativeTo: .title3, weight: .semibold)
                 .foregroundStyle(theme.textPrimary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -524,7 +524,7 @@ private struct FolderMapView: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Tap a folder segment to drill down. Tap the center to go back.")
-                    .font(.subheadline)
+                    .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                     .foregroundStyle(.secondary)
 
                 SunburstChartView(root: root)
@@ -587,7 +587,7 @@ private struct ScannedFilesView: View {
                                 Text(file.name)
                                     .lineLimit(1)
                                 Text(file.relativePathComponents.dropLast().joined(separator: "/"))
-                                    .font(.caption)
+                                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(1)
                             }
@@ -596,7 +596,7 @@ private struct ScannedFilesView: View {
                                 fromByteCount: file.byteCount,
                                 countStyle: .file
                             ))
-                            .font(.caption)
+                            .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                             .foregroundStyle(.secondary)
                         }
                     }
@@ -636,9 +636,9 @@ private struct ScannedFilesView: View {
             HStack(spacing: 14) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(selectedURLs.count) selected")
-                        .font(.subheadline.weight(.semibold))
+                        .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
                     Text(selectedFileSizeText)
-                        .font(.caption)
+                        .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                         .foregroundStyle(.secondary)
                 }
 

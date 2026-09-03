@@ -18,13 +18,13 @@ struct ConversionGuideLocalizedPreview: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(selectedTool.map(toolTitle) ?? L10n.string("conversion.guide.title"))
-                    .font(.title3.bold())
+                    .appTypeface(.title3.bold(), size: 20, relativeTo: .title3, weight: .bold)
                     .lineLimit(1)
 
                 Spacer()
 
                 Image(systemName: selectedTool.map(toolSymbol) ?? "lightbulb")
-                    .font(.headline)
+                    .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                     .foregroundStyle(theme.accent)
                     .frame(width: 34, height: 34)
                     .background(theme.accent.opacity(0.12), in: Circle())
@@ -68,17 +68,17 @@ struct ConversionGuideLocalizedPreview: View {
     private func previewRow(symbol: String, title: String, detail: String) -> some View {
         HStack(alignment: .center, spacing: 11) {
             Image(systemName: symbol)
-                .font(.system(size: 16, weight: .semibold))
+                .appTypeface(.system(size: 16, weight: .semibold), size: 16, relativeTo: .body, weight: .semibold)
                 .foregroundStyle(theme.accent)
                 .frame(width: 34, height: 34)
                 .background(theme.accent.opacity(0.10), in: RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.subheadline.weight(.semibold))
+                    .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
                     .lineLimit(1)
                 Text(detail)
-                    .font(.caption)
+                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
                     .lineLimit(2)
             }
@@ -87,7 +87,7 @@ struct ConversionGuideLocalizedPreview: View {
 
     private func previewTag(_ title: String) -> some View {
         Text(title)
-            .font(.caption2.weight(.semibold))
+            .appTypeface(.caption2.weight(.semibold), size: 11, relativeTo: .caption2, weight: .semibold)
             .lineLimit(1)
             .padding(.horizontal, 9)
             .padding(.vertical, 6)

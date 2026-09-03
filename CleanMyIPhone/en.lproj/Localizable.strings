@@ -428,3 +428,14 @@
 "Add Files" = "Add Files";
 "Analyzed Files" = "Analyzed Files";
 "%lld selected files" = "%lld selected files";
+"appearance.font.title" = "Font";
+"appearance.font.system" = "System Default";
+"appearance.font.rounded" = "Rounded";
+"appearance.font.serif" = "Serif";
+"appearance.font.monospaced" = "Monospaced";
+"appearance.font.detail" = "Applies to app text. Some languages use system fallback fonts; numeric alignment and system dialogs retain their own styling.";
+"appearance.font.avenirNext" = "Avenir Next";
+"appearance.font.helveticaNeue" = "Helvetica Neue";
+"appearance.font.georgia" = "Georgia";
+"appearance.font.palatino" = "Palatino";
+"appearance.font.languageNote" = "Font choices primarily style English text. Other languages may use system fallback fonts and look different. System dialogs keep their own fonts.";

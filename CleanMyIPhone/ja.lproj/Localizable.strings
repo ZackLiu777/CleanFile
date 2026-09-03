@@ -428,3 +428,14 @@
 "Add Files" = "ファイルを追加";
 "Analyzed Files" = "解析済みファイル";
 "%lld selected files" = "%lld 個のファイルを選択";
+"appearance.font.title" = "フォント";
+"appearance.font.system" = "システム標準";
+"appearance.font.rounded" = "丸み";
+"appearance.font.serif" = "セリフ";
+"appearance.font.monospaced" = "等幅";
+"appearance.font.detail" = "アプリの文字に適用します。一部の言語は代替フォントを使用し、数字の配置とシステムダイアログの書式は維持されます。";
+"appearance.font.avenirNext" = "Avenir Next";
+"appearance.font.helveticaNeue" = "Helvetica Neue";
+"appearance.font.georgia" = "Georgia";
+"appearance.font.palatino" = "Palatino";
+"appearance.font.languageNote" = "フォントは主に英語の表示に適用されます。他の言語では代替フォントが使われ、見た目が異なる場合があります。システムダイアログのフォントは変更されません。";

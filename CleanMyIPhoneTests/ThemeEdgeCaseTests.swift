@@ -5,6 +5,34 @@ import Testing
 
 @Suite("Theme and background edge cases")
 struct ThemeEdgeCaseTests {
+    @Test("Named font choices are exposed only when available on the device")
+    @MainActor
+    func namedFontsAreAvailable() {
+        for style in [AppFontStyle.avenirNext, .helveticaNeue, .georgia, .palatino] {
+            #expect(AppFontStyle.availableCases.contains(style) == (style.fontName != nil))
+        }
+        #expect(AppFontStyle.availableCases.contains(.system))
+        #expect(AppFontStyle.system.fontName == nil)
+        #expect(AppFontStyle.rounded.fontName == nil)
+    }
+
+    // Required: preferences are isolated from the user's defaults.
+    @Test("Font selection persists and invalid values fall back safely")
+    @MainActor
+    func fontSelectionPersists() throws {
+        let name = "FontPreferenceTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: name))
+        defer { defaults.removePersistentDomain(forName: name) }
+        #expect(ThemeSettings(userDefaults: defaults).fontStyle == .system)
+        for style in AppFontStyle.allCases {
+            let settings = ThemeSettings(userDefaults: defaults)
+            settings.fontStyle = style
+            #expect(ThemeSettings(userDefaults: defaults).fontStyle == style)
+        }
+        defaults.set("unknown", forKey: "appearance.fontStyle")
+        #expect(ThemeSettings(userDefaults: defaults).fontStyle == .system)
+    }
+
     @Test("Appearance choices map to the expected color-scheme policy")
     func appearanceColorSchemePolicyIsStable() {
         #expect(AppAppearance.system.colorScheme == nil)

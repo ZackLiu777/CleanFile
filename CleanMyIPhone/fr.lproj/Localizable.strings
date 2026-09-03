@@ -428,3 +428,14 @@
 "Add Files" = "Ajouter des fichiers";
 "Analyzed Files" = "Fichiers analysés";
 "%lld selected files" = "%lld fichiers sélectionnés";
+"appearance.font.title" = "Police";
+"appearance.font.system" = "Par défaut";
+"appearance.font.rounded" = "Arrondie";
+"appearance.font.serif" = "Avec empattements";
+"appearance.font.monospaced" = "Chasse fixe";
+"appearance.font.detail" = "S’applique au texte de l’app. Certaines langues utilisent des polices de substitution ; l’alignement des chiffres et les dialogues système conservent leur style.";
+"appearance.font.avenirNext" = "Avenir Next";
+"appearance.font.helveticaNeue" = "Helvetica Neue";
+"appearance.font.georgia" = "Georgia";
+"appearance.font.palatino" = "Palatino";
+"appearance.font.languageNote" = "Ces polices s’appliquent principalement à l’anglais. Les autres langues peuvent utiliser des polices de substitution et présenter un aspect différent. Les dialogues système conservent leurs polices.";

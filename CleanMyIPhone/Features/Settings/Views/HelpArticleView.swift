@@ -44,20 +44,20 @@ struct HelpArticleView: View {
     private var articleHeader: some View {
         VStack(alignment: .leading, spacing: 12) {
             Image(systemName: article.systemImage)
-                .font(.system(size: 28, weight: .semibold))
+                .appTypeface(.system(size: 28, weight: .semibold), size: 28, relativeTo: .body, weight: .semibold)
                 .foregroundStyle(theme.accentPrimary)
                 .frame(width: 52, height: 52)
                 .background(theme.accentPrimary.opacity(0.12), in: Circle())
                 .accessibilityHidden(true)
 
             Text(article.title)
-                .font(.title2.bold())
+                .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
                 .foregroundStyle(theme.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
 
             Text(article.summary)
-                .font(.body)
+                .appTypeface(.body, size: 17, relativeTo: .body, weight: .regular)
                 .foregroundStyle(theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -71,19 +71,19 @@ struct HelpArticleView: View {
 
         return HStack(alignment: .top, spacing: 12) {
             Image(systemName: noticeSymbol(for: notice.tone))
-                .font(.system(size: 18, weight: .semibold))
+                .appTypeface(.system(size: 18, weight: .semibold), size: 18, relativeTo: .body, weight: .semibold)
                 .foregroundStyle(color)
                 .frame(width: 28, height: 28)
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 5) {
                 Text(notice.title)
-                    .font(.headline)
+                    .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                     .foregroundStyle(theme.textPrimary)
                     .accessibilityAddTraits(.isHeader)
 
                 Text(notice.detail)
-                    .font(.subheadline)
+                    .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -100,14 +100,14 @@ struct HelpArticleView: View {
     private func sectionCard(_ section: HelpArticleSection) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(section.title)
-                .font(.headline)
+                .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                 .foregroundStyle(theme.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
 
             ForEach(Array(section.paragraphs.enumerated()), id: \.offset) { _, paragraph in
                 Text(paragraph)
-                    .font(.body)
+                    .appTypeface(.body, size: 17, relativeTo: .body, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -137,12 +137,12 @@ struct HelpArticleView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(step.title)
-                    .font(.body.weight(.semibold))
+                    .appTypeface(.body.weight(.semibold), size: 17, relativeTo: .body, weight: .semibold)
                     .foregroundStyle(theme.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text(step.detail)
-                    .font(.subheadline)
+                    .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -153,7 +153,7 @@ struct HelpArticleView: View {
     private var resourcesCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Apple Support Resources")
-                .font(.headline)
+                .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                 .foregroundStyle(theme.textPrimary)
                 .accessibilityAddTraits(.isHeader)
 
@@ -172,14 +172,14 @@ struct HelpArticleView: View {
                                 .accessibilityHidden(true)
 
                             Text(resource.title)
-                                .font(.body)
+                                .appTypeface(.body, size: 17, relativeTo: .body, weight: .regular)
                                 .foregroundStyle(theme.textPrimary)
                                 .fixedSize(horizontal: false, vertical: true)
 
                             Spacer(minLength: 8)
 
                             Image(systemName: "arrow.up.right")
-                                .font(.caption.bold())
+                                .appTypeface(.caption.bold(), size: 12, relativeTo: .caption, weight: .bold)
                                 .foregroundStyle(theme.textSecondary)
                                 .accessibilityHidden(true)
                         }

@@ -25,7 +25,7 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Text("Settings")
-                    .font(.largeTitle.bold())
+                    .appTypeface(.largeTitle.bold(), size: 34, relativeTo: .largeTitle, weight: .bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .listRowInsets(
                         EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12)
@@ -41,7 +41,7 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text("Appearance & Theme")
                                 Text(selectedBackgroundName)
-                                    .font(.caption)
+                                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                                     .foregroundStyle(theme.textSecondary)
                             }
                         } icon: {
@@ -92,7 +92,7 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text("Help")
                                 Text("Learn how to use the app and safely free up iPhone storage.")
-                                    .font(.caption)
+                                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                                     .foregroundStyle(theme.textSecondary)
                             }
                         } icon: {

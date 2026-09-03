@@ -637,10 +637,10 @@ private struct SunburstChartCanvas: View {
                     .overlay(
                         VStack(spacing: 2) {
                             Text(centerCapacity.value)
-                                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                .appTypeface(.system(size: 17, weight: .semibold, design: .rounded), size: 17, relativeTo: .body, weight: .semibold)
                                 .foregroundStyle(.primary)
                             Text(centerCapacity.unit)
-                                .font(.system(size: 11, weight: .regular, design: .rounded))
+                                .appTypeface(.system(size: 11, weight: .regular, design: .rounded), size: 11, relativeTo: .body, weight: .regular)
                                 .foregroundStyle(.secondary)
                         }
                     )

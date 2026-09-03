@@ -30,7 +30,7 @@ public struct ImageConversionView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 Text(L10n.string("converter.heading"))
-                    .font(.largeTitle.bold())
+                    .appTypeface(.largeTitle.bold(), size: 34, relativeTo: .largeTitle, weight: .bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, -12)
@@ -107,14 +107,14 @@ public struct ImageConversionView: View {
     private var privacySummary: some View {
         HStack(spacing: 8) {
             Label(L10n.string("import.subtitle"), systemImage: "lock.shield")
-                .font(.caption2)
+                .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Button(L10n.string("formats.view_all")) {
                 isFormatSheetPresented = true
             }
-            .font(.caption2.weight(.medium))
+            .appTypeface(.caption2.weight(.medium), size: 11, relativeTo: .caption2, weight: .medium)
             .foregroundStyle(.secondary)
             .buttonStyle(.plain)
         }
@@ -343,12 +343,12 @@ struct ImageConversionContentView: View {
     private var importCard: some View {
         VStack(spacing: 12) {
             Image(systemName: "arrow.triangle.2.circlepath.camera")
-                .font(.system(size: 34, weight: .semibold))
+                .appTypeface(.system(size: 34, weight: .semibold), size: 34, relativeTo: .body, weight: .semibold)
                 .foregroundStyle(.tint)
 
             VStack(spacing: 4) {
                 Text(L10n.string("import.title"))
-                    .font(.headline)
+                    .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
             }
 
             Button {
@@ -538,7 +538,7 @@ struct ImageConversionContentView: View {
                             viewModel.progress.total
                         )
                     )
-                    .font(.footnote)
+                    .appTypeface(.footnote, size: 13, relativeTo: .footnote, weight: .regular)
                     .foregroundStyle(.secondary)
 
                     Spacer()
@@ -628,7 +628,7 @@ private struct ImageConversionSettingsCard: View {
                     Spacer()
                     Text(L10n.string("quality.best"))
                 }
-                .font(.caption2)
+                .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
                 .foregroundStyle(.tertiary)
             }
             .disabled(!viewModel.outputFormat.supportsQuality)
@@ -650,7 +650,7 @@ private struct ImageConversionSettingsCard: View {
                     .pickerStyle(.segmented)
                     .accessibilityIdentifier("conversion.image.background")
                 Text(L10n.string("settings.background.detail"))
-                    .font(.footnote)
+                    .appTypeface(.footnote, size: 13, relativeTo: .footnote, weight: .regular)
                     .foregroundStyle(.secondary)
             }
 
@@ -736,7 +736,7 @@ private struct ImageConversionFileRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(presentationURL.lastPathComponent)
-                    .font(.subheadline.weight(.medium))
+                    .appTypeface(.subheadline.weight(.medium), size: 15, relativeTo: .subheadline, weight: .medium)
                     .lineLimit(1)
 
                 if let info = item.info {
@@ -764,13 +764,13 @@ private struct ImageConversionFileRow: View {
                         )
                         Text(statusText)
                     }
-                    .font(.caption)
+                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                     .foregroundStyle(.secondary)
                 }
 
                 if case let .failed(message) = item.status {
                     Text(message)
-                        .font(.caption)
+                        .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                         .foregroundStyle(theme.destructive)
                         .lineLimit(2)
                 }
@@ -833,7 +833,7 @@ private struct ImageConversionFileRow: View {
         case .ready, .failed, .cancelled:
             Button(action: onRemove) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .medium))
+                    .appTypeface(.system(size: 12, weight: .medium), size: 12, relativeTo: .body, weight: .medium)
                     .foregroundStyle(.secondary)
                     .frame(width: 32, height: 32)
             }
@@ -853,7 +853,7 @@ struct NoticeView: View {
             Image(systemName: "info.circle.fill")
                 .foregroundStyle(.tint)
             Text(message)
-                .font(.footnote)
+                .appTypeface(.footnote, size: 13, relativeTo: .footnote, weight: .regular)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(14)
@@ -876,7 +876,7 @@ struct PrimaryConversionButton: View {
             if #available(iOS 26.0, *), theme.liquidGlassEnabled {
                 Button(action: action) {
                     Label(title, systemImage: "arrow.triangle.2.circlepath")
-                        .font(.system(size: 17, weight: .semibold))
+                        .appTypeface(.system(size: 17, weight: .semibold), size: 17, relativeTo: .body, weight: .semibold)
                         .frame(maxWidth: .infinity)
                         .frame(height: 54)
                 }
@@ -894,7 +894,7 @@ struct PrimaryConversionButton: View {
     private var fallbackButton: some View {
         Button(action: action) {
             Label(title, systemImage: "arrow.triangle.2.circlepath")
-                .font(.system(size: 17, weight: .semibold))
+                .appTypeface(.system(size: 17, weight: .semibold), size: 17, relativeTo: .body, weight: .semibold)
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
         }

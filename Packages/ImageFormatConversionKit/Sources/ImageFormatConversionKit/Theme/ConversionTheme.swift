@@ -4,6 +4,43 @@
 //
 
 import SwiftUI
+
+private struct ConversionFontNameKey: EnvironmentKey {
+    static let defaultValue: String? = nil
+}
+
+public extension EnvironmentValues {
+    var conversionFontName: String? {
+        get { self[ConversionFontNameKey.self] }
+        set { self[ConversionFontNameKey.self] = newValue }
+    }
+}
+
+/// Preserves the original font when no named family is selected.
+public struct ConversionTypefaceModifier: ViewModifier {
+    @Environment(\.conversionFontName) private var name
+    let fallback: Font
+    let size: CGFloat
+    let style: Font.TextStyle
+    let weight: Font.Weight
+
+    public init(_ fallback: Font, size: CGFloat, relativeTo style: Font.TextStyle, weight: Font.Weight = .regular) {
+        self.fallback = fallback
+        self.size = size
+        self.style = style
+        self.weight = weight
+    }
+
+    public func body(content: Content) -> some View {
+        content.font(name.map { Font.custom($0, size: size, relativeTo: style).weight(weight) } ?? fallback)
+    }
+}
+
+extension View {
+    func appTypeface(_ fallback: Font, size: CGFloat, relativeTo style: Font.TextStyle, weight: Font.Weight = .regular) -> some View {
+        modifier(ConversionTypefaceModifier(fallback, size: size, relativeTo: style, weight: weight))
+    }
+}
 #if os(iOS)
 import UIKit
 #elseif os(macOS)

@@ -137,10 +137,10 @@ struct PhotosView: View {
     private var limitedPhotoContent: some View {
         VStack(spacing: 12) {
             Label("Limited Photo Access", systemImage: "photo.badge.checkmark")
-                .font(.headline)
+                .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
 
             Text("Only the photos you selected are available to CleanMyIPhone.")
-                .font(.subheadline)
+                .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
 
@@ -159,7 +159,7 @@ struct PhotosView: View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 24) {
                 Text("My Space")
-                    .font(.largeTitle.bold())
+                    .appTypeface(.largeTitle.bold(), size: 34, relativeTo: .largeTitle, weight: .bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(12)
                     .padding(.bottom, -16)
@@ -180,7 +180,7 @@ struct PhotosView: View {
         case .idle:
             VStack(alignment: .leading, spacing: 14) {
                 Label("Smart Media Analysis", systemImage: "sparkles")
-                    .font(.title2.bold())
+                    .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
                 Text("Find visually similar photos and organize videos, screenshots, and Live Photos.")
                     .foregroundStyle(.secondary)
                 Button {
@@ -197,11 +197,11 @@ struct PhotosView: View {
         case .analyzing(let progress):
             VStack(alignment: .leading, spacing: 10) {
                 Text(analysisTitle(for: progress.phase))
-                    .font(.headline)
+                    .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                 ProgressView(value: progress.fractionCompleted)
                     .tint(theme.accentPrimary)
                 Text("Analyzed \(progress.completed) of \(progress.total)")
-                    .font(.caption)
+                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                     .foregroundStyle(.secondary)
             }
             .mediaAnalysisCard()
@@ -319,7 +319,7 @@ private struct MediaDashboardResultsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Cleanup Recommendations")
-                .font(.title2.bold())
+                .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
                 .padding(.horizontal, 12)
 
             LazyVGrid(columns: columns, spacing: 10) {
@@ -329,7 +329,7 @@ private struct MediaDashboardResultsView: View {
             }
 
             Text("Media sizes are estimated without downloading original files.")
-                .font(.caption)
+                .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                 .foregroundStyle(.secondary)
 
             videoCategoryGrid
@@ -339,7 +339,7 @@ private struct MediaDashboardResultsView: View {
                     "\(result.skippedImageCount) iCloud or unavailable image(s) were skipped.",
                     systemImage: "icloud.slash"
                 )
-                .font(.caption)
+                .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                 .foregroundStyle(.secondary)
             }
 
@@ -418,7 +418,7 @@ private struct MediaDashboardResultsView: View {
         if !videoCategories.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Video Categories")
-                    .font(.title2.bold())
+                    .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
 
                 LazyVGrid(columns: columns, spacing: 10) {
                     ForEach(videoCategories) { category in
@@ -568,16 +568,16 @@ private struct MediaStorageOverview: View {
                             .foregroundStyle(theme.textSecondary)
                             .lineLimit(1)
                     }
-                    .font(.caption2)
+                    .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
                 }
             }
 
             Text("Includes iOS, system data, and other app data.")
-                .font(.caption2)
+                .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
                 .foregroundStyle(theme.textTertiary)
 
             Text(storageSummary)
-                .font(.system(.subheadline, design: .rounded).weight(.medium))
+                .appTypeface(.system(.subheadline, design: .rounded).weight(.medium), size: 15, relativeTo: .subheadline, weight: .medium)
                 .foregroundStyle(theme.textPrimary)
         }
         .padding(14)
@@ -673,7 +673,7 @@ private struct MediaCategoryCard: View {
                     }
                 } else {
                     Image(systemName: systemImage)
-                        .font(.largeTitle)
+                        .appTypeface(.largeTitle, size: 34, relativeTo: .largeTitle, weight: .regular)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -687,12 +687,12 @@ private struct MediaCategoryCard: View {
             .overlay(alignment: .bottomLeading) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
-                        .font(.headline)
+                        .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                         .foregroundStyle(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                     Text(detail)
-                        .font(.subheadline)
+                        .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                         .foregroundStyle(.white.opacity(0.82))
                         .lineLimit(1)
                 }
@@ -826,9 +826,9 @@ private struct MediaCategoryDetailView: View {
                     HStack(spacing: 14) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("\(selectedIDs.count) selected")
-                                .font(.subheadline.weight(.semibold))
+                                .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
                             Text("Estimated \(selectedMediaSizeText)")
-                                .font(.caption)
+                                .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                                 .foregroundStyle(.secondary)
                         }
 
@@ -933,12 +933,12 @@ private struct MediaCategoryDetailView: View {
     private func deletionReceipt(deletedCount: Int, estimatedBytes: Int64) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "checkmark.circle.fill")
-                .font(.title3)
+                .appTypeface(.title3, size: 20, relativeTo: .title3, weight: .regular)
                 .foregroundStyle(theme.positiveGreen)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Moved to Recently Deleted")
-                    .font(.subheadline.weight(.semibold))
+                    .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
 
                 HStack(spacing: 5) {
                     Text(
@@ -958,11 +958,11 @@ private struct MediaCategoryDetailView: View {
                         )
                     )
                 }
-                .font(.caption)
+                .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                 .foregroundStyle(theme.textSecondary)
 
                 Text("These items still use storage until permanently deleted in Photos.")
-                    .font(.caption2)
+                    .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
                     .foregroundStyle(theme.textTertiary)
             }
 

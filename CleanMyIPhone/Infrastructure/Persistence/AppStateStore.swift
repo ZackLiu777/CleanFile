@@ -22,7 +22,7 @@ nonisolated struct MediaSizeIndexSnapshot: Codable, Sendable {
 }
 
 nonisolated struct MediaSizeIndexEntry: Codable, Sendable {
-    let modificationDate: Date?
+    let modificationDate: Date? 
     let byteCount: Int64
 }
 

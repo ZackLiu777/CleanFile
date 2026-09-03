@@ -118,11 +118,11 @@ private extension Theme {
 #Preview("App Theme") {
     VStack(spacing: 16) {
         Image(systemName: "photo.on.rectangle")
-            .font(.largeTitle)
+            .appTypeface(.largeTitle, size: 34, relativeTo: .largeTitle, weight: .regular)
             .foregroundStyle(Theme.system.accentPrimary)
 
         Text("CleanMyIPhone")
-            .font(.title2.bold())
+            .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
 
         Text("Run the app to choose a folder or access the photo library.")
             .multilineTextAlignment(.center)

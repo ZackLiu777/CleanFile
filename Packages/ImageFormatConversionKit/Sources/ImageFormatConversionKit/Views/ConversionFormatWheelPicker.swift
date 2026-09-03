@@ -34,7 +34,7 @@ struct ConversionFormatWheelPicker<Value: Hashable>: View {
                     Text(selectedOption?.title ?? "")
                         .fontWeight(.semibold)
                     Image(systemName: "chevron.up.chevron.down")
-                        .font(.caption2.weight(.semibold))
+                        .appTypeface(.caption2.weight(.semibold), size: 11, relativeTo: .caption2, weight: .semibold)
                 }
                 .foregroundStyle(theme.accent)
             }
@@ -42,7 +42,7 @@ struct ConversionFormatWheelPicker<Value: Hashable>: View {
 
             if let selectedOption {
                 Label(selectedOption.detail, systemImage: "info.circle")
-                    .font(.caption)
+                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -100,7 +100,7 @@ struct ConversionSettingsWheelPicker<WheelContent: View>: View {
 
             if let detail, !detail.isEmpty {
                 Label(detail, systemImage: "info.circle")
-                    .font(.caption)
+                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -152,7 +152,7 @@ struct ConversionWheelColumn<Selection: Hashable, Content: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             Text(title)
-                .font(.caption.weight(.semibold))
+                .appTypeface(.caption.weight(.semibold), size: 12, relativeTo: .caption, weight: .semibold)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)

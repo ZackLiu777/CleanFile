@@ -389,7 +389,7 @@ private struct LivePhotoAssetPreview: View {
                     VStack {
                         Spacer()
                         Label("Press and hold to play", systemImage: "livephoto")
-                            .font(.caption.weight(.semibold))
+                            .appTypeface(.caption.weight(.semibold), size: 12, relativeTo: .caption, weight: .semibold)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(.ultraThinMaterial, in: Capsule())

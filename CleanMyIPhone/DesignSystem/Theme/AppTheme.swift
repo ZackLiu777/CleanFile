@@ -7,6 +7,18 @@ import Combine
 import Foundation
 import SwiftUI
 import UIKit
+import ImageFormatConversionKit
+
+extension View {
+    func appTypeface(_ fallback: Font, size: CGFloat, relativeTo style: Font.TextStyle, weight: Font.Weight = .regular) -> some View {
+        modifier(ConversionTypefaceModifier(fallback, size: size, relativeTo: style, weight: weight))
+    }
+
+    func appFontFamily(_ name: String?) -> some View {
+        environment(\.conversionFontName, name)
+            .font(name.map { Font.custom($0, size: 17, relativeTo: .body) })
+    }
+}
 
 /// 定义 `AppAppearance` 使用的有限状态或选项集合。
 enum AppAppearance: String, CaseIterable, Identifiable, Sendable {
@@ -742,6 +754,50 @@ struct Theme: Sendable {
 }
 
 /// 定义 `AppThemeEnvironmentKey` 的值语义数据与相关行为。
+enum AppFontStyle: String, CaseIterable, Identifiable {
+    case system, rounded, serif, monospaced
+    case avenirNext, helveticaNeue, georgia, palatino
+    var fontName: String? {
+        let candidate: String
+        switch self {
+        case .avenirNext: candidate = "AvenirNext-Regular"
+        case .helveticaNeue: candidate = "HelveticaNeue"
+        case .georgia: candidate = "Georgia"
+        case .palatino: candidate = "Palatino-Roman"
+        default: return nil
+        }
+        return UIFont(name: candidate, size: 17) == nil ? nil : candidate
+    }
+    static var availableCases: [Self] {
+        allCases.filter { [.system, .rounded, .serif, .monospaced].contains($0) || $0.fontName != nil }
+    }
+    var id: Self { self }
+    var inheritedDesign: Font.Design? {
+        fontName == nil ? design : nil
+    }
+    var design: Font.Design {
+        switch self {
+        case .system: .default
+        case .rounded: .rounded
+        case .serif: .serif
+        case .monospaced: .monospaced
+        default: .default
+        }
+    }
+    var uiDesign: UIFontDescriptor.SystemDesign {
+        switch self {
+        case .system: .default
+        case .rounded: .rounded
+        case .serif: .serif
+        case .monospaced: .monospaced
+        default: .default
+        }
+    }
+    var titleKey: String {
+        "appearance.font.\(rawValue)"
+    }
+}
+
 private struct AppThemeEnvironmentKey: EnvironmentKey {
     static let defaultValue = Theme.system
 }
@@ -757,6 +813,9 @@ extension EnvironmentValues {
 @MainActor
 /// 封装 `ThemeSettings` 的引用语义、状态与业务行为。
 final class ThemeSettings: ObservableObject {
+    @Published var fontStyle: AppFontStyle {
+        didSet { userDefaults.set(fontStyle.rawValue, forKey: "appearance.fontStyle") }
+    }
     @Published var appearance: AppAppearance {
         didSet { userDefaults.set(appearance.rawValue, forKey: Self.appearanceKey) }
     }
@@ -862,6 +921,7 @@ final class ThemeSettings: ObservableObject {
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(userDefaults: UserDefaults = .standard) {
+        fontStyle = AppFontStyle(rawValue: userDefaults.string(forKey: "appearance.fontStyle") ?? "") ?? .system
         self.userDefaults = userDefaults
         let storedTheme = userDefaults.string(forKey: Self.themeKey)
         let migratedTheme = Self.migratedThemeID(from: storedTheme)

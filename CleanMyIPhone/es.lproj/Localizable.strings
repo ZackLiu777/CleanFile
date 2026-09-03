@@ -428,3 +428,14 @@
 "Add Files" = "Añadir archivos";
 "Analyzed Files" = "Archivos analizados";
 "%lld selected files" = "%lld archivos seleccionados";
+"appearance.font.title" = "Fuente";
+"appearance.font.system" = "Predeterminada";
+"appearance.font.rounded" = "Redondeada";
+"appearance.font.serif" = "Serif";
+"appearance.font.monospaced" = "Monoespaciada";
+"appearance.font.detail" = "Se aplica al texto de la app. Algunos idiomas usan fuentes alternativas del sistema; la alineación numérica y los diálogos del sistema conservan su estilo.";
+"appearance.font.avenirNext" = "Avenir Next";
+"appearance.font.helveticaNeue" = "Helvetica Neue";
+"appearance.font.georgia" = "Georgia";
+"appearance.font.palatino" = "Palatino";
+"appearance.font.languageNote" = "Estas fuentes se aplican principalmente al inglés. Otros idiomas pueden usar fuentes alternativas y verse diferentes. Los diálogos del sistema conservan sus fuentes.";

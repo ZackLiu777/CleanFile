@@ -176,7 +176,7 @@ private struct ConversionGuideHero: View {
 
             VStack(alignment: .leading, spacing: 14) {
                 Image(systemName: "arrow.triangle.2.circlepath")
-                    .font(.system(size: 36, weight: .semibold))
+                    .appTypeface(.system(size: 36, weight: .semibold), size: 36, relativeTo: .body, weight: .semibold)
                     .foregroundStyle(theme.accent)
                     .frame(width: 68, height: 68)
                     .background(
@@ -186,11 +186,11 @@ private struct ConversionGuideHero: View {
 
                 VStack(alignment: .leading, spacing: 7) {
                     Text(L10n.string("conversion.guide.hero.title"))
-                        .font(.title.bold())
+                        .appTypeface(.title.bold(), size: 28, relativeTo: .title, weight: .bold)
                         .foregroundStyle(theme.textPrimary)
 
                     Text(L10n.string("conversion.guide.hero.detail"))
-                        .font(.subheadline)
+                        .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                         .foregroundStyle(theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -222,7 +222,7 @@ private struct ConversionGuideSection<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(title)
-                .font(.title2.bold())
+                .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             content
@@ -246,10 +246,10 @@ private struct ConversionGuideStep: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.headline)
+                    .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
 
                 Text(detail)
-                    .font(.subheadline)
+                    .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -286,17 +286,17 @@ private struct ConversionGuideScreenshotCard: View {
 
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: symbol)
-                    .font(.system(size: 17, weight: .semibold))
+                    .appTypeface(.system(size: 17, weight: .semibold), size: 17, relativeTo: .body, weight: .semibold)
                     .foregroundStyle(theme.accent)
                     .frame(width: 36, height: 36)
                     .background(theme.accent.opacity(0.12), in: Circle())
 
                 VStack(alignment: .leading, spacing: 5) {
                     Text(title)
-                        .font(.headline)
+                        .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
 
                     Text(detail)
-                        .font(.subheadline)
+                        .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                         .foregroundStyle(theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -304,7 +304,7 @@ private struct ConversionGuideScreenshotCard: View {
 
                 if showsDisclosure {
                     Image(systemName: "chevron.right")
-                        .font(.caption.bold())
+                        .appTypeface(.caption.bold(), size: 12, relativeTo: .caption, weight: .bold)
                         .foregroundStyle(theme.textSecondary)
                         .frame(width: 20, height: 36)
                         .accessibilityHidden(true)
@@ -317,7 +317,7 @@ private struct ConversionGuideScreenshotCard: View {
                     Text(L10n.string("conversion.guide.learn_more"))
                     Image(systemName: "arrow.right")
                 }
-                .font(.caption.weight(.semibold))
+                .appTypeface(.caption.weight(.semibold), size: 12, relativeTo: .caption, weight: .semibold)
                 .foregroundStyle(theme.accent)
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
@@ -338,17 +338,17 @@ private struct ConversionGuideFeature: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: symbol)
-                .font(.system(size: 16, weight: .semibold))
+                .appTypeface(.system(size: 16, weight: .semibold), size: 16, relativeTo: .body, weight: .semibold)
                 .foregroundStyle(theme.accent)
                 .frame(width: 34, height: 34)
                 .background(theme.accent.opacity(0.12), in: Circle())
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.headline)
+                    .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
 
                 Text(detail)
-                    .font(.subheadline)
+                    .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -365,17 +365,17 @@ private struct ConversionGuidePrivacyCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             Image(systemName: "lock.shield.fill")
-                .font(.system(size: 24, weight: .semibold))
+                .appTypeface(.system(size: 24, weight: .semibold), size: 24, relativeTo: .body, weight: .semibold)
                 .foregroundStyle(theme.accent)
                 .frame(width: 52, height: 52)
                 .background(theme.accent.opacity(0.13), in: Circle())
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(L10n.string("conversion.guide.privacy.title"))
-                    .font(.title3.bold())
+                    .appTypeface(.title3.bold(), size: 20, relativeTo: .title3, weight: .bold)
 
                 Text(L10n.string("conversion.guide.privacy.detail"))
-                    .font(.subheadline)
+                    .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }

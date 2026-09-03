@@ -50,6 +50,8 @@ struct CleanMyIPhoneApp: App {
             rootView
                 .id(languageSettings.language.rawValue)
                 .environmentObject(themeSettings)
+                .fontDesign(themeSettings.fontStyle.inheritedDesign)
+                .appFontFamily(themeSettings.fontStyle.fontName)
                 .environmentObject(languageSettings)
                 .environment(\.appTheme, themeSettings.theme)
                 .environment(\.locale, languageSettings.language.locale)
