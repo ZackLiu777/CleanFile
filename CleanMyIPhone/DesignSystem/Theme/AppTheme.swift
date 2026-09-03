@@ -635,14 +635,26 @@ struct Theme: Sendable {
             minimumRatio: 1.5
         )
         let isDarkBackground = foreground == .white
+        // Light preset themes keep cards on the same base surface as the background.
+        // Applying a foreground wash to a light custom color made every card look darker
+        // than the background, so only dark custom backgrounds receive an elevated wash.
+        let secondaryBackground = isDarkBackground
+            ? background.blended(toward: foreground, amount: 0.035).color
+            : background.color
+        let cardSurface = isDarkBackground
+            ? background.blended(toward: foreground, amount: 0.055).color
+            : background.color
+        let cardElevated = isDarkBackground
+            ? background.blended(toward: foreground, amount: 0.10).color
+            : background.color
 
         return Theme(
             background: resolved.background,
             backgroundPrimary: background.color,
-            backgroundSecondary: background.blended(toward: foreground, amount: 0.035).color,
+            backgroundSecondary: secondaryBackground,
             backgroundGrouped: background.color,
-            cardSurface: background.blended(toward: foreground, amount: 0.055).color,
-            cardElevated: background.blended(toward: foreground, amount: 0.10).color,
+            cardSurface: cardSurface,
+            cardElevated: cardElevated,
             textPrimary: foreground.color,
             textSecondary: secondaryText.color,
             textTertiary: tertiaryText.color,
