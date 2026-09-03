@@ -7,6 +7,7 @@ import SwiftUI
 
 struct MediaQuickCleanView: View {
     @Environment(\.appTheme) private var theme
+    @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
     @ObservedObject private var photoLibrary: PhotoLibraryViewModel
     @StateObject private var viewModel: MediaQuickCleanViewModel
     @State private var isDeleteConfirmationPresented = false
@@ -92,6 +93,20 @@ struct MediaQuickCleanView: View {
             viewModel.refreshCategories()
         }
         .sensoryFeedback(.selection, trigger: viewModel.selectedCategoryIDs)
+        .onAppear {
+            tabBarVisibility.setHidden(
+                true,
+                source: "media.quickClean",
+                scope: .media
+            )
+        }
+        .onDisappear {
+            tabBarVisibility.setHidden(
+                false,
+                source: "media.quickClean",
+                scope: .media
+            )
+        }
     }
 
     private var categoryContent: some View {
