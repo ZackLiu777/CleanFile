@@ -187,11 +187,14 @@ struct AudioConversionView: View {
     }
 
     private var audioSettingsSummary: String {
-        let quality = viewModel.outputFormat.isLossless
-            ? L10n.string("audio.lossless")
-            : "\(viewModel.bitRate.rawValue / 1_000) kbps"
-        return [audioFormatTitle(viewModel.outputFormat), quality]
-            .joined(separator: " · ")
+        guard !viewModel.outputFormat.isLossless else {
+            return audioFormatTitle(viewModel.outputFormat)
+        }
+
+        return [
+            audioFormatTitle(viewModel.outputFormat),
+            "\(viewModel.bitRate.rawValue / 1_000) kbps"
+        ].joined(separator: " · ")
     }
 
     /// 封装 `audioFormatTitle` 对应的局部行为，供当前类型在统一入口下复用。
