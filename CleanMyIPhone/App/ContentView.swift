@@ -272,8 +272,10 @@ struct ContentView: View {
         }
         .padding(5)
         .background {
-            Capsule()
-                .fill(.ultraThinMaterial)
+            // Avoid system material falling back to the window's white backdrop
+            // while the page layer is transitioning between tabs.
+            ThemeBackgroundLayer(background: theme.background)
+                .clipShape(Capsule())
                 .overlay {
                     Capsule()
                         .strokeBorder(theme.divider.opacity(0.5), lineWidth: 0.5)
