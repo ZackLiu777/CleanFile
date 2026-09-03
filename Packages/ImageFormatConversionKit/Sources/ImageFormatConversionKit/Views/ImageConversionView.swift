@@ -635,19 +635,23 @@ private struct ImageConversionSettingsCard: View {
             .opacity(viewModel.outputFormat.supportsQuality ? 1 : 0.42)
             .animation(.easeInOut(duration: 0.18), value: viewModel.outputFormat)
 
-            if viewModel.outputFormat.requiresOpaquePixels {
-                settingRow(title: L10n.string("settings.transparent_background")) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L10n.string("settings.background"))
                     Picker(
-                        L10n.string("settings.transparent_background"),
-                        selection: $viewModel.flattenColor
+                        L10n.string("settings.background"),
+                        selection: $viewModel.background
                     ) {
-                        Text(L10n.string("color.white")).tag(ImageFlattenColor.white)
-                        Text(L10n.string("color.black")).tag(ImageFlattenColor.black)
+                        Text(L10n.string("color.white")).tag(ImageBackground.white)
+                        Text(L10n.string("color.black")).tag(ImageBackground.black)
+                        Text(L10n.string("color.transparent")).tag(ImageBackground.transparent)
+                            .disabled(!viewModel.outputFormat.supportsTransparentBackground)
                     }
                     .labelsHidden()
                     .pickerStyle(.segmented)
-                    .frame(width: 140)
-                }
+                    .accessibilityIdentifier("conversion.image.background")
+                Text(L10n.string("settings.background.detail"))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
 
             HStack(alignment: .firstTextBaseline) {
@@ -679,6 +683,7 @@ private struct ImageConversionSettingsCard: View {
         case .ultraHD: "4096 px"
         case .large: "2048 px"
         case .medium: "1280 px"
+        case .square1024: L10n.string("resize.square1024")
         }
     }
 
@@ -710,6 +715,7 @@ private struct ImageConversionSettingsCard: View {
         case .ultraHD: L10n.string("resize.4096")
         case .large: L10n.string("resize.2048")
         case .medium: L10n.string("resize.1280")
+        case .square1024: L10n.string("resize.square1024")
         }
     }
 

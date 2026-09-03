@@ -200,7 +200,8 @@
 "conversion.guide.image.imports.detail" = "Sélectionnez plusieurs fichiers ou jusqu’à 100 éléments dans Photos. Les formats affichés dépendent des capacités de cet appareil ; RAW, DNG et ProRAW sont réservés à l’importation, et les images animées ne sont pas prises en charge.";
 "conversion.guide.image.workflow.detail" = "Suivez les états de lecture et de conversion, ou annulez pendant le traitement ; les résultats terminés sont conservés. Partagez depuis chaque carte, puis effacez la liste avant un nouveau lot.";
 "conversion.guide.image.quality.detail" = "JPEG, HEIC, HEIF et WebP acceptent une qualité de 10 à 100 %, par pas de 5 %, avec 85 % par défaut. Les autres formats n’ont pas de réglage de qualité.";
-"conversion.guide.image.resize.detail" = "Conservez les dimensions d’origine ou limitez le bord le plus long à 4096, 2048 ou 1280 px. Les petites images ne sont jamais agrandies.";
+"resize.square1024" = "1024px";
+"conversion.guide.image.resize.detail" = "Conservez les dimensions d’origine ou limitez le bord le plus long à 4096, 2048 ou 1280 px sans agrandir. L’option 1024 × 1024 centre l’image entière sur un fond carré, avec des marges, sans recadrage ni déformation ; les petites images sont agrandies.";
 "conversion.guide.image.transparency.detail" = "JPEG et BMP ne peuvent pas stocker les pixels transparents. Avec ces formats, remplissez les zones transparentes en blanc ou en noir.";
 "conversion.guide.video.purpose" = "Convertissez par lots des vidéos MOV, MP4 ou M4V en choisissant le conteneur, le codec et la résolution, sans écraser les originaux.";
 "conversion.guide.video.imports.detail" = "Sélectionnez plusieurs fichiers MOV, MP4 ou M4V, ou jusqu’à 50 vidéos dans Photos.";
@@ -220,3 +221,6 @@
 "conversion.guide.audio.lossless.detail" = "M4A (ALAC), WAV, AIFF, CAF PCM et CAF ALAC n’utilisent pas le réglage de débit. Ils conservent la qualité audio disponible dans la source.";
 "conversion.guide.audio.extract.title" = "Extraire d’une vidéo";
 "conversion.guide.audio.extract.detail" = "Choisissez un fichier MOV, MP4 ou M4V dans Fichiers pour lire sa piste audio disponible et la réencoder dans le format choisi. La vidéo n’est pas modifiée ; une vidéo protégée ou sans audio ne peut pas être extraite.";
+"settings.background" = "Arrière-plan";
+"color.transparent" = "Transparent";
+"settings.background.detail" = "S’applique aux pixels transparents et aux marges carrées, sans supprimer le fond de l’image. La transparence est disponible en PNG et TIFF. Les autres formats rétablissent le blanc.";

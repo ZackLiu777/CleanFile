@@ -7,6 +7,75 @@ import UniformTypeIdentifiers
 
 @Suite("Image conversion engine")
 struct ImageConversionEngineTests {
+    // Required: fixed transparent fixture, decoded pixel contract (not UI snapshots).
+    @Test("Selected background is encoded into transparent pixels and square padding",
+          arguments: ImageBackground.allCases, [ImageResizePolicy.original, .square1024])
+    func backgroundPixels(background: ImageBackground, resize: ImageResizePolicy) async throws {
+        let workspace = try TestImageWorkspace()
+        defer { workspace.remove() }
+        let source = workspace.root.appendingPathComponent("transparent.png")
+        try TestImageFactory.writeStillImage(to: source, type: .png, width: 40, height: 20, alpha: 0)
+        let result = try await ImageConversionEngine().convert(ImageConversionRequest(
+            sourceURL: source, destinationDirectory: workspace.output, outputFormat: .png,
+            resizePolicy: resize, background: background
+        ))
+        let imageSource = try #require(CGImageSourceCreateWithURL(result.outputURL as CFURL, nil))
+        let image = try #require(CGImageSourceCreateImageAtIndex(imageSource, 0, nil))
+        let context = try #require(CGContext(
+            data: nil, width: image.width, height: image.height, bitsPerComponent: 8, bytesPerRow: image.width * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+        ))
+        context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        let pixels = try #require(context.data).assumingMemoryBound(to: UInt8.self)
+        for offset in [0, (image.height / 2 * image.width + image.width / 2) * 4] {
+            if background == .transparent {
+                #expect(pixels[offset + 3] == 0)
+            } else {
+                #expect(pixels[offset + 3] == 255)
+                let expected: UInt8 = background == .white ? 255 : 0
+                #expect(pixels[offset] == expected)
+                #expect(pixels[offset + 1] == expected)
+                #expect(pixels[offset + 2] == expected)
+            }
+        }
+    }
+
+    @Test("Transparent JPEG is rejected rather than silently flattened")
+    func rejectsTransparentJPEG() async throws {
+        let workspace = try TestImageWorkspace()
+        defer { workspace.remove() }
+        await #expect(throws: ImageConversionError.unsupportedOutputFormat(.jpeg)) {
+            try await ImageConversionEngine().convert(ImageConversionRequest(
+                sourceURL: workspace.root.appendingPathComponent("unused.png"),
+                destinationDirectory: workspace.output, outputFormat: .jpeg, background: .transparent
+            ))
+        }
+    }
+
+    // Required: fixed fixtures verify exact dimensions and preserved source bytes.
+    @Test("Square preset produces exactly 1024 pixels for every aspect ratio", arguments: [
+        [400, 200], [200, 400], [80, 80], [2048, 1024]
+    ])
+    func squareOutput(dimensions: [Int]) async throws {
+        let workspace = try TestImageWorkspace()
+        defer { workspace.remove() }
+        let source = workspace.root.appendingPathComponent("square-input.png")
+        try TestImageFactory.writeStillImage(to: source, type: .png, width: dimensions[0], height: dimensions[1])
+        let original = try Data(contentsOf: source)
+        let engine = ImageConversionEngine()
+        let result = try await engine.convert(ImageConversionRequest(
+            sourceURL: source, destinationDirectory: workspace.output,
+            outputFormat: .png, resizePolicy: ImageResizePreset.square1024.policy
+        ))
+        let info = try await engine.inspect(result.outputURL)
+        #expect(result.pixelWidth == 1024 && result.pixelHeight == 1024)
+        #expect(info.pixelWidth == 1024 && info.pixelHeight == 1024)
+        #expect(try Data(contentsOf: source) == original)
+        let encoded = try JSONEncoder().encode(ImageResizePreset.square1024.policy)
+        #expect(try JSONDecoder().decode(ImageResizePolicy.self, from: encoded) == .square1024)
+    }
+
     @Test("PNG converts to JPEG and remains inspectable")
     func convertsPNGToJPEG() async throws {
         let workspace = try TestImageWorkspace()

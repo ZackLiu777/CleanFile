@@ -52,6 +52,23 @@ public enum ImageOutputFormat: String, CaseIterable, Codable, Identifiable, Send
     public var requiresOpaquePixels: Bool {
         self == .jpeg || self == .bmp
     }
+
+    /// Only expose full alpha export for codecs validated by this pipeline.
+    public var supportsTransparentBackground: Bool {
+        self == .png || self == .tiff
+    }
+}
+
+public enum ImageBackground: String, CaseIterable, Identifiable, Sendable {
+    case white, black, transparent
+    public var id: Self { self }
+    public var color: ImageFlattenColor? {
+        switch self {
+        case .white: .white
+        case .black: .black
+        case .transparent: nil
+        }
+    }
 }
 
 /// 定义 `ImageMetadataPolicy` 使用的有限状态或选项集合。
@@ -67,6 +84,8 @@ public enum ImageMetadataPolicy: String, CaseIterable, Codable, Identifiable, Se
 public enum ImageResizePolicy: Hashable, Codable, Sendable {
     case original
     case fit(maxPixelDimension: Int)
+    /// Exact canvas using the selected background, aspect-fit without cropping; may upscale.
+    case square1024
 }
 
 /// 定义 `ImageNameCollisionPolicy` 使用的有限状态或选项集合。
@@ -108,6 +127,7 @@ public struct ImageConversionRequest: Hashable, Sendable {
     public let metadataPolicy: ImageMetadataPolicy
     public let resizePolicy: ImageResizePolicy
     public let flattenColor: ImageFlattenColor
+    public let background: ImageBackground?
     public let collisionPolicy: ImageNameCollisionPolicy
     public let preferredBaseName: String?
 
@@ -120,6 +140,7 @@ public struct ImageConversionRequest: Hashable, Sendable {
         metadataPolicy: ImageMetadataPolicy = .removeGPS,
         resizePolicy: ImageResizePolicy = .original,
         flattenColor: ImageFlattenColor = .white,
+        background: ImageBackground? = nil,
         collisionPolicy: ImageNameCollisionPolicy = .makeUnique,
         preferredBaseName: String? = nil
     ) {
@@ -130,6 +151,7 @@ public struct ImageConversionRequest: Hashable, Sendable {
         self.metadataPolicy = metadataPolicy
         self.resizePolicy = resizePolicy
         self.flattenColor = flattenColor
+        self.background = background
         self.collisionPolicy = collisionPolicy
         self.preferredBaseName = preferredBaseName
     }
@@ -338,10 +360,15 @@ public enum ImageResizePreset: Int, CaseIterable, Identifiable, Sendable {
     case ultraHD = 4096
     case large = 2048
     case medium = 1280
+    case square1024 = 1024
 
     public var id: Self { self }
 
     public var policy: ImageResizePolicy {
-        self == .original ? .original : .fit(maxPixelDimension: rawValue)
+        switch self {
+        case .original: .original
+        case .square1024: .square1024
+        default: .fit(maxPixelDimension: rawValue)
+        }
     }
 }

@@ -54,11 +54,18 @@ public final class ImageConversionViewModel {
     public private(set) var notice: String?
     private(set) var importProgress: ConversionImportProgress?
 
-    public var outputFormat: ImageOutputFormat
+    public var outputFormat: ImageOutputFormat {
+        didSet {
+            if !outputFormat.supportsTransparentBackground && background == .transparent {
+                background = .white
+            }
+        }
+    }
     public var quality = 0.85
     public var metadataPolicy: ImageMetadataPolicy = .removeGPS
     public var resizePreset: ImageResizePreset = .original
     public var flattenColor: ImageFlattenColor = .white
+    public var background: ImageBackground = .white
     public var maxConcurrentConversions = 2
 
     public let outputDirectory: URL
@@ -351,6 +358,7 @@ public final class ImageConversionViewModel {
                 metadataPolicy: metadataPolicy,
                 resizePolicy: resizePreset.policy,
                 flattenColor: flattenColor,
+                background: background,
                 collisionPolicy: .makeUnique
             )
         }

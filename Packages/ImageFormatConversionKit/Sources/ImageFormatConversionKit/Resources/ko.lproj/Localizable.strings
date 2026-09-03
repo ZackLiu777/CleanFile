@@ -200,7 +200,8 @@
 "conversion.guide.image.imports.detail" = "파일에서 여러 개를 선택하거나 사진에서 한 번에 최대 100장을 선택하세요. 목록은 이 기기의 지원 형식에 따라 표시됩니다. RAW, DNG, ProRAW는 가져오기만 지원하며 애니메이션 이미지는 지원하지 않습니다.";
 "conversion.guide.image.workflow.detail" = "읽기 및 변환 상태를 확인하고 처리 중 취소할 수 있습니다. 완료된 결과는 유지됩니다. 파일 카드에서 공유한 뒤 다음 일괄 작업 전에 현재 목록을 지우세요.";
 "conversion.guide.image.quality.detail" = "JPEG, HEIC, HEIF, WebP는 10%~100% 범위에서 5% 단위로 조정할 수 있으며 기본값은 85%입니다. 다른 형식에는 품질 조절 기능이 없습니다.";
-"conversion.guide.image.resize.detail" = "원래 크기를 유지하거나 긴 변을 4096, 2048, 1280px로 제한하세요. 작은 이미지는 확대되지 않습니다.";
+"resize.square1024" = "1024px";
+"conversion.guide.image.resize.detail" = "원래 크기를 유지하거나 확대 없이 긴 변을 4096, 2048, 1280px로 제한합니다. 1024 × 1024 옵션은 비율을 유지한 채 전체 이미지를 중앙에 배치하고 여백을 추가합니다. 자르거나 늘리지 않으며 작은 이미지는 확대됩니다.";
 "conversion.guide.image.transparency.detail" = "JPEG와 BMP는 투명 픽셀을 저장할 수 없습니다. 이 형식으로 출력할 때 투명 영역을 흰색 또는 검은색으로 채울 수 있습니다.";
 "conversion.guide.video.purpose" = "MOV, MP4, M4V 비디오를 일괄 변환하고 출력 컨테이너, 코덱, 해상도를 선택하세요. 원본 비디오는 덮어쓰지 않습니다.";
 "conversion.guide.video.imports.detail" = "파일에서 MOV, MP4, M4V를 여러 개 선택하거나 사진에서 한 번에 최대 50개의 비디오를 선택하세요.";
@@ -220,3 +221,6 @@
 "conversion.guide.audio.lossless.detail" = "M4A(ALAC), WAV, AIFF, CAF PCM, CAF ALAC는 비트 전송률 설정을 사용하지 않으며 소스에서 사용할 수 있는 오디오 품질을 유지합니다.";
 "conversion.guide.audio.extract.title" = "비디오에서 추출";
 "conversion.guide.audio.extract.detail" = "MOV, MP4, M4V를 선택하면 사용 가능한 오디오 트랙을 읽고 선택한 형식으로 다시 인코딩합니다. 원본 비디오는 변경되지 않으며 오디오가 없거나 보호된 비디오는 추출할 수 없습니다.";
+"settings.background" = "배경";
+"color.transparent" = "투명";
+"settings.background.detail" = "투명 영역과 정사각형 여백에 적용됩니다. 원래 배경을 제거하지 않습니다. 투명 출력은 PNG와 TIFF에서 지원되며 다른 형식으로 변경하면 흰색으로 돌아갑니다.";

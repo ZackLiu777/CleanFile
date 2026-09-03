@@ -149,7 +149,8 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             batchSelectionPanGesture.cancelsTouchesInView = true
             collectionView.addGestureRecognizer(batchSelectionPanGesture)
 
-            // 滚动先等待批选手势判断方向：左右或向下时批选胜出，向上时交还浏览。
+            // Only an explicitly horizontal start may claim batch selection.
+            // Vertical/ambiguous starts fail immediately, releasing native scrolling.
             collectionView.panGestureRecognizer.require(toFail: batchSelectionPanGesture)
             self.batchSelectionPanGesture = batchSelectionPanGesture
         }
@@ -278,7 +279,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             return batchSelectionStartIndexPath != nil
         }
 
-        /// 仅允许明确横向或向下的一指拖动开始，向上和方向不明的手势直接失败。
+        /// 上下和斜向起手始终留给滚动；只有明确横向起手才能进入批选。
         func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
             guard gestureRecognizer === batchSelectionPanGesture else { return true }
             guard
@@ -286,20 +287,11 @@ struct MediaInteractiveGrid: UIViewRepresentable {
                 batchSelectionStartIndexPath != nil
             else { return false }
 
-            let velocity = panGesture.velocity(in: collectionView)
-            if velocity.x > 0, velocity.x > abs(velocity.y) * 1.35 {
-                batchSelectionDirection = .right
-                return true
-            }
-            if velocity.x < 0, -velocity.x > abs(velocity.y) * 1.35 {
-                batchSelectionDirection = .left
-                return true
-            }
-            if velocity.y > 0, velocity.y > abs(velocity.x) * 1.35 {
-                batchSelectionDirection = .down
-                return true
-            }
-            return false
+            batchSelectionDirection = MediaBatchSelectionDirection.resolveStart(
+                translation: panGesture.translation(in: collectionView),
+                velocity: panGesture.velocity(in: collectionView)
+            )
+            return batchSelectionDirection != nil
         }
 
         // MARK: Cell and header configuration
@@ -612,7 +604,9 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
             guard
                 gesture.state == .began,
-                let collectionView
+                let collectionView,
+                !collectionView.isDragging,
+                !collectionView.isDecelerating
             else { return }
             synchronizeDensityWithInstalledLayout(in: collectionView)
             guard
@@ -1064,6 +1058,16 @@ enum MediaBatchSelectionDirection: Equatable {
     case left
     case down
     case up
+
+    /// Require displacement and velocity to agree, so a flick's initial jitter
+    /// cannot convert a predominantly vertical drag into a selection gesture.
+    static func resolveStart(translation: CGPoint, velocity: CGPoint) -> Self? {
+        guard abs(translation.x) >= 2.5,
+              abs(translation.x) > abs(translation.y) * 1.45,
+              abs(velocity.x) > abs(velocity.y) * 1.45,
+              translation.x * velocity.x > 0 else { return nil }
+        return translation.x > 0 ? .right : .left
+    }
 
     /// 返回当前方向对应的目标选择状态。
     var shouldSelect: Bool {

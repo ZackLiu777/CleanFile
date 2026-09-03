@@ -200,7 +200,8 @@
 "conversion.guide.image.imports.detail" = "Select multiple files, or up to 100 items from Photos. Formats reflect this device's capabilities; RAW/DNG/ProRAW are import-only, and animated images are not supported.";
 "conversion.guide.image.workflow.detail" = "Follow inspection and conversion states, or cancel while work is in progress; completed results remain. Share from each file card, then clear the current list before starting another batch.";
 "conversion.guide.image.quality.detail" = "JPEG, HEIC, HEIF, and WebP support 10%–100% quality in 5% steps, with 85% as the default. Other formats do not show a quality control.";
-"conversion.guide.image.resize.detail" = "Keep the original dimensions, or cap the longest edge at 4096, 2048, or 1280 px. Smaller images are never enlarged.";
+"resize.square1024" = "1024px";
+"conversion.guide.image.resize.detail" = "Keep the original dimensions, or cap the longest edge at 4096, 2048, or 1280 px without enlarging. The 1024 × 1024 option fits the whole image onto a square background without cropping or stretching; small images are enlarged.";
 "conversion.guide.image.transparency.detail" = "JPEG and BMP cannot store transparent pixels. When using either format, fill transparent areas with white or black.";
 "conversion.guide.video.purpose" = "Batch-convert MOV, MP4, or M4V video by container, codec, and resolution without overwriting the originals.";
 "conversion.guide.video.imports.detail" = "Select multiple MOV, MP4, or M4V files, or choose up to 50 videos from Photos.";
@@ -220,3 +221,6 @@
 "conversion.guide.audio.lossless.detail" = "M4A (ALAC), WAV, AIFF, CAF PCM, and CAF ALAC do not use the bitrate setting. They preserve the audio quality available in the source.";
 "conversion.guide.audio.extract.title" = "Extract from video";
 "conversion.guide.audio.extract.detail" = "Choose MOV, MP4, or M4V to read its available audio track and re-encode it in the selected format. The video is not changed; protected video or video without audio cannot be extracted.";
+"settings.background" = "Background";
+"color.transparent" = "Transparent";
+"settings.background.detail" = "Applies to transparent pixels and square padding; it does not remove the image background. Transparency is available for PNG and TIFF. Other formats reset transparency to white.";

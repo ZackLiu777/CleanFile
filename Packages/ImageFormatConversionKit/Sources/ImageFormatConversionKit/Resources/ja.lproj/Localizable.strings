@@ -200,7 +200,8 @@
 "conversion.guide.image.imports.detail" = "「ファイル」から複数選択するか、「写真」から一度に最大100枚を選べます。形式はデバイスの対応状況に応じて表示されます。RAW、DNG、ProRAWは読み込み専用で、アニメーション画像には対応していません。";
 "conversion.guide.image.workflow.detail" = "読み込みと変換の状態を確認でき、処理中はキャンセルできます。完了した結果は保持されます。ファイルカードから共有し、別のバッチを始める前に現在のリストを消去します。";
 "conversion.guide.image.quality.detail" = "JPEG、HEIC、HEIF、WebP は10%～100%を5%刻みで調整でき、デフォルトは85%です。それ以外の形式には品質設定がありません。";
-"conversion.guide.image.resize.detail" = "元のサイズを保つか、長辺を4096、2048、1280 pxに制限できます。小さい画像は拡大されません。";
+"resize.square1024" = "1024px";
+"conversion.guide.image.resize.detail" = "元のサイズを保つか、長辺を4096、2048、1280 pxに制限します（拡大なし）。1024 × 1024では画像全体を縦横比を保って中央に配置し、余白を追加します。切り抜きや引き伸ばしはせず、小さい画像は拡大します。";
 "conversion.guide.image.transparency.detail" = "JPEGとBMPは透明ピクセルを保存できません。これらの形式では、透明部分を白または黒で塗りつぶせます。";
 "conversion.guide.video.purpose" = "MOV、MP4、M4Vの動画をまとめて変換し、コンテナ、コーデック、解像度を選べます。元の動画は上書きされません。";
 "conversion.guide.video.imports.detail" = "「ファイル」からMOV、MP4、M4Vを複数選択するか、「写真」から一度に最大50本の動画を選べます。";
@@ -220,3 +221,6 @@
 "conversion.guide.audio.lossless.detail" = "M4A（ALAC）、WAV、AIFF、CAF PCM、CAF ALACはビットレート設定を使用しません。ソースに残っている音質を保ちます。";
 "conversion.guide.audio.extract.title" = "動画から抽出";
 "conversion.guide.audio.extract.detail" = "MOV、MP4、M4Vを選ぶと、利用できる音声トラックを読み込み、選択した形式で再エンコードします。元の動画は変更されません。音声がない動画や保護された動画は抽出できません。";
+"settings.background" = "背景";
+"color.transparent" = "透明";
+"settings.background.detail" = "透明部分と正方形の余白に適用されます。元の背景を除去する機能ではありません。透明出力はPNGとTIFFに対応し、他の形式に切り替えると白に戻ります。";

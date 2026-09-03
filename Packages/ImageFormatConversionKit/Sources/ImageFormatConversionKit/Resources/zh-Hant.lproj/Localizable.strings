@@ -200,7 +200,8 @@
 "conversion.guide.image.imports.detail" = "可從「檔案」多選，或從「照片」一次選取最多 100 張。清單會依裝置能力顯示；RAW、DNG、ProRAW 僅可匯入，目前不支援動態圖片。";
 "conversion.guide.image.workflow.detail" = "可查看讀取與轉換狀態，轉換中可取消，已完成的結果會保留。完成後從檔案卡片分享；開始下一批前請先清除目前清單。";
 "conversion.guide.image.quality.detail" = "JPEG、HEIC、HEIF 與 WebP 可在 10%–100% 間以 5% 調整，預設 85%；其他格式不提供品質控制。";
-"conversion.guide.image.resize.detail" = "保留原始尺寸，或將最長邊限制為 4096、2048、1280 px。只會縮小，不會放大小圖片。";
+"resize.square1024" = "1024px";
+"conversion.guide.image.resize.detail" = "保留原始尺寸，或將最長邊限制為 4096、2048、1280 px（不放大小圖片）。1024 × 1024 選項將整張圖片等比例縮放並置中留白，不裁切、不拉伸；小圖片會放大。";
 "conversion.guide.image.transparency.detail" = "JPEG 與 BMP 不支援透明像素。輸出這些格式時，可選擇使用白色或黑色填滿透明區域。";
 "conversion.guide.video.purpose" = "批次轉換 MOV、MP4 或 M4V 影片的容器、編碼器與解析度，且不會覆寫原始影片。";
 "conversion.guide.video.imports.detail" = "可從「檔案」多選 MOV、MP4、M4V，或從「照片」一次選取最多 50 部影片。";
@@ -220,3 +221,6 @@
 "conversion.guide.audio.lossless.detail" = "M4A（ALAC）、WAV、AIFF、CAF PCM 與 CAF ALAC 不使用位元率設定；會保留來源檔案中可用的音訊品質。";
 "conversion.guide.audio.extract.title" = "從影片擷取";
 "conversion.guide.audio.extract.detail" = "選擇 MOV、MP4 或 M4V 後，App 會讀取可用音軌並按所選格式重新編碼；不會修改原始影片。沒有音軌或受保護的影片無法擷取。";
+"settings.background" = "背景";
+"color.transparent" = "無色透明";
+"settings.background.detail" = "套用於透明區域與正方形留邊，不會移除圖片原有背景。透明輸出支援 PNG、TIFF；切換至其他格式時恢復白色。";

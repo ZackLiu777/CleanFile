@@ -200,7 +200,8 @@
 "conversion.guide.image.imports.detail" = "Selecciona varios archivos o hasta 100 elementos de Fotos. Los formatos dependen de las capacidades de este dispositivo; RAW, DNG y ProRAW solo se pueden importar y no se admiten imágenes animadas.";
 "conversion.guide.image.workflow.detail" = "Consulta los estados de lectura y conversión, o cancela durante el proceso; los resultados completados se conservan. Comparte desde cada tarjeta y borra la lista antes de empezar otro lote.";
 "conversion.guide.image.quality.detail" = "JPEG, HEIC, HEIF y WebP permiten ajustar la calidad del 10 % al 100 % en pasos del 5 %, con un 85 % predeterminado. Los demás formatos no tienen control de calidad.";
-"conversion.guide.image.resize.detail" = "Conserva las dimensiones originales o limita el lado más largo a 4096, 2048 o 1280 px. Las imágenes pequeñas no se amplían.";
+"resize.square1024" = "1024px";
+"conversion.guide.image.resize.detail" = "Conserva las dimensiones originales o limita el lado más largo a 4096, 2048 o 1280 px sin ampliar. La opción 1024 × 1024 centra la imagen completa sobre un fondo cuadrado con márgenes, sin recortar ni deformar; las imágenes pequeñas se amplían.";
 "conversion.guide.image.transparency.detail" = "JPEG y BMP no pueden guardar píxeles transparentes. Al usar estos formatos, rellena las zonas transparentes de blanco o negro.";
 "conversion.guide.video.purpose" = "Convierte por lotes vídeos MOV, MP4 o M4V eligiendo contenedor, códec y resolución, sin sobrescribir los originales.";
 "conversion.guide.video.imports.detail" = "Selecciona varios archivos MOV, MP4 o M4V, o hasta 50 vídeos desde Fotos.";
@@ -220,3 +221,6 @@
 "conversion.guide.audio.lossless.detail" = "M4A (ALAC), WAV, AIFF, CAF PCM y CAF ALAC no usan el ajuste de tasa de bits. Conservan la calidad de audio disponible en el origen.";
 "conversion.guide.audio.extract.title" = "Extraer de un vídeo";
 "conversion.guide.audio.extract.detail" = "Elige un archivo MOV, MP4 o M4V en Archivos para leer su pista de audio disponible y volver a codificarla en el formato elegido. El vídeo no cambia; los vídeos protegidos o sin audio no se pueden extraer.";
+"settings.background" = "Fondo";
+"color.transparent" = "Transparente";
+"settings.background.detail" = "Se aplica a los píxeles transparentes y los márgenes cuadrados; no elimina el fondo de la imagen. La transparencia está disponible en PNG y TIFF. Los demás formatos restablecen el blanco.";

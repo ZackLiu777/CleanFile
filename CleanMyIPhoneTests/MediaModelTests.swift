@@ -5,6 +5,24 @@ import Testing
 
 @Suite("Media model behavior")
 struct MediaModelTests {
+    // Required: selection may only claim an explicitly horizontal gesture start.
+    @Test("Vertical and diagonal starts stay available for scrolling", arguments: [
+        CGPoint(x: 0, y: 30), CGPoint(x: 0, y: -30),
+        CGPoint(x: 10, y: 30), CGPoint(x: -10, y: -30),
+        CGPoint(x: 20, y: 20), CGPoint(x: 1, y: 1)
+    ])
+    func scrollingDoesNotBeginSelection(translation: CGPoint) {
+        #expect(MediaBatchSelectionDirection.resolveStart(translation: translation, velocity: translation) == nil)
+    }
+
+    @Test("Horizontal starts retain batch selection in both directions")
+    func horizontalStartsRemainSelectable() {
+        #expect(MediaBatchSelectionDirection.resolveStart(translation: CGPoint(x: 10, y: 1), velocity: CGPoint(x: 100, y: 5)) == .right)
+        #expect(MediaBatchSelectionDirection.resolveStart(translation: CGPoint(x: -10, y: 1), velocity: CGPoint(x: -100, y: 5)) == .left)
+        #expect(MediaBatchSelectionDirection.resolveStart(translation: CGPoint(x: 10, y: 1), velocity: CGPoint(x: 5, y: 100)) == nil)
+        #expect(MediaBatchSelectionDirection.resolveStart(translation: CGPoint(x: 10, y: 1), velocity: CGPoint(x: -100, y: 5)) == nil)
+    }
+
     @Test("Continuous batch selection maps right and down to selection")
     func batchSelectionPositiveDirectionsSelect() {
         #expect(

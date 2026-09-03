@@ -68,6 +68,9 @@ public actor ImageConversionEngine {
 
     /// 验证 `validate` 所需条件，并阻止无效状态继续进入后续流程。
     private func validate(_ request: ImageConversionRequest) throws {
+        guard request.background != .transparent || request.outputFormat.supportsTransparentBackground else {
+            throw ImageConversionError.unsupportedOutputFormat(request.outputFormat)
+        }
         guard (0 ... 1).contains(request.quality) else {
             throw ImageConversionError.invalidQuality(request.quality)
         }
@@ -345,6 +348,8 @@ private enum ImageConversionWorker {
             requestedMaxDimension = sourceMaxDimension
         case let .fit(maxPixelDimension):
             requestedMaxDimension = min(sourceMaxDimension, maxPixelDimension)
+        case .square1024:
+            requestedMaxDimension = min(sourceMaxDimension, 1024)
         }
 
         let thumbnailOptions: [CFString: Any] = [
@@ -365,7 +370,14 @@ private enum ImageConversionWorker {
         }
         ConversionPerformance.end("Conversion Image Decode", id: decodeID)
 
-        if request.outputFormat.requiresOpaquePixels {
+        if request.resizePolicy == .square1024 {
+            let color: ImageFlattenColor? = request.background == nil ? .white : request.background?.color
+            decodedImage = try squareCanvas(decodedImage, color: color)
+        } else if let background = request.background {
+            if let color = background.color {
+                decodedImage = try flattened(decodedImage, color: color)
+            }
+        } else if request.outputFormat.requiresOpaquePixels {
             decodedImage = try flattened(decodedImage, color: request.flattenColor)
         }
 
@@ -496,6 +508,28 @@ private enum ImageConversionWorker {
         }
 
         return properties
+    }
+
+    /// Preserve the entire oriented image instead of stretching or silently cropping it.
+    private static func squareCanvas(_ image: CGImage, color: ImageFlattenColor?) throws -> CGImage {
+        guard let context = CGContext(
+            data: nil, width: 1024, height: 1024, bitsPerComponent: 8, bytesPerRow: 0,
+            space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else { throw ImageConversionError.cannotFlattenTransparency }
+        if let color {
+            context.setFillColor(red: color.red, green: color.green, blue: color.blue, alpha: 1)
+            context.fill(CGRect(x: 0, y: 0, width: 1024, height: 1024))
+        } else {
+            context.clear(CGRect(x: 0, y: 0, width: 1024, height: 1024))
+        }
+        let scale = 1024 / CGFloat(max(image.width, image.height))
+        let width = CGFloat(image.width) * scale
+        let height = CGFloat(image.height) * scale
+        context.interpolationQuality = .high
+        context.draw(image, in: CGRect(x: (1024 - width) / 2, y: (1024 - height) / 2, width: width, height: height))
+        guard let output = context.makeImage() else { throw ImageConversionError.cannotFlattenTransparency }
+        return output
     }
 
     /// 封装 `flattened` 对应的局部行为，供当前类型在统一入口下复用。
