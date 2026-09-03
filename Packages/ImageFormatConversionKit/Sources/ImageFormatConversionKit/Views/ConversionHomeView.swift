@@ -12,6 +12,7 @@ public struct ConversionHomeView: View {
     private let theme: ConversionTheme
     private let isTabActive: Bool
     private let animationsEnabled: Bool
+    private let onDetailVisibilityChanged: (Bool) -> Void
     @State private var recentRecords: [ConversionHomeKind: ConversionHomeRecord] = [:]
     @State private var imageViewModel: ImageConversionViewModel
     @State private var videoViewModel: VideoConversionViewModel
@@ -30,11 +31,13 @@ public struct ConversionHomeView: View {
     public init(
         theme: ConversionTheme = .system,
         isTabActive: Bool = true,
-        animationsEnabled: Bool = true
+        animationsEnabled: Bool = true,
+        onDetailVisibilityChanged: @escaping (Bool) -> Void = { _ in }
     ) {
         self.theme = theme
         self.isTabActive = isTabActive
         self.animationsEnabled = animationsEnabled
+        self.onDetailVisibilityChanged = onDetailVisibilityChanged
         _imageViewModel = State(initialValue: ImageConversionViewModel())
         _videoViewModel = State(initialValue: VideoConversionViewModel())
         _audioViewModel = State(initialValue: AudioConversionViewModel())
@@ -139,6 +142,7 @@ public struct ConversionHomeView: View {
                 )
             }
             .onAppear {
+                onDetailVisibilityChanged(!navigationPath.isEmpty)
                 if !hasAppeared {
                     hasAppeared = true
                     if isTabActive {
@@ -153,6 +157,9 @@ public struct ConversionHomeView: View {
                 } else {
                     cancelAndResetEntrance()
                 }
+            }
+            .onChange(of: navigationPath) { _, newPath in
+                onDetailVisibilityChanged(!newPath.isEmpty)
             }
         }
         .sheet(isPresented: $isGuidePresented) {

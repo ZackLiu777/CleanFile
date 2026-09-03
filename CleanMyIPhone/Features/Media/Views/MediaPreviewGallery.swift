@@ -26,6 +26,7 @@ struct MediaPreviewGallery: View {
     let initialAssetID: String
     @ObservedObject var viewModel: PhotoLibraryViewModel
     let onDismiss: () -> Void
+    @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
 
     @State private var selectedAssetID: String
 
@@ -66,6 +67,20 @@ struct MediaPreviewGallery: View {
             }
         }
         .preferredColorScheme(.dark)
+        .onAppear {
+            tabBarVisibility.setHidden(
+                true,
+                source: "media.preview",
+                scope: .media
+            )
+        }
+        .onDisappear {
+            tabBarVisibility.setHidden(
+                false,
+                source: "media.preview",
+                scope: .media
+            )
+        }
     }
 
     private var positionText: String {

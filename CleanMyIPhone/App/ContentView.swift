@@ -11,7 +11,45 @@
 //
 
 import ImageFormatConversionKit
+import Combine
 import SwiftUI
+
+/// 协调详情页面对自定义 Tab Bar 的可见性，避免未激活 Tab 的导航栈影响当前页面。
+@MainActor
+final class TabBarVisibilityCoordinator: ObservableObject {
+    enum Scope: String {
+        case media
+        case storage
+        case conversion
+        case settings
+    }
+
+    @Published private(set) var isHidden = false
+    private var activeScope: Scope = .media
+    private var hiddenSources = Set<String>()
+
+    func setActiveScope(_ scope: Scope) {
+        activeScope = scope
+        updateVisibility()
+    }
+
+    func setHidden(_ hidden: Bool, source: String, scope: Scope) {
+        let key = "\(scope.rawValue):\(source)"
+        if hidden {
+            hiddenSources.insert(key)
+        } else {
+            hiddenSources.remove(key)
+        }
+        updateVisibility()
+    }
+
+    private func updateVisibility() {
+        let scopePrefix = "\(activeScope.rawValue):"
+        let shouldHide = hiddenSources.contains { $0.hasPrefix(scopePrefix) }
+        guard shouldHide != isHidden else { return }
+        isHidden = shouldHide
+    }
+}
 
 /// 定义 `AppTab` 使用的有限状态或选项集合。
 private enum AppTab: String, CaseIterable, Hashable {
@@ -58,12 +96,22 @@ private enum AppTab: String, CaseIterable, Hashable {
             "tab.settings"
         }
     }
+
+    var tabBarScope: TabBarVisibilityCoordinator.Scope {
+        switch self {
+        case .photos: .media
+        case .storage: .storage
+        case .conversion: .conversion
+        case .settings: .settings
+        }
+    }
 }
 
 /// 定义 `ContentView` 的值语义数据与相关行为。
 struct ContentView: View {
     @Environment(\.appTheme) private var theme
     @EnvironmentObject private var themeSettings: ThemeSettings
+    @StateObject private var tabBarVisibility = TabBarVisibilityCoordinator()
     @StateObject private var mediaViewModel = PhotoLibraryViewModel()
     @StateObject private var fileViewModel = FileScannerViewModel()
     @AppStorage("selectedAppTab") private var selectedTab: AppTab = .photos
@@ -90,6 +138,7 @@ struct ContentView: View {
                 customTabView
             }
         }
+        .environmentObject(tabBarVisibility)
         .onChange(of: selectedTab) { _, newTab in
             // Native TabView changes the persisted selection directly. Keep the
             // custom page layer ready if the Liquid Glass option is turned off.
@@ -165,10 +214,23 @@ struct ContentView: View {
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            tabBar
+            if !tabBarVisibility.isHidden {
+                tabBar
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
         .tint(theme.accentPrimary)
         .sensoryFeedback(.selection, trigger: selectedTab)
+        .animation(
+            animationsEnabled ? .easeInOut(duration: 0.28) : nil,
+            value: tabBarVisibility.isHidden
+        )
+        .onAppear {
+            tabBarVisibility.setActiveScope(displayedTab.tabBarScope)
+        }
+        .onChange(of: displayedTab) { _, newTab in
+            tabBarVisibility.setActiveScope(newTab.tabBarScope)
+        }
     }
 
     @ViewBuilder
@@ -188,7 +250,14 @@ struct ContentView: View {
             ConversionHomeView(
                 theme: theme.conversionTheme,
                 isTabActive: displayedTab == .conversion,
-                animationsEnabled: themeSettings.interfaceAnimationsEnabled
+                animationsEnabled: themeSettings.interfaceAnimationsEnabled,
+                onDetailVisibilityChanged: { isDetailVisible in
+                    tabBarVisibility.setHidden(
+                        isDetailVisible,
+                        source: "conversion.tool",
+                        scope: .conversion
+                    )
+                }
             )
         case .settings:
             SettingsView()

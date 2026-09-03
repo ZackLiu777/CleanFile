@@ -708,6 +708,7 @@ private struct MediaCategoryCard: View {
 private struct MediaCategoryDetailView: View {
     @Environment(\.appTheme) private var theme
     @EnvironmentObject private var themeSettings: ThemeSettings
+    @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
     let title: String
     let assetIDs: [String]
     @ObservedObject var viewModel: PhotoLibraryViewModel
@@ -913,6 +914,20 @@ private struct MediaCategoryDetailView: View {
         }
         // 触觉挂在稳定页面层，确保回执首次插入时也能触发。
         .sensoryFeedback(.success, trigger: deletionSuccessTrigger)
+        .onAppear {
+            tabBarVisibility.setHidden(
+                true,
+                source: "media.categoryDetail",
+                scope: .media
+            )
+        }
+        .onDisappear {
+            tabBarVisibility.setHidden(
+                false,
+                source: "media.categoryDetail",
+                scope: .media
+            )
+        }
     }
 
     private var selectedMediaSizeText: String {

@@ -519,6 +519,7 @@ private struct StorageBarStripeTexture: View {
 /// 定义 `FolderMapView` 的值语义数据与相关行为。
 private struct FolderMapView: View {
     let root: FileNode
+    @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -536,12 +537,27 @@ private struct FolderMapView: View {
         .background(AppBackground())
         .navigationTitle("Folder Map")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            tabBarVisibility.setHidden(
+                true,
+                source: "storage.folderMap",
+                scope: .storage
+            )
+        }
+        .onDisappear {
+            tabBarVisibility.setHidden(
+                false,
+                source: "storage.folderMap",
+                scope: .storage
+            )
+        }
     }
 }
 
 /// 定义 `ScannedFilesView` 的值语义数据与相关行为。
 private struct ScannedFilesView: View {
     @Environment(\.appTheme) private var theme
+    @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
     @ObservedObject var viewModel: FileScannerViewModel
     let category: FileCategory?
     @State private var selectedURLs = Set<URL>()
@@ -683,6 +699,20 @@ private struct ScannedFilesView: View {
             Button("OK") { viewModel.clearDeletionResult() }
         } message: {
             Text(deletionResultMessage)
+        }
+        .onAppear {
+            tabBarVisibility.setHidden(
+                true,
+                source: "storage.scannedFiles",
+                scope: .storage
+            )
+        }
+        .onDisappear {
+            tabBarVisibility.setHidden(
+                false,
+                source: "storage.scannedFiles",
+                scope: .storage
+            )
         }
     }
 
