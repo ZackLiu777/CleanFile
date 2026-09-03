@@ -107,6 +107,20 @@ private enum AppTab: String, CaseIterable, Hashable {
     }
 }
 
+private struct TabButtonFramesKey: PreferenceKey {
+    static let defaultValue: [AppTab: CGRect] = [:]
+
+    static func reduce(value: inout [AppTab: CGRect], nextValue: () -> [AppTab: CGRect]) {
+        value.merge(nextValue(), uniquingKeysWith: { _, new in new })
+    }
+}
+
+private struct TabBarDragState {
+    // Keep hit regions fixed while the selected label changes the bar's layout.
+    let frames: [AppTab: CGRect]
+    var target: AppTab
+}
+
 /// 定义 `ContentView` 的值语义数据与相关行为。
 struct ContentView: View {
     @Environment(\.appTheme) private var theme
@@ -124,6 +138,8 @@ struct ContentView: View {
     @State private var incomingPageOpacity = 0.0
     @State private var incomingPageOffset: CGFloat = 12
     @State private var transitionGeneration = 0
+    @State private var tabButtonFrames: [AppTab: CGRect] = [:]
+    @GestureState private var tabBarDragState: TabBarDragState?
 
     init() {
         let storedTab = UserDefaults.standard.string(forKey: "selectedAppTab")
@@ -292,19 +308,28 @@ struct ContentView: View {
                 }
                 .shadow(color: .black.opacity(0.12), radius: 18, x: 0, y: 8)
         }
+        .coordinateSpace(name: "customTabBar")
+        .contentShape(Capsule())
+        .onPreferenceChange(TabButtonFramesKey.self) { tabButtonFrames = $0 }
+        .highPriorityGesture(tabBarDragGesture)
+        .animation(
+            animationsEnabled ? .spring(response: 0.24, dampingFraction: 0.88) : nil,
+            value: tabBarDragState?.target
+        )
         // Match the native Liquid Glass tab bar's 16pt side inset.
         .padding(.horizontal, 16)
         .padding(.bottom, -10)
     }
 
     private func tabButton(for tab: AppTab) -> some View {
-        Button {
+        let isHighlighted = (tabBarDragState?.target ?? selectedTab) == tab
+        return Button {
             selectTab(tab)
         } label: {
             HStack(spacing: 5) {
                 Image(systemName: tab.systemImage)
 
-                if selectedTab == tab {
+                if isHighlighted {
                     Text(tab.titleKey)
                 }
             }
@@ -315,13 +340,13 @@ struct ContentView: View {
                 weight: .medium
             )
             .foregroundStyle(
-                selectedTab == tab ? theme.textPrimary : theme.textSecondary
+                isHighlighted ? theme.textPrimary : theme.textSecondary
             )
             .frame(maxWidth: .infinity)
             .frame(height: 45)
-            .padding(.horizontal, selectedTab == tab ? 10 : 7)
+            .padding(.horizontal, isHighlighted ? 10 : 7)
             .background {
-                if selectedTab == tab {
+                if isHighlighted {
                     Capsule()
                         .fill(theme.accentPrimary.opacity(0.14))
                         .matchedGeometryEffect(id: "selectedTab", in: tabNamespace)
@@ -332,6 +357,43 @@ struct ContentView: View {
         .buttonStyle(.plain)
         .accessibilityLabel(Text(tab.titleKey))
         .accessibilityIdentifier(tab.accessibilityIdentifier)
+        .accessibilityAddTraits(selectedTab == tab ? .isSelected : [])
+        .background {
+            GeometryReader { geometry in
+                Color.clear.preference(
+                    key: TabButtonFramesKey.self,
+                    value: [tab: geometry.frame(in: .named("customTabBar"))]
+                )
+            }
+        }
+    }
+
+    private var tabBarDragGesture: some Gesture {
+        DragGesture(minimumDistance: 10, coordinateSpace: .named("customTabBar"))
+            .updating($tabBarDragState) { value, state, _ in
+                if state == nil {
+                    guard abs(value.translation.width) > abs(value.translation.height),
+                          !tabButtonFrames.isEmpty else { return }
+                    state = TabBarDragState(frames: tabButtonFrames, target: selectedTab)
+                }
+                if let frames = state?.frames,
+                   let target = tab(at: value.location.x, in: frames) {
+                    state?.target = target
+                }
+            }
+            .onEnded { value in
+                guard tabBarDragState != nil
+                    || abs(value.translation.width) > abs(value.translation.height) else { return }
+                let frames = tabBarDragState?.frames ?? tabButtonFrames
+                if let target = tab(at: value.location.x, in: frames) {
+                    selectTab(target)
+                }
+            }
+    }
+
+    private func tab(at x: CGFloat, in frames: [AppTab: CGRect]) -> AppTab? {
+        // Nearest centers also cover button gaps and clamp drags past either end.
+        frames.min { abs($0.value.midX - x) < abs($1.value.midX - x) }?.key
     }
 
     private func pageOpacity(for tab: AppTab) -> Double {
