@@ -176,7 +176,7 @@ struct AudioConversionView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             row(L10n.string("settings.output")) {
-                Text(viewModel.outputDirectory.lastPathComponent)
+                Text(L10n.string("settings.output.audio"))
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(.secondary)
             }

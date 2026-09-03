@@ -57,7 +57,7 @@ struct ContentView: View {
                 animationsEnabled: themeSettings.interfaceAnimationsEnabled
             )
                 .tabItem {
-                    Label("Convert", systemImage: "arrow.triangle.2.circlepath")
+                    Label("Compress", systemImage: "arrow.triangle.2.circlepath")
                         .accessibilityIdentifier("tab.convert")
                 }
                 .tag(AppTab.conversion)

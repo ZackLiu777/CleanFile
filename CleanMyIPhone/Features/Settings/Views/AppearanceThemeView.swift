@@ -334,7 +334,7 @@ struct AppearanceThemeView: View {
         } header: {
             Text("Display Options")
         } footer: {
-            Text("Control dashboard animations and date headings in media detail grids.")
+            Text("Control dashboard animations, compression card animations, and date headings in media detail grids.")
         }
         .appListCard()
     }

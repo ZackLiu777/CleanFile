@@ -32,7 +32,7 @@ final class CleanMyIPhoneUITests: XCTestCase {
         ]
         app.launch()
 
-        for label in ["Media", "Storage", "Convert", "Settings"] {
+        for label in ["Media", "Storage", "Compress", "Settings"] {
             XCTAssertTrue(
                 app.tabBars.buttons[label].waitForExistence(timeout: 5),
                 "Missing primary tab \(label)"

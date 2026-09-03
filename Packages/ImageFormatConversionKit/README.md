@@ -1,6 +1,6 @@
 # ImageFormatConversionKit
 
-An Xcode-ready, Apple-native image conversion component for **CleanMyIPhone**.
+An Xcode-ready, Apple-native media compression component for **CleanMyIPhone**.
 The first release deliberately covers still images well instead of hiding an
 unmaintained FFmpeg wrapper behind a thin UI.
 
@@ -8,7 +8,7 @@ unmaintained FFmpeg wrapper behind a thin UI.
 
 - JPEG, PNG, HEIC, HEIF, TIFF, WebP, static GIF, and BMP output, filtered at runtime by the encoders that
   ImageIO reports on the current device.
-- Batch conversion with bounded concurrency (two files by default), task
+- Batch compression with bounded concurrency (two files by default), task
   cancellation, per-file isolation, and progress reporting.
 - Security-scoped access for URLs returned by SwiftUI's file importer.
 - EXIF orientation normalized into pixels so removing metadata does not rotate
@@ -19,7 +19,7 @@ unmaintained FFmpeg wrapper behind a thin UI.
 - Collision policies (`makeUnique`, `overwrite`, and `fail`) with actor-based
   output-name reservation.
 - Temporary-file encoding followed by a same-directory move/replace, so a
-  failed conversion does not leave a partial final file.
+  failed compression does not leave a partial final file.
 - SwiftUI + MVVM feature screen with Liquid Glass on iOS 26+ and a material
   fallback.
 - English, Simplified Chinese, Traditional Chinese, Korean, French, Japanese,
@@ -41,7 +41,7 @@ the first GIF frame would be data loss disguised as success.
 ```swift
 import ImageFormatConversionKit
 
-NavigationLink("Format Conversion") {
+NavigationLink("Media Compression") {
     ImageConversionView()
 }
 ```
@@ -70,14 +70,14 @@ let result = try await engine.convert(request)
 print(result.outputURL)
 ```
 
-`ImageBatchConverter` accepts an array of requests and exposes an async progress
+`ImageBatchConverter` accepts an array of compression requests and exposes an async progress
 handler. `ImageConversionEngine` is an actor: separate calls may execute their
 image work concurrently, while destination-name allocation remains serialized.
 
 ## Output and privacy
 
-The provided ViewModel writes into the app's Documents directory under
-`Converted Images`. The feature uses the system file importer and only accesses
+The provided ViewModel writes into the app's Documents directory under an
+app-managed output folder. The feature uses the system file importer and only accesses
 files the user selects. No network API, analytics call, or server upload is
 present.
 

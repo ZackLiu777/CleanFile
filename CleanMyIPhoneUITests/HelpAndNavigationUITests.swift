@@ -133,7 +133,7 @@ final class HelpAndNavigationUITests: XCTestCase {
         switch identifier {
         case "tab.media": label = "Media"
         case "tab.storage": label = "Storage"
-        case "tab.convert": label = "Convert"
+        case "tab.convert": label = "Compress"
         default: label = "Settings"
         }
         return app.tabBars.buttons[label]

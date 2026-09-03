@@ -657,7 +657,7 @@ private struct ImageConversionSettingsCard: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(L10n.string("settings.output"))
                 Spacer()
-                Text(viewModel.outputDirectory.lastPathComponent)
+                Text(L10n.string("settings.output.images"))
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)

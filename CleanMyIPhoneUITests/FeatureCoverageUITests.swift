@@ -26,12 +26,12 @@ final class FeatureCoverageUITests: XCTestCase {
     @MainActor
     func testEveryConversionToolCanOpenAndReturnHome() throws {
         let app = launchEnglishApp()
-        tab(in: app, id: "tab.convert", label: "Convert").tap()
+        tab(in: app, id: "tab.convert", label: "Compress").tap()
 
         for (id, title) in [
-            ("conversion.home.image", "Convert Images"),
-            ("conversion.home.video", "Convert Video"),
-            ("conversion.home.audio", "Convert Audio")
+            ("conversion.home.image", "Compress Images"),
+            ("conversion.home.video", "Compress Video"),
+            ("conversion.home.audio", "Compress Audio")
         ] {
             let tool = reveal(app.buttons[id], in: app)
             XCTAssertTrue(
@@ -50,17 +50,17 @@ final class FeatureCoverageUITests: XCTestCase {
     @MainActor
     func testConversionGuideCoversImagesVideoAndAudio() throws {
         let app = launchEnglishApp()
-        tab(in: app, id: "tab.convert", label: "Convert").tap()
+        tab(in: app, id: "tab.convert", label: "Compress").tap()
 
         let guide = app.buttons["conversion.guide.button"]
         XCTAssertTrue(guide.waitForExistence(timeout: 5))
         guide.tap()
-        XCTAssertTrue(app.navigationBars["Conversion Guide"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Compression Guide"].waitForExistence(timeout: 5))
 
         for (id, title) in [
-            ("conversion.guide.tool.image", "Convert Images"),
-            ("conversion.guide.tool.video", "Convert Video"),
-            ("conversion.guide.tool.audio", "Convert Audio")
+            ("conversion.guide.tool.image", "Compress Images"),
+            ("conversion.guide.tool.video", "Compress Video"),
+            ("conversion.guide.tool.audio", "Compress Audio")
         ] {
             let item = reveal(app.descendants(matching: .any)[id], in: app)
             XCTAssertTrue(item.exists, "Missing guide item \(id)")
@@ -71,7 +71,7 @@ final class FeatureCoverageUITests: XCTestCase {
 
         XCTAssertTrue(reveal(app.buttons["Done"], in: app).exists)
         app.buttons["Done"].tap()
-        XCTAssertFalse(app.navigationBars["Conversion Guide"].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.navigationBars["Compression Guide"].waitForExistence(timeout: 2))
     }
 
     @MainActor

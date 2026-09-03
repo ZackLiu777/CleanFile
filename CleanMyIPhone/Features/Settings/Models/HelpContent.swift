@@ -112,7 +112,7 @@ enum HelpCatalog {
                 id: "three-tools",
                 title: "Three focused tools",
                 paragraphs: [
-                    "Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Convert works with copies imported into the app's private workspace."
+                    "Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace."
                 ]
             ),
             HelpArticleSection(
@@ -220,32 +220,32 @@ enum HelpCatalog {
 
     private static let conversion = HelpArticle(
         id: "conversion",
-        title: "Use Convert",
-        summary: "Convert images, videos, and audio without changing the original file.",
+        title: "Use Compress",
+        summary: "Compress images, videos, and audio without changing the original file.",
         systemImage: "arrow.triangle.2.circlepath",
         notice: HelpNotice(
             tone: .information,
             title: "The original stays where it was",
-            detail: "Convert imports a working copy into the app. Clearing the conversion workspace removes app-managed copies and outputs, so export anything you want to keep first."
+            detail: "Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first."
         ),
         sections: [
             HelpArticleSection(
                 id: "workflow",
-                title: "Convert a file",
+                title: "Compress a file",
                 paragraphs: [],
                 steps: [
-                    HelpStep(id: "type", title: "Choose a conversion type", detail: "Open image, video, audio, or video-to-audio conversion."),
+                    HelpStep(id: "type", title: "Choose a media type", detail: "Open image, video, or audio compression. The audio tool can also extract a track from video."),
                     HelpStep(id: "import", title: "Import your files", detail: "Select supported items from Photos or Files and wait for the working copies to finish importing."),
-                    HelpStep(id: "settings", title: "Review output settings", detail: "Choose the format and available size, quality, or metadata options."),
-                    HelpStep(id: "convert", title: "Start conversion", detail: "Keep the task open until each item completes or reports an error."),
-                    HelpStep(id: "export", title: "Save the result", detail: "Use the share action to save or send completed output before clearing the workspace.")
+                    HelpStep(id: "settings", title: "Review compression settings", detail: "Choose the format and adjust the available size, quality, bitrate, or metadata options."),
+                    HelpStep(id: "convert", title: "Start compression", detail: "Keep the task open until each item completes or reports an error."),
+                    HelpStep(id: "export", title: "Save the result", detail: "Use the share action to save or send the compressed output before clearing the workspace.")
                 ]
             ),
             HelpArticleSection(
                 id: "storage",
-                title: "Manage conversion storage",
+                title: "Manage compression storage",
                 paragraphs: [
-                    "Imported copies and converted outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep."
+                    "Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep."
                 ]
             )
         ],
@@ -485,7 +485,7 @@ enum HelpCatalog {
                 id: "whole-iphone",
                 title: "Can the app scan my whole iPhone?",
                 paragraphs: [
-                    "No. It can analyze the Photos items you authorize, the folder you choose, and its own conversion workspace. Other apps and protected system storage remain private."
+                    "No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private."
                 ]
             ),
             HelpArticleSection(
@@ -532,9 +532,9 @@ enum HelpCatalog {
             ),
             HelpArticleSection(
                 id: "uploads",
-                title: "Does analysis or conversion upload my files?",
+                title: "Does analysis or compression upload my files?",
                 paragraphs: [
-                    "No. Media analysis, folder analysis, and conversion run on this device. Apple services or file providers may sync their own content according to your existing settings."
+                    "No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings."
                 ]
             )
         ],
@@ -549,7 +549,7 @@ enum HelpCatalog {
         notice: HelpNotice(
             tone: .privacy,
             title: "Local by design",
-            detail: "Media analysis, folder scanning, and conversion happen on this device. The app does not upload your files for these features."
+            detail: "Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features."
         ),
         sections: [
             HelpArticleSection(
@@ -568,9 +568,9 @@ enum HelpCatalog {
             ),
             HelpArticleSection(
                 id: "conversion",
-                title: "Conversion workspace",
+                title: "Compression workspace",
                 paragraphs: [
-                    "Convert keeps imported working copies and outputs inside app-managed storage. The original outside the app is not replaced. Clear the workspace only after exporting results you want to keep."
+                    "Compress keeps imported working copies and outputs inside app-managed storage. The original outside the app is not replaced. Clear the workspace only after exporting results you want to keep."
                 ]
             ),
             HelpArticleSection(

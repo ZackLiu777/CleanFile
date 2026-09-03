@@ -234,7 +234,7 @@ struct VideoConversionView: View {
                 }
             }
             setting(L10n.string("settings.output")) {
-                Text(viewModel.outputDirectory.lastPathComponent)
+                Text(L10n.string("settings.output.videos"))
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(.secondary)
             }
