@@ -203,10 +203,18 @@ struct ContentView: View {
             // Keep the app background mounted outside the page transition. The
             // individual pages fade out as a unit, so without this stable layer
             // the transparent interval would expose the window's white color.
-            AppBackground()
+            // The opaque representative color is an immediate fallback for
+            // complex custom backgrounds while their full renderer is composited.
+            theme.backgroundPrimary
+                .ignoresSafeArea()
+            ThemeBackgroundLayer(background: theme.background)
+                .ignoresSafeArea()
 
             ForEach(AppTab.allCases, id: \.self) { tab in
                 page(for: tab)
+                    // Fade the completed page, including its background, as one
+                    // group instead of applying opacity to overlapping surfaces.
+                    .compositingGroup()
                     .opacity(pageOpacity(for: tab))
                     .offset(y: pageOffset(for: tab))
                     .allowsHitTesting(isInteractive(tab))
@@ -272,9 +280,11 @@ struct ContentView: View {
         }
         .padding(5)
         .background {
-            // Avoid system material falling back to the window's white backdrop
-            // while the page layer is transitioning between tabs.
-            ThemeBackgroundLayer(background: theme.background)
+            // Use the same opaque theme token as the stable page background.
+            // This prevents a material or gradient renderer from exposing the
+            // system window's white backdrop during a tab transition.
+            Capsule()
+                .fill(theme.backgroundPrimary)
                 .clipShape(Capsule())
                 .overlay {
                     Capsule()

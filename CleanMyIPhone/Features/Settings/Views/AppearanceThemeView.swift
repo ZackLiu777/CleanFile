@@ -395,16 +395,20 @@ struct AppearanceThemeView: View {
         }
     }
 
-    /// 更新完整背景主题，避免只替换单个背景色造成层级失配。
+    /// 更新完整背景主题，避免 List 卡片与全屏背景在颜色动画中产生帧差。
     private func updateBackgroundTheme(_ themeID: AppThemeID) {
-        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.16)) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
             themeSettings.selectBackgroundTheme(themeID)
         }
     }
 
     /// 重新选择用户上次编辑的背景颜色，并保留预设主题以便随时切回。
     private func selectCustomBackground() {
-        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.16)) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
             themeSettings.selectCustomBackground()
         }
     }
