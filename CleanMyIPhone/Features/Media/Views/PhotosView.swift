@@ -320,6 +320,7 @@ private struct MediaDashboardResultsView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Cleanup Recommendations")
                 .font(.title2.bold())
+                .padding(.horizontal, 12)
 
             LazyVGrid(columns: columns, spacing: 10) {
                 ForEach(cleanupCategories) { category in

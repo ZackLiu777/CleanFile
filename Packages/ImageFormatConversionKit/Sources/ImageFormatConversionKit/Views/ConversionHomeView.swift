@@ -103,7 +103,7 @@ public struct ConversionHomeView: View {
                             )
                         )
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 4)
                     .padding(.bottom, 24)
                 }
                 .converterSoftScrollEdge()
@@ -405,6 +405,20 @@ private actor ConversionHomeHistoryLoader {
     }
 }
 
+private struct ConversionHomeInsetSurface: ViewModifier {
+    @Environment(\.conversionTheme) private var theme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, macOS 26.0, *), theme.liquidGlassCardsEnabled && !reduceTransparency {
+            content.glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+        } else {
+            content.background(theme.cardElevated, in: .rect(cornerRadius: cornerRadius))
+        }
+    }
+}
+
 private struct ConversionHomeCard: View {
     @Environment(\.conversionTheme) private var theme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
@@ -418,19 +432,7 @@ private struct ConversionHomeCard: View {
                     .font(.system(size: 23, weight: .medium))
                     .foregroundStyle(theme.textPrimary)
                     .frame(width: 54, height: 54)
-                    .background(
-                        cardHighlightGradient,
-                        in: RoundedRectangle(
-                            cornerRadius: 16,
-                            style: .continuous
-                        )
-                    )
-                    .shadow(
-                        color: theme.divider.opacity(0.34),
-                        radius: 6,
-                        x: 0,
-                        y: 3
-                    )
+                    .modifier(ConversionHomeInsetSurface(cornerRadius: 16))
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(kind.title)
@@ -459,10 +461,7 @@ private struct ConversionHomeCard: View {
                         .foregroundStyle(theme.textSecondary)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 4)
-                        .background(
-                            theme.cardElevated,
-                            in: Capsule()
-                        )
+                        .modifier(ConversionHomeInsetSurface(cornerRadius: 100))
                 }
             }
 
@@ -522,15 +521,6 @@ private struct ConversionHomeCard: View {
 
     private var usesGlassCard: Bool {
         theme.liquidGlassCardsEnabled && !reduceTransparency
-    }
-
-    /// 使用背景主题的两个语义表面绘制高亮块，使大卡与背景调色盘保持同一管理状态。
-    private var cardHighlightGradient: LinearGradient {
-        LinearGradient(
-            colors: [theme.cardHighlight, theme.cardElevated],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
     }
 
     /// 将历史输入与真实输出文件体积转换为不暗示释放空间的中性反馈。

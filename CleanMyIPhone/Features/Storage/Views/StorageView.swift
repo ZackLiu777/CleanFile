@@ -51,11 +51,23 @@ struct StorageView: View {
                                 NavigationLink {
                                     ScannedFilesView(viewModel: viewModel)
                                 } label: {
-                                    Label("Review and Delete Files", systemImage: "trash")
-                                        .frame(maxWidth: .infinity)
+                                    HStack(spacing: 14) {
+                                        Image(systemName: "trash")
+                                            .font(.title2)
+                                            .foregroundStyle(theme.accentPrimary)
+                                            .frame(width: 44, height: 44)
+                                        Text("Review and Delete Files")
+                                            .font(.headline)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                        Image(systemName: "chevron.right")
+                                            .font(.footnote.weight(.semibold))
+                                    }
+                                    .foregroundStyle(theme.textPrimary)
+                                    .padding(16)
+                                    .frame(maxWidth: .infinity, minHeight: 80)
+                                    .appContentCard()
                                 }
-                                .buttonStyle(.borderedProminent)
-                                .tint(theme.accentPrimary)
+                                .buttonStyle(.plain)
                             }
                         }
                     }

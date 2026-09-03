@@ -319,11 +319,17 @@ struct AppearanceThemeView: View {
     /// Groups optional presentation details without duplicating iOS Reduce Motion.
     private var displayOptionsSection: some View {
         Section {
-            Toggle("Interface Animations", isOn: $themeSettings.interfaceAnimationsEnabled)
-                .accessibilityIdentifier("appearance.interfaceAnimations")
-
-            Toggle("Show Media Dates", isOn: $themeSettings.mediaDateHeadersEnabled)
-                .accessibilityIdentifier("appearance.mediaDates")
+            // One list row owns the glass surface; separate rows draw overlapping rounded edges.
+            VStack(spacing: 0) {
+                Toggle("Interface Animations", isOn: $themeSettings.interfaceAnimationsEnabled)
+                    .accessibilityIdentifier("appearance.interfaceAnimations")
+                    .frame(minHeight: 50)
+                Divider()
+                Toggle("Show Media Dates", isOn: $themeSettings.mediaDateHeadersEnabled)
+                    .accessibilityIdentifier("appearance.mediaDates")
+                    .frame(minHeight: 50)
+            }
+            .listRowSeparator(.hidden)
         } header: {
             Text("Display Options")
         } footer: {
