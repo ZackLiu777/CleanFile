@@ -49,6 +49,9 @@
 "Cards" = "Cards";
 "Liquid Glass Cards" = "Liquid Glass Cards";
 "Use system glass surfaces for content cards throughout the app." = "Use system glass surfaces for content cards throughout the app.";
+"Tab Bar" = "Tab Bar";
+"Liquid Glass Tab" = "Liquid Glass Tab";
+"Use the native Liquid Glass tab bar for primary navigation." = "Use the native Liquid Glass tab bar for primary navigation.";
 "Choose the appearance used throughout the app." = "Choose the appearance used throughout the app.";
 "CleanMyIPhone Pink" = "CleanMyIPhone Pink";
 "Accent Color" = "Accent Color";

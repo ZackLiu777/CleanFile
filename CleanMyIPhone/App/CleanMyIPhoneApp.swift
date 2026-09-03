@@ -32,6 +32,7 @@ struct CleanMyIPhoneApp: App {
                 "appCustomBackgroundStyle",
                 "appUsesCustomBackground",
                 "appLiquidGlassCardsEnabled",
+                "appLiquidGlassTabEnabled",
                 "appInterfaceAnimationsEnabled",
                 "appMediaDateHeadersEnabled",
                 "selectedAppTab"

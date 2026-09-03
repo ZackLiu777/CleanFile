@@ -49,6 +49,9 @@
 "Cards" = "卡片";
 "Liquid Glass Cards" = "Liquid Glass 卡片";
 "Use system glass surfaces for content cards throughout the app." = "将整个 App 的内容卡片切换为系统玻璃外观。";
+"Tab Bar" = "标签栏";
+"Liquid Glass Tab" = "Liquid Glass 标签栏";
+"Use the native Liquid Glass tab bar for primary navigation." = "使用原生 Liquid Glass 标签栏进行主要导航。";
 "Choose the appearance used throughout the app." = "选择整个 App 使用的外观。";
 "CleanMyIPhone Pink" = "CleanMyIPhone 粉色";
 "Accent Color" = "强调色";

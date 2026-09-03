@@ -49,6 +49,9 @@
 "Cards" = "카드";
 "Liquid Glass Cards" = "Liquid Glass 카드";
 "Use system glass surfaces for content cards throughout the app." = "앱 전체의 콘텐츠 카드에 시스템 유리 표면을 사용합니다.";
+"Tab Bar" = "탭 막대";
+"Liquid Glass Tab" = "Liquid Glass 탭 막대";
+"Use the native Liquid Glass tab bar for primary navigation." = "주요 탐색에 네이티브 Liquid Glass 탭 막대를 사용합니다.";
 "Choose the appearance used throughout the app." = "앱 전체에서 사용할 화면 모드를 선택하세요.";
 "CleanMyIPhone Pink" = "CleanMyIPhone 핑크";
 "Accent Color" = "강조 색상";

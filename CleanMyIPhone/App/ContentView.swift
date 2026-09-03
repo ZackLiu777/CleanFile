@@ -14,11 +14,50 @@ import ImageFormatConversionKit
 import SwiftUI
 
 /// 定义 `AppTab` 使用的有限状态或选项集合。
-private enum AppTab: String, Hashable {
+private enum AppTab: String, CaseIterable, Hashable {
     case photos
     case storage
     case conversion
     case settings
+
+    var titleKey: LocalizedStringKey {
+        switch self {
+        case .photos:
+            "Media"
+        case .storage:
+            "Storage"
+        case .conversion:
+            "Compress"
+        case .settings:
+            "Settings"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .photos:
+            "photo.on.rectangle"
+        case .storage:
+            "externaldrive"
+        case .conversion:
+            "arrow.triangle.2.circlepath"
+        case .settings:
+            "gearshape"
+        }
+    }
+
+    var accessibilityIdentifier: String {
+        switch self {
+        case .photos:
+            "tab.media"
+        case .storage:
+            "tab.storage"
+        case .conversion:
+            "tab.convert"
+        case .settings:
+            "tab.settings"
+        }
+    }
 }
 
 /// 定义 `ContentView` 的值语义数据与相关行为。
@@ -28,8 +67,43 @@ struct ContentView: View {
     @StateObject private var mediaViewModel = PhotoLibraryViewModel()
     @StateObject private var fileViewModel = FileScannerViewModel()
     @AppStorage("selectedAppTab") private var selectedTab: AppTab = .photos
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Namespace private var tabNamespace
+    @State private var displayedTab: AppTab
+    @State private var transitionFrom: AppTab?
+    @State private var transitionTo: AppTab?
+    @State private var outgoingPageOpacity = 1.0
+    @State private var incomingPageOpacity = 0.0
+    @State private var incomingPageOffset: CGFloat = 12
+    @State private var transitionGeneration = 0
+
+    init() {
+        let storedTab = UserDefaults.standard.string(forKey: "selectedAppTab")
+        _displayedTab = State(initialValue: AppTab(rawValue: storedTab ?? "") ?? .photos)
+    }
 
     var body: some View {
+        Group {
+            if themeSettings.liquidGlassTabEnabled {
+                nativeTabView
+            } else {
+                customTabView
+            }
+        }
+        .onChange(of: selectedTab) { _, newTab in
+            // Native TabView changes the persisted selection directly. Keep the
+            // custom page layer ready if the Liquid Glass option is turned off.
+            guard themeSettings.liquidGlassTabEnabled else { return }
+            settleTransition(to: newTab)
+        }
+        .onChange(of: themeSettings.liquidGlassTabEnabled) { _, _ in
+            // Switching implementations must never leave an in-flight custom
+            // transition or a stale displayed tab behind.
+            settleTransition(to: selectedTab)
+        }
+    }
+
+    private var nativeTabView: some View {
         TabView(selection: $selectedTab) {
             PhotosView(
                 viewModel: mediaViewModel,
@@ -73,6 +147,214 @@ struct ContentView: View {
         .tint(theme.accentPrimary)
         .toolbarBackground(.hidden, for: .tabBar)
         .sensoryFeedback(.selection, trigger: selectedTab)
+    }
+
+    private var customTabView: some View {
+        ZStack {
+            // Keep the app background mounted outside the page transition. The
+            // individual pages fade out as a unit, so without this stable layer
+            // the transparent interval would expose the window's white color.
+            AppBackground()
+
+            ForEach(AppTab.allCases, id: \.self) { tab in
+                page(for: tab)
+                    .opacity(pageOpacity(for: tab))
+                    .offset(y: pageOffset(for: tab))
+                    .allowsHitTesting(isInteractive(tab))
+                    .accessibilityHidden(!isInteractive(tab))
+            }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            tabBar
+        }
+        .tint(theme.accentPrimary)
+        .sensoryFeedback(.selection, trigger: selectedTab)
+    }
+
+    @ViewBuilder
+    private func page(for tab: AppTab) -> some View {
+        switch tab {
+        case .photos:
+            PhotosView(
+                viewModel: mediaViewModel,
+                isTabActive: displayedTab == .photos
+            )
+        case .storage:
+            StorageView(
+                viewModel: fileViewModel,
+                isTabActive: displayedTab == .storage
+            )
+        case .conversion:
+            ConversionHomeView(
+                theme: theme.conversionTheme,
+                isTabActive: displayedTab == .conversion,
+                animationsEnabled: themeSettings.interfaceAnimationsEnabled
+            )
+        case .settings:
+            SettingsView()
+        }
+    }
+
+    private var tabBar: some View {
+        HStack(spacing: 4) {
+            ForEach(AppTab.allCases, id: \.self) { tab in
+                tabButton(for: tab)
+            }
+        }
+        .padding(5)
+        .background {
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .overlay {
+                    Capsule()
+                        .strokeBorder(theme.divider.opacity(0.5), lineWidth: 0.5)
+                }
+                .shadow(color: .black.opacity(0.12), radius: 18, x: 0, y: 8)
+        }
+        // Match the native Liquid Glass tab bar's 16pt side inset.
+        .padding(.horizontal, 16)
+        .padding(.bottom, -10)
+    }
+
+    private func tabButton(for tab: AppTab) -> some View {
+        Button {
+            selectTab(tab)
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: tab.systemImage)
+
+                if selectedTab == tab {
+                    Text(tab.titleKey)
+                }
+            }
+            .appTypeface(
+                .caption.weight(.medium),
+                size: 13,
+                relativeTo: .caption,
+                weight: .medium
+            )
+            .foregroundStyle(
+                selectedTab == tab ? theme.textPrimary : theme.textSecondary
+            )
+            .frame(maxWidth: .infinity)
+            .frame(height: 45)
+            .padding(.horizontal, selectedTab == tab ? 10 : 7)
+            .background {
+                if selectedTab == tab {
+                    Capsule()
+                        .fill(theme.accentPrimary.opacity(0.14))
+                        .matchedGeometryEffect(id: "selectedTab", in: tabNamespace)
+                }
+            }
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(tab.titleKey))
+        .accessibilityIdentifier(tab.accessibilityIdentifier)
+    }
+
+    private func pageOpacity(for tab: AppTab) -> Double {
+        guard let transitionFrom, let transitionTo else {
+            return tab == displayedTab ? 1 : 0
+        }
+
+        if tab == transitionFrom {
+            return outgoingPageOpacity
+        }
+
+        if tab == transitionTo {
+            return incomingPageOpacity
+        }
+
+        return 0
+    }
+
+    private func pageOffset(for tab: AppTab) -> CGFloat {
+        tab == transitionTo ? incomingPageOffset : 0
+    }
+
+    private func isInteractive(_ tab: AppTab) -> Bool {
+        transitionTo == nil && tab == displayedTab
+    }
+
+    private var animationsEnabled: Bool {
+        themeSettings.interfaceAnimationsEnabled && !reduceMotion
+    }
+
+    private func selectTab(_ newTab: AppTab) {
+        guard newTab != selectedTab else { return }
+
+        // Finish the previous transition before starting another one so a rapid
+        // sequence of taps cannot leave the page layer in an inconsistent state.
+        if transitionTo != nil {
+            settleTransition(to: selectedTab)
+        }
+
+        let oldTab = displayedTab
+        guard oldTab != newTab else { return }
+
+        if !animationsEnabled {
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                selectedTab = newTab
+                displayedTab = newTab
+                transitionFrom = nil
+                transitionTo = nil
+                outgoingPageOpacity = 1
+                incomingPageOpacity = 0
+                incomingPageOffset = 12
+            }
+            return
+        }
+
+        withAnimation(.spring(response: 0.42, dampingFraction: 0.88)) {
+            selectedTab = newTab
+        }
+
+        transitionFrom = oldTab
+        transitionTo = newTab
+        outgoingPageOpacity = 1
+        incomingPageOpacity = 0
+        incomingPageOffset = 12
+        transitionGeneration += 1
+        let generation = transitionGeneration
+
+        withAnimation(.easeOut(duration: 0.18)) {
+            outgoingPageOpacity = 0
+        }
+
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(180))
+            guard generation == transitionGeneration else { return }
+
+            displayedTab = newTab
+
+            withAnimation(.easeIn(duration: 0.38)) {
+                incomingPageOpacity = 1
+                incomingPageOffset = 0
+            }
+
+            try? await Task.sleep(for: .milliseconds(400))
+            guard generation == transitionGeneration else { return }
+            settleTransition(to: newTab)
+        }
+    }
+
+    private func settleTransition(to tab: AppTab) {
+        transitionGeneration += 1
+
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            selectedTab = tab
+            displayedTab = tab
+            transitionFrom = nil
+            transitionTo = nil
+            outgoingPageOpacity = 1
+            incomingPageOpacity = 0
+            incomingPageOffset = 12
+        }
     }
 }
 

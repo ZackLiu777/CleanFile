@@ -49,6 +49,9 @@
 "Cards" = "カード";
 "Liquid Glass Cards" = "Liquid Glassカード";
 "Use system glass surfaces for content cards throughout the app." = "App全体のコンテンツカードにシステムのガラスサーフェスを使用します。";
+"Tab Bar" = "タブバー";
+"Liquid Glass Tab" = "Liquid Glassタブバー";
+"Use the native Liquid Glass tab bar for primary navigation." = "主要なナビゲーションにネイティブのLiquid Glassタブバーを使用します。";
 "Choose the appearance used throughout the app." = "App 全体で使用する外観を選択します。";
 "CleanMyIPhone Pink" = "CleanMyIPhone ピンク";
 "Accent Color" = "アクセントカラー";

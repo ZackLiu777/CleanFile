@@ -26,6 +26,7 @@ struct AppearanceThemeView: View {
                 customBackgroundEditorSection
             }
             glassCardSection
+            glassTabSection
             displayOptionsSection
             fontSection
             appearanceSection
@@ -41,6 +42,7 @@ struct AppearanceThemeView: View {
         .sensoryFeedback(.selection, trigger: themeSettings.selectedThemeID)
         .sensoryFeedback(.selection, trigger: themeSettings.customBackgroundStyle.kind)
         .sensoryFeedback(.selection, trigger: themeSettings.liquidGlassCardsEnabled)
+        .sensoryFeedback(.selection, trigger: themeSettings.liquidGlassTabEnabled)
     }
 
     /// 提供小型即时预览，使用户在离开设置页前理解配色关系。
@@ -313,6 +315,23 @@ struct AppearanceThemeView: View {
             Text("Cards")
         } footer: {
             Text("Use system glass surfaces for content cards throughout the app.")
+        }
+        .appListCard()
+    }
+
+    /// Controls the primary navigation style independently from content cards.
+    private var glassTabSection: some View {
+        Section {
+            Toggle(
+                "Liquid Glass Tab",
+                isOn: $themeSettings.liquidGlassTabEnabled
+            )
+            .accessibilityIdentifier("appearance.liquidGlassTab")
+            .accessibilityValue(themeSettings.liquidGlassTabEnabled ? "1" : "0")
+        } header: {
+            Text("Tab Bar")
+        } footer: {
+            Text("Use the native Liquid Glass tab bar for primary navigation.")
         }
         .appListCard()
     }
