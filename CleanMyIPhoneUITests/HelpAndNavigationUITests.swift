@@ -34,7 +34,7 @@ final class HelpAndNavigationUITests: XCTestCase {
         let app = launchEnglishApp()
         openHelp(in: app)
 
-        for title in ["Meet the App", "Use Media", "Use Storage", "Use Convert", "Common Questions"] {
+        for title in ["Meet the App", "Use Media", "Use Storage", "Use Compress", "Common Questions"] {
             let entry = reveal(app.staticTexts[title], in: app)
             XCTAssertTrue(entry.exists, "Missing help entry " + title)
         }

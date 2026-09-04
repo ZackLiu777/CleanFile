@@ -121,6 +121,7 @@ struct AppearanceThemeView: View {
                 }
                 .padding(.vertical, 12)
             }
+            .accessibilityIdentifier("appearance.background.palette")
         } header: {
             Text("App Background")
         } footer: {
@@ -231,6 +232,7 @@ struct AppearanceThemeView: View {
                 } label: {
                     Label("Add Color", systemImage: "plus.circle")
                 }
+                .accessibilityIdentifier("appearance.background.addColor")
             }
         }
     }

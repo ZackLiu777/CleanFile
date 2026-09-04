@@ -62,11 +62,13 @@ final class FeatureCoverageUITests: XCTestCase {
             ("conversion.guide.tool.video", "Compress Video"),
             ("conversion.guide.tool.audio", "Compress Audio")
         ] {
-            let item = reveal(app.descendants(matching: .any)[id], in: app)
+            let item = reveal(app.buttons[id], in: app)
             XCTAssertTrue(item.exists, "Missing guide item \(id)")
             item.tap()
             XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5))
-            app.navigationBars.buttons.element(boundBy: 0).tap()
+            let back = app.navigationBars[title].buttons["Compression Guide"]
+            XCTAssertTrue(back.waitForExistence(timeout: 3))
+            back.tap()
         }
 
         XCTAssertTrue(reveal(app.buttons["Done"], in: app).exists)
@@ -101,24 +103,32 @@ final class FeatureCoverageUITests: XCTestCase {
     @MainActor
     func testCustomBackgroundSupportsAtLeastFiveGradientColors() throws {
         let app = launchAppearance(in: launchEnglishApp())
-        let custom = reveal(
-            app.descendants(matching: .any)["appearance.background.custom"],
+        let palette = reveal(
+            app.descendants(matching: .any)["appearance.background.palette"],
             in: app
         )
-        XCTAssertTrue(custom.exists)
+        XCTAssertTrue(palette.exists)
+
+        let custom = app.buttons["appearance.background.custom"]
+        for _ in 0..<6 where !custom.exists || !custom.isHittable {
+            palette.swipeLeft()
+        }
+        XCTAssertTrue(custom.exists && custom.isHittable)
         custom.tap()
 
         let style = reveal(app.segmentedControls["appearance.background.style"], in: app)
         XCTAssertTrue(style.exists)
         style.buttons["Linear Gradient"].tap()
 
-        let addColor = app.buttons["Add Color"]
+        let appearanceScroll = app.collectionViews.firstMatch
+        XCTAssertTrue(appearanceScroll.exists)
         for _ in 0..<3 {
-            XCTAssertTrue(reveal(addColor, in: app).exists)
+            let addColor = app.buttons["appearance.background.addColor"]
+            XCTAssertTrue(reveal(addColor, in: appearanceScroll).exists)
             addColor.tap()
         }
 
-        XCTAssertTrue(reveal(app.staticTexts["Color 5"], in: app).exists)
+        XCTAssertTrue(reveal(app.staticTexts["Color 5"], in: appearanceScroll).exists)
     }
 
     @MainActor
@@ -214,6 +224,18 @@ final class FeatureCoverageUITests: XCTestCase {
     ) -> XCUIElement {
         for _ in 0..<maxSwipes where !element.exists || !element.isHittable {
             app.swipeUp()
+        }
+        return element
+    }
+
+    @MainActor
+    private func reveal(
+        _ element: XCUIElement,
+        in scrollView: XCUIElement,
+        maxSwipes: Int = 8
+    ) -> XCUIElement {
+        for _ in 0..<maxSwipes where !element.exists || !element.isHittable {
+            scrollView.swipeUp()
         }
         return element
     }

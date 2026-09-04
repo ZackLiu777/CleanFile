@@ -32,9 +32,17 @@ final class CleanMyIPhoneUITests: XCTestCase {
         ]
         app.launch()
 
-        for label in ["Media", "Storage", "Compress", "Settings"] {
+        for (identifier, label) in [
+            ("tab.media", "Media"),
+            ("tab.storage", "Storage"),
+            ("tab.convert", "Compress"),
+            ("tab.settings", "Settings")
+        ] {
+            let customTab = app.buttons[identifier]
+            let nativeTab = app.tabBars.buttons[label]
             XCTAssertTrue(
-                app.tabBars.buttons[label].waitForExistence(timeout: 5),
+                customTab.waitForExistence(timeout: 2)
+                    || nativeTab.waitForExistence(timeout: 3),
                 "Missing primary tab \(label)"
             )
         }
