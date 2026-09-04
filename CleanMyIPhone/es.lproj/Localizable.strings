@@ -441,4 +441,21 @@
 "appearance.font.helveticaNeue" = "Helvetica Neue";
 "appearance.font.georgia" = "Georgia";
 "appearance.font.palatino" = "Palatino";
+
+/* Premium */
+"premium.entry.subtitle" = "Descubre las funciones y los planes";
+"premium.close" = "Cerrar";
+"premium.title" = "Más espacio para lo importante";
+"premium.subtitle" = "Organiza contenido multimedia, limpia archivos y comprime en un solo lugar.";
+"premium.media.title" = "Organiza tus fotos y vídeos";
+"premium.media.detail" = "Revisa fotos y vídeos y elige qué eliminar.";
+"premium.storage.title" = "Limpia archivos";
+"premium.storage.detail" = "Encuentra archivos innecesarios en las carpetas que autorices.";
+"premium.compression.title" = "Comprime contenido multimedia";
+"premium.compression.detail" = "Reduce el tamaño de imágenes, vídeos y audio con ajustes personalizables.";
+"premium.privacy" = "El contenido multimedia y los archivos se procesan en este dispositivo.";
+"premium.plans.title" = "Elige tu plan";
+"premium.plans.unavailable" = "Las suscripciones aún no están disponibles";
+"premium.plans.retryLater" = "Vuelve más tarde. Puedes seguir usando la app.";
+"premium.trial.note" = "Las pruebas gratuitas están disponibles solo para suscriptores que cumplan los requisitos. El App Store muestra la oferta aplicable y el precio de renovación antes de la compra.";
 "appearance.font.languageNote" = "Estas fuentes se aplican principalmente al inglés. Otros idiomas pueden usar fuentes alternativas y verse diferentes. Los diálogos del sistema conservan sus fuentes.";

@@ -441,4 +441,21 @@
 "appearance.font.helveticaNeue" = "Helvetica Neue";
 "appearance.font.georgia" = "Georgia";
 "appearance.font.palatino" = "Palatino";
+
+/* Premium */
+"premium.entry.subtitle" = "Explore features and subscription plans";
+"premium.close" = "Close";
+"premium.title" = "More room for what matters";
+"premium.subtitle" = "Media, files, and compression in one place.";
+"premium.media.title" = "Organize your media";
+"premium.media.detail" = "Review photos and videos and choose what to remove.";
+"premium.storage.title" = "Clean up files";
+"premium.storage.detail" = "Find unnecessary files in folders you authorize.";
+"premium.compression.title" = "Compress media";
+"premium.compression.detail" = "Reduce image, video, and audio file sizes with adjustable settings.";
+"premium.privacy" = "Media and file processing stays on this device.";
+"premium.plans.title" = "Choose your plan";
+"premium.plans.unavailable" = "Subscriptions are not available yet.";
+"premium.plans.retryLater" = "Please check back later. You can continue using the app.";
+"premium.trial.note" = "Free trials are available only to eligible subscribers. The App Store displays the applicable offer and renewal price before purchase.";
 "appearance.font.languageNote" = "Font choices primarily style English text. Other languages may use system fallback fonts and look different. System dialogs keep their own fonts.";

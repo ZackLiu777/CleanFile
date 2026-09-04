@@ -441,4 +441,21 @@
 "appearance.font.helveticaNeue" = "Helvetica Neue";
 "appearance.font.georgia" = "Georgia";
 "appearance.font.palatino" = "Palatino";
+
+/* Premium */
+"premium.entry.subtitle" = "了解功能與訂閱方案";
+"premium.close" = "關閉";
+"premium.title" = "為重要內容騰出空間";
+"premium.subtitle" = "媒體整理、檔案清理與壓縮，集中一處。";
+"premium.media.title" = "整理媒體";
+"premium.media.detail" = "瀏覽照片與影片，自主選擇需要刪除的內容。";
+"premium.storage.title" = "清理檔案";
+"premium.storage.detail" = "在你授權的資料夾中尋找不再需要的檔案。";
+"premium.compression.title" = "壓縮媒體";
+"premium.compression.detail" = "調整設定，減少圖片、影片與音訊的檔案大小。";
+"premium.privacy" = "媒體與檔案處理均在本裝置完成。";
+"premium.plans.title" = "選擇訂閱方案";
+"premium.plans.unavailable" = "訂閱尚未開放";
+"premium.plans.retryLater" = "請稍後再來查看，你仍可繼續使用 App。";
+"premium.trial.note" = "免費試用僅適用於符合資格的訂閱者。購買前，App Store 會顯示適用的優惠與續訂價格。";
 "appearance.font.languageNote" = "字體主要針對英文顯示。其他語言可能使用系統替代字體，效果有所不同；系統對話框保留原有字體。";

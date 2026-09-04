@@ -441,4 +441,21 @@
 "appearance.font.helveticaNeue" = "Helvetica Neue";
 "appearance.font.georgia" = "Georgia";
 "appearance.font.palatino" = "Palatino";
+
+/* Premium */
+"premium.entry.subtitle" = "機能とサブスクリプションプランを見る";
+"premium.close" = "閉じる";
+"premium.title" = "大切なもののために空き容量を";
+"premium.subtitle" = "メディア整理、ファイル整理、圧縮をひとつに。";
+"premium.media.title" = "メディアを整理";
+"premium.media.detail" = "写真やビデオを確認し、削除するものを選べます。";
+"premium.storage.title" = "ファイルを整理";
+"premium.storage.detail" = "アクセスを許可したフォルダで不要なファイルを探せます。";
+"premium.compression.title" = "メディアを圧縮";
+"premium.compression.detail" = "設定を調整して画像、ビデオ、音声のファイルサイズを減らせます。";
+"premium.privacy" = "メディアとファイルの処理はこのデバイス内で行われます。";
+"premium.plans.title" = "プランを選択";
+"premium.plans.unavailable" = "サブスクリプションはまだ利用できません";
+"premium.plans.retryLater" = "後でもう一度ご確認ください。アプリは引き続き利用できます。";
+"premium.trial.note" = "無料トライアルは対象の方のみ利用できます。購入前に、App Storeで適用される特典と更新価格が表示されます。";
 "appearance.font.languageNote" = "フォントは主に英語の表示に適用されます。他の言語では代替フォントが使われ、見た目が異なる場合があります。システムダイアログのフォントは変更されません。";
