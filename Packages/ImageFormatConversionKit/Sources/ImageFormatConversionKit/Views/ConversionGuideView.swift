@@ -20,7 +20,10 @@ struct ConversionGuideView: View {
     var body: some View {
         NavigationStack(path: $navigationPath) {
             ScrollView(.vertical, showsIndicators: false) {
-                LazyVStack(alignment: .leading, spacing: 30) {
+                // Keep the complete guide in the accessibility tree. This page is
+                // small, and lazy creation made off-screen tool links unavailable
+                // to VoiceOver and UI automation until SwiftUI finished scrolling.
+                VStack(alignment: .leading, spacing: 30) {
                     ConversionGuideHero()
 
                     ConversionGuideSection(
