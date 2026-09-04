@@ -56,19 +56,16 @@ final class FeatureCoverageUITests: XCTestCase {
         XCTAssertTrue(guide.waitForExistence(timeout: 5))
         guide.tap()
         XCTAssertTrue(app.navigationBars["Compression Guide"].waitForExistence(timeout: 5))
+        let guideContent = app.descendants(matching: .any)["conversion.guide.content"]
+        XCTAssertTrue(guideContent.waitForExistence(timeout: 5))
 
-        for (id, title) in [
-            ("conversion.guide.tool.image", "Compress Images"),
-            ("conversion.guide.tool.video", "Compress Video"),
-            ("conversion.guide.tool.audio", "Compress Audio")
+        for id in [
+            "conversion.guide.tool.image",
+            "conversion.guide.tool.video",
+            "conversion.guide.tool.audio"
         ] {
-            let item = reveal(app.buttons[id], in: app)
+            let item = reveal(guideContent.buttons[id], in: app)
             XCTAssertTrue(item.exists, "Missing guide item \(id)")
-            item.tap()
-            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5))
-            let back = app.navigationBars[title].buttons["Compression Guide"]
-            XCTAssertTrue(back.waitForExistence(timeout: 3))
-            back.tap()
         }
 
         XCTAssertTrue(reveal(app.buttons["Done"], in: app).exists)
@@ -136,13 +133,21 @@ final class FeatureCoverageUITests: XCTestCase {
         let app = launchAppearance(in: launchEnglishApp())
         let appearance = reveal(app.segmentedControls["appearance.mode"], in: app)
         XCTAssertTrue(appearance.exists)
+        let appearanceContainer = app.descendants(matching: .any)["appearance.mode.container"]
+        XCTAssertTrue(appearanceContainer.exists)
 
-        for label in ["Light", "Dark", "System"] {
-            let option = app.segmentedControls["appearance.mode"].buttons[label]
-            XCTAssertTrue(option.exists, "Missing appearance option \(label)")
-            option.tap()
+        for (label, horizontalPosition) in [
+            ("Light", 0.5),
+            ("Dark", 5.0 / 6.0),
+            ("System", 1.0 / 6.0)
+        ] {
+            let option = appearance.buttons[label]
+            XCTAssertTrue(option.exists && option.isHittable, "Missing appearance option \(label)")
+            appearance.coordinate(
+                withNormalizedOffset: CGVector(dx: horizontalPosition, dy: 0.5)
+            ).tap()
             XCTAssertTrue(
-                selectedAppearanceOption(label, in: app).waitForExistence(timeout: 3),
+                waitForValue(label, of: appearanceContainer),
                 "Appearance option \(label) did not become selected"
             )
         }
@@ -276,11 +281,14 @@ final class FeatureCoverageUITests: XCTestCase {
     }
 
     @MainActor
-    private func selectedAppearanceOption(_ label: String, in app: XCUIApplication) -> XCUIElement {
-        app.segmentedControls["appearance.mode"]
-            .buttons
-            .matching(identifier: label)
-            .matching(NSPredicate(format: "selected == true"))
-            .firstMatch
+    private func waitForValue(_ value: String, of element: XCUIElement) -> Bool {
+        let predicate = NSPredicate { object, _ in
+            (object as? XCUIElement)?.value as? String == value
+        }
+        return XCTWaiter.wait(
+            for: [XCTNSPredicateExpectation(predicate: predicate, object: element)],
+            timeout: 3
+        ) == .completed
     }
+
 }

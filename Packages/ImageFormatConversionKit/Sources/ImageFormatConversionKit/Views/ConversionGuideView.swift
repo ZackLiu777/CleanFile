@@ -117,6 +117,8 @@ struct ConversionGuideView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 12)
                 .padding(.bottom, 36)
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("conversion.guide.content")
             }
             .converterSoftScrollEdge()
             .background(converterBackground)

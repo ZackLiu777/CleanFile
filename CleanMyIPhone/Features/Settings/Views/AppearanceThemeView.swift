@@ -15,6 +15,7 @@ struct AppearanceThemeView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var themeSettings: ThemeSettings
+    @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
 
     /// 组合主题预览与三组低频全局设置，并沿用 App 的连续背景。
     var body: some View {
@@ -43,6 +44,20 @@ struct AppearanceThemeView: View {
         .sensoryFeedback(.selection, trigger: themeSettings.customBackgroundStyle.kind)
         .sensoryFeedback(.selection, trigger: themeSettings.liquidGlassCardsEnabled)
         .sensoryFeedback(.selection, trigger: themeSettings.liquidGlassTabEnabled)
+        .onAppear {
+            tabBarVisibility.setHidden(
+                true,
+                source: "settings.appearance",
+                scope: .settings
+            )
+        }
+        .onDisappear {
+            tabBarVisibility.setHidden(
+                false,
+                source: "settings.appearance",
+                scope: .settings
+            )
+        }
     }
 
     /// 提供小型即时预览，使用户在离开设置页前理解配色关系。
@@ -279,15 +294,20 @@ struct AppearanceThemeView: View {
                         .foregroundStyle(theme.textSecondary)
                 }
             } else {
-                Picker("Appearance", selection: $themeSettings.appearance) {
-                    ForEach(AppAppearance.allCases) { appearance in
-                        Text(appearance.displayName)
-                            .tag(appearance)
+                VStack(spacing: 0) {
+                    Picker("Appearance", selection: $themeSettings.appearance) {
+                        ForEach(AppAppearance.allCases) { appearance in
+                            Text(appearance.displayName)
+                                .tag(appearance)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .accessibilityIdentifier("appearance.mode")
                 }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .accessibilityIdentifier("appearance.mode")
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("appearance.mode.container")
+                .accessibilityValue(themeSettings.appearance.displayName)
             }
         } header: {
             Text("Appearance")
