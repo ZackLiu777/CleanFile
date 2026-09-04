@@ -792,6 +792,10 @@ private struct MediaCategoryDetailView: View {
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+        // Selection gestures frequently begin near the leading edge. Hiding the
+        // back item while selecting also disables the navigation pop gesture;
+        // Done restores both without changing normal navigation behavior.
+        .navigationBarBackButtonHidden(isSelecting)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 if isSelecting {
