@@ -443,6 +443,7 @@
 "appearance.font.palatino" = "Palatino";
 
 /* Premium */
+"premium.entitlement.checking" = "구독 이용 권한 확인 중…";
 "premium.entry.subtitle" = "기능 및 구독 요금제 알아보기";
 "premium.close" = "닫기";
 "premium.title" = "소중한 것을 위한 여유 공간";

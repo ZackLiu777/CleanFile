@@ -443,6 +443,7 @@
 "appearance.font.palatino" = "Palatino";
 
 /* Premium */
+"premium.entitlement.checking" = "正在檢查訂閱權限…";
 "premium.entry.subtitle" = "了解功能與訂閱方案";
 "premium.close" = "關閉";
 "premium.title" = "為重要內容騰出空間";

@@ -18,6 +18,7 @@ import SwiftUI
 struct CleanMyIPhoneApp: App {
     @StateObject private var themeSettings: ThemeSettings
     @StateObject private var languageSettings: AppLanguageSettings
+    @StateObject private var premiumEntitlementStore: PremiumEntitlementStore
 
     init() {
 #if DEBUG
@@ -44,6 +45,7 @@ struct CleanMyIPhoneApp: App {
 #endif
         _themeSettings = StateObject(wrappedValue: ThemeSettings())
         _languageSettings = StateObject(wrappedValue: AppLanguageSettings())
+        _premiumEntitlementStore = StateObject(wrappedValue: PremiumEntitlementStore())
     }
 
     var body: some Scene {
@@ -54,6 +56,7 @@ struct CleanMyIPhoneApp: App {
                 .fontDesign(themeSettings.fontStyle.inheritedDesign)
                 .appFontFamily(themeSettings.fontStyle.fontName)
                 .environmentObject(languageSettings)
+                .environmentObject(premiumEntitlementStore)
                 .environment(\.appTheme, themeSettings.theme)
                 .environment(\.locale, languageSettings.language.locale)
                 .preferredColorScheme(themeSettings.effectiveColorScheme)
@@ -68,10 +71,10 @@ struct CleanMyIPhoneApp: App {
         if ProcessInfo.processInfo.arguments.contains("--ui-test-import-progress") {
             ConversionImportProgressUITestHarness()
         } else {
-            ContentView()
+            PremiumAccessRootView(entitlementStore: premiumEntitlementStore)
         }
 #else
-        ContentView()
+        PremiumAccessRootView(entitlementStore: premiumEntitlementStore)
 #endif
     }
 }

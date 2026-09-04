@@ -443,6 +443,7 @@
 "appearance.font.palatino" = "Palatino";
 
 /* Premium */
+"premium.entitlement.checking" = "Checking subscription access…";
 "premium.entry.subtitle" = "Explore features and subscription plans";
 "premium.close" = "Close";
 "premium.title" = "More room for what matters";

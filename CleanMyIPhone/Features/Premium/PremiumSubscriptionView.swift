@@ -4,23 +4,33 @@ import SwiftUI
 struct PremiumSubscriptionView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var entitlementStore: PremiumEntitlementStore
+
+    let allowsDismiss: Bool
+
+    init(allowsDismiss: Bool = true) {
+        self.allowsDismiss = allowsDismiss
+    }
 
     var body: some View {
         NavigationStack {
             Group {
                 if PremiumConfiguration.purchasesEnabled,
-                   let groupID = PremiumConfiguration.subscriptionGroupID,
-                   let privacyURL = PremiumConfiguration.privacyPolicyURL,
-                   let termsURL = PremiumConfiguration.termsOfServiceURL {
+                   let groupID = PremiumConfiguration.subscriptionGroupID {
                     SubscriptionStoreView(groupID: groupID) {
                         introduction
                     }
                     .subscriptionStoreControlStyle(.prominentPicker)
                     .subscriptionStoreControlBackground(theme.cardSurface)
                     .subscriptionStoreButtonLabel(.multiline)
-                    .subscriptionStorePolicyDestination(url: privacyURL, for: .privacyPolicy)
-                    .subscriptionStorePolicyDestination(url: termsURL, for: .termsOfService)
                     .storeButton(.visible, for: .restorePurchases)
+                    .onInAppPurchaseCompletion { _, result in
+                        guard case .success(let purchaseResult) = result else {
+                            await entitlementStore.refresh()
+                            return
+                        }
+                        await entitlementStore.handlePurchaseResult(purchaseResult)
+                    }
                     .containerBackground(for: .subscriptionStoreFullHeight) {
                         AppBackground()
                     }
@@ -39,10 +49,12 @@ struct PremiumSubscriptionView: View {
             .navigationTitle("CleanFile Premium")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("premium.close", systemImage: "xmark") { dismiss() }
-                        .labelStyle(.iconOnly)
-                        .accessibilityIdentifier("premium.close")
+                if allowsDismiss {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("premium.close", systemImage: "xmark") { dismiss() }
+                            .labelStyle(.iconOnly)
+                            .accessibilityIdentifier("premium.close")
+                    }
                 }
             }
         }

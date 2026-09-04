@@ -74,6 +74,9 @@
             ReferencedContainer = "container:CleanMyIPhone.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <StoreKitConfigurationFileReference
+         identifier = "../../CleanMyIPhone/App/File Cleaner &amp; Media Converter.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

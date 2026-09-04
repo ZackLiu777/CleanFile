@@ -443,6 +443,7 @@
 "appearance.font.palatino" = "Palatino";
 
 /* Premium */
+"premium.entitlement.checking" = "サブスクリプションの利用状況を確認中…";
 "premium.entry.subtitle" = "機能とサブスクリプションプランを見る";
 "premium.close" = "閉じる";
 "premium.title" = "大切なもののために空き容量を";

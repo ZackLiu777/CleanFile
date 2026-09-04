@@ -443,6 +443,7 @@
 "appearance.font.palatino" = "Palatino";
 
 /* Premium */
+"premium.entitlement.checking" = "Vérification de l’accès à l’abonnement…";
 "premium.entry.subtitle" = "Découvrir les fonctionnalités et les offres";
 "premium.close" = "Fermer";
 "premium.title" = "Plus de place pour l’essentiel";
