@@ -202,10 +202,10 @@
 "conversion.guide.image.purpose" = "Compressez des images fixes par lots et contrôlez le format, la qualité, le bord le plus long et les métadonnées. Les réglages s’appliquent au lot sans modifier les originaux.";
 "conversion.guide.image.imports.detail" = "Sélectionnez plusieurs fichiers ou jusqu’à 100 éléments dans Photos. Les formats affichés dépendent des capacités de cet appareil ; RAW, DNG et ProRAW sont réservés à l’importation, et les images animées ne sont pas prises en charge.";
 "conversion.guide.image.workflow.detail" = "Suivez les états de lecture et de compression, ou annulez pendant le traitement ; les résultats terminés sont conservés. Comparez les tailles et partagez depuis chaque carte avant d’effacer la liste.";
-"conversion.guide.image.quality.detail" = "JPEG, HEIC, HEIF et WebP acceptent une qualité de 10 à 100 %, par pas de 5 %, avec 85 % par défaut. Une qualité moindre produit généralement des fichiers plus petits avec une perte plus visible ; les autres formats n’ont pas de réglage de qualité.";
+"conversion.guide.image.quality.detail" = "JPG, HEIC, HEIF et WebP acceptent une qualité de 10 à 100 %, par pas de 5 %, avec 85 % par défaut. Une qualité moindre produit généralement des fichiers plus petits avec une perte plus visible ; les autres formats n’ont pas de réglage de qualité.";
 "resize.square1024" = "1024px";
 "conversion.guide.image.resize.detail" = "Conservez les dimensions d’origine ou limitez le bord le plus long à 4096, 2048 ou 1280 px pour réduire la taille sans agrandir. L’option 1024 × 1024 centre l’image entière sur un fond carré, avec des marges, sans recadrage ni déformation ; les petites images sont agrandies.";
-"conversion.guide.image.transparency.detail" = "JPEG et BMP ne peuvent pas stocker les pixels transparents. Avec ces formats, remplissez les zones transparentes en blanc ou en noir.";
+"conversion.guide.image.transparency.detail" = "JPG et BMP ne peuvent pas stocker les pixels transparents. Avec ces formats, remplissez les zones transparentes en blanc ou en noir.";
 "conversion.guide.video.purpose" = "Compressez par lots des vidéos MOV, MP4 ou M4V en choisissant le conteneur, le codec et la résolution, sans écraser les originaux.";
 "conversion.guide.video.imports.detail" = "Sélectionnez plusieurs fichiers MOV, MP4 ou M4V, ou jusqu’à 50 vidéos dans Photos.";
 "conversion.guide.video.workflow.detail" = "Les vidéos sont traitées une par une. Consultez l’état et le nombre terminé, annulez si nécessaire, puis comparez les tailles et partagez chaque résultat.";

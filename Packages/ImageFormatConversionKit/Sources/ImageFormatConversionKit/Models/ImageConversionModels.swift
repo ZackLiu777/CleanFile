@@ -19,6 +19,14 @@ public enum ImageOutputFormat: String, CaseIterable, Codable, Identifiable, Send
 
     public var id: Self { self }
 
+    /// 使用用户熟悉的文件扩展名展示格式，底层编码类型仍保持 JPEG。
+    public var displayName: String {
+        switch self {
+        case .jpeg: "JPG"
+        default: rawValue.uppercased()
+        }
+    }
+
     public var fileExtension: String {
         switch self {
         case .jpeg: "jpg"
@@ -261,7 +269,7 @@ extension ImageConversionError: LocalizedError {
         case let .animatedImageUnsupported(frameCount):
             L10n.format("error.animated_unsupported", frameCount)
         case let .unsupportedOutputFormat(format):
-            L10n.format("error.unsupported_output", format.rawValue.uppercased())
+            L10n.format("error.unsupported_output", format.displayName)
         case let .invalidQuality(quality):
             L10n.format("error.invalid_quality", quality)
         case let .invalidMaximumPixelDimension(value):

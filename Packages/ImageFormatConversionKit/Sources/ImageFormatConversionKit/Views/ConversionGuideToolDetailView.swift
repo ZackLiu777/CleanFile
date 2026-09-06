@@ -64,7 +64,7 @@ enum ConversionGuideTool: String, CaseIterable, Identifiable, Hashable {
         case .image:
             ImageConversionEngine.supportedOutputFormats.map { format in
                 ConversionGuideFormat(
-                    title: format.rawValue.uppercased(),
+                    title: format.displayName,
                     detail: L10n.dynamicString("format.image.\(format.rawValue).detail")
                 )
             }

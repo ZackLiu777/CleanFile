@@ -333,7 +333,7 @@ private enum ConversionHomeKind: String, CaseIterable, Identifiable, Hashable, S
         case .image:
             ImageConversionEngine.supportedOutputFormats
                 .prefix(4)
-                .map { $0.rawValue.uppercased() }
+                .map(\.displayName)
         case .video:
             ["MP4", "MOV", "M4V", "HEVC"]
         case .audio:

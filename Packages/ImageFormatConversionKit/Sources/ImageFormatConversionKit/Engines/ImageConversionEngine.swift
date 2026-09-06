@@ -176,7 +176,7 @@ public actor ImageConversionEngine {
 /// 定义 `ImageConversionWorker` 使用的有限状态或选项集合。
 private enum ImageConversionWorker {
     private static let inputDefinitions: [(name: String, type: UTType)] = [
-        ("JPEG", .jpeg),
+        ("JPG", .jpeg),
         ("PNG", .png),
         ("HEIC", .heic),
         ("HEIF", .heif),

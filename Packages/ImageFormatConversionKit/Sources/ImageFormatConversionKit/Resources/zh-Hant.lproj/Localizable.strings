@@ -202,10 +202,10 @@
 "conversion.guide.image.purpose" = "批次壓縮靜態圖片，並設定格式、品質、最長邊與中繼資料；一組設定會套用到目前批次，原始檔不會被修改。";
 "conversion.guide.image.imports.detail" = "可從「檔案」多選，或從「照片」一次選取最多 100 張。清單會依裝置能力顯示；RAW、DNG、ProRAW 僅可匯入，目前不支援動態圖片。";
 "conversion.guide.image.workflow.detail" = "可查看讀取與壓縮狀態，壓縮中可取消，已完成的結果會保留。比較檔案大小並從檔案卡片分享，然後再清除目前清單。";
-"conversion.guide.image.quality.detail" = "JPEG、HEIC、HEIF 與 WebP 可在 10%–100% 間以 5% 調整，預設 85%。品質越低通常檔案越小，但細節損失可能更明顯；其他格式不提供品質控制。";
+"conversion.guide.image.quality.detail" = "JPG、HEIC、HEIF 與 WebP 可在 10%–100% 間以 5% 調整，預設 85%。品質越低通常檔案越小，但細節損失可能更明顯；其他格式不提供品質控制。";
 "resize.square1024" = "1024px";
 "conversion.guide.image.resize.detail" = "保留原始尺寸，或將最長邊限制為 4096、2048、1280 px，通常可減小檔案且不會放大小圖片。1024 × 1024 選項將整張圖片等比例縮放並置中留白，不裁切、不拉伸；小圖片會放大。";
-"conversion.guide.image.transparency.detail" = "JPEG 與 BMP 不支援透明像素。輸出這些格式時，可選擇使用白色或黑色填滿透明區域。";
+"conversion.guide.image.transparency.detail" = "JPG 與 BMP 不支援透明像素。輸出這些格式時，可選擇使用白色或黑色填滿透明區域。";
 "conversion.guide.video.purpose" = "批次壓縮 MOV、MP4 或 M4V 影片，並調整容器、編碼器與解析度，且不會覆寫原始影片。";
 "conversion.guide.video.imports.detail" = "可從「檔案」多選 MOV、MP4、M4V，或從「照片」一次選取最多 50 部影片。";
 "conversion.guide.video.workflow.detail" = "影片會逐個處理；可查看工作狀態與完成數，也可取消。完成後可比較輸入與輸出大小並分享結果。";

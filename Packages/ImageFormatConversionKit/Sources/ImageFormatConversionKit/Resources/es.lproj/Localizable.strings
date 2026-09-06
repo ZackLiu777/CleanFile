@@ -202,10 +202,10 @@
 "conversion.guide.image.purpose" = "Comprime imágenes estáticas por lotes y controla el formato, la calidad, el lado más largo y los metadatos. Los ajustes se aplican al lote actual sin modificar los originales.";
 "conversion.guide.image.imports.detail" = "Selecciona varios archivos o hasta 100 elementos de Fotos. Los formatos dependen de las capacidades de este dispositivo; RAW, DNG y ProRAW solo se pueden importar y no se admiten imágenes animadas.";
 "conversion.guide.image.workflow.detail" = "Consulta los estados de lectura y compresión, o cancela durante el proceso; los resultados completados se conservan. Compara los tamaños y comparte desde cada tarjeta antes de borrar la lista.";
-"conversion.guide.image.quality.detail" = "JPEG, HEIC, HEIF y WebP permiten ajustar la calidad del 10 % al 100 % en pasos del 5 %, con un 85 % predeterminado. Una calidad menor suele crear archivos más pequeños con una pérdida más visible; los demás formatos no tienen control de calidad.";
+"conversion.guide.image.quality.detail" = "JPG, HEIC, HEIF y WebP permiten ajustar la calidad del 10 % al 100 % en pasos del 5 %, con un 85 % predeterminado. Una calidad menor suele crear archivos más pequeños con una pérdida más visible; los demás formatos no tienen control de calidad.";
 "resize.square1024" = "1024px";
 "conversion.guide.image.resize.detail" = "Conserva las dimensiones originales o limita el lado más largo a 4096, 2048 o 1280 px para reducir el tamaño sin ampliar. La opción 1024 × 1024 centra la imagen completa sobre un fondo cuadrado con márgenes, sin recortar ni deformar; las imágenes pequeñas se amplían.";
-"conversion.guide.image.transparency.detail" = "JPEG y BMP no pueden guardar píxeles transparentes. Al usar estos formatos, rellena las zonas transparentes de blanco o negro.";
+"conversion.guide.image.transparency.detail" = "JPG y BMP no pueden guardar píxeles transparentes. Al usar estos formatos, rellena las zonas transparentes de blanco o negro.";
 "conversion.guide.video.purpose" = "Comprime por lotes vídeos MOV, MP4 o M4V eligiendo contenedor, códec y resolución, sin sobrescribir los originales.";
 "conversion.guide.video.imports.detail" = "Selecciona varios archivos MOV, MP4 o M4V, o hasta 50 vídeos desde Fotos.";
 "conversion.guide.video.workflow.detail" = "Los vídeos se procesan uno a uno. Consulta el estado y el número completado, cancela cuando lo necesites y después compara tamaños y comparte cada resultado.";

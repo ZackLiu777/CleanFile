@@ -202,10 +202,10 @@
 "conversion.guide.image.purpose" = "Batch-compress static images by format, quality, longest edge, and metadata. One set of options applies to the current batch without changing the originals.";
 "conversion.guide.image.imports.detail" = "Select multiple files, or up to 100 items from Photos. Formats reflect this device's capabilities; RAW/DNG/ProRAW are import-only, and animated images are not supported.";
 "conversion.guide.image.workflow.detail" = "Follow inspection and compression states, or cancel while work is in progress; completed results remain. Compare sizes and share from each file card before clearing the list.";
-"conversion.guide.image.quality.detail" = "JPEG, HEIC, HEIF, and WebP support 10%–100% quality in 5% steps, with 85% as the default. Lower quality usually creates smaller files with more visible loss; other formats do not show a quality control.";
+"conversion.guide.image.quality.detail" = "JPG, HEIC, HEIF, and WebP support 10%–100% quality in 5% steps, with 85% as the default. Lower quality usually creates smaller files with more visible loss; other formats do not show a quality control.";
 "resize.square1024" = "1024px";
 "conversion.guide.image.resize.detail" = "Keep the original dimensions, or cap the longest edge at 4096, 2048, or 1280 px to reduce size without enlarging. The 1024 × 1024 option fits the whole image onto a square background without cropping or stretching; small images are enlarged.";
-"conversion.guide.image.transparency.detail" = "JPEG and BMP cannot store transparent pixels. When using either format, fill transparent areas with white or black.";
+"conversion.guide.image.transparency.detail" = "JPG and BMP cannot store transparent pixels. When using either format, fill transparent areas with white or black.";
 "conversion.guide.video.purpose" = "Batch-compress MOV, MP4, or M4V video by container, codec, and resolution without overwriting the originals.";
 "conversion.guide.video.imports.detail" = "Select multiple MOV, MP4, or M4V files, or choose up to 50 videos from Photos.";
 "conversion.guide.video.workflow.detail" = "Videos are processed one by one. Follow task states and completed count, cancel when needed, then compare input and output sizes and share each result.";

@@ -202,10 +202,10 @@
 "conversion.guide.image.purpose" = "정지 이미지를 일괄 압축하고 형식, 품질, 긴 변, 메타데이터를 설정하세요. 한 번의 설정이 현재 일괄 작업에 적용되며 원본은 변경되지 않습니다.";
 "conversion.guide.image.imports.detail" = "파일에서 여러 개를 선택하거나 사진에서 한 번에 최대 100장을 선택하세요. 목록은 이 기기의 지원 형식에 따라 표시됩니다. RAW, DNG, ProRAW는 가져오기만 지원하며 애니메이션 이미지는 지원하지 않습니다.";
 "conversion.guide.image.workflow.detail" = "읽기 및 압축 상태를 확인하고 처리 중 취소할 수 있습니다. 완료된 결과는 유지됩니다. 크기를 비교하고 파일 카드에서 공유한 뒤 목록을 지우세요.";
-"conversion.guide.image.quality.detail" = "JPEG, HEIC, HEIF, WebP는 10%~100% 범위에서 5% 단위로 조정할 수 있으며 기본값은 85%입니다. 품질이 낮을수록 보통 파일이 작아지지만 손실이 더 눈에 띌 수 있습니다. 다른 형식에는 품질 조절 기능이 없습니다.";
+"conversion.guide.image.quality.detail" = "JPG, HEIC, HEIF, WebP는 10%~100% 범위에서 5% 단위로 조정할 수 있으며 기본값은 85%입니다. 품질이 낮을수록 보통 파일이 작아지지만 손실이 더 눈에 띌 수 있습니다. 다른 형식에는 품질 조절 기능이 없습니다.";
 "resize.square1024" = "1024px";
 "conversion.guide.image.resize.detail" = "원래 크기를 유지하거나 긴 변을 4096, 2048, 1280px로 제한해 파일 크기를 줄일 수 있습니다. 1024 × 1024 옵션은 비율을 유지한 채 전체 이미지를 중앙에 배치하고 여백을 추가합니다. 자르거나 늘리지 않습니다.";
-"conversion.guide.image.transparency.detail" = "JPEG와 BMP는 투명 픽셀을 저장할 수 없습니다. 이 형식으로 출력할 때 투명 영역을 흰색 또는 검은색으로 채울 수 있습니다.";
+"conversion.guide.image.transparency.detail" = "JPG와 BMP는 투명 픽셀을 저장할 수 없습니다. 이 형식으로 출력할 때 투명 영역을 흰색 또는 검은색으로 채울 수 있습니다.";
 "conversion.guide.video.purpose" = "MOV, MP4, M4V 비디오를 일괄 압축하고 출력 컨테이너, 코덱, 해상도를 선택하세요. 원본 비디오는 덮어쓰지 않습니다.";
 "conversion.guide.video.imports.detail" = "파일에서 MOV, MP4, M4V를 여러 개 선택하거나 사진에서 한 번에 최대 50개의 비디오를 선택하세요.";
 "conversion.guide.video.workflow.detail" = "비디오는 하나씩 처리됩니다. 작업 상태와 완료 수를 확인하고 필요하면 취소하세요. 완료 후 입력 및 출력 크기를 비교하고 결과를 공유할 수 있습니다.";

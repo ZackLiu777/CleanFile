@@ -215,7 +215,7 @@ private struct SupportedFormatsSheet: View {
 
     /// 生成 `formatName` 使用的展示文本，保持格式与本地化规则一致。
     private func formatName(_ format: ImageOutputFormat) -> String {
-        format.rawValue.uppercased()
+        format.displayName
     }
 }
 
@@ -583,7 +583,7 @@ private struct ImageConversionSettingsCard: View {
                             selection: $viewModel.outputFormat
                         ) {
                             ForEach(viewModel.availableFormats) { format in
-                                Text(format.rawValue.uppercased()).tag(format)
+                                Text(format.displayName).tag(format)
                             }
                         }
                         ConversionWheelColumn(
@@ -670,7 +670,7 @@ private struct ImageConversionSettingsCard: View {
 
     private var imageSettingsSummary: String {
         [
-            viewModel.outputFormat.rawValue.uppercased(),
+            viewModel.outputFormat.displayName,
             metadataTitle(viewModel.metadataPolicy),
             resizeSummaryTitle(viewModel.resizePreset)
         ].joined(separator: " · ")
