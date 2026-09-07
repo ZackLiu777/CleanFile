@@ -12,11 +12,15 @@
 - Subscription Group ID：`22356442`
 - 年度订阅 Product ID：`LZQ777`
 - 月度订阅 Product ID：`LLL777`
+- Privacy Policy：`https://zane-liao.github.io/cleanmyiphone/privacy/`
+- Terms of Service：`https://zane-liao.github.io/cleanmyiphone/terms/`
+
+订阅页已通过 StoreKit 原生政策按钮接入上述两个网站；本地 StoreKit 配置中的月度订阅免费试用已设为 3 天。
 
 ## 提交与发布前必须完成
 
-1. 在 App Store Connect 完成两个自动续期订阅的本地化、价格和审核信息，并为选定产品配置 3 天免费试用介绍优惠。
-2. 提供公开可访问的 Privacy Policy URL 与 Terms of Service URL，并在 App Store Connect 和 App 元数据中完成法律信息。代码当前不以这两个 URL 阻止 StoreKit 技术流程。
+1. 在 App Store Connect 完成订阅群组及两个自动续期订阅的本地化、价格和审核信息，并为选定产品配置 3 天免费试用介绍优惠。本地 `.storekit` 文件不会修改 App Store Connect 的正式配置。
+2. 在 App Store Connect 的 App 隐私政策字段填写 Privacy Policy URL；在 App 描述或自定义许可协议等适用元数据中提供 Terms of Service URL，并确认两个网页无需登录即可公开访问。
 3. 配置 StoreKit 测试及沙盒环境，验证首次订阅、试用资格、无试用资格、取消购买、购买失败、待批准、续订、过期、退款、撤销、恢复和跨设备权益。按项目规则，本地测试执行需用户另行授权。
 4. 首个自动续期订阅必须随新的 App 版本一并提交审核；产品仍处于“准备提交”时不能视为生产环境可购买。
 

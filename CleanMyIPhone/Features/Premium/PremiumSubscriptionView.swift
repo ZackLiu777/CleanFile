@@ -23,6 +23,15 @@ struct PremiumSubscriptionView: View {
                     .subscriptionStoreControlStyle(.prominentPicker)
                     .subscriptionStoreControlBackground(theme.cardSurface)
                     .subscriptionStoreButtonLabel(.multiline)
+                    .subscriptionStorePolicyDestination(
+                        url: PremiumConfiguration.privacyPolicyURL,
+                        for: .privacyPolicy
+                    )
+                    .subscriptionStorePolicyDestination(
+                        url: PremiumConfiguration.termsOfServiceURL,
+                        for: .termsOfService
+                    )
+                    .subscriptionStorePolicyForegroundStyle(theme.textSecondary)
                     .storeButton(.visible, for: .restorePurchases)
                     .onInAppPurchaseCompletion { _, result in
                         guard case .success(let purchaseResult) = result else {

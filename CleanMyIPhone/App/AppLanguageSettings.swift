@@ -41,8 +41,16 @@ final class AppLanguageSettings: ObservableObject {
 
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
-        language = userDefaults.string(forKey: Self.defaultsKey)
-            .flatMap(AppLanguage.init(rawValue:)) ?? .system
+        let storedLanguage = userDefaults.string(forKey: Self.defaultsKey)
+            .flatMap(AppLanguage.init(rawValue:))
+        let resolvedLanguage = storedLanguage ?? .english
+        language = resolvedLanguage
+
+        // Programmatic strings and the conversion package read this shared key
+        // directly, so the first-launch default must be persisted as well as published.
+        if storedLanguage == nil {
+            userDefaults.set(resolvedLanguage.rawValue, forKey: Self.defaultsKey)
+        }
     }
 
     func select(_ language: AppLanguage) {
@@ -50,11 +58,7 @@ final class AppLanguageSettings: ObservableObject {
 
         // Persist first so programmatic localization observes the new bundle
         // during the same SwiftUI update that publishes the language change.
-        if language == .system {
-            userDefaults.removeObject(forKey: Self.defaultsKey)
-        } else {
-            userDefaults.set(language.rawValue, forKey: Self.defaultsKey)
-        }
+        userDefaults.set(language.rawValue, forKey: Self.defaultsKey)
         self.language = language
     }
 }

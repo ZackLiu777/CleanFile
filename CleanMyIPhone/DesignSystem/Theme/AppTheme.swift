@@ -939,7 +939,7 @@ final class ThemeSettings: ObservableObject {
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(userDefaults: UserDefaults = .standard) {
-        fontStyle = AppFontStyle(rawValue: userDefaults.string(forKey: "appearance.fontStyle") ?? "") ?? .system
+        fontStyle = AppFontStyle(rawValue: userDefaults.string(forKey: "appearance.fontStyle") ?? "") ?? .georgia
         self.userDefaults = userDefaults
         let storedTheme = userDefaults.string(forKey: Self.themeKey)
         let migratedTheme = Self.migratedThemeID(from: storedTheme)
@@ -1115,7 +1115,8 @@ final class ThemeSettings: ObservableObject {
         case "sky", "monoStone", "nebula": return .porcelain
         case "forest": return .sage
         case "graphiteGold", "roseNoir": return .graphite
-        case "pureBlack", nil: return .system
+        case "pureBlack": return .system
+        case nil: return .cream
         default: return .system
         }
     }

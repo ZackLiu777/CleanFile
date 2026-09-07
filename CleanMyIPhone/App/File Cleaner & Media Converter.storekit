@@ -101,7 +101,7 @@
             "internalID" : "E3824F14",
             "numberOfPeriods" : 1,
             "paymentMode" : "free",
-            "subscriptionPeriod" : "P1W"
+            "subscriptionPeriod" : "P3D"
           },
           "introductoryOffers" : [
             {
@@ -109,7 +109,7 @@
               "internalID" : "E3824F14",
               "numberOfPeriods" : 1,
               "paymentMode" : "free",
-              "subscriptionPeriod" : "P1W"
+              "subscriptionPeriod" : "P3D"
             }
           ],
           "localizations" : [

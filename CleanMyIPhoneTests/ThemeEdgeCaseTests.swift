@@ -23,14 +23,14 @@ struct ThemeEdgeCaseTests {
         let name = "FontPreferenceTests.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: name))
         defer { defaults.removePersistentDomain(forName: name) }
-        #expect(ThemeSettings(userDefaults: defaults).fontStyle == .system)
+        #expect(ThemeSettings(userDefaults: defaults).fontStyle == .georgia)
         for style in AppFontStyle.allCases {
             let settings = ThemeSettings(userDefaults: defaults)
             settings.fontStyle = style
             #expect(ThemeSettings(userDefaults: defaults).fontStyle == style)
         }
         defaults.set("unknown", forKey: "appearance.fontStyle")
-        #expect(ThemeSettings(userDefaults: defaults).fontStyle == .system)
+        #expect(ThemeSettings(userDefaults: defaults).fontStyle == .georgia)
     }
 
     @Test("Appearance choices map to the expected color-scheme policy")

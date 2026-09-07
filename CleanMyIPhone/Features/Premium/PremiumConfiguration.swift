@@ -7,8 +7,8 @@ enum PremiumConfiguration {
     static let annualProductID = "LZQ777"
     static let monthlyProductID = "LLL777"
     static let productIDs: Set<String> = [annualProductID, monthlyProductID]
-    static let privacyPolicyURL: URL? = nil
-    static let termsOfServiceURL: URL? = nil
+    static let privacyPolicyURL = URL(string: "https://zane-liao.github.io/cleanmyiphone/privacy/")!
+    static let termsOfServiceURL = URL(string: "https://zane-liao.github.io/cleanmyiphone/terms/")!
 
     /// UI automation exercises app features rather than the App Store purchase sheet.
     static var bypassesEntitlementForUITesting: Bool {
