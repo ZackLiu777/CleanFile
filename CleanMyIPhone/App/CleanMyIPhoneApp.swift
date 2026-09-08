@@ -24,7 +24,8 @@ struct CleanMyIPhoneApp: App {
         // The app now follows iOS language exclusively. Remove any legacy override.
         defaults.removeObject(forKey: "appLanguageOverride")
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-reset-state") {
+        let launchArguments = ProcessInfo.processInfo.arguments
+        if launchArguments.contains("--ui-testing-reset-state") {
             for key in [
                 "appAppearance",
                 "appTheme",
@@ -41,6 +42,9 @@ struct CleanMyIPhoneApp: App {
             ] {
                 defaults.removeObject(forKey: key)
             }
+        }
+        if launchArguments.contains("--ui-testing-system-theme") {
+            defaults.set(AppThemeID.system.rawValue, forKey: "appTheme")
         }
 #endif
         _themeSettings = StateObject(wrappedValue: ThemeSettings())

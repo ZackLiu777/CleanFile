@@ -130,7 +130,9 @@ final class FeatureCoverageUITests: XCTestCase {
 
     @MainActor
     func testAppearanceCanSwitchBetweenSystemLightAndDark() throws {
-        let app = launchAppearance(in: launchEnglishApp())
+        let app = launchAppearance(
+            in: launchEnglishApp(additionalArguments: ["--ui-testing-system-theme"])
+        )
         let appearance = reveal(app.segmentedControls["appearance.mode"], in: app)
         XCTAssertTrue(appearance.exists)
         let appearanceContainer = app.descendants(matching: .any)["appearance.mode.container"]
@@ -175,13 +177,13 @@ final class FeatureCoverageUITests: XCTestCase {
     }
 
     @MainActor
-    private func launchEnglishApp() -> XCUIApplication {
+    private func launchEnglishApp(additionalArguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
             "--ui-testing-reset-state",
             "-AppleLanguages", "(en)",
             "-AppleLocale", "en_US"
-        ]
+        ] + additionalArguments
         app.launch()
         return app
     }
