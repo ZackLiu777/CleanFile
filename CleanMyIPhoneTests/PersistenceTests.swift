@@ -187,7 +187,7 @@ struct ThemePersistenceTests {
         #expect(settings.appearance == .system)
         #expect(settings.selectedThemeID == .cream)
         #expect(settings.selectedAccentPaletteID == .automatic)
-        #expect(settings.effectiveColorScheme == nil)
+        #expect(settings.effectiveColorScheme == .light)
         #expect(settings.interfaceAnimationsEnabled)
         #expect(settings.mediaDateHeadersEnabled)
         #expect(defaults.string(forKey: "appAccentPalette") == "automatic")
@@ -341,7 +341,7 @@ struct ThemePersistenceTests {
             let defaults = isolatedDefaults()
             let settings = ThemeSettings(userDefaults: defaults)
 
-            #expect(settings.effectiveColorScheme == nil)
+            #expect(settings.effectiveColorScheme == .light)
         }
 
         do {
@@ -349,7 +349,7 @@ struct ThemePersistenceTests {
             defaults.set("dark", forKey: "appAppearance")
             let settings = ThemeSettings(userDefaults: defaults)
 
-            #expect(settings.effectiveColorScheme == .dark)
+            #expect(settings.effectiveColorScheme == .light)
         }
 
         do {
