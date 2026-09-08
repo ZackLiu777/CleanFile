@@ -416,34 +416,3 @@ struct ThemePersistenceTests {
         return defaults
     }
 }
-
-@MainActor
-@Suite("Language persistence")
-struct LanguagePersistenceTests {
-    @Test("First launch selects and persists English")
-    func firstLaunchDefaultsToEnglish() {
-        let suiteName = "CleanMyIPhone.LanguagePersistenceTests.\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suiteName)!
-        defer { defaults.removePersistentDomain(forName: suiteName) }
-        defaults.removePersistentDomain(forName: suiteName)
-
-        let settings = AppLanguageSettings(userDefaults: defaults)
-
-        #expect(settings.language == .english)
-        #expect(defaults.string(forKey: AppLanguageSettings.defaultsKey) == AppLanguage.english.rawValue)
-    }
-
-    @Test("Explicit Follow System selection remains persisted")
-    func followSystemPersists() {
-        let suiteName = "CleanMyIPhone.LanguagePersistenceTests.\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suiteName)!
-        defer { defaults.removePersistentDomain(forName: suiteName) }
-        defaults.removePersistentDomain(forName: suiteName)
-        let settings = AppLanguageSettings(userDefaults: defaults)
-
-        settings.select(.system)
-
-        #expect(defaults.string(forKey: AppLanguageSettings.defaultsKey) == AppLanguage.system.rawValue)
-        #expect(AppLanguageSettings(userDefaults: defaults).language == .system)
-    }
-}

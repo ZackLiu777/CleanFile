@@ -17,13 +17,14 @@ import SwiftUI
 /// 定义 `CleanMyIPhoneApp` 的值语义数据与相关行为。
 struct CleanMyIPhoneApp: App {
     @StateObject private var themeSettings: ThemeSettings
-    @StateObject private var languageSettings: AppLanguageSettings
     @StateObject private var premiumEntitlementStore: PremiumEntitlementStore
 
     init() {
+        let defaults = UserDefaults.standard
+        // The app now follows iOS language exclusively. Remove any legacy override.
+        defaults.removeObject(forKey: "appLanguageOverride")
 #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-reset-state") {
-            let defaults = UserDefaults.standard
             for key in [
                 "appAppearance",
                 "appTheme",
@@ -40,25 +41,20 @@ struct CleanMyIPhoneApp: App {
             ] {
                 defaults.removeObject(forKey: key)
             }
-            defaults.removeObject(forKey: AppLanguageSettings.defaultsKey)
         }
 #endif
         _themeSettings = StateObject(wrappedValue: ThemeSettings())
-        _languageSettings = StateObject(wrappedValue: AppLanguageSettings())
         _premiumEntitlementStore = StateObject(wrappedValue: PremiumEntitlementStore())
     }
 
     var body: some Scene {
         WindowGroup {
             rootView
-                .id(languageSettings.language.rawValue)
                 .environmentObject(themeSettings)
                 .fontDesign(themeSettings.fontStyle.inheritedDesign)
                 .appFontFamily(themeSettings.fontStyle.fontName)
-                .environmentObject(languageSettings)
                 .environmentObject(premiumEntitlementStore)
                 .environment(\.appTheme, themeSettings.theme)
-                .environment(\.locale, languageSettings.language.locale)
                 .preferredColorScheme(themeSettings.effectiveColorScheme)
                 .tint(themeSettings.theme.accentPrimary)
                 .foregroundStyle(themeSettings.theme.textPrimary)
