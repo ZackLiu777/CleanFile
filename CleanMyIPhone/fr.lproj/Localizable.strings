@@ -457,3 +457,12 @@
 "premium.plans.retryLater" = "Revenez plus tard. Vous pouvez continuer à utiliser l’app.";
 "premium.trial.note" = "Les essais gratuits sont réservés aux abonnés éligibles. L’App Store affiche l’offre applicable et le prix de renouvellement avant l’achat.";
 "appearance.font.languageNote" = "Ces polices s’appliquent principalement à l’anglais. Les autres langues peuvent utiliser des polices de substitution et présenter un aspect différent. Les dialogues système conservent leurs polices.";
+"premium.lifetime.title" = "Accès à vie";
+"premium.lifetime.detail" = "Débloquez toutes les fonctionnalités Premium en un seul achat, sans abonnement.";
+"premium.lifetime.buy" = "Acheter une fois";
+"premium.lifetime.once" = "achat unique";
+"premium.lifetime.loading" = "Chargement de l’achat à vie…";
+"premium.lifetime.unavailable" = "L’achat à vie est actuellement indisponible.";
+"premium.lifetime.error.title" = "Achat indisponible";
+"premium.lifetime.error.load" = "Impossible de charger l’achat à vie. Réessayez plus tard.";
+"premium.lifetime.error.purchase" = "Impossible de finaliser l’achat. Réessayez.";

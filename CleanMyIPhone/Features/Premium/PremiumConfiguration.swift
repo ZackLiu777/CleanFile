@@ -6,7 +6,9 @@ enum PremiumConfiguration {
     static let subscriptionGroupID: String? = "22356442"
     static let annualProductID = "LZQ777"
     static let monthlyProductID = "LLL777"
-    static let productIDs: Set<String> = [annualProductID, monthlyProductID]
+    static let lifetimeProductID = "filecleaner.lifetime"
+    static let subscriptionProductIDs: Set<String> = [annualProductID, monthlyProductID]
+    static let productIDs: Set<String> = subscriptionProductIDs.union([lifetimeProductID])
     static let privacyPolicyURL = URL(string: "https://zane-liao.github.io/cleanmyiphone/privacy/")!
     static let termsOfServiceURL = URL(string: "https://zane-liao.github.io/cleanmyiphone/terms/")!
 

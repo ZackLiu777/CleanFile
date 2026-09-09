@@ -457,3 +457,12 @@
 "premium.plans.retryLater" = "나중에 다시 확인해 주세요. 앱은 계속 사용할 수 있습니다.";
 "premium.trial.note" = "무료 체험은 자격을 갖춘 구독자만 이용할 수 있습니다. 구매 전에 App Store에서 적용되는 혜택과 갱신 가격을 확인할 수 있습니다.";
 "appearance.font.languageNote" = "글꼴은 주로 영어 표시에 적용됩니다. 다른 언어는 시스템 대체 글꼴을 사용하여 다르게 보일 수 있습니다. 시스템 대화상자의 글꼴은 유지됩니다.";
+"premium.lifetime.title" = "평생 이용";
+"premium.lifetime.detail" = "한 번 구매하면 구독 없이 모든 Premium 기능을 영구적으로 이용할 수 있습니다.";
+"premium.lifetime.buy" = "한 번만 구매";
+"premium.lifetime.once" = "일회성 구매";
+"premium.lifetime.loading" = "평생 이용권을 불러오는 중…";
+"premium.lifetime.unavailable" = "현재 평생 이용권을 구매할 수 없습니다.";
+"premium.lifetime.error.title" = "구매할 수 없음";
+"premium.lifetime.error.load" = "평생 이용권을 불러올 수 없습니다. 나중에 다시 시도해 주세요.";
+"premium.lifetime.error.purchase" = "구매를 완료할 수 없습니다. 다시 시도해 주세요.";

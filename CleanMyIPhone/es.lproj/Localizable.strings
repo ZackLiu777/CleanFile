@@ -457,3 +457,12 @@
 "premium.plans.retryLater" = "Vuelve más tarde. Puedes seguir usando la app.";
 "premium.trial.note" = "Las pruebas gratuitas están disponibles solo para suscriptores que cumplan los requisitos. El App Store muestra la oferta aplicable y el precio de renovación antes de la compra.";
 "appearance.font.languageNote" = "Estas fuentes se aplican principalmente al inglés. Otros idiomas pueden usar fuentes alternativas y verse diferentes. Los diálogos del sistema conservan sus fuentes.";
+"premium.lifetime.title" = "Acceso de por vida";
+"premium.lifetime.detail" = "Desbloquea todas las funciones Premium con un solo pago, sin suscripción.";
+"premium.lifetime.buy" = "Comprar una vez";
+"premium.lifetime.once" = "pago único";
+"premium.lifetime.loading" = "Cargando la compra de por vida…";
+"premium.lifetime.unavailable" = "La compra de por vida no está disponible actualmente.";
+"premium.lifetime.error.title" = "Compra no disponible";
+"premium.lifetime.error.load" = "No se pudo cargar la compra de por vida. Inténtalo más tarde.";
+"premium.lifetime.error.purchase" = "No se pudo completar la compra. Inténtalo de nuevo.";

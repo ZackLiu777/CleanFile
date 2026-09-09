@@ -457,3 +457,12 @@
 "premium.plans.retryLater" = "請稍後再來查看，你仍可繼續使用 App。";
 "premium.trial.note" = "免費試用僅適用於符合資格的訂閱者。購買前，App Store 會顯示適用的優惠與續訂價格。";
 "appearance.font.languageNote" = "字體主要針對英文顯示。其他語言可能使用系統替代字體，效果有所不同；系統對話框保留原有字體。";
+"premium.lifetime.title" = "終身存取";
+"premium.lifetime.detail" = "一次購買即可永久解鎖所有 Premium 功能，無需訂閱。";
+"premium.lifetime.buy" = "一次性購買";
+"premium.lifetime.once" = "一次性購買";
+"premium.lifetime.loading" = "正在載入終身購買…";
+"premium.lifetime.unavailable" = "終身購買目前無法使用。";
+"premium.lifetime.error.title" = "無法購買";
+"premium.lifetime.error.load" = "無法載入終身購買，請稍後再試。";
+"premium.lifetime.error.purchase" = "無法完成購買，請再試一次。";

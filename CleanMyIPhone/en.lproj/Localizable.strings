@@ -457,3 +457,12 @@
 "premium.plans.retryLater" = "Please check back later. You can continue using the app.";
 "premium.trial.note" = "Free trials are available only to eligible subscribers. The App Store displays the applicable offer and renewal price before purchase.";
 "appearance.font.languageNote" = "Font choices primarily style English text. Other languages may use system fallback fonts and look different. System dialogs keep their own fonts.";
+"premium.lifetime.title" = "Lifetime Access";
+"premium.lifetime.detail" = "Unlock every Premium feature with one purchase. No subscription.";
+"premium.lifetime.buy" = "Buy Once";
+"premium.lifetime.once" = "one-time purchase";
+"premium.lifetime.loading" = "Loading lifetime purchase…";
+"premium.lifetime.unavailable" = "Lifetime purchase is currently unavailable.";
+"premium.lifetime.error.title" = "Purchase Unavailable";
+"premium.lifetime.error.load" = "The lifetime purchase could not be loaded. Please try again later.";
+"premium.lifetime.error.purchase" = "The purchase could not be completed. Please try again.";

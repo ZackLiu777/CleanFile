@@ -457,3 +457,12 @@
 "premium.plans.retryLater" = "後でもう一度ご確認ください。アプリは引き続き利用できます。";
 "premium.trial.note" = "無料トライアルは対象の方のみ利用できます。購入前に、App Storeで適用される特典と更新価格が表示されます。";
 "appearance.font.languageNote" = "フォントは主に英語の表示に適用されます。他の言語では代替フォントが使われ、見た目が異なる場合があります。システムダイアログのフォントは変更されません。";
+"premium.lifetime.title" = "永久アクセス";
+"premium.lifetime.detail" = "一度の購入ですべての Premium 機能を永久に利用できます。サブスクリプションは不要です。";
+"premium.lifetime.buy" = "一度だけ購入";
+"premium.lifetime.once" = "買い切り";
+"premium.lifetime.loading" = "永久購入を読み込み中…";
+"premium.lifetime.unavailable" = "永久購入は現在利用できません。";
+"premium.lifetime.error.title" = "購入できません";
+"premium.lifetime.error.load" = "永久購入を読み込めませんでした。後でもう一度お試しください。";
+"premium.lifetime.error.purchase" = "購入を完了できませんでした。もう一度お試しください。";
