@@ -126,6 +126,7 @@
 				FF23C7503033FBD500B13EBA /* Sources */,
 				FF23C7513033FBD500B13EBA /* Frameworks */,
 				FF23C7523033FBD500B13EBA /* Resources */,
+				A30000000000000000000001 /* Generate LAME dSYM */,
 			);
 			buildRules = (
 			);
@@ -261,6 +262,36 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A30000000000000000000001 /* Generate LAME dSYM */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Scripts/generate-lame-dsym.sh",
+				"$(BUILT_PRODUCTS_DIR)/LAME.framework/LAME",
+			);
+			name = "Generate LAME dSYM";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DWARF_DSYM_FOLDER_PATH)/LAME.framework.dSYM",
+				"$(DWARF_DSYM_FOLDER_PATH)/LAME.framework.dSYM/Contents",
+				"$(DWARF_DSYM_FOLDER_PATH)/LAME.framework.dSYM/Contents/Info.plist",
+				"$(DWARF_DSYM_FOLDER_PATH)/LAME.framework.dSYM/Contents/Resources",
+				"$(DWARF_DSYM_FOLDER_PATH)/LAME.framework.dSYM/Contents/Resources/DWARF",
+				"$(DWARF_DSYM_FOLDER_PATH)/LAME.framework.dSYM/Contents/Resources/DWARF/LAME",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"${SRCROOT}/Scripts/generate-lame-dsym.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		FF23C7503033FBD500B13EBA /* Sources */ = {
@@ -470,6 +501,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NL82DMN369;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = CleanMyIPhone/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "File Cleaner & Media Converter";
