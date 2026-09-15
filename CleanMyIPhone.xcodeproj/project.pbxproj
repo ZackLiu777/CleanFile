@@ -432,7 +432,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = CleanMyIPhone/Info.plist;
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Allow CleanMyIPhone to display images from your Photos library.";
+				INFOPLIST_KEY_CFBundleDisplayName = "File Cleaner & Media Converter";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CleanFile uses your photo library to display and analyze photos and videos, group similar items, and let you choose items to delete—for example, to find similar photos for cleanup.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -471,7 +472,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = CleanMyIPhone/Info.plist;
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Allow CleanMyIPhone to display images from your Photos library.";
+				INFOPLIST_KEY_CFBundleDisplayName = "File Cleaner & Media Converter";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CleanFile uses your photo library to display and analyze photos and videos, group similar items, and let you choose items to delete—for example, to find similar photos for cleanup.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
