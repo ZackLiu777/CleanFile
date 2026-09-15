@@ -108,6 +108,8 @@ public struct ConversionHomeView: View {
                     }
                     .padding(.horizontal, 4)
                     .padding(.bottom, 24)
+                    .frame(maxWidth: 900)
+                    .frame(maxWidth: .infinity)
                 }
                 .converterSoftScrollEdge()
             }

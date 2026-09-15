@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "允許存取以顯示照片圖庫中的圖片。";
 "Allow Photo Access" = "允許存取照片";
 "Continue" = "繼續";
-"Continue to choose which photos and videos CleanFile can display, analyze, and help you organize." = "繼續選擇允許 CleanFile 顯示、分析並協助整理的照片和影片。";
+"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "繼續選擇允許 File Cleaner & Media Converter 顯示、分析並協助整理的照片和影片。";
 "Photo access is off" = "照片存取已關閉";
 "Enable Photos access in Settings to display your images." = "請在「設定」中啟用照片存取權限以顯示圖片。";
 "Open Settings" = "開啟設定";
@@ -21,7 +21,7 @@
 "No Photos" = "沒有照片";
 "No images are available in your Photos library." = "照片圖庫中沒有可用的圖片。";
 "Limited Photo Access" = "有限照片存取";
-"Only the photos you selected are available to CleanMyIPhone." = "CleanMyIPhone 只能存取您選擇的照片。";
+"Only the photos you selected are available to File Cleaner & Media Converter." = "File Cleaner & Media Converter 只能存取您選擇的照片。";
 "Manage Selected Photos" = "管理所選照片";
 "Choose Folder" = "選擇資料夾";
 "Analyzed Folder" = "已分析資料夾";
@@ -423,6 +423,8 @@
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "選擇格式，並調整可用的尺寸、品質、位元率或中繼資料選項。";
 "Keep the task open until each item completes or reports an error." = "保持任務打開，直到每個項目完成或報告錯誤。";
 "Use the share action to save or send the compressed output before clearing the workspace." = "清除工作區前，使用分享操作儲存或傳送壓縮後的輸出。";
+"MP3 audio output" = "MP3 音訊輸出";
+"In Audio Compression, choose MP3 to create a widely compatible compressed audio file. MP3 and AAC outputs support 96, 128, 192, and 256 kbps; lower bitrates usually reduce file size further but may make quality loss more noticeable." = "在音訊壓縮中選擇 MP3，可建立相容性廣泛的壓縮音訊檔案。MP3 和 AAC 輸出支援 96、128、192 和 256 kbps；較低位元率通常能進一步減小檔案，但品質損失可能更明顯。";
 "Go to Settings > General > iPhone Storage and wait for the category chart to finish calculating." = "前往“設定”>“一般”>“iPhone 儲存體”，然後等待類別圖表完成計算。";
 "Start with Photos, apps, Messages, or downloads that can make a meaningful difference." = "從可以產生有意義的變化的照片、應用程式、訊息或下載開始。";
 "Use Media for your authorized Photos library, Storage for a selected folder, and the system guide for everything else." = "將媒體用於您的授權照片庫，將儲存用於選定的資料夾，並將系統指南用於其他所有內容。";

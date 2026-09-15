@@ -288,6 +288,8 @@ struct ImageConversionContentView: View {
             .padding(.horizontal, 4)
             .padding(.top, 4)
             .padding(.bottom, 20)
+            .frame(maxWidth: 900)
+            .frame(maxWidth: .infinity)
         }
         .converterSoftScrollEdge()
         .fileImporter(

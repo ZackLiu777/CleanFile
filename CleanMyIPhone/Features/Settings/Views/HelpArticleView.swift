@@ -33,6 +33,8 @@ struct HelpArticleView: View {
             .padding(.horizontal, 16)
             .padding(.top, 12)
             .padding(.bottom, 32)
+            .frame(maxWidth: 760)
+            .frame(maxWidth: .infinity)
         }
         .scrollIndicators(.hidden)
         .background(AppBackground())

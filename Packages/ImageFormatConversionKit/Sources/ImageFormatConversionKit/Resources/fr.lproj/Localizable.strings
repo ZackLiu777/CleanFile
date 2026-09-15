@@ -219,9 +219,9 @@
 "conversion.guide.video.codec.prores422.detail" = "Codec de montage haute qualité : MOV uniquement, à la résolution d’origine ; les fichiers sont généralement volumineux et ne sont pas destinés à économiser de l’espace.";
 "conversion.guide.video.codec.prores4444.detail" = "Codec haute qualité pour le post-traitement exigeant : MOV uniquement, à la résolution d’origine ; les fichiers sont généralement très volumineux et ne sont pas destinés à économiser de l’espace.";
 "conversion.guide.audio.purpose" = "Compressez des fichiers audio pris en charge ou créez un fichier audio compressé séparé à partir d’une vidéo contenant une piste lisible. Les originaux restent inchangés.";
-"conversion.guide.audio.imports.detail" = "Sélectionnez plusieurs éléments dans Fichiers uniquement. Audio : M4A, AAC, MP3, WAV, AIFF/AIF, CAF. Vidéo : MOV, MP4, M4V. Le MP3 est réservé à l’importation.";
+"conversion.guide.audio.imports.detail" = "Sélectionnez plusieurs éléments dans Fichiers uniquement. Entrées audio : M4A, AAC, MP3, WAV, AIFF/AIF et CAF. Entrées vidéo : MOV, MP4 et M4V. Le MP3 est également disponible comme format de sortie.";
 "conversion.guide.audio.workflow.detail" = "Consultez le type de source, la durée, l’état et le nombre terminé, ou annulez si nécessaire. Comparez les tailles et partagez l’audio terminé.";
-"conversion.guide.audio.quality.detail" = "Les sorties AAC proposent 96, 128, 192 ou 256 kbit/s, avec 192 kbit/s par défaut. Un débit moindre produit généralement des fichiers plus petits avec une perte plus audible ; un débit supérieur conserve généralement plus de détails.";
+"conversion.guide.audio.quality.detail" = "Les sorties MP3 et AAC proposent 96, 128, 192 ou 256 kbit/s, avec 192 kbit/s par défaut. Un débit moindre produit généralement des fichiers plus petits avec une perte plus audible ; un débit supérieur conserve généralement plus de détails.";
 "conversion.guide.audio.lossless.title" = "Formats sans perte";
 "conversion.guide.audio.lossless.detail" = "M4A (ALAC), WAV, AIFF, CAF PCM et CAF ALAC n’utilisent pas le réglage de débit. Ils préservent la qualité audio disponible, mais ne réduisent pas toujours la taille du fichier.";
 "conversion.guide.audio.extract.title" = "Extraire d’une vidéo";

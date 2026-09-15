@@ -219,9 +219,9 @@
 "conversion.guide.video.codec.prores422.detail" = "For high-quality editing: MOV only, at the original resolution. Files are usually large and are not intended for space-saving compression.";
 "conversion.guide.video.codec.prores4444.detail" = "For high-quality post-production: MOV only, at the original resolution. Files are usually very large and are not intended for space-saving compression.";
 "conversion.guide.audio.purpose" = "Compress audio or create a separate compressed audio file from a video with a usable track. The original audio and video remain unchanged.";
-"conversion.guide.audio.imports.detail" = "Select multiple items from Files only. Audio: M4A, AAC, MP3, WAV, AIFF/AIF, CAF. Video: MOV, MP4, M4V. MP3 is import-only.";
+"conversion.guide.audio.imports.detail" = "Select multiple items from Files only. Audio inputs: M4A, AAC, MP3, WAV, AIFF/AIF, and CAF. Video inputs: MOV, MP4, and M4V. MP3 is also available as an output format.";
 "conversion.guide.audio.workflow.detail" = "Follow source type, duration, task state, and completed count, or cancel when needed. Compare input and output sizes and share the finished audio.";
-"conversion.guide.audio.quality.detail" = "AAC outputs offer 96, 128, 192, or 256 kbps, with 192 kbps as the default. Lower bitrates usually create smaller files with more audible loss; higher bitrates usually retain more detail.";
+"conversion.guide.audio.quality.detail" = "MP3 and AAC outputs offer 96, 128, 192, or 256 kbps, with 192 kbps as the default. Lower bitrates usually create smaller files with more audible loss; higher bitrates usually retain more detail.";
 "conversion.guide.audio.lossless.title" = "Lossless formats";
 "conversion.guide.audio.lossless.detail" = "M4A (ALAC), WAV, AIFF, CAF PCM, and CAF ALAC do not use the bitrate setting. They preserve available audio quality, so they may not reduce file size.";
 "conversion.guide.audio.extract.title" = "Extract from video";

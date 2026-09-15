@@ -267,6 +267,8 @@ struct ConversionGuideToolDetailView: View {
             .padding(.horizontal, 20)
             .padding(.top, 12)
             .padding(.bottom, 36)
+            .frame(maxWidth: 760)
+            .frame(maxWidth: .infinity)
         }
         .converterSoftScrollEdge()
         .background(converterBackground)

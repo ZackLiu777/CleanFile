@@ -219,9 +219,9 @@
 "conversion.guide.video.codec.prores422.detail" = "高品質な編集向け：MOVのみ、オリジナル解像度。通常はファイルが大きく、容量節約向けではありません。";
 "conversion.guide.video.codec.prores4444.detail" = "高度な編集向け：MOVのみ、オリジナル解像度。通常は非常に大きく、容量節約向けではありません。";
 "conversion.guide.audio.purpose" = "オーディオを圧縮したり、音声トラックを含む動画から独立した圧縮オーディオファイルを作成したりできます。元のファイルは変更されません。";
-"conversion.guide.audio.imports.detail" = "「ファイル」から複数選択します。オーディオはM4A、AAC、MP3、WAV、AIFF/AIF、CAF、動画はMOV、MP4、M4Vに対応します。MP3は読み込み専用です。";
+"conversion.guide.audio.imports.detail" = "「ファイル」から複数選択します。音声入力はM4A、AAC、MP3、WAV、AIFF/AIF、CAF、動画入力はMOV、MP4、M4Vに対応します。MP3は出力形式としても利用できます。";
 "conversion.guide.audio.workflow.detail" = "ソースの種類、長さ、状態、完了数を確認でき、必要ならキャンセルできます。完了後はサイズを比べてオーディオを共有できます。";
-"conversion.guide.audio.quality.detail" = "AAC出力は96、128、192、256 kbpsから選べ、デフォルトは192 kbpsです。低いビットレートは通常ファイルを小さくしますが、音の劣化が目立つ場合があります。高いビットレートは通常より細部を保ちます。";
+"conversion.guide.audio.quality.detail" = "MP3とAAC出力は96、128、192、256 kbpsから選べ、デフォルトは192 kbpsです。低いビットレートは通常ファイルを小さくしますが、音の劣化が目立つ場合があります。高いビットレートは通常より細部を保ちます。";
 "conversion.guide.audio.lossless.title" = "ロスレス形式";
 "conversion.guide.audio.lossless.detail" = "M4A（ALAC）、WAV、AIFF、CAF PCM、CAF ALACはビットレート設定を使用しません。利用可能な音質を保つため、ファイルサイズが小さくならない場合があります。";
 "conversion.guide.audio.extract.title" = "動画から抽出";

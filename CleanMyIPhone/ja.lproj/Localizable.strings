@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "写真ライブラリの画像を表示するにはアクセスを許可してください。";
 "Allow Photo Access" = "写真へのアクセスを許可";
 "Continue" = "続ける";
-"Continue to choose which photos and videos CleanFile can display, analyze, and help you organize." = "続けて、CleanFileが表示、分析、整理できる写真とビデオを選択します。";
+"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "続けて、File Cleaner & Media Converterが表示、分析、整理できる写真とビデオを選択します。";
 "Photo access is off" = "写真へのアクセスがオフです";
 "Enable Photos access in Settings to display your images." = "画像を表示するには「設定」で写真へのアクセスを有効にしてください。";
 "Open Settings" = "設定を開く";
@@ -21,7 +21,7 @@
 "No Photos" = "写真がありません";
 "No images are available in your Photos library." = "写真ライブラリに利用できる画像がありません。";
 "Limited Photo Access" = "写真への制限付きアクセス";
-"Only the photos you selected are available to CleanMyIPhone." = "選択した写真のみ CleanMyIPhone で利用できます。";
+"Only the photos you selected are available to File Cleaner & Media Converter." = "選択した写真のみ File Cleaner & Media Converter で利用できます。";
 "Manage Selected Photos" = "選択した写真を管理";
 "Choose Folder" = "フォルダを選択";
 "Analyzed Folder" = "解析済みフォルダ";
@@ -423,6 +423,8 @@
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "形式を選び、利用可能なサイズ、品質、ビットレート、メタデータのオプションを調整します。";
 "Keep the task open until each item completes or reports an error." = "各アイテムが完了するかエラーが報告されるまで、タスクを開いたままにしてください。";
 "Use the share action to save or send the compressed output before clearing the workspace." = "ワークスペースを消去する前に、共有アクションで圧縮済みの出力を保存または送信します。";
+"MP3 audio output" = "MP3オーディオ出力";
+"In Audio Compression, choose MP3 to create a widely compatible compressed audio file. MP3 and AAC outputs support 96, 128, 192, and 256 kbps; lower bitrates usually reduce file size further but may make quality loss more noticeable." = "オーディオ圧縮でMP3を選ぶと、幅広く互換性のある圧縮音声ファイルを作成できます。MP3とAAC出力は96、128、192、256 kbpsに対応します。ビットレートを下げると通常はさらに小さくなりますが、音質低下が目立つ場合があります。";
 "Go to Settings > General > iPhone Storage and wait for the category chart to finish calculating." = "[設定] > [一般] > [iPhone ストレージ] に移動し、カテゴリ グラフの計算が完了するまで待ちます。";
 "Start with Photos, apps, Messages, or downloads that can make a meaningful difference." = "有意義な変化をもたらすことができる写真、アプリ、メッセージ、ダウンロードから始めましょう。";
 "Use Media for your authorized Photos library, Storage for a selected folder, and the system guide for everything else." = "承認された写真ライブラリにはメディアを使用し、選択したフォルダーにはストレージを使用し、その他すべてにはシステム ガイドを使用します。";

@@ -242,6 +242,13 @@ enum HelpCatalog {
                 ]
             ),
             HelpArticleSection(
+                id: "mp3-output",
+                title: "MP3 audio output",
+                paragraphs: [
+                    "In Audio Compression, choose MP3 to create a widely compatible compressed audio file. MP3 and AAC outputs support 96, 128, 192, and 256 kbps; lower bitrates usually reduce file size further but may make quality loss more noticeable."
+                ]
+            ),
+            HelpArticleSection(
                 id: "storage",
                 title: "Manage compression storage",
                 paragraphs: [

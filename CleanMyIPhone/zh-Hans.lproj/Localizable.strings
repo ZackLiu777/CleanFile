@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "允许访问以显示照片图库中的图片。";
 "Allow Photo Access" = "允许访问照片";
 "Continue" = "继续";
-"Continue to choose which photos and videos CleanFile can display, analyze, and help you organize." = "继续选择允许 CleanFile 显示、分析并协助整理的照片和视频。";
+"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "继续选择允许 File Cleaner & Media Converter 显示、分析并协助整理的照片和视频。";
 "Photo access is off" = "照片访问已关闭";
 "Enable Photos access in Settings to display your images." = "请在“设置”中启用照片访问权限以显示图片。";
 "Open Settings" = "打开设置";
@@ -21,7 +21,7 @@
 "No Photos" = "没有照片";
 "No images are available in your Photos library." = "照片图库中没有可用图片。";
 "Limited Photo Access" = "有限照片访问";
-"Only the photos you selected are available to CleanMyIPhone." = "CleanMyIPhone 只能访问您选择的照片。";
+"Only the photos you selected are available to File Cleaner & Media Converter." = "File Cleaner & Media Converter 只能访问您选择的照片。";
 "Manage Selected Photos" = "管理所选照片";
 "Choose Folder" = "选择文件夹";
 "Analyzed Folder" = "已分析文件夹";
@@ -423,6 +423,8 @@
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "选择格式，并调整可用的尺寸、质量、码率或元数据选项。";
 "Keep the task open until each item completes or reports an error." = "保持任务打开，直到每个项目完成或报告错误。";
 "Use the share action to save or send the compressed output before clearing the workspace." = "清除工作区前，使用共享操作保存或发送压缩后的输出。";
+"MP3 audio output" = "MP3 音频输出";
+"In Audio Compression, choose MP3 to create a widely compatible compressed audio file. MP3 and AAC outputs support 96, 128, 192, and 256 kbps; lower bitrates usually reduce file size further but may make quality loss more noticeable." = "在音频压缩中选择 MP3，可生成兼容性广泛的压缩音频文件。MP3 和 AAC 输出支持 96、128、192 和 256 kbps；较低码率通常能进一步减小文件，但质量损失可能更明显。";
 "Go to Settings > General > iPhone Storage and wait for the category chart to finish calculating." = "前往“设置”>“通用”>“iPhone 存储空间”，然后等待类别图表完成计算。";
 "Start with Photos, apps, Messages, or downloads that can make a meaningful difference." = "从可以产生有意义的变化的照片、应用程序、消息或下载开始。";
 "Use Media for your authorized Photos library, Storage for a selected folder, and the system guide for everything else." = "将媒体用于您的授权照片库，将存储用于选定的文件夹，并将系统指南用于其他所有内容。";

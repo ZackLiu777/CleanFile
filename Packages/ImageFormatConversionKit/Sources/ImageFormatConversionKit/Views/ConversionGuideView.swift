@@ -120,6 +120,8 @@ struct ConversionGuideView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 12)
                 .padding(.bottom, 36)
+                .frame(maxWidth: 760)
+                .frame(maxWidth: .infinity)
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("conversion.guide.content")
             }

@@ -74,6 +74,8 @@ struct StorageView: View {
                     .padding(.horizontal, 4)
                     .padding(.top, -24)
                     .padding(.bottom, 24)
+                    .frame(maxWidth: 900)
+                    .frame(maxWidth: .infinity)
                 }
                 .appSoftScrollEdge()
             }

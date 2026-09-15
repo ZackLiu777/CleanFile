@@ -316,6 +316,10 @@ struct ContentView: View {
             animationsEnabled ? .spring(response: 0.24, dampingFraction: 0.88) : nil,
             value: tabBarDragState?.target
         )
+        // Keep the custom control comfortably reachable on iPad instead of
+        // stretching it across the full display width.
+        .frame(maxWidth: 720)
+        .frame(maxWidth: .infinity)
         // Match the native Liquid Glass tab bar's 16pt side inset.
         .padding(.horizontal, 16)
         .padding(.bottom, -10)
@@ -331,6 +335,8 @@ struct ContentView: View {
 
                 if isHighlighted {
                     Text(tab.titleKey)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
             }
             .appTypeface(

@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Allow access to display the images in your Photos library.";
 "Allow Photo Access" = "Allow Photo Access";
 "Continue" = "Continue";
-"Continue to choose which photos and videos CleanFile can display, analyze, and help you organize." = "Continue to choose which photos and videos CleanFile can display, analyze, and help you organize.";
+"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize.";
 "Photo access is off" = "Photo access is off";
 "Enable Photos access in Settings to display your images." = "Enable Photos access in Settings to display your images.";
 "Open Settings" = "Open Settings";
@@ -21,7 +21,7 @@
 "No Photos" = "No Photos";
 "No images are available in your Photos library." = "No images are available in your Photos library.";
 "Limited Photo Access" = "Limited Photo Access";
-"Only the photos you selected are available to CleanMyIPhone." = "Only the photos you selected are available to CleanMyIPhone.";
+"Only the photos you selected are available to File Cleaner & Media Converter." = "Only the photos you selected are available to File Cleaner & Media Converter.";
 "Manage Selected Photos" = "Manage Selected Photos";
 "Choose Folder" = "Choose Folder";
 "Analyzed Folder" = "Analyzed Folder";
@@ -423,6 +423,8 @@
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "Choose the format and adjust the available size, quality, bitrate, or metadata options.";
 "Keep the task open until each item completes or reports an error." = "Keep the task open until each item completes or reports an error.";
 "Use the share action to save or send the compressed output before clearing the workspace." = "Use the share action to save or send the compressed output before clearing the workspace.";
+"MP3 audio output" = "MP3 audio output";
+"In Audio Compression, choose MP3 to create a widely compatible compressed audio file. MP3 and AAC outputs support 96, 128, 192, and 256 kbps; lower bitrates usually reduce file size further but may make quality loss more noticeable." = "In Audio Compression, choose MP3 to create a widely compatible compressed audio file. MP3 and AAC outputs support 96, 128, 192, and 256 kbps; lower bitrates usually reduce file size further but may make quality loss more noticeable.";
 "Go to Settings > General > iPhone Storage and wait for the category chart to finish calculating." = "Go to Settings > General > iPhone Storage and wait for the category chart to finish calculating.";
 "Start with Photos, apps, Messages, or downloads that can make a meaningful difference." = "Start with Photos, apps, Messages, or downloads that can make a meaningful difference.";
 "Use Media for your authorized Photos library, Storage for a selected folder, and the system guide for everything else." = "Use Media for your authorized Photos library, Storage for a selected folder, and the system guide for everything else.";

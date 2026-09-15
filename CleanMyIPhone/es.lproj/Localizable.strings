@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Permite el acceso para mostrar las imágenes de tu fototeca.";
 "Allow Photo Access" = "Permitir acceso a Fotos";
 "Continue" = "Continuar";
-"Continue to choose which photos and videos CleanFile can display, analyze, and help you organize." = "Continúa para elegir qué fotos y vídeos puede mostrar y analizar CleanFile y ayudarte a organizar.";
+"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Continúa para elegir qué fotos y vídeos puede mostrar y analizar File Cleaner & Media Converter y ayudarte a organizar.";
 "Photo access is off" = "El acceso a Fotos está desactivado";
 "Enable Photos access in Settings to display your images." = "Activa el acceso a Fotos en Ajustes para mostrar tus imágenes.";
 "Open Settings" = "Abrir Ajustes";
@@ -21,7 +21,7 @@
 "No Photos" = "No hay fotos";
 "No images are available in your Photos library." = "No hay imágenes disponibles en tu fototeca.";
 "Limited Photo Access" = "Acceso limitado a Fotos";
-"Only the photos you selected are available to CleanMyIPhone." = "CleanMyIPhone solo puede acceder a las fotos seleccionadas.";
+"Only the photos you selected are available to File Cleaner & Media Converter." = "File Cleaner & Media Converter solo puede acceder a las fotos seleccionadas.";
 "Manage Selected Photos" = "Gestionar fotos seleccionadas";
 "Choose Folder" = "Elegir carpeta";
 "Analyzed Folder" = "Carpeta analizada";
@@ -423,6 +423,8 @@
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "Elija el formato y ajuste las opciones disponibles de tamaño, calidad, tasa de bits o metadatos.";
 "Keep the task open until each item completes or reports an error." = "Mantenga la tarea abierta hasta que cada elemento se complete o informe un error.";
 "Use the share action to save or send the compressed output before clearing the workspace." = "Utilice la acción de compartir para guardar o enviar el resultado comprimido antes de limpiar el espacio de trabajo.";
+"MP3 audio output" = "Salida de audio MP3";
+"In Audio Compression, choose MP3 to create a widely compatible compressed audio file. MP3 and AAC outputs support 96, 128, 192, and 256 kbps; lower bitrates usually reduce file size further but may make quality loss more noticeable." = "En Compresión de audio, elige MP3 para crear un archivo de audio comprimido ampliamente compatible. Las salidas MP3 y AAC admiten 96, 128, 192 y 256 kbps; las tasas menores suelen reducir más el tamaño, pero la pérdida de calidad puede ser más perceptible.";
 "Go to Settings > General > iPhone Storage and wait for the category chart to finish calculating." = "Vaya a Configuración > General > Almacenamiento de iPhone y espere a que la tabla de categorías termine de calcular.";
 "Start with Photos, apps, Messages, or downloads that can make a meaningful difference." = "Comience con Fotos, aplicaciones, Mensajes o descargas que pueden marcar una diferencia significativa.";
 "Use Media for your authorized Photos library, Storage for a selected folder, and the system guide for everything else." = "Utilice Medios para su biblioteca de fotos autorizada, Almacenamiento para una carpeta seleccionada y la guía del sistema para todo lo demás.";

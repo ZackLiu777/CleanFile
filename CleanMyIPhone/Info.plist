@@ -27,7 +27,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>CleanFile uses your photo library to display and analyze photos and videos, group similar items, and let you choose items to delete—for example, to find similar photos for cleanup.</string>
+	<string>File Cleaner &amp; Media Converter uses your photo library to display and analyze photos and videos, group similar items, and let you choose items to delete—for example, to find similar photos for cleanup.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

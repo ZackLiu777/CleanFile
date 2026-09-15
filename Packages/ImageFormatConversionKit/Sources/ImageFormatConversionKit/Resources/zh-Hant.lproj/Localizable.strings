@@ -219,9 +219,9 @@
 "conversion.guide.video.codec.prores422.detail" = "適合高品質編輯：僅 MOV，並保持原始解析度；檔案通常較大，不適合節省空間。";
 "conversion.guide.video.codec.prores4444.detail" = "適合高要求後期製作：僅 MOV，並保持原始解析度；檔案通常很大，不適合節省空間。";
 "conversion.guide.audio.purpose" = "壓縮音訊，或從帶有音軌的影片建立獨立的壓縮音訊檔案；原始音訊和影片都不會被修改。";
-"conversion.guide.audio.imports.detail" = "僅可從「檔案」多選。音訊支援 M4A、AAC、MP3、WAV、AIFF/AIF、CAF；影片支援 MOV、MP4、M4V。MP3 僅可匯入。";
+"conversion.guide.audio.imports.detail" = "僅可從「檔案」多選。音訊輸入支援 M4A、AAC、MP3、WAV、AIFF/AIF、CAF；影片輸入支援 MOV、MP4、M4V。MP3 也可作為輸出格式。";
 "conversion.guide.audio.workflow.detail" = "可查看來源類型、時長、工作狀態與完成數，也可取消。完成後可比較輸入與輸出大小並分享音訊。";
-"conversion.guide.audio.quality.detail" = "AAC 輸出可選 96、128、192 或 256 kbps，預設 192 kbps。位元率越低通常檔案越小，但聽感損失可能更明顯；位元率越高通常保留更多細節。";
+"conversion.guide.audio.quality.detail" = "MP3 和 AAC 輸出可選 96、128、192 或 256 kbps，預設 192 kbps。位元率越低通常檔案越小，但聽感損失可能更明顯；位元率越高通常保留更多細節。";
 "conversion.guide.audio.lossless.title" = "無損格式";
 "conversion.guide.audio.lossless.detail" = "M4A（ALAC）、WAV、AIFF、CAF PCM 與 CAF ALAC 不使用位元率設定，會保留可用的音訊品質，因此不一定減小檔案大小。";
 "conversion.guide.audio.extract.title" = "從影片擷取";

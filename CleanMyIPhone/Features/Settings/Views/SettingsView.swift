@@ -142,6 +142,8 @@ struct SettingsView: View {
             }
             .contentMargins(.horizontal, 4, for: .scrollContent)
             .padding(.top, -24)
+            .frame(maxWidth: 760)
+            .frame(maxWidth: .infinity)
             .scrollIndicators(.hidden)
             .scrollContentBackground(.hidden)
             .background(AppBackground())

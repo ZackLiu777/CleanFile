@@ -31,7 +31,7 @@ struct PhotosView: View {
                     case .notDetermined:
                         permissionView(
                             title: "Access your photos",
-                            message: "Continue to choose which photos and videos CleanFile can display, analyze, and help you organize.",
+                            message: "Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize.",
                             buttonTitle: "Continue",
                             action: viewModel.requestAccess
                         )
@@ -139,7 +139,7 @@ struct PhotosView: View {
             Label("Limited Photo Access", systemImage: "photo.badge.checkmark")
                 .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
 
-            Text("Only the photos you selected are available to CleanMyIPhone.")
+            Text("Only the photos you selected are available to File Cleaner & Media Converter.")
                 .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -170,6 +170,8 @@ struct PhotosView: View {
             .padding(.horizontal, 4)
             .padding(.top, -24)
             .padding(.bottom, 24)
+            .frame(maxWidth: 900)
+            .frame(maxWidth: .infinity)
         }
         .appSoftScrollEdge()
     }
@@ -310,11 +312,14 @@ private struct MediaDashboardResultsView: View {
     let isPartial: Bool
     @ObservedObject var viewModel: PhotoLibraryViewModel
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    private let columns = [
-        GridItem(.flexible(), spacing: 10),
-        GridItem(.flexible(), spacing: 10)
-    ]
+    private var columns: [GridItem] {
+        Array(
+            repeating: GridItem(.flexible(), spacing: 10),
+            count: horizontalSizeClass == .regular ? 3 : 2
+        )
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
