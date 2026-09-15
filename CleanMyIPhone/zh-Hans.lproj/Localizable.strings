@@ -7,6 +7,8 @@
 "Access your photos" = "访问您的照片";
 "Allow access to display the images in your Photos library." = "允许访问以显示照片图库中的图片。";
 "Allow Photo Access" = "允许访问照片";
+"Continue" = "继续";
+"Continue to choose which photos and videos CleanFile can display, analyze, and help you organize." = "继续选择允许 CleanFile 显示、分析并协助整理的照片和视频。";
 "Photo access is off" = "照片访问已关闭";
 "Enable Photos access in Settings to display your images." = "请在“设置”中启用照片访问权限以显示图片。";
 "Open Settings" = "打开设置";

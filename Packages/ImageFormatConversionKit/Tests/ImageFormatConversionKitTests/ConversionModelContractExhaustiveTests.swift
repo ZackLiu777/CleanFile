@@ -6,10 +6,12 @@ import Testing
 struct ConversionModelContractExhaustiveTests {
     @Test("Audio output formats expose stable extensions and lossless semantics")
     func audioFormatMetadataIsComplete() {
-        #expect(AudioOutputFormat.allCases.map { $0.fileExtension } == ["m4a", "aac", "m4a", "wav", "aiff", "caf", "caf"])
+        #expect(AudioConversionEngine.supportedInputExtensions.contains("flac"))
+        #expect(AudioOutputFormat.allCases.map { $0.fileExtension } == ["mp3", "m4a", "aac", "m4a", "wav", "aiff", "caf", "caf"])
+        #expect(AudioOutputFormat.mp3.isLossless == false)
         #expect(AudioOutputFormat.aac.isLossless == false)
         #expect(AudioOutputFormat.aacFile.isLossless == false)
-        #expect(AudioOutputFormat.allCases.dropFirst(2).allSatisfy { $0.isLossless })
+        #expect(AudioOutputFormat.allCases.dropFirst(3).allSatisfy { $0.isLossless })
     }
 
     @Test("Audio conversion errors always provide localized descriptions")

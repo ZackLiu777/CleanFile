@@ -15,9 +15,18 @@ let package = Package(
             targets: ["ImageFormatConversionKit"]
         )
     ],
+    dependencies: [
+        .package(
+            url: "https://github.com/BB9z/LAME-xcframework.git",
+            exact: "3.100.3"
+        )
+    ],
     targets: [
         .target(
             name: "ImageFormatConversionKit",
+            dependencies: [
+                .product(name: "LAME", package: "LAME-xcframework")
+            ],
             resources: [.process("Resources")]
         ),
         .testTarget(

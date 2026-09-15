@@ -97,6 +97,7 @@
 "audio.error.video_protected" = "無法擷取受保護影片的音訊。";
 "audio.import.title" = "壓縮音訊";
 "audio.settings.quality" = "品質";
+"audio.format.mp3" = "MP3";
 "audio.format.aac" = "M4A（AAC 編碼）";
 "audio.format.aac_file" = "AAC（AAC 編碼）";
 "audio.format.alac" = "M4A（Apple 無損）";
@@ -153,6 +154,7 @@
 "format.video.mov.detail" = ".mov · Apple 媒體容器，適合高品質影片工作流程。";
 "format.video.m4v.detail" = ".m4v · Apple 平台常用的 MPEG-4 影片容器。";
 "format.audio.aac.detail" = ".m4a · AAC 音訊，音質與檔案大小較為均衡。";
+"format.audio.mp3.detail" = ".mp3 · 相容性廣泛、在本機完成編碼的壓縮音訊。";
 "format.audio.aacFile.detail" = ".aac · 原始 AAC 音訊流，適合明確要求 AAC 檔案的情境。";
 "format.audio.alac.detail" = ".m4a · Apple 無損音訊，檔案比 AAC 更大。";
 "format.audio.wav.detail" = ".wav · 未壓縮 PCM 音訊，適合編輯但檔案較大。";

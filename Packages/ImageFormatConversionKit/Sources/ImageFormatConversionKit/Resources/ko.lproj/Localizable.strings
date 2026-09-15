@@ -97,6 +97,7 @@
 "audio.error.video_protected" = "보호된 비디오에서는 오디오를 추출할 수 없습니다.";
 "audio.import.title" = "오디오 압축";
 "audio.settings.quality" = "품질";
+"audio.format.mp3" = "MP3";
 "audio.format.aac" = "M4A(AAC 인코딩)";
 "audio.format.aac_file" = "AAC(AAC 인코딩)";
 "audio.format.alac" = "M4A(Apple 무손실)";
@@ -164,6 +165,7 @@
 "format.video.mov.detail" = ".mov · 고품질 작업에 적합한 Apple 미디어 컨테이너입니다.";
 "format.video.m4v.detail" = ".m4v · Apple 플랫폼에서 사용하는 MPEG-4 컨테이너입니다.";
 "format.audio.aac.detail" = ".m4a · 음질과 파일 크기의 균형이 좋은 AAC 오디오입니다.";
+"format.audio.mp3.detail" = ".mp3 · 호환성이 높고 기기에서 인코딩되는 압축 오디오입니다.";
 "format.audio.aacFile.detail" = ".aac · AAC 파일이 필요한 환경을 위한 원시 AAC 스트림입니다.";
 "format.audio.alac.detail" = ".m4a · Apple 무손실 오디오로 AAC보다 파일이 큽니다.";
 "format.audio.wav.detail" = ".wav · 편집용 무압축 PCM 오디오로 파일이 큽니다.";

@@ -200,6 +200,7 @@ struct AudioConversionView: View {
     /// 封装 `audioFormatTitle` 对应的局部行为，供当前类型在统一入口下复用。
     private func audioFormatTitle(_ format: AudioOutputFormat) -> String {
         switch format {
+        case .mp3: L10n.string("audio.format.mp3")
         case .aac: L10n.string("audio.format.aac")
         case .aacFile: L10n.string("audio.format.aac_file")
         case .alac: L10n.string("audio.format.alac")

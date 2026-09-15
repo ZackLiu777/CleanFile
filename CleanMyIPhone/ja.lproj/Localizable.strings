@@ -7,6 +7,8 @@
 "Access your photos" = "写真へのアクセス";
 "Allow access to display the images in your Photos library." = "写真ライブラリの画像を表示するにはアクセスを許可してください。";
 "Allow Photo Access" = "写真へのアクセスを許可";
+"Continue" = "続ける";
+"Continue to choose which photos and videos CleanFile can display, analyze, and help you organize." = "続けて、CleanFileが表示、分析、整理できる写真とビデオを選択します。";
 "Photo access is off" = "写真へのアクセスがオフです";
 "Enable Photos access in Settings to display your images." = "画像を表示するには「設定」で写真へのアクセスを有効にしてください。";
 "Open Settings" = "設定を開く";

@@ -97,6 +97,7 @@
 "audio.error.video_protected" = "Protected video audio cannot be extracted.";
 "audio.import.title" = "Compress Audio";
 "audio.settings.quality" = "Quality";
+"audio.format.mp3" = "MP3";
 "audio.format.aac" = "M4A (AAC encoded)";
 "audio.format.aac_file" = "AAC (AAC encoded)";
 "audio.format.alac" = "M4A (Apple Lossless)";
@@ -153,6 +154,7 @@
 "format.video.mov.detail" = ".mov · Apple media container suited to high-quality workflows.";
 "format.video.m4v.detail" = ".m4v · MPEG-4 video container commonly used on Apple platforms.";
 "format.audio.aac.detail" = ".m4a · AAC audio with good quality at a compact file size.";
+"format.audio.mp3.detail" = ".mp3 · Widely compatible compressed audio encoded on this device.";
 "format.audio.aacFile.detail" = ".aac · Raw AAC stream for systems that specifically require AAC files.";
 "format.audio.alac.detail" = ".m4a · Apple Lossless audio; larger than AAC without lossy compression.";
 "format.audio.wav.detail" = ".wav · Uncompressed PCM audio for editing; files are large.";

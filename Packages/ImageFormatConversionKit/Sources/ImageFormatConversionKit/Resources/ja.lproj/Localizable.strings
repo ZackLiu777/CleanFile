@@ -97,6 +97,7 @@
 "audio.error.video_protected" = "保護されたビデオから音声を抽出できません。";
 "audio.import.title" = "オーディオを圧縮";
 "audio.settings.quality" = "品質";
+"audio.format.mp3" = "MP3";
 "audio.format.aac" = "M4A（AAC エンコード）";
 "audio.format.aac_file" = "AAC（AAC エンコード）";
 "audio.format.alac" = "M4A（Apple Lossless）";
@@ -153,6 +154,7 @@
 "format.video.mov.detail" = ".mov · 高品質な制作に適した Apple のメディアコンテナです。";
 "format.video.m4v.detail" = ".m4v · Apple プラットフォームで一般的な MPEG-4 コンテナです。";
 "format.audio.aac.detail" = ".m4a · 音質と容量のバランスが良い AAC 音声です。";
+"format.audio.mp3.detail" = ".mp3 · 幅広い互換性を持ち、端末上でエンコードされる圧縮音声です。";
 "format.audio.aacFile.detail" = ".aac · AAC ファイルが必要な用途向けの AAC ストリームです。";
 "format.audio.alac.detail" = ".m4a · Apple Lossless 音声。AAC より容量が大きくなります。";
 "format.audio.wav.detail" = ".wav · 編集向けの非圧縮 PCM 音声で、容量は大きくなります。";

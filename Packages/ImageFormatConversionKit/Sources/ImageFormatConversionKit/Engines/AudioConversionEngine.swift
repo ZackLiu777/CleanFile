@@ -7,10 +7,11 @@ import AVFAudio
 import AVFoundation
 import AudioToolbox
 import Foundation
+import LAME
 
 /// 使用 Actor 隔离 `AudioConversionEngine` 的可变状态，确保并发访问安全。
 public actor AudioConversionEngine {
-    public static let supportedInputExtensions = ["m4a", "aac", "mp3", "wav", "aiff", "aif", "caf"]
+    public static let supportedInputExtensions = ["m4a", "aac", "mp3", "flac", "wav", "aiff", "aif", "caf"]
     public static let supportedVideoInputExtensions = ["mov", "mp4", "m4v"]
 
     private let videoExtractor = VideoAudioExtractionEngine()
@@ -37,6 +38,7 @@ public actor AudioConversionEngine {
     ) async throws -> URL {
         let performanceID = ConversionPerformance.begin("Conversion Audio Total")
         defer { ConversionPerformance.end("Conversion Audio Total", id: performanceID) }
+        let progressReporter = ConversionProgressReporter(callback: progress)
         let source = request.sourceURL.standardizedFileURL
         let directory = request.destinationDirectory.standardizedFileURL
         let sourceAccess = source.startAccessingSecurityScopedResource()
@@ -77,7 +79,7 @@ public actor AudioConversionEngine {
             extractedPCM = extracted
             do {
                 try await videoExtractor.extractPCM(from: source, to: extracted) { value in
-                    await progress(value * 0.55)
+                    await progressReporter.report(value * 0.55)
                 }
             } catch let error as AudioConversionError {
                 throw error
@@ -99,6 +101,25 @@ public actor AudioConversionEngine {
             let inputFormat = input.processingFormat
             guard input.length > 0, inputFormat.channelCount > 0 else {
                 throw AudioConversionError.invalidAudio
+            }
+
+            if request.outputFormat == .mp3 {
+                try await encodeMP3(
+                    input: input,
+                    bitRate: request.bitRate,
+                    destination: temporary,
+                    sourceKind: request.sourceKind,
+                    progressReporter: progressReporter
+                )
+                ConversionPerformance.end("Conversion Audio Encode", id: encodeID)
+                try Task.checkCancellation()
+                do {
+                    try manager.moveItem(at: temporary, to: output)
+                } catch {
+                    throw AudioConversionError.commitFailed(error.localizedDescription)
+                }
+                await progressReporter.report(1, force: true)
+                return output
             }
 
             let settings = outputSettings(
@@ -164,7 +185,7 @@ public actor AudioConversionEngine {
                 let overallProgress = request.sourceKind == .video
                     ? 0.55 + encodingProgress * 0.45
                     : encodingProgress
-                await progress(overallProgress)
+                await progressReporter.report(overallProgress)
                 if status == .endOfStream { break }
             }
         } catch is CancellationError {
@@ -187,7 +208,7 @@ public actor AudioConversionEngine {
         } catch {
             throw AudioConversionError.commitFailed(error.localizedDescription)
         }
-        await progress(1)
+        await progressReporter.report(1, force: true)
         return output
     }
 
@@ -205,6 +226,8 @@ public actor AudioConversionEngine {
     ) -> [String: Any] {
         let channelCount = Int(min(max(channels, 1), 2))
         switch format {
+        case .mp3:
+            return [:]
         case .aac, .aacFile:
             return [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
@@ -236,6 +259,87 @@ public actor AudioConversionEngine {
                 channelCount: channelCount,
                 isBigEndian: false
             )
+        }
+    }
+
+    /// Streams decoded PCM frames into LAME without loading the source file into memory.
+    private func encodeMP3(
+        input: AVAudioFile,
+        bitRate: AudioBitRate,
+        destination: URL,
+        sourceKind: AudioSourceKind,
+        progressReporter: ConversionProgressReporter
+    ) async throws {
+        let format = input.processingFormat
+        let channelCount = Int(format.channelCount)
+        guard (1 ... 2).contains(channelCount), format.sampleRate > 0 else {
+            throw AudioConversionError.invalidAudio
+        }
+        guard let encoder = lame_init() else {
+            throw AudioConversionError.conversionFailed("LAME initialization failed")
+        }
+        defer { lame_close(encoder) }
+
+        guard lame_set_in_samplerate(encoder, Int32(format.sampleRate.rounded())) == 0,
+              lame_set_num_channels(encoder, Int32(channelCount)) == 0,
+              lame_set_brate(encoder, Int32(bitRate.rawValue / 1_000)) == 0,
+              lame_set_quality(encoder, 2) == 0,
+              lame_init_params(encoder) == 0
+        else {
+            throw AudioConversionError.conversionFailed("LAME configuration failed")
+        }
+
+        guard FileManager.default.createFile(atPath: destination.path, contents: nil) else {
+            throw AudioConversionError.cannotCreateOutput(destination.lastPathComponent)
+        }
+        let handle = try FileHandle(forWritingTo: destination)
+        defer { try? handle.close() }
+
+        let capacity: AVAudioFrameCount = 16_384
+        guard let pcm = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: capacity) else {
+            throw AudioConversionError.invalidAudio
+        }
+        var encoded = [UInt8](repeating: 0, count: Int(Double(capacity) * 1.25) + 7_200)
+
+        while input.framePosition < input.length {
+            try Task.checkCancellation()
+            try input.read(into: pcm, frameCount: capacity)
+            guard pcm.frameLength > 0, let channels = pcm.floatChannelData else { break }
+
+            let sampleCount = Int32(pcm.frameLength)
+            let encodedCount = encoded.withUnsafeMutableBufferPointer { outputBuffer in
+                lame_encode_buffer_ieee_float(
+                    encoder,
+                    channels[0],
+                    channelCount == 2 ? channels[1] : channels[0],
+                    sampleCount,
+                    outputBuffer.baseAddress,
+                    Int32(outputBuffer.count)
+                )
+            }
+            guard encodedCount >= 0 else {
+                throw AudioConversionError.conversionFailed("LAME encoding failed (\(encodedCount))")
+            }
+            if encodedCount > 0 {
+                try handle.write(contentsOf: Data(encoded.prefix(Int(encodedCount))))
+            }
+
+            let encodingProgress = Double(input.framePosition) / Double(input.length)
+            let overallProgress = sourceKind == .video
+                ? 0.55 + encodingProgress * 0.45
+                : encodingProgress
+            await progressReporter.report(overallProgress)
+        }
+
+        var flushed = [UInt8](repeating: 0, count: 7_200)
+        let flushedCount = flushed.withUnsafeMutableBufferPointer {
+            lame_encode_flush(encoder, $0.baseAddress, Int32($0.count))
+        }
+        guard flushedCount >= 0 else {
+            throw AudioConversionError.conversionFailed("LAME flush failed (\(flushedCount))")
+        }
+        if flushedCount > 0 {
+            try handle.write(contentsOf: Data(flushed.prefix(Int(flushedCount))))
         }
     }
 

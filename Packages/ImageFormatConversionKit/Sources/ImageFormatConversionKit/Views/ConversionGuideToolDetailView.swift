@@ -200,6 +200,7 @@ enum ConversionGuideTool: String, CaseIterable, Identifiable, Hashable {
 
     private static func audioFormatTitle(_ format: AudioOutputFormat) -> String {
         switch format {
+        case .mp3: L10n.string("audio.format.mp3")
         case .aac: L10n.string("audio.format.aac")
         case .aacFile: L10n.string("audio.format.aac_file")
         case .alac: L10n.string("audio.format.alac")

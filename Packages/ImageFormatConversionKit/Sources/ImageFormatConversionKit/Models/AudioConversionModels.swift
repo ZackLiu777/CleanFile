@@ -13,6 +13,7 @@ public enum AudioSourceKind: String, Codable, Sendable {
 
 /// 定义 `AudioOutputFormat` 使用的有限状态或选项集合。
 public enum AudioOutputFormat: String, CaseIterable, Identifiable, Sendable {
+    case mp3
     case aac
     case aacFile
     case alac
@@ -25,6 +26,7 @@ public enum AudioOutputFormat: String, CaseIterable, Identifiable, Sendable {
 
     public var fileExtension: String {
         switch self {
+        case .mp3: "mp3"
         case .aac, .alac: "m4a"
         case .aacFile: "aac"
         case .wav: "wav"
@@ -35,7 +37,7 @@ public enum AudioOutputFormat: String, CaseIterable, Identifiable, Sendable {
 
     public var isLossless: Bool {
         switch self {
-        case .aac, .aacFile: false
+        case .mp3, .aac, .aacFile: false
         case .alac, .wav, .aiff, .cafPCM, .cafALAC: true
         }
     }

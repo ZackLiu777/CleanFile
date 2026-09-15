@@ -31,8 +31,8 @@ struct PhotosView: View {
                     case .notDetermined:
                         permissionView(
                             title: "Access your photos",
-                            message: "Allow access to display the images in your Photos library.",
-                            buttonTitle: "Allow Photo Access",
+                            message: "Continue to choose which photos and videos CleanFile can display, analyze, and help you organize.",
+                            buttonTitle: "Continue",
                             action: viewModel.requestAccess
                         )
                     case .authorized:

@@ -77,6 +77,7 @@ struct ConversionModelEdgeCaseTests {
 
     @Test("Audio formats expose lossless semantics and expected extensions")
     func audioFormatMetadataIsStable() {
+        #expect(AudioOutputFormat.mp3.fileExtension == "mp3")
         #expect(AudioOutputFormat.aac.fileExtension == "m4a")
         #expect(AudioOutputFormat.aacFile.fileExtension == "aac")
         #expect(AudioOutputFormat.cafPCM.fileExtension == "caf")

@@ -9,8 +9,8 @@ enum PremiumConfiguration {
     static let lifetimeProductID = "filecleaner.lifetime"
     static let subscriptionProductIDs: Set<String> = [annualProductID, monthlyProductID]
     static let productIDs: Set<String> = subscriptionProductIDs.union([lifetimeProductID])
-    static let privacyPolicyURL = URL(string: "https://zane-liao.github.io/cleanmyiphone/privacy/")!
-    static let termsOfServiceURL = URL(string: "https://zane-liao.github.io/cleanmyiphone/terms/")!
+    static let privacyPolicyURL = URL(string: "https://zane-liao.github.io/privacy/")!
+    static let termsOfServiceURL = URL(string: "https://zane-liao.github.io/terms/")!
 
     /// UI automation exercises app features rather than the App Store purchase sheet.
     static var bypassesEntitlementForUITesting: Bool {
