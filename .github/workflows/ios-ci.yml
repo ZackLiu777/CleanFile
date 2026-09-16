@@ -16,12 +16,12 @@ concurrency:
 env:
   PROJECT: CleanMyIPhone.xcodeproj
   SCHEME: CleanMyIPhone
-  DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=latest
+  DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=27.0
 
 jobs:
   unit-tests:
     name: Build and Unit Tests
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 30
 
     steps:
@@ -70,7 +70,7 @@ jobs:
 
   ui-tests:
     name: UI Tests
-    runs-on: macos-26
+    runs-on: xcode-27
     needs: unit-tests
     timeout-minutes: 45
 
