@@ -20,6 +20,80 @@ enum PersistedConversionStatus: String, Codable, Sendable {
     case cancelled
 }
 
+/// The persistence representation of a runtime conversion status.
+/// Runtime enums remain free to model media-specific states while manifests
+/// consume one stable shape.
+struct PersistedConversionState {
+    let status: PersistedConversionStatus
+    let outputPath: String?
+}
+
+protocol ConversionStatusPersistable {
+    var persistedState: PersistedConversionState { get }
+}
+
+extension ImageConversionItemStatus: ConversionStatusPersistable {
+    var persistedState: PersistedConversionState {
+        switch self {
+        case let .completed(outputURL):
+            PersistedConversionState(status: .completed, outputPath: outputURL.path)
+        case .failed:
+            PersistedConversionState(status: .failed, outputPath: nil)
+        case .cancelled:
+            PersistedConversionState(status: .cancelled, outputPath: nil)
+        case .inspecting, .ready, .converting:
+            PersistedConversionState(status: .ready, outputPath: nil)
+        }
+    }
+}
+
+extension AudioConversionStatus: ConversionStatusPersistable {
+    var persistedState: PersistedConversionState {
+        switch self {
+        case let .completed(outputURL):
+            PersistedConversionState(status: .completed, outputPath: outputURL.path)
+        case .failed:
+            PersistedConversionState(status: .failed, outputPath: nil)
+        case .cancelled:
+            PersistedConversionState(status: .cancelled, outputPath: nil)
+        case .ready, .converting:
+            PersistedConversionState(status: .ready, outputPath: nil)
+        }
+    }
+}
+
+extension VideoConversionStatus: ConversionStatusPersistable {
+    var persistedState: PersistedConversionState {
+        switch self {
+        case let .completed(outputURL):
+            PersistedConversionState(status: .completed, outputPath: outputURL.path)
+        case .failed:
+            PersistedConversionState(status: .failed, outputPath: nil)
+        case .cancelled:
+            PersistedConversionState(status: .cancelled, outputPath: nil)
+        case .ready, .converting:
+            PersistedConversionState(status: .ready, outputPath: nil)
+        }
+    }
+}
+
+/// Owns the filesystem naming convention for converted media directories.
+enum ConversionOutputDirectory {
+    static func url(for kind: ConversionMediaKind, fileManager: FileManager = .default) -> URL {
+        let baseURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? fileManager.temporaryDirectory
+        return baseURL.appendingPathComponent(name(for: kind), isDirectory: true)
+    }
+
+    private static func name(for kind: ConversionMediaKind) -> String {
+        switch kind {
+        case .image: "Converted Images"
+        case .video: "Converted Videos"
+        case .audio: "Converted Audio"
+        }
+    }
+}
+
 /// 定义 `PersistedConversionItem` 的值语义数据与相关行为。
 struct PersistedConversionItem: Codable, Sendable {
     let id: UUID
@@ -208,6 +282,20 @@ actor ConversionWorkspace {
             }
         }
         return succeeded
+    }
+
+    /// Deletes records sequentially and reports exactly which items succeeded.
+    /// Sequential deletion preserves the existing bounded file-system behavior.
+    func delete(
+        _ records: [PersistedConversionItem],
+        kind: ConversionMediaKind,
+        outputRoot: URL
+    ) -> Set<UUID> {
+        var deletedIDs = Set<UUID>()
+        for record in records where delete(record, kind: kind, outputRoot: outputRoot) {
+            deletedIDs.insert(record.id)
+        }
+        return deletedIDs
     }
 
     /// 封装 `manifestURL` 对应的局部行为，供当前类型在统一入口下复用。

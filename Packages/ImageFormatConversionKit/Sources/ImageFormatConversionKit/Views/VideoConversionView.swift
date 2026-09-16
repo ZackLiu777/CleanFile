@@ -203,39 +203,32 @@ struct VideoConversionView: View {
                             selection: Binding(
                                 get: { viewModel.container },
                                 set: { viewModel.container = $0 }
-                            )
-                        ) {
-                            ForEach(viewModel.availableContainers) { container in
-                                Text(container.rawValue.uppercased()).tag(container)
-                            }
-                        }
+                            ),
+                            options: viewModel.availableContainers,
+                            optionTitle: { $0.rawValue.uppercased() }
+                        )
                         ConversionWheelColumn(
                             title: L10n.string("video.settings.codec"),
                             selection: Binding(
                                 get: { viewModel.codec },
                                 set: { viewModel.codec = $0 }
-                            )
-                        ) {
-                            Text("H.264").tag(VideoCodec.h264)
-                            Text("HEVC").tag(VideoCodec.hevc)
-                            Text("ProRes 422").tag(VideoCodec.proRes422)
-                            Text("ProRes 4444").tag(VideoCodec.proRes4444)
-                        }
+                            ),
+                            options: VideoCodec.allCases,
+                            optionTitle: videoCodecTitle
+                        )
                         ConversionWheelColumn(
                             title: L10n.string("video.settings.resolution"),
                             selection: Binding(
                                 get: { viewModel.resolution },
                                 set: { viewModel.resolution = $0 }
-                            )
-                        ) {
-                            ForEach(viewModel.availableResolutions) { preset in
-                                Text(resolutionTitle(preset)).tag(preset)
-                            }
-                        }
+                            ),
+                            options: viewModel.availableResolutions,
+                            optionTitle: resolutionTitle
+                        )
                     }
                 }
             }
-            setting(L10n.string("settings.output")) {
+            ConversionSettingRow(L10n.string("settings.output")) {
                 Text(L10n.string("settings.output.videos"))
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(.secondary)
@@ -254,22 +247,21 @@ struct VideoConversionView: View {
         }
     }
 
-    private var videoSettingsSummary: String {
-        [
-            viewModel.container.rawValue.uppercased(),
-            codecTitle(viewModel.codec),
-            resolutionTitle(viewModel.resolution)
-        ].joined(separator: " · ")
-    }
-
-    /// 封装 `codecTitle` 对应的局部行为，供当前类型在统一入口下复用。
-    private func codecTitle(_ codec: VideoCodec) -> String {
+    private func videoCodecTitle(_ codec: VideoCodec) -> String {
         switch codec {
         case .h264: "H.264"
         case .hevc: "HEVC"
         case .proRes422: "ProRes 422"
         case .proRes4444: "ProRes 4444"
         }
+    }
+
+    private var videoSettingsSummary: String {
+        [
+            viewModel.container.rawValue.uppercased(),
+            videoCodecTitle(viewModel.codec),
+            resolutionTitle(viewModel.resolution)
+        ].joined(separator: " · ")
     }
 
     private var selectedFilesCard: some View {
@@ -283,16 +275,17 @@ struct VideoConversionView: View {
             onClear: { isClearAllConfirmationPresented = true }
         ) {
             ForEach(viewModel.items) { item in
-                let presentationURL = outputURL(item.status) ?? item.sourceURL
+                let presentation = item.status.conversionPresentation
+                let presentationURL = presentation.outputURL ?? item.sourceURL
                 ConversionFileTile(
                     url: presentationURL,
                     kind: .video,
                     title: presentationURL.lastPathComponent,
-                    subtitle: sizeDescription(item),
-                    phase: phase(item.status),
-                    statusLabel: statusText(item.status),
+                    subtitle: ConversionFileSizePresentation.description(sourceBytes: item.sourceBytes, outputURL: presentation.outputURL),
+                    phase: presentation.phase,
+                    statusLabel: presentation.label,
                     isLocked: viewModel.isConverting,
-                    outputURL: outputURL(item.status),
+                    outputURL: presentation.outputURL,
                     onRemove: { viewModel.remove(item.id) }
                 )
             }
@@ -339,11 +332,6 @@ struct VideoConversionView: View {
         }
     }
 
-    /// 封装 `setting` 对应的局部行为，供当前类型在统一入口下复用。
-    private func setting<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
-        HStack { Text(title); Spacer(); content() }
-    }
-
     /// 封装 `resolutionTitle` 对应的局部行为，供当前类型在统一入口下复用。
     private func resolutionTitle(_ preset: VideoResolutionPreset) -> String {
         switch preset {
@@ -355,39 +343,4 @@ struct VideoConversionView: View {
         }
     }
 
-    /// 封装 `phase` 对应的局部行为，供当前类型在统一入口下复用。
-    private func phase(_ status: VideoConversionStatus) -> ConversionFilePhase {
-        switch status {
-        case .ready, .cancelled: .pending
-        case .converting: .working
-        case .completed: .completed
-        case .failed: .failed
-        }
-    }
-
-    /// 封装 `statusText` 对应的局部行为，供当前类型在统一入口下复用。
-    private func statusText(_ status: VideoConversionStatus) -> String {
-        switch status {
-        case .ready: L10n.string("status.ready")
-        case .converting: L10n.string("status.converting")
-        case .completed: L10n.string("status.completed")
-        case let .failed(message): message
-        case .cancelled: L10n.string("status.cancelled")
-        }
-    }
-
-    /// 封装 `outputURL` 对应的局部行为，供当前类型在统一入口下复用。
-    private func outputURL(_ status: VideoConversionStatus) -> URL? {
-        guard case let .completed(url) = status else { return nil }
-        return url
-    }
-
-    /// 封装 `sizeDescription` 对应的局部行为，供当前类型在统一入口下复用。
-    private func sizeDescription(_ item: VideoConversionItem) -> String {
-        let source = ByteCountFormatter.string(fromByteCount: item.sourceBytes, countStyle: .file)
-        guard case let .completed(url) = item.status else { return source }
-        let outputBytes = Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
-        let output = ByteCountFormatter.string(fromByteCount: outputBytes, countStyle: .file)
-        return "\(source) → \(output)"
-    }
 }

@@ -29,10 +29,7 @@ final class AudioConversionViewModel {
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(engine: AudioConversionEngine = AudioConversionEngine()) {
         self.engine = engine
-        let manager = FileManager.default
-        let base = manager.urls(for: .documentDirectory, in: .userDomainMask).first
-            ?? manager.temporaryDirectory
-        outputDirectory = base.appendingPathComponent("Converted Audio", isDirectory: true)
+        outputDirectory = ConversionOutputDirectory.url(for: .audio)
         Task { [weak self] in await self?.restore() }
     }
 
@@ -155,12 +152,11 @@ final class AudioConversionViewModel {
         let removedItems = items
         notice = nil
         Task {
-            var deletedIDs = Set<UUID>()
-            for item in removedItems {
-                if await workspace.delete(record(item), kind: .audio, outputRoot: outputDirectory) {
-                    deletedIDs.insert(item.id)
-                }
-            }
+            let deletedIDs = await workspace.delete(
+                removedItems.map(record),
+                kind: .audio,
+                outputRoot: outputDirectory
+            )
             items.removeAll { deletedIDs.contains($0.id) }
             if deletedIDs.count != removedItems.count {
                 notice = L10n.string("conversion.delete.failed")
@@ -270,20 +266,13 @@ final class AudioConversionViewModel {
 
     /// 记录 `record` 产生的结果，并通知依赖该状态的调用方。
     private func record(_ item: AudioConversionItem) -> PersistedConversionItem {
-        let status: PersistedConversionStatus
-        let outputPath: String?
-        switch item.status {
-        case .completed(let url): status = .completed; outputPath = url.path
-        case .failed: status = .failed; outputPath = nil
-        case .cancelled: status = .cancelled; outputPath = nil
-        case .ready, .converting: status = .ready; outputPath = nil
-        }
+        let persistedState = item.status.persistedState
         return PersistedConversionItem(
             id: item.id,
             sourcePath: item.sourceURL.path,
             sourceBytes: item.sourceBytes,
-            status: status,
-            outputPath: outputPath,
+            status: persistedState.status,
+            outputPath: persistedState.outputPath,
             sourceKind: item.sourceKind,
             duration: item.duration
         )

@@ -86,7 +86,7 @@ public final class ImageConversionViewModel {
         let formats = ImageConversionEngine.supportedOutputFormats
         availableFormats = formats
         outputFormat = formats.contains(.jpeg) ? .jpeg : (formats.first ?? .png)
-        self.outputDirectory = outputDirectory ?? Self.defaultOutputDirectory()
+        self.outputDirectory = outputDirectory ?? ConversionOutputDirectory.url(for: .image)
         self.engine = engine
         batchConverter = ImageBatchConverter(engine: engine)
         Task { [weak self] in await self?.restore() }
@@ -278,12 +278,11 @@ public final class ImageConversionViewModel {
         notice = nil
         resetProgress()
         Task {
-            var deletedIDs = Set<UUID>()
-            for item in removedItems {
-                if await workspace.delete(record(item), kind: .image, outputRoot: outputDirectory) {
-                    deletedIDs.insert(item.id)
-                }
-            }
+            let deletedIDs = await workspace.delete(
+                removedItems.map(record),
+                kind: .image,
+                outputRoot: outputDirectory
+            )
             items.removeAll { deletedIDs.contains($0.id) }
             if deletedIDs.count != removedItems.count {
                 notice = L10n.string("conversion.delete.failed")
@@ -299,12 +298,11 @@ public final class ImageConversionViewModel {
             if case .completed = $0.status { true } else { false }
         }
         Task {
-            var deletedIDs = Set<UUID>()
-            for item in completedItems {
-                if await workspace.delete(record(item), kind: .image, outputRoot: outputDirectory) {
-                    deletedIDs.insert(item.id)
-                }
-            }
+            let deletedIDs = await workspace.delete(
+                completedItems.map(record),
+                kind: .image,
+                outputRoot: outputDirectory
+            )
             items.removeAll { deletedIDs.contains($0.id) }
             if deletedIDs.count != completedItems.count {
                 notice = L10n.string("conversion.delete.failed")
@@ -465,20 +463,13 @@ public final class ImageConversionViewModel {
 
     /// 记录 `record` 产生的结果，并通知依赖该状态的调用方。
     private func record(_ item: ImageConversionItem) -> PersistedConversionItem {
-        let status: PersistedConversionStatus
-        let outputPath: String?
-        switch item.status {
-        case .completed(let url): status = .completed; outputPath = url.path
-        case .failed: status = .failed; outputPath = nil
-        case .cancelled: status = .cancelled; outputPath = nil
-        case .inspecting, .ready, .converting: status = .ready; outputPath = nil
-        }
+        let persistedState = item.status.persistedState
         return PersistedConversionItem(
             id: item.id,
             sourcePath: item.sourceURL.path,
             sourceBytes: item.info?.fileSizeBytes ?? 0,
-            status: status,
-            outputPath: outputPath
+            status: persistedState.status,
+            outputPath: persistedState.outputPath
         )
     }
 
@@ -493,13 +484,6 @@ public final class ImageConversionViewModel {
         }
     }
 
-    /// 封装 `defaultOutputDirectory` 对应的局部行为，供当前类型在统一入口下复用。
-    private static func defaultOutputDirectory() -> URL {
-        let fileManager = FileManager.default
-        let baseURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
-            ?? fileManager.temporaryDirectory
-        return baseURL.appendingPathComponent("Converted Images", isDirectory: true)
-    }
 }
 
 /// 定义 `InspectionOutcome` 使用的有限状态或选项集合。

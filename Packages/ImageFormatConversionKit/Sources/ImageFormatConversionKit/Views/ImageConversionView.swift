@@ -454,16 +454,17 @@ struct ImageConversionContentView: View {
             onClear: { isClearAllConfirmationPresented = true }
         ) {
             ForEach(viewModel.items) { item in
-                let presentationURL = imageOutputURL(item.status) ?? item.sourceURL
+                let presentation = item.status.conversionPresentation
+                let presentationURL = presentation.outputURL ?? item.sourceURL
                 ConversionFileTile(
                     url: presentationURL,
                     kind: .image,
                     title: presentationURL.lastPathComponent,
                     subtitle: imageSubtitle(item),
-                    phase: imagePhase(item.status),
-                    statusLabel: imageStatusText(item.status),
+                    phase: presentation.phase,
+                    statusLabel: presentation.label,
                     isLocked: viewModel.isConverting,
-                    outputURL: imageOutputURL(item.status),
+                    outputURL: presentation.outputURL,
                     onRemove: { viewModel.removeItem(id: item.id) }
                 )
             }
@@ -493,37 +494,9 @@ struct ImageConversionContentView: View {
 
     /// 封装 `imageSubtitle` 对应的局部行为，供当前类型在统一入口下复用。
     private func imageSubtitle(_ item: ImageConversionItem) -> String {
-        guard let info = item.info else { return imageStatusText(item.status) }
+        guard let info = item.info else { return item.status.conversionPresentation.label }
         let size = ByteCountFormatter.string(fromByteCount: info.fileSizeBytes, countStyle: .file)
         return "\(info.pixelWidth)×\(info.pixelHeight) · \(size)"
-    }
-
-    /// 封装 `imagePhase` 对应的局部行为，供当前类型在统一入口下复用。
-    private func imagePhase(_ status: ImageConversionItemStatus) -> ConversionFilePhase {
-        switch status {
-        case .inspecting, .ready, .cancelled: .pending
-        case .converting: .working
-        case .completed: .completed
-        case .failed: .failed
-        }
-    }
-
-    /// 封装 `imageStatusText` 对应的局部行为，供当前类型在统一入口下复用。
-    private func imageStatusText(_ status: ImageConversionItemStatus) -> String {
-        switch status {
-        case .inspecting: L10n.string("status.inspecting")
-        case .ready: L10n.string("status.ready")
-        case .converting: L10n.string("status.converting")
-        case .completed: L10n.string("status.completed")
-        case let .failed(message): message
-        case .cancelled: L10n.string("status.cancelled")
-        }
-    }
-
-    /// 封装 `imageOutputURL` 对应的局部行为，供当前类型在统一入口下复用。
-    private func imageOutputURL(_ status: ImageConversionItemStatus) -> URL? {
-        guard case let .completed(url) = status else { return nil }
-        return url
     }
 
     @ViewBuilder
@@ -582,28 +555,22 @@ private struct ImageConversionSettingsCard: View {
                     HStack(spacing: 0) {
                         ConversionWheelColumn(
                             title: L10n.string("settings.format"),
-                            selection: $viewModel.outputFormat
-                        ) {
-                            ForEach(viewModel.availableFormats) { format in
-                                Text(format.displayName).tag(format)
-                            }
-                        }
+                            selection: $viewModel.outputFormat,
+                            options: viewModel.availableFormats,
+                            optionTitle: { $0.displayName }
+                        )
                         ConversionWheelColumn(
                             title: L10n.string("settings.metadata"),
-                            selection: $viewModel.metadataPolicy
-                        ) {
-                            ForEach(ImageMetadataPolicy.allCases) { policy in
-                                Text(metadataTitle(policy)).tag(policy)
-                            }
-                        }
+                            selection: $viewModel.metadataPolicy,
+                            options: ImageMetadataPolicy.allCases,
+                            optionTitle: metadataTitle
+                        )
                         ConversionWheelColumn(
                             title: L10n.string("settings.resize"),
-                            selection: $viewModel.resizePreset
-                        ) {
-                            ForEach(ImageResizePreset.allCases) { preset in
-                                Text(resizeTitle(preset)).tag(preset)
-                            }
-                        }
+                            selection: $viewModel.resizePreset,
+                            options: ImageResizePreset.allCases,
+                            optionTitle: resizeTitle
+                        )
                     }
                 }
             }
@@ -686,18 +653,6 @@ private struct ImageConversionSettingsCard: View {
         case .large: "2048 px"
         case .medium: "1280 px"
         case .square1024: L10n.string("resize.square1024")
-        }
-    }
-
-    /// 封装 `settingRow` 对应的局部行为，供当前类型在统一入口下复用。
-    private func settingRow<Content: View>(
-        title: String,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        HStack {
-            Text(title)
-            Spacer()
-            content()
         }
     }
 
@@ -785,28 +740,15 @@ private struct ImageConversionFileRow: View {
     }
 
     private var presentationURL: URL {
-        guard case let .completed(outputURL) = item.status else { return item.sourceURL }
-        return outputURL
+        item.status.conversionPresentation.outputURL ?? item.sourceURL
     }
 
     private var statusPhase: ConversionFilePhase {
-        switch item.status {
-        case .inspecting, .ready, .cancelled: .pending
-        case .converting: .working
-        case .completed: .completed
-        case .failed: .failed
-        }
+        item.status.conversionPresentation.phase
     }
 
     private var statusText: String {
-        switch item.status {
-        case .inspecting: L10n.string("status.inspecting")
-        case .ready: L10n.string("status.ready")
-        case .converting: L10n.string("status.converting")
-        case .completed: L10n.string("status.completed")
-        case let .failed(message): message
-        case .cancelled: L10n.string("status.cancelled")
-        }
+        item.status.conversionPresentation.label
     }
 
     @ViewBuilder

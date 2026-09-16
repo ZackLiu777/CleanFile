@@ -152,23 +152,19 @@ struct AudioConversionView: View {
                             selection: Binding(
                                 get: { viewModel.outputFormat },
                                 set: { viewModel.outputFormat = $0 }
-                            )
-                        ) {
-                            ForEach(AudioOutputFormat.allCases) { format in
-                                Text(audioFormatTitle(format)).tag(format)
-                            }
-                        }
+                            ),
+                            options: AudioOutputFormat.allCases,
+                            optionTitle: audioFormatTitle
+                        )
                         ConversionWheelColumn(
                             title: L10n.string("audio.settings.quality"),
                             selection: Binding(
                                 get: { viewModel.bitRate },
                                 set: { viewModel.bitRate = $0 }
-                            )
-                        ) {
-                            ForEach(AudioBitRate.allCases) { bitRate in
-                                Text("\(bitRate.rawValue / 1_000) kbps").tag(bitRate)
-                            }
-                        }
+                            ),
+                            options: AudioBitRate.allCases,
+                            optionTitle: { "\($0.rawValue / 1_000) kbps" }
+                        )
                     }
                 }
             }
@@ -177,7 +173,7 @@ struct AudioConversionView: View {
                     .appTypeface(.caption, size: 12, relativeTo: .caption).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            row(L10n.string("settings.output")) {
+            ConversionSettingRow(L10n.string("settings.output")) {
                 Text(L10n.string("settings.output.audio"))
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(.secondary)
@@ -224,16 +220,17 @@ struct AudioConversionView: View {
             onClear: { isClearAllConfirmationPresented = true }
         ) {
             ForEach(viewModel.items) { item in
-                let presentationURL = outputURL(item.status) ?? item.sourceURL
+                let presentation = item.status.conversionPresentation
+                let presentationURL = presentation.outputURL ?? item.sourceURL
                 ConversionFileTile(
                     url: presentationURL,
-                    kind: outputURL(item.status) == nil && item.sourceKind == .video ? .video : .audio,
+                    kind: presentation.outputURL == nil && item.sourceKind == .video ? .video : .audio,
                     title: presentationURL.lastPathComponent,
-                    subtitle: "\(sourceDescription(item)) · \(sizeDescription(item))",
-                    phase: phase(item.status),
-                    statusLabel: statusString(item.status),
+                    subtitle: "\(sourceDescription(item)) · \(ConversionFileSizePresentation.description(sourceBytes: item.sourceBytes, outputURL: presentation.outputURL))",
+                    phase: presentation.phase,
+                    statusLabel: presentation.label,
                     isLocked: viewModel.isConverting,
-                    outputURL: outputURL(item.status),
+                    outputURL: presentation.outputURL,
                     onRemove: { viewModel.remove(item.id) }
                 )
             }
@@ -279,25 +276,6 @@ struct AudioConversionView: View {
         }
     }
 
-    /// 封装 `row` 对应的局部行为，供当前类型在统一入口下复用。
-    private func row<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
-        HStack { Text(title); Spacer(); content() }
-    }
-
-    /// 封装 `sizeDescription` 对应的局部行为，供当前类型在统一入口下复用。
-    private func sizeDescription(_ item: AudioConversionItem) -> String {
-        let source = ByteCountFormatter.string(fromByteCount: item.sourceBytes, countStyle: .file)
-        guard case let .completed(url) = item.status else { return source }
-        let bytes = Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
-        return "\(source) → \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))"
-    }
-
-    /// 封装 `outputURL` 对应的局部行为，供当前类型在统一入口下复用。
-    private func outputURL(_ status: AudioConversionStatus) -> URL? {
-        guard case let .completed(url) = status else { return nil }
-        return url
-    }
-
     /// 封装 `sourceDescription` 对应的局部行为，供当前类型在统一入口下复用。
     private func sourceDescription(_ item: AudioConversionItem) -> String {
         let kind = item.sourceKind == .video
@@ -308,24 +286,4 @@ struct AudioConversionView: View {
         return "\(kind) · \(String(format: "%d:%02d", totalSeconds / 60, totalSeconds % 60))"
     }
 
-    /// 封装 `phase` 对应的局部行为，供当前类型在统一入口下复用。
-    private func phase(_ status: AudioConversionStatus) -> ConversionFilePhase {
-        switch status {
-        case .ready, .cancelled: .pending
-        case .converting: .working
-        case .completed: .completed
-        case .failed: .failed
-        }
-    }
-
-    /// 封装 `statusString` 对应的局部行为，供当前类型在统一入口下复用。
-    private func statusString(_ status: AudioConversionStatus) -> String {
-        switch status {
-        case .ready: L10n.string("status.ready")
-        case .converting: L10n.string("status.converting")
-        case .completed: L10n.string("status.completed")
-        case let .failed(message): message
-        case .cancelled: L10n.string("status.cancelled")
-        }
-    }
 }

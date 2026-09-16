@@ -42,6 +42,103 @@ enum ConversionFilePhase {
     case failed
 }
 
+/// 隔离业务状态枚举与 UI 展示所需数据，避免 View 重复理解每一种状态。
+struct ConversionStatusPresentation {
+    let phase: ConversionFilePhase
+    let label: String
+    let outputURL: URL?
+}
+
+protocol ConversionStatusPresentable {
+    var conversionPresentation: ConversionStatusPresentation { get }
+}
+
+extension ImageConversionItemStatus: ConversionStatusPresentable {
+    var conversionPresentation: ConversionStatusPresentation {
+        switch self {
+        case .inspecting:
+            ConversionStatusPresentation(phase: .pending, label: L10n.string("status.inspecting"), outputURL: nil)
+        case .ready:
+            ConversionStatusPresentation(phase: .pending, label: L10n.string("status.ready"), outputURL: nil)
+        case .converting:
+            ConversionStatusPresentation(phase: .working, label: L10n.string("status.converting"), outputURL: nil)
+        case let .completed(outputURL):
+            ConversionStatusPresentation(phase: .completed, label: L10n.string("status.completed"), outputURL: outputURL)
+        case let .failed(message):
+            ConversionStatusPresentation(phase: .failed, label: message, outputURL: nil)
+        case .cancelled:
+            ConversionStatusPresentation(phase: .pending, label: L10n.string("status.cancelled"), outputURL: nil)
+        }
+    }
+}
+
+extension AudioConversionStatus: ConversionStatusPresentable {
+    var conversionPresentation: ConversionStatusPresentation {
+        switch self {
+        case .ready:
+            ConversionStatusPresentation(phase: .pending, label: L10n.string("status.ready"), outputURL: nil)
+        case .converting:
+            ConversionStatusPresentation(phase: .working, label: L10n.string("status.converting"), outputURL: nil)
+        case let .completed(outputURL):
+            ConversionStatusPresentation(phase: .completed, label: L10n.string("status.completed"), outputURL: outputURL)
+        case let .failed(message):
+            ConversionStatusPresentation(phase: .failed, label: message, outputURL: nil)
+        case .cancelled:
+            ConversionStatusPresentation(phase: .pending, label: L10n.string("status.cancelled"), outputURL: nil)
+        }
+    }
+}
+
+extension VideoConversionStatus: ConversionStatusPresentable {
+    var conversionPresentation: ConversionStatusPresentation {
+        switch self {
+        case .ready:
+            ConversionStatusPresentation(phase: .pending, label: L10n.string("status.ready"), outputURL: nil)
+        case .converting:
+            ConversionStatusPresentation(phase: .working, label: L10n.string("status.converting"), outputURL: nil)
+        case let .completed(outputURL):
+            ConversionStatusPresentation(phase: .completed, label: L10n.string("status.completed"), outputURL: outputURL)
+        case let .failed(message):
+            ConversionStatusPresentation(phase: .failed, label: message, outputURL: nil)
+        case .cancelled:
+            ConversionStatusPresentation(phase: .pending, label: L10n.string("status.cancelled"), outputURL: nil)
+        }
+    }
+}
+
+/// 文件大小的读取与格式化集中在展示边界，业务 View 不依赖文件属性细节。
+enum ConversionFileSizePresentation {
+    static func description(sourceBytes: Int64, outputURL: URL?) -> String {
+        let source = ByteCountFormatter.string(fromByteCount: sourceBytes, countStyle: .file)
+        guard let outputURL else { return source }
+
+        let outputBytes = Int64(
+            (try? outputURL.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+        )
+        let output = ByteCountFormatter.string(fromByteCount: outputBytes, countStyle: .file)
+        return "\(source) → \(output)"
+    }
+}
+
+/// 转换设置中通用的标题/值行，保持各媒体页面布局一致。
+struct ConversionSettingRow<Content: View>: View {
+    let title: String
+    let content: Content
+
+    init(_ title: String, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.content = content()
+    }
+
+    var body: some View {
+        HStack {
+            Text(title)
+            Spacer()
+            content
+        }
+    }
+}
+
 /// 定义 `SendableThumbnail` 的值语义数据与相关行为。
 private struct SendableThumbnail: @unchecked Sendable {
 #if os(iOS)

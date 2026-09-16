@@ -32,7 +32,7 @@ public final class VideoConversionViewModel {
         outputDirectory: URL? = nil,
         engine: VideoConversionEngine = VideoConversionEngine()
     ) {
-        self.outputDirectory = outputDirectory ?? Self.defaultOutputDirectory()
+        self.outputDirectory = outputDirectory ?? ConversionOutputDirectory.url(for: .video)
         self.engine = engine
         Task { [weak self] in await self?.restore() }
     }
@@ -145,12 +145,11 @@ public final class VideoConversionViewModel {
         let removedItems = items
         notice = nil
         Task {
-            var deletedIDs = Set<UUID>()
-            for item in removedItems {
-                if await workspace.delete(record(item), kind: .video, outputRoot: outputDirectory) {
-                    deletedIDs.insert(item.id)
-                }
-            }
+            let deletedIDs = await workspace.delete(
+                removedItems.map(record),
+                kind: .video,
+                outputRoot: outputDirectory
+            )
             items.removeAll { deletedIDs.contains($0.id) }
             if deletedIDs.count != removedItems.count {
                 notice = L10n.string("conversion.delete.failed")
@@ -268,28 +267,13 @@ public final class VideoConversionViewModel {
 
     /// 记录 `record` 产生的结果，并通知依赖该状态的调用方。
     private func record(_ item: VideoConversionItem) -> PersistedConversionItem {
-        let status: PersistedConversionStatus
-        let outputPath: String?
-        switch item.status {
-        case .completed(let url): status = .completed; outputPath = url.path
-        case .failed: status = .failed; outputPath = nil
-        case .cancelled: status = .cancelled; outputPath = nil
-        case .ready, .converting: status = .ready; outputPath = nil
-        }
+        let persistedState = item.status.persistedState
         return PersistedConversionItem(
             id: item.id,
             sourcePath: item.sourceURL.path,
             sourceBytes: item.sourceBytes,
-            status: status,
-            outputPath: outputPath
+            status: persistedState.status,
+            outputPath: persistedState.outputPath
         )
-    }
-
-    /// 封装 `defaultOutputDirectory` 对应的局部行为，供当前类型在统一入口下复用。
-    private static func defaultOutputDirectory() -> URL {
-        let manager = FileManager.default
-        let base = manager.urls(for: .documentDirectory, in: .userDomainMask).first
-            ?? manager.temporaryDirectory
-        return base.appendingPathComponent("Converted Videos", isDirectory: true)
     }
 }
