@@ -32,18 +32,29 @@ final class CleanMyIPhoneUITests: XCTestCase {
         ]
         app.launch()
 
-        for (identifier, label) in [
+        for (index, tab) in [
             ("tab.media", "Media"),
             ("tab.storage", "Storage"),
             ("tab.convert", "Compress"),
             ("tab.settings", "Settings")
-        ] {
-            let customTab = app.buttons[identifier]
+        ].enumerated() {
+            let (identifier, label) = tab
+            // SwiftUI may expose the same tab as Button or Any depending on
+            // whether the custom or native Liquid Glass tab bar is active.
+            let identifiedTab = app.descendants(matching: .any)[identifier]
             let nativeTab = app.tabBars.buttons[label]
+            let identifiedTimeout: TimeInterval = index == 0 ? 10 : 5
+
+            let identifiedTabExists = identifiedTab.waitForExistence(
+                timeout: identifiedTimeout
+            )
+            let nativeTabExists = identifiedTabExists
+                ? false
+                : nativeTab.waitForExistence(timeout: 5)
+
             XCTAssertTrue(
-                customTab.waitForExistence(timeout: 2)
-                    || nativeTab.waitForExistence(timeout: 3),
-                "Missing primary tab \(label)"
+                identifiedTabExists || nativeTabExists,
+                "Missing primary tab \(label) (identifier: \(identifier)) after app launch"
             )
         }
     }
