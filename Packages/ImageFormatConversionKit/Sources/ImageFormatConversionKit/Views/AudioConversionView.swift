@@ -178,6 +178,7 @@ struct AudioConversionView: View {
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(.secondary)
             }
+            ConversionSizeEstimateView(estimate: viewModel.sizeEstimate)
         }
         .padding(16)
         .converterCard()
@@ -226,7 +227,7 @@ struct AudioConversionView: View {
                     url: presentationURL,
                     kind: presentation.outputURL == nil && item.sourceKind == .video ? .video : .audio,
                     title: presentationURL.lastPathComponent,
-                    subtitle: "\(sourceDescription(item)) · \(ConversionFileSizePresentation.description(sourceBytes: item.sourceBytes, outputURL: presentation.outputURL))",
+                    subtitle: audioSubtitle(item, outputURL: presentation.outputURL),
                     phase: presentation.phase,
                     statusLabel: presentation.label,
                     isLocked: viewModel.isConverting,
@@ -277,6 +278,16 @@ struct AudioConversionView: View {
     }
 
     /// 封装 `sourceDescription` 对应的局部行为，供当前类型在统一入口下复用。
+    private func audioSubtitle(_ item: AudioConversionItem, outputURL: URL?) -> String {
+        let sizes = ConversionFileSizePresentation.description(
+            sourceBytes: item.sourceBytes,
+            outputURL: outputURL
+        )
+        // Keep the size transition first so compact tiles never truncate the
+        // most important result behind source and duration metadata.
+        return "\(sizes) · \(sourceDescription(item))"
+    }
+
     private func sourceDescription(_ item: AudioConversionItem) -> String {
         let kind = item.sourceKind == .video
             ? L10n.string("audio.source.video")

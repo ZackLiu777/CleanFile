@@ -229,3 +229,12 @@
 "settings.background" = "Arrière-plan";
 "color.transparent" = "Transparent";
 "settings.background.detail" = "S’applique aux pixels transparents et aux marges carrées, sans supprimer le fond de l’image. La transparence est disponible en PNG et TIFF. Les autres formats rétablissent le blanc.";
+"estimate.title" = "Taille estimée";
+"estimate.original" = "Taille d’origine";
+"estimate.output" = "Sortie estimée";
+"estimate.savings" = "Économie estimée";
+"estimate.increase" = "Augmentation estimée";
+"estimate.range" = "%@–%@";
+"estimate.change" = "%@ · environ %d %%";
+"estimate.disclaimer" = "Estimation uniquement. La taille réelle dépend du contenu et de l’encodeur.";
+"estimate.calculating" = "Estimation de la taille de sortie…";

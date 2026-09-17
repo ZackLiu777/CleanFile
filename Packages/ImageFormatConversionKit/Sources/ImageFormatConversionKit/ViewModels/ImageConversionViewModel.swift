@@ -104,6 +104,16 @@ public final class ImageConversionViewModel {
         }
     }
 
+    var sizeEstimate: ConversionSizeEstimate? {
+        ConversionSizeEstimate.image(
+            infos: items.compactMap(\.info),
+            format: outputFormat,
+            quality: quality,
+            resize: resizePreset,
+            metadata: metadataPolicy
+        )
+    }
+
     /// 封装 `addFiles` 对应的局部行为，供当前类型在统一入口下复用。
     public func addFiles(
         _ urls: [URL],

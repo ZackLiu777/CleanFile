@@ -11,6 +11,11 @@ import LAME
 
 /// 使用 Actor 隔离 `AudioConversionEngine` 的可变状态，确保并发访问安全。
 public actor AudioConversionEngine {
+    public struct Inspection: Sendable {
+        public let duration: TimeInterval
+        public let sampleRate: Double
+        public let channelCount: Int
+    }
     public static let supportedInputExtensions = ["m4a", "aac", "mp3", "flac", "wav", "aiff", "aif", "caf"]
     public static let supportedVideoInputExtensions = ["mov", "mp4", "m4v"]
 
@@ -21,13 +26,26 @@ public actor AudioConversionEngine {
 
     /// 执行 `inspect` 分析流程，在遵守文件访问边界的前提下生成结果。
     public func inspect(_ sourceURL: URL, sourceKind: AudioSourceKind) async throws -> TimeInterval {
+        try await inspectDetails(sourceURL, sourceKind: sourceKind).duration
+    }
+
+    public func inspectDetails(_ sourceURL: URL, sourceKind: AudioSourceKind) async throws -> Inspection {
         switch sourceKind {
         case .audioFile:
             let file = try AVAudioFile(forReading: sourceURL)
-            let sampleRate = file.processingFormat.sampleRate
-            return sampleRate > 0 ? Double(file.length) / sampleRate : 0
+            let format = file.processingFormat
+            let duration = format.sampleRate > 0 ? Double(file.length) / format.sampleRate : 0
+            return Inspection(
+                duration: duration,
+                sampleRate: format.sampleRate,
+                channelCount: Int(format.channelCount)
+            )
         case .video:
-            return try await videoExtractor.inspect(sourceURL)
+            return Inspection(
+                duration: try await videoExtractor.inspect(sourceURL),
+                sampleRate: 48_000,
+                channelCount: 2
+            )
         }
     }
 

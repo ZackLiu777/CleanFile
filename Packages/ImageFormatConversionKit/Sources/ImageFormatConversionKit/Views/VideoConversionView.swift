@@ -233,6 +233,10 @@ struct VideoConversionView: View {
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(.secondary)
             }
+            ConversionSizeEstimateView(
+                estimate: viewModel.sizeEstimate,
+                isLoading: viewModel.isEstimatingSize
+            )
         }
         .padding(16)
         .converterCard()

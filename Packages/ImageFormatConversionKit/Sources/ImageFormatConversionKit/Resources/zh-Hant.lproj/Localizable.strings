@@ -229,3 +229,12 @@
 "settings.background" = "背景";
 "color.transparent" = "無色透明";
 "settings.background.detail" = "套用於透明區域與正方形留邊，不會移除圖片原有背景。透明輸出支援 PNG、TIFF；切換至其他格式時恢復白色。";
+"estimate.title" = "預估大小";
+"estimate.original" = "原始大小";
+"estimate.output" = "預估輸出";
+"estimate.savings" = "預估節省";
+"estimate.increase" = "預估增加";
+"estimate.range" = "%@–%@";
+"estimate.change" = "%@ · 約 %d%%";
+"estimate.disclaimer" = "僅為預估值，實際大小取決於媒體內容和編碼器。";
+"estimate.calculating" = "正在預估輸出大小…";

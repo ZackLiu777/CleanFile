@@ -119,6 +119,53 @@ public actor VideoConversionEngine {
         activeExporters.values.forEach { $0.cancelExport() }
     }
 
+    /// Uses the same export preset as conversion so estimates follow codec and resolution changes.
+    public func estimateOutputBytes(_ request: VideoConversionRequest) async throws -> Int64 {
+        let asset = AVURLAsset(url: request.sourceURL.standardizedFileURL)
+        let preset = exportPreset(codec: request.codec, resolution: request.resolution)
+        guard await AVAssetExportSession.compatibility(
+            ofExportPreset: preset,
+            with: asset,
+            outputFileType: fileType(request.container)
+        ), let exporter = AVAssetExportSession(asset: asset, presetName: preset) else {
+            throw VideoConversionError.unsupportedSettings
+        }
+        exporter.outputFileType = fileType(request.container)
+        let duration = try await asset.load(.duration)
+        if duration.isNumeric, duration > .zero {
+            // A finite range gives AVFoundation all information needed for its most
+            // accurate content-aware estimate instead of relying on an open-ended range.
+            exporter.timeRange = CMTimeRange(start: .zero, duration: duration)
+        }
+        if let bytes = try? await exporter.estimatedOutputFileLengthInBytes, bytes > 0 {
+            return bytes
+        }
+        if let bytes = try await proResFallbackOutputBytes(asset: asset, codec: request.codec) {
+            return bytes
+        }
+        throw VideoConversionError.cannotCreateExporter
+    }
+
+    private func proResFallbackOutputBytes(asset: AVAsset, codec: VideoCodec) async throws -> Int64? {
+        guard codec == .proRes422 || codec == .proRes4444 else { return nil }
+        let duration = try await asset.load(.duration).seconds
+        guard let track = try await asset.loadTracks(withMediaType: .video).first else { return nil }
+        let naturalSize = try await track.load(.naturalSize)
+        let transform = try await track.load(.preferredTransform)
+        let transformedSize = naturalSize.applying(transform)
+        let width = Int(abs(transformedSize.width).rounded())
+        let height = Int(abs(transformedSize.height).rounded())
+        let nominalFrameRate = Double(try await track.load(.nominalFrameRate))
+
+        return ConversionSizeEstimate.proResOutputBytes(
+            duration: duration,
+            width: width,
+            height: height,
+            framesPerSecond: nominalFrameRate > 0 ? nominalFrameRate : 30,
+            codec: codec
+        )
+    }
+
     /// 执行 `exportPreset` 转换流程，并按当前配置生成输出结果。
     private func exportPreset(codec: VideoCodec, resolution: VideoResolutionPreset) -> String {
         if codec == .proRes422 { return AVAssetExportPresetAppleProRes422LPCM }

@@ -139,6 +139,70 @@ struct ConversionSettingRow<Content: View>: View {
     }
 }
 
+/// Shared estimate presentation keeps all conversion screens honest and visually consistent.
+struct ConversionSizeEstimateView: View {
+    let estimate: ConversionSizeEstimate?
+    var isLoading = false
+
+    var body: some View {
+        if let estimate {
+            VStack(alignment: .leading, spacing: 9) {
+                Divider()
+                ConversionMicroText(L10n.string("estimate.title"))
+                valueRow(L10n.string("estimate.original"), bytes(estimate.originalBytes))
+                valueRow(
+                    L10n.string("estimate.output"),
+                    L10n.format(
+                        "estimate.range",
+                        bytes(estimate.lowerBoundBytes),
+                        bytes(estimate.upperBoundBytes)
+                    )
+                )
+                valueRow(changeTitle(estimate), changeValue(estimate))
+                Text(L10n.string("estimate.disclaimer"))
+                    .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .accessibilityIdentifier("conversion.sizeEstimate")
+        } else if isLoading {
+            HStack(spacing: 8) {
+                ProgressView().controlSize(.small)
+                Text(L10n.string("estimate.calculating"))
+                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
+                    .foregroundStyle(.secondary)
+            }
+            .accessibilityIdentifier("conversion.sizeEstimate.loading")
+        }
+    }
+
+    private func valueRow(_ title: String, _ value: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title).foregroundStyle(.secondary)
+            Spacer()
+            Text(value).monospacedDigit().multilineTextAlignment(.trailing)
+        }
+        .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .medium)
+    }
+
+    private func changeTitle(_ estimate: ConversionSizeEstimate) -> String {
+        estimate.likelyBytes <= estimate.originalBytes
+            ? L10n.string("estimate.savings")
+            : L10n.string("estimate.increase")
+    }
+
+    private func changeValue(_ estimate: ConversionSizeEstimate) -> String {
+        let difference = abs(estimate.originalBytes - estimate.likelyBytes)
+        guard estimate.originalBytes > 0 else { return bytes(difference) }
+        let percentage = Int((Double(difference) / Double(estimate.originalBytes) * 100).rounded())
+        return L10n.format("estimate.change", bytes(difference), percentage)
+    }
+
+    private func bytes(_ value: Int64) -> String {
+        ByteCountFormatter.string(fromByteCount: value, countStyle: .file)
+    }
+}
+
 /// 定义 `SendableThumbnail` 的值语义数据与相关行为。
 private struct SendableThumbnail: @unchecked Sendable {
 #if os(iOS)

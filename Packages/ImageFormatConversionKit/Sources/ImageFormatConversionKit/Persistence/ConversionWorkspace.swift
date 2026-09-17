@@ -103,6 +103,8 @@ struct PersistedConversionItem: Codable, Sendable {
     let outputPath: String?
     var sourceKind: AudioSourceKind? = nil
     var duration: TimeInterval? = nil
+    var sampleRate: Double? = nil
+    var channelCount: Int? = nil
 }
 
 /// 使用 Actor 隔离 `ConversionWorkspace` 的可变状态，确保并发访问安全。

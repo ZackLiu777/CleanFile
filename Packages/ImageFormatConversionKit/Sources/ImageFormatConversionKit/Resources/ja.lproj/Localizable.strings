@@ -229,3 +229,12 @@
 "settings.background" = "背景";
 "color.transparent" = "透明";
 "settings.background.detail" = "透明部分と正方形の余白に適用されます。元の背景を除去する機能ではありません。透明出力はPNGとTIFFに対応し、他の形式に切り替えると白に戻ります。";
+"estimate.title" = "推定サイズ";
+"estimate.original" = "元のサイズ";
+"estimate.output" = "推定出力";
+"estimate.savings" = "推定削減量";
+"estimate.increase" = "推定増加量";
+"estimate.range" = "%@～%@";
+"estimate.change" = "%@・約%d%%";
+"estimate.disclaimer" = "推定値です。実際のサイズはメディア内容とエンコーダーによって異なります。";
+"estimate.calculating" = "出力サイズを推定中…";

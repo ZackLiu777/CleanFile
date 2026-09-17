@@ -42,6 +42,14 @@ final class AudioConversionViewModel {
         }
     }
 
+    var sizeEstimate: ConversionSizeEstimate? {
+        ConversionSizeEstimate.audio(
+            items: items,
+            format: outputFormat,
+            bitRate: bitRate
+        )
+    }
+
     /// 封装 `addFiles` 对应的局部行为，供当前类型在统一入口下复用。
     func addFiles(
         _ urls: [URL],
@@ -92,15 +100,17 @@ final class AudioConversionViewModel {
                 }
                 do {
                     let audioEngine = engine
-                    let duration = try await ConversionImportScheduler.shared.withPermit {
-                        try await audioEngine.inspect(stagedURL, sourceKind: sourceKind)
+                    let inspection = try await ConversionImportScheduler.shared.withPermit {
+                        try await audioEngine.inspectDetails(stagedURL, sourceKind: sourceKind)
                     }
                     items.append(AudioConversionItem(
                         id: id,
                         sourceURL: stagedURL,
                         sourceBytes: bytes,
                         sourceKind: sourceKind,
-                        duration: duration
+                        duration: inspection.duration,
+                        sampleRate: inspection.sampleRate,
+                        channelCount: inspection.channelCount
                     ))
                 } catch {
                     _ = await workspace.delete(
@@ -252,6 +262,8 @@ final class AudioConversionViewModel {
                 sourceBytes: record.sourceBytes,
                 sourceKind: record.sourceKind ?? .audioFile,
                 duration: record.duration,
+                sampleRate: record.sampleRate,
+                channelCount: record.channelCount,
                 status: status
             )
         }
@@ -274,7 +286,9 @@ final class AudioConversionViewModel {
             status: persistedState.status,
             outputPath: persistedState.outputPath,
             sourceKind: item.sourceKind,
-            duration: item.duration
+            duration: item.duration,
+            sampleRate: item.sampleRate,
+            channelCount: item.channelCount
         )
     }
 }

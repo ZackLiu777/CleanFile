@@ -16,16 +16,25 @@ public final class VideoConversionViewModel {
     public private(set) var total = 0
     public private(set) var currentProgress = 0.0
     public private(set) var notice: String?
+    private(set) var sizeEstimate: ConversionSizeEstimate?
+    private(set) var isEstimatingSize = false
     private(set) var importProgress: ConversionImportProgress?
 
-    public var container: VideoOutputContainer = .mp4
-    public var codec: VideoCodec = .h264
-    public var resolution: VideoResolutionPreset = .original
+    public var container: VideoOutputContainer = .mp4 {
+        didSet { scheduleSizeEstimate() }
+    }
+    public var codec: VideoCodec = .h264 {
+        didSet { scheduleSizeEstimate() }
+    }
+    public var resolution: VideoResolutionPreset = .original {
+        didSet { scheduleSizeEstimate() }
+    }
     public let outputDirectory: URL
 
     private let engine: VideoConversionEngine
     private let workspace = ConversionWorkspace.shared
     @ObservationIgnored private var task: Task<Void, Never>?
+    @ObservationIgnored private var estimateTask: Task<Void, Never>?
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     public init(
@@ -120,6 +129,7 @@ public final class VideoConversionViewModel {
             ).mapped(to: progressRange)
         }
         persist()
+        scheduleSizeEstimate()
     }
 
     /// 执行 `remove` 移除流程，并同步更新受影响的业务状态。
@@ -132,6 +142,7 @@ public final class VideoConversionViewModel {
             )
             if succeeded {
                 items.removeAll { $0.id == id }
+                scheduleSizeEstimate()
             } else {
                 notice = L10n.string("conversion.delete.failed")
             }
@@ -151,6 +162,7 @@ public final class VideoConversionViewModel {
                 outputRoot: outputDirectory
             )
             items.removeAll { deletedIDs.contains($0.id) }
+            scheduleSizeEstimate()
             if deletedIDs.count != removedItems.count {
                 notice = L10n.string("conversion.delete.failed")
             }
@@ -257,6 +269,55 @@ public final class VideoConversionViewModel {
             )
         }
         persist()
+        scheduleSizeEstimate()
+    }
+
+    private func scheduleSizeEstimate() {
+        estimateTask?.cancel()
+        sizeEstimate = nil
+        guard !items.isEmpty else {
+            isEstimatingSize = false
+            return
+        }
+
+        let sources = items.map { ($0.sourceURL, $0.sourceBytes) }
+        let container = container
+        let codec = codec
+        let resolution = resolution
+        let outputDirectory = outputDirectory
+        let engine = engine
+        isEstimatingSize = true
+
+        estimateTask = Task { [weak self] in
+            do {
+                try await Task.sleep(for: .milliseconds(300))
+                var estimatedBytes: Int64 = 0
+                for (sourceURL, _) in sources {
+                    try Task.checkCancellation()
+                    let request = VideoConversionRequest(
+                        sourceURL: sourceURL,
+                        destinationDirectory: outputDirectory,
+                        container: container,
+                        codec: codec,
+                        resolution: resolution
+                    )
+                    estimatedBytes += try await engine.estimateOutputBytes(request)
+                }
+                try Task.checkCancellation()
+                let originalBytes = sources.reduce(Int64(0)) { $0 + $1.1 }
+                self?.sizeEstimate = ConversionSizeEstimate.video(
+                    originalBytes: originalBytes,
+                    estimatedBytes: estimatedBytes
+                )
+                self?.isEstimatingSize = false
+            } catch is CancellationError {
+                return
+            } catch {
+                guard !Task.isCancelled else { return }
+                self?.sizeEstimate = nil
+                self?.isEstimatingSize = false
+            }
+        }
     }
 
     /// 持久化 `persist` 对应的数据，并保持后续恢复所需的信息完整。

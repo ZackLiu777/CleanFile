@@ -229,3 +229,12 @@
 "settings.background" = "Background";
 "color.transparent" = "Transparent";
 "settings.background.detail" = "Applies to transparent pixels and square padding; it does not remove the image background. Transparency is available for PNG and TIFF. Other formats reset transparency to white.";
+"estimate.title" = "Estimated Size";
+"estimate.original" = "Original";
+"estimate.output" = "Estimated output";
+"estimate.savings" = "Estimated savings";
+"estimate.increase" = "Estimated increase";
+"estimate.range" = "%@–%@";
+"estimate.change" = "%@ · about %d%%";
+"estimate.disclaimer" = "Estimate only. Actual size depends on the media content and encoder.";
+"estimate.calculating" = "Estimating output size…";

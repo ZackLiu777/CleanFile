@@ -69,6 +69,8 @@ public struct AudioConversionItem: Identifiable, Hashable, Sendable {
     public let sourceBytes: Int64
     public let sourceKind: AudioSourceKind
     public let duration: TimeInterval?
+    public let sampleRate: Double?
+    public let channelCount: Int?
     public var status: AudioConversionStatus
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
@@ -78,6 +80,8 @@ public struct AudioConversionItem: Identifiable, Hashable, Sendable {
         sourceBytes: Int64,
         sourceKind: AudioSourceKind = .audioFile,
         duration: TimeInterval? = nil,
+        sampleRate: Double? = nil,
+        channelCount: Int? = nil,
         status: AudioConversionStatus = .ready
     ) {
         self.id = id
@@ -85,6 +89,8 @@ public struct AudioConversionItem: Identifiable, Hashable, Sendable {
         self.sourceBytes = sourceBytes
         self.sourceKind = sourceKind
         self.duration = duration
+        self.sampleRate = sampleRate
+        self.channelCount = channelCount
         self.status = status
     }
 }

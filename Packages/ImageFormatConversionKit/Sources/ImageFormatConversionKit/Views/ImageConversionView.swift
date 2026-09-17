@@ -495,8 +495,10 @@ struct ImageConversionContentView: View {
     /// 封装 `imageSubtitle` 对应的局部行为，供当前类型在统一入口下复用。
     private func imageSubtitle(_ item: ImageConversionItem) -> String {
         guard let info = item.info else { return item.status.conversionPresentation.label }
-        let size = ByteCountFormatter.string(fromByteCount: info.fileSizeBytes, countStyle: .file)
-        return "\(info.pixelWidth)×\(info.pixelHeight) · \(size)"
+        return ConversionFileSizePresentation.description(
+            sourceBytes: info.fileSizeBytes,
+            outputURL: item.status.conversionPresentation.outputURL
+        )
     }
 
     @ViewBuilder
@@ -631,6 +633,8 @@ private struct ImageConversionSettingsCard: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
+
+            ConversionSizeEstimateView(estimate: viewModel.sizeEstimate)
         }
         .padding(16)
         .converterCard()
@@ -702,11 +706,9 @@ private struct ImageConversionFileRow: View {
                             phase: statusPhase,
                             accessibilityLabel: statusText
                         )
-                        Text("\(info.pixelWidth)×\(info.pixelHeight)")
-                        Text("·")
-                        Text(ByteCountFormatter.string(
-                            fromByteCount: info.fileSizeBytes,
-                            countStyle: .file
+                        Text(ConversionFileSizePresentation.description(
+                            sourceBytes: info.fileSizeBytes,
+                            outputURL: item.status.conversionPresentation.outputURL
                         ))
                     }
                     .font(.system(size: 12, weight: .medium, design: .monospaced))

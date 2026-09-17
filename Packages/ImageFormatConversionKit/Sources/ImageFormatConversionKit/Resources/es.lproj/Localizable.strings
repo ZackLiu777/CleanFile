@@ -229,3 +229,12 @@
 "settings.background" = "Fondo";
 "color.transparent" = "Transparente";
 "settings.background.detail" = "Se aplica a los píxeles transparentes y los márgenes cuadrados; no elimina el fondo de la imagen. La transparencia está disponible en PNG y TIFF. Los demás formatos restablecen el blanco.";
+"estimate.title" = "Tamaño estimado";
+"estimate.original" = "Tamaño original";
+"estimate.output" = "Salida estimada";
+"estimate.savings" = "Ahorro estimado";
+"estimate.increase" = "Aumento estimado";
+"estimate.range" = "%@–%@";
+"estimate.change" = "%@ · aprox. %d %%";
+"estimate.disclaimer" = "Solo es una estimación. El tamaño real depende del contenido y del codificador.";
+"estimate.calculating" = "Calculando el tamaño de salida…";
