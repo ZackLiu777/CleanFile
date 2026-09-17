@@ -470,3 +470,6 @@
 "premium.lifetime.error.title" = "購入できません";
 "premium.lifetime.error.load" = "永久購入を読み込めませんでした。後でもう一度お試しください。";
 "premium.lifetime.error.purchase" = "購入を完了できませんでした。もう一度お試しください。";
+"Contact Developer" = "開発者に連絡";
+"Send feedback, questions, or bug reports by email." = "ご意見、ご質問、不具合報告をメールで送信します。";
+"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter フィードバック";

@@ -20,6 +20,7 @@ struct SettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var photoAuthorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     @State private var showsPremium = false
+    @State private var showsHelp = false
 
     var body: some View {
         NavigationStack {
@@ -79,22 +80,58 @@ struct SettingsView: View {
                 .appListCard()
 
                 Section("Support") {
-                    NavigationLink {
-                        HelpView()
-                    } label: {
-                        Label {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("Help")
-                                Text("Learn how to use the app and safely free up iPhone storage.")
-                                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
-                                    .foregroundStyle(theme.textSecondary)
+                    VStack(spacing: 0) {
+                        Button {
+                            showsHelp = true
+                        } label: {
+                            HStack(spacing: 12) {
+                                Label {
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text("Help")
+                                        Text("Learn how to use the app and safely free up iPhone storage.")
+                                            .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
+                                            .foregroundStyle(theme.textSecondary)
+                                    }
+                                } icon: {
+                                    Image(systemName: "questionmark.circle")
+                                        .foregroundStyle(theme.accentPrimary)
+                                }
+
+                                Spacer(minLength: 8)
+
+                                Image(systemName: "chevron.right")
+                                    .font(.footnote.weight(.semibold))
+                                    .foregroundStyle(.tertiary)
                             }
-                        } icon: {
-                            Image(systemName: "questionmark.circle")
-                                .foregroundStyle(theme.accentPrimary)
+                            .contentShape(Rectangle())
                         }
+                        .buttonStyle(.plain)
+                        .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
+                        .accessibilityIdentifier("settings.help")
+
+                        Divider()
+
+                        Button {
+                            guard let feedbackEmailURL else { return }
+                            openURL(feedbackEmailURL)
+                        } label: {
+                            Label {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("Contact Developer")
+                                    Text("Send feedback, questions, or bug reports by email.")
+                                        .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
+                                        .foregroundStyle(theme.textSecondary)
+                                }
+                            } icon: {
+                                Image(systemName: "envelope")
+                                    .foregroundStyle(theme.accentPrimary)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .accessibilityIdentifier("settings.contactDeveloper")
                     }
-                    .accessibilityIdentifier("settings.help")
                 }
                 .appListCard()
 
@@ -154,6 +191,9 @@ struct SettingsView: View {
             }
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $showsHelp) {
+                HelpView()
+            }
         }
         .accessibilityIdentifier("settings.screen")
         .sheet(isPresented: $showsPremium) {
@@ -177,6 +217,19 @@ struct SettingsView: View {
 
     private var buildNumber: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"
+    }
+
+    private var feedbackEmailURL: URL? {
+        var components = URLComponents()
+        components.scheme = "mailto"
+        components.path = "liaozhengqiang8@gmail.com"
+        components.queryItems = [
+            URLQueryItem(
+                name: "subject",
+                value: String(localized: "File Cleaner & Media Converter Feedback")
+            )
+        ]
+        return components.url
     }
 
     /// 在设置主页准确显示当前使用的是预设背景还是用户自定义背景。

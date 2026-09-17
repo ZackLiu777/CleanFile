@@ -7,24 +7,34 @@ import SwiftUI
 
 struct MediaQuickCleanView: View {
     @Environment(\.appTheme) private var theme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @EnvironmentObject private var themeSettings: ThemeSettings
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
     @ObservedObject private var photoLibrary: PhotoLibraryViewModel
     @StateObject private var viewModel: MediaQuickCleanViewModel
     @State private var isDeleteConfirmationPresented = false
     @State private var completionMessage: String?
+    @State private var presentedCategories: [MediaQuickCleanViewModel.Category]
+    @State private var categoryFrames = [MediaQuickCleanViewModel.Category.ID: CGRect]()
+    @State private var pendingDeletionCategoryIDs = Set<MediaQuickCleanViewModel.Category.ID>()
+    @State private var dissolvingCategoryIDs = Set<MediaQuickCleanViewModel.Category.ID>()
+    @State private var isAnimatingDeletion = false
+    @State private var categoryScrollPosition: MediaQuickCleanViewModel.Category.ID?
 
     init(photoLibrary: PhotoLibraryViewModel) {
         self.photoLibrary = photoLibrary
+        let quickCleanViewModel = MediaQuickCleanViewModel(photoLibrary: photoLibrary)
         _viewModel = StateObject(
-            wrappedValue: MediaQuickCleanViewModel(photoLibrary: photoLibrary)
+            wrappedValue: quickCleanViewModel
         )
+        _presentedCategories = State(initialValue: quickCleanViewModel.categories)
     }
 
     var body: some View {
         ZStack {
             AppBackground()
 
-            if viewModel.categories.isEmpty {
+            if presentedCategories.isEmpty {
                 emptyContent
             } else {
                 categoryContent
@@ -37,12 +47,12 @@ struct MediaQuickCleanView: View {
                 Button(viewModel.allCategoriesSelected ? "Deselect All" : "Select All") {
                     viewModel.toggleAllCategories()
                 }
-                .disabled(viewModel.categories.isEmpty || photoLibrary.deletionState.isDeleting)
+                .disabled(presentedCategories.isEmpty || photoLibrary.deletionState.isDeleting || isAnimatingDeletion)
                 .accessibilityIdentifier("media.quickClean.selectAll")
             }
         }
         .safeAreaInset(edge: .bottom) {
-            if !viewModel.categories.isEmpty {
+            if !presentedCategories.isEmpty {
                 cleanupBar
             }
         }
@@ -50,8 +60,22 @@ struct MediaQuickCleanView: View {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
                 Task {
+                    let orderedIDs = presentedCategories
+                        .map(\.id)
+                        .filter { viewModel.selectedCategoryIDs.contains($0) }
+                    pendingDeletionCategoryIDs = Set(orderedIDs)
+                    isAnimatingDeletion = true
                     await viewModel.deleteSelection()
-                    handleDeletionResult()
+                    if case .success = photoLibrary.deletionState {
+                        // 等待系统 PhotoKit 确认界面完全退场，避免把系统遮罩截入卡片快照。
+                        try? await Task.sleep(for: .milliseconds(120))
+                        await animateDeletedCategories(in: orderedIDs)
+                        handleDeletionResult()
+                    } else {
+                        pendingDeletionCategoryIDs.removeAll()
+                        isAnimatingDeletion = false
+                        presentedCategories = viewModel.categories
+                    }
                 }
             }
         } message: {
@@ -92,6 +116,13 @@ struct MediaQuickCleanView: View {
         .onChange(of: photoLibrary.analysisState) { _, _ in
             viewModel.refreshCategories()
         }
+        .onChange(of: viewModel.categories) { _, categories in
+            guard !isAnimatingDeletion else { return }
+            presentedCategories = categories
+        }
+        .onPreferenceChange(QuickCleanCategoryFramePreferenceKey.self) { frames in
+            categoryFrames = frames
+        }
         .sensoryFeedback(.selection, trigger: viewModel.selectedCategoryIDs)
         .onAppear {
             tabBarVisibility.setHidden(
@@ -114,8 +145,9 @@ struct MediaQuickCleanView: View {
             LazyVStack(spacing: 12) {
                 summaryCard
 
-                ForEach(viewModel.categories) { category in
+                ForEach(presentedCategories) { category in
                     categoryButton(category)
+                        .id(category.id)
                 }
 
                 Text("Sizes are approximate. Categories can overlap, and selected items are counted once.")
@@ -124,9 +156,12 @@ struct MediaQuickCleanView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, 4)
             }
+            .scrollTargetLayout()
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
+            .animation(.snappy(duration: 0.32), value: presentedCategories.map(\.id))
         }
+        .scrollPosition(id: $categoryScrollPosition, anchor: .center)
         .appSoftScrollEdge()
     }
 
@@ -145,6 +180,7 @@ struct MediaQuickCleanView: View {
 
     private func categoryButton(_ category: MediaQuickCleanViewModel.Category) -> some View {
         let isSelected = viewModel.isSelected(category)
+            || pendingDeletionCategoryIDs.contains(category.id)
         return Button {
             viewModel.toggle(category)
         } label: {
@@ -186,6 +222,16 @@ struct MediaQuickCleanView: View {
             .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
         .buttonStyle(.plain)
+        .opacity(dissolvingCategoryIDs.contains(category.id) ? 0 : 1)
+        .background {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: QuickCleanCategoryFramePreferenceKey.self,
+                    value: [category.id: proxy.frame(in: .global)]
+                )
+            }
+        }
+        .disabled(isAnimatingDeletion)
         .accessibilityLabel(category.title)
         .accessibilityValue(isSelected ? "Selected" : "Not selected")
         .accessibilityHint("Selects or deselects every suggested item in this category.")
@@ -216,7 +262,11 @@ struct MediaQuickCleanView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(theme.negativeRed)
-            .disabled(viewModel.selectedAssetIDs.isEmpty || photoLibrary.deletionState.isDeleting)
+            .disabled(
+                viewModel.selectedAssetIDs.isEmpty
+                    || photoLibrary.deletionState.isDeleting
+                    || isAnimatingDeletion
+            )
             .accessibilityIdentifier("media.quickClean.delete")
         }
         .padding(.horizontal, 16)
@@ -290,5 +340,62 @@ struct MediaQuickCleanView: View {
                 size
             )
         }
+    }
+
+    /// 按当前列表顺序逐张分解卡片；每张结束后才收拢布局并处理下一张。
+    private func animateDeletedCategories(
+        in orderedIDs: [MediaQuickCleanViewModel.Category.ID]
+    ) async {
+        guard let window = activeWindow else {
+            presentedCategories = viewModel.categories
+            pendingDeletionCategoryIDs.removeAll()
+            isAnimatingDeletion = false
+            return
+        }
+
+        let usesMotion = themeSettings.interfaceAnimationsEnabled && !reduceMotion
+        for categoryID in orderedIDs {
+            if categoryFrames[categoryID]?.intersects(window.bounds) != true {
+                categoryScrollPosition = categoryID
+                try? await Task.sleep(for: .milliseconds(usesMotion ? 300 : 100))
+            }
+
+            guard
+                presentedCategories.contains(where: { $0.id == categoryID }),
+                let frame = categoryFrames[categoryID],
+                let snapshot = QuickCleanCardDeletionEffect.capture(frame: frame, in: window)
+            else {
+                presentedCategories.removeAll { $0.id == categoryID }
+                continue
+            }
+
+            await QuickCleanCardDeletionEffect.play(
+                snapshot: snapshot,
+                in: window,
+                animated: usesMotion,
+                hideOriginal: {
+                    dissolvingCategoryIDs.insert(categoryID)
+                }
+            )
+
+            withAnimation(.snappy(duration: usesMotion ? 0.32 : 0.16)) {
+                presentedCategories.removeAll { $0.id == categoryID }
+                dissolvingCategoryIDs.remove(categoryID)
+            }
+            try? await Task.sleep(for: .milliseconds(usesMotion ? 360 : 180))
+        }
+
+        categoryScrollPosition = nil
+        presentedCategories = viewModel.categories
+        pendingDeletionCategoryIDs.removeAll()
+        dissolvingCategoryIDs.removeAll()
+        isAnimatingDeletion = false
+    }
+
+    private var activeWindow: UIWindow? {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)
     }
 }

@@ -470,3 +470,6 @@
 "premium.lifetime.error.title" = "购买不可用";
 "premium.lifetime.error.load" = "无法加载终身购买，请稍后重试。";
 "premium.lifetime.error.purchase" = "无法完成购买，请重试。";
+"Contact Developer" = "联系开发者";
+"Send feedback, questions, or bug reports by email." = "通过电子邮件发送反馈、问题或错误报告。";
+"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter 用户反馈";

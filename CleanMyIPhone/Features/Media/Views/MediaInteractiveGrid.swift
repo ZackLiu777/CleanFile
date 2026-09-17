@@ -22,6 +22,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
     let isSelecting: Bool
     @ObservedObject var viewModel: PhotoLibraryViewModel
     let accentColor: Color
+    let deletionEffectController: MediaDeletionEffectController
     let onOpen: (String) -> Void
     let onBeginSelecting: (String) -> Void
 
@@ -64,6 +65,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 
         context.coordinator.installGestures(on: collectionView)
         context.coordinator.collectionView = collectionView
+        deletionEffectController.renderer = context.coordinator
         context.coordinator.sectionSignature = context.coordinator.makeSectionSignature(from: sections)
         return collectionView
     }
@@ -71,6 +73,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
     /// 同步 SwiftUI 状态；资源结构改变时刷新数据，选择改变时只刷新可见单元格。
     func updateUIView(_ collectionView: UICollectionView, context: Context) {
         context.coordinator.parent = self
+        deletionEffectController.renderer = context.coordinator
         let newSignature = context.coordinator.makeSectionSignature(from: sections)
         if let layout = collectionView.collectionViewLayout as? MediaDensityFlowLayout {
             layout.setShowsDateHeaders(showsDateHeaders)
@@ -92,7 +95,8 @@ struct MediaInteractiveGrid: UIViewRepresentable {
     final class Coordinator: NSObject,
         UICollectionViewDataSource,
         UICollectionViewDelegate,
-        UIGestureRecognizerDelegate
+        UIGestureRecognizerDelegate,
+        MediaDeletionEffectRendering
     {
         static let cellReuseIdentifier = "MediaInteractiveGrid.Cell"
         static let headerReuseIdentifier = "MediaInteractiveGrid.Header"
@@ -117,6 +121,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         private var isBatchSelectionRejected = false
         private var selectionFeedbackGenerator: UISelectionFeedbackGenerator?
         private weak var batchSelectionPanGesture: UIPanGestureRecognizer?
+        private var deletionSnapshots = [MediaDeletionEffectToken: [MediaDeletionSnapshot]]()
 
         /// 保存初始 SwiftUI 配置，后续由 updateUIView 持续替换为最新值。
         init(parent: MediaInteractiveGrid) {
@@ -389,6 +394,69 @@ struct MediaInteractiveGrid: UIViewRepresentable {
                 let cell = collectionView.cellForItem(at: indexPath)
             else { return }
             configure(cell, at: indexPath)
+        }
+
+        /// 在调用 PhotoKit 前保存屏幕内已选缩略图；真实删除失败或取消时只丢弃快照。
+        func captureDeletionEffect(for assetIDs: Set<String>) -> MediaDeletionEffectToken? {
+            guard let collectionView, let window = collectionView.window else { return nil }
+
+            let viewportCenter = CGPoint(
+                x: collectionView.bounds.midX,
+                y: collectionView.bounds.midY
+            )
+            let visibleIndexPaths = collectionView.indexPathsForVisibleItems
+                .filter { indexPath in
+                    guard let assetID = assetID(at: indexPath) else { return false }
+                    return assetIDs.contains(assetID)
+                }
+                .sorted { lhs, rhs in
+                    let lhsCenter = collectionView.layoutAttributesForItem(at: lhs)?.center ?? .zero
+                    let rhsCenter = collectionView.layoutAttributesForItem(at: rhs)?.center ?? .zero
+                    let lhsDistance = pow(lhsCenter.x - viewportCenter.x, 2)
+                        + pow(lhsCenter.y - viewportCenter.y, 2)
+                    let rhsDistance = pow(rhsCenter.x - viewportCenter.x, 2)
+                        + pow(rhsCenter.y - viewportCenter.y, 2)
+                    return lhsDistance < rhsDistance
+                }
+                // 限制覆盖层数量，避免高密度网格批量删除时创建过多图层。
+                .prefix(18)
+
+            let snapshots = visibleIndexPaths.compactMap { indexPath -> MediaDeletionSnapshot? in
+                guard let cell = collectionView.cellForItem(at: indexPath) else { return nil }
+                let bounds = cell.bounds
+                guard bounds.width > 1, bounds.height > 1 else { return nil }
+
+                let format = UIGraphicsImageRendererFormat.default()
+                format.scale = window.screen.scale
+                format.opaque = false
+                let image = UIGraphicsImageRenderer(bounds: bounds, format: format).image { context in
+                    cell.layer.render(in: context.cgContext)
+                }
+                let frame = cell.convert(bounds, to: window)
+                guard frame.intersects(window.bounds) else { return nil }
+                return MediaDeletionSnapshot(image: image, frameInWindow: frame)
+            }
+
+            guard !snapshots.isEmpty else { return nil }
+            let token = MediaDeletionEffectToken()
+            deletionSnapshots[token] = snapshots
+            return token
+        }
+
+        func playDeletionEffect(_ token: MediaDeletionEffectToken, animated: Bool) async {
+            guard
+                let snapshots = deletionSnapshots.removeValue(forKey: token),
+                let window = collectionView?.window
+            else { return }
+            await MediaDeletionEffectAnimator.play(
+                snapshots: snapshots,
+                in: window,
+                animated: animated
+            )
+        }
+
+        func discardDeletionEffect(_ token: MediaDeletionEffectToken) {
+            deletionSnapshots[token] = nil
         }
 
         /// 将日期转换为用户当前区域的 Today、Yesterday 或完整日期标题。

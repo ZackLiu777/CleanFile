@@ -104,6 +104,45 @@ struct MediaModelTests {
         ) == 2_000)
     }
 
+    @Test("Segmented hash index keeps strong near matches")
+    func segmentedHashIndexFindsStrongNearMatches() {
+        let base: UInt64 = 0x0123_4567_89AB_CDEF
+        let eightBitDifference = base ^ 0x0000_0000_0000_00FF
+        let index = SegmentedHammingIndex(features: [
+            CandidateFeature(id: "base", perceptualHash: base),
+            CandidateFeature(id: "query", perceptualHash: eightBitDifference)
+        ])
+        let pairs = index.allPairs(
+            maximumDistance: 16,
+            maximumResults: 32,
+            maximumEvaluationsPerImage: .max,
+            workerCount: 1
+        )
+
+        #expect(pairs.count == 1)
+        #expect(pairs.first?.firstIndex == 0)
+        #expect(pairs.first?.secondIndex == 1)
+    }
+
+    @Test("Segmented hash index applies distance and result limits")
+    func segmentedHashIndexHonorsLimits() {
+        let index = SegmentedHammingIndex(features: [
+            CandidateFeature(id: "a", perceptualHash: 0),
+            CandidateFeature(id: "b", perceptualHash: 0),
+            CandidateFeature(id: "c", perceptualHash: 0),
+            CandidateFeature(id: "far", perceptualHash: .max)
+        ])
+        let pairs = index.allPairs(
+            maximumDistance: 16,
+            maximumResults: 1,
+            maximumEvaluationsPerImage: .max,
+            workerCount: 1
+        )
+
+        #expect(pairs.map(\.firstIndex) == [0, 0])
+        #expect(pairs.map(\.secondIndex) == [1, 2])
+    }
+
     @Test("Media date sections and items sort newest first")
     func mediaDateSectionsSortNewestFirst() throws {
         let calendar = utcCalendar

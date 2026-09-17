@@ -470,3 +470,6 @@
 "premium.lifetime.error.title" = "구매할 수 없음";
 "premium.lifetime.error.load" = "평생 이용권을 불러올 수 없습니다. 나중에 다시 시도해 주세요.";
 "premium.lifetime.error.purchase" = "구매를 완료할 수 없습니다. 다시 시도해 주세요.";
+"Contact Developer" = "개발자에게 문의";
+"Send feedback, questions, or bug reports by email." = "의견, 질문 또는 버그 신고를 이메일로 보내세요.";
+"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter 피드백";

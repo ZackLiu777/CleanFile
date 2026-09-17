@@ -712,6 +712,7 @@ private struct MediaCategoryCard: View {
 /// 定义 `MediaCategoryDetailView` 的值语义数据与相关行为。
 private struct MediaCategoryDetailView: View {
     @Environment(\.appTheme) private var theme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var themeSettings: ThemeSettings
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
     let title: String
@@ -722,6 +723,7 @@ private struct MediaCategoryDetailView: View {
     @State private var selectedIDs = Set<String>()
     @State private var isDeleteConfirmationPresented = false
     @State private var previewAssetID: String?
+    @StateObject private var deletionEffectController = MediaDeletionEffectController()
 
     private var visibleAssetIDs: [String] {
         assetIDs.filter { viewModel.asset(withIdentifier: $0) != nil }
@@ -781,6 +783,7 @@ private struct MediaCategoryDetailView: View {
                         isSelecting: isSelecting,
                         viewModel: viewModel,
                         accentColor: theme.accentPrimary,
+                        deletionEffectController: deletionEffectController,
                         onOpen: { previewAssetID = $0 },
                         onBeginSelecting: { assetID in
                             isSelecting = true
@@ -866,11 +869,18 @@ private struct MediaCategoryDetailView: View {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
                 let ids = selectedIDs
+                let effectToken = deletionEffectController.capture(assetIDs: ids)
                 Task {
                     await viewModel.deleteAssets(withIDs: ids)
                     if case .success = viewModel.deletionState {
+                        await deletionEffectController.play(
+                            effectToken,
+                            animated: themeSettings.interfaceAnimationsEnabled && !reduceMotion
+                        )
                         selectedIDs.removeAll()
                         isSelecting = false
+                    } else {
+                        deletionEffectController.discard(effectToken)
                     }
                 }
             }

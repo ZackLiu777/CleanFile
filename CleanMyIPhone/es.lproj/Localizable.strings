@@ -470,3 +470,6 @@
 "premium.lifetime.error.title" = "Compra no disponible";
 "premium.lifetime.error.load" = "No se pudo cargar la compra de por vida. Inténtalo más tarde.";
 "premium.lifetime.error.purchase" = "No se pudo completar la compra. Inténtalo de nuevo.";
+"Contact Developer" = "Contactar con el desarrollador";
+"Send feedback, questions, or bug reports by email." = "Envía comentarios, preguntas o informes de errores por correo electrónico.";
+"File Cleaner & Media Converter Feedback" = "Comentarios sobre File Cleaner & Media Converter";

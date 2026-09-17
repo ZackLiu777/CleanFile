@@ -18,8 +18,8 @@ struct MediaClassificationService {
     private let maximumConcurrentHashRequests = 4
     /// Vision 特征生成仍属于 CPU 密集任务，限制为两路以避免扫描时挤占 UI 和内存。
     private let maximumConcurrentVisionRequests = 2
-    private let maximumPerceptualHashDistance = 16
-    private let maximumHashMatchesPerImage = 32
+    nonisolated private static let maximumPerceptualHashDistance = 16
+    nonisolated private static let maximumHashMatchesPerImage = 32
     // Vision has no universal distance threshold. Start conservatively and
     // calibrate this value against representative user photo libraries.
     private let maximumFeaturePrintDistance: Float = 0.55
@@ -62,8 +62,18 @@ struct MediaClassificationService {
 
         let availableHashes = hashOutcomes.compactMap(\.feature)
         let hashSkippedCount = hashOutcomes.count - availableHashes.count
-        let comparisonPairs = candidatePairs(from: availableHashes)
-        let comparisonIdentifiers = Set(comparisonPairs.flatMap { [$0.firstID, $0.secondID] })
+        // 哈希索引在大图库中属于 CPU 密集工作，不能继承 MediaClassificationService
+        // 的 MainActor 隔离，否则十万级资源会长时间阻塞滚动和进度动画。
+        let candidateSearch = await Task.detached(priority: .utility) {
+            Self.candidatePairs(from: availableHashes)
+        }.value
+        let comparisonPairs = candidateSearch.pairs
+        var comparisonIdentifiers = Set<String>()
+        comparisonIdentifiers.reserveCapacity(min(candidates.count, comparisonPairs.count * 2))
+        for pair in comparisonPairs {
+            comparisonIdentifiers.insert(candidateSearch.features[Int(pair.firstIndex)].id)
+            comparisonIdentifiers.insert(candidateSearch.features[Int(pair.secondIndex)].id)
+        }
         let comparisonCandidates = candidates.filter { comparisonIdentifiers.contains($0.id) }
         let comparisonWorkCount = comparisonCandidates.count + comparisonPairs.count
         progress(MediaAnalysisProgress(
@@ -95,8 +105,14 @@ struct MediaClassificationService {
         for batchStart in stride(from: 0, to: comparisonPairs.count, by: comparisonBatchSize) {
             try Task.checkCancellation()
             let batchEnd = min(batchStart + comparisonBatchSize, comparisonPairs.count)
+            let batch = comparisonPairs[batchStart ..< batchEnd].map { pair in
+                CandidatePair(
+                    firstID: candidateSearch.features[Int(pair.firstIndex)].id,
+                    secondID: candidateSearch.features[Int(pair.secondIndex)].id
+                )
+            }
             if let matches = try? await featureEngine.acceptedPairs(
-                from: Array(comparisonPairs[batchStart ..< batchEnd]),
+                from: batch,
                 maximumDistance: maximumFeaturePrintDistance
             ) {
                 acceptedPairs.append(contentsOf: matches)
@@ -377,24 +393,17 @@ struct MediaClassificationService {
     }
 
     /// 判断 `candidatePairs` 条件是否成立，供调用方选择正确的处理分支。
-    private func candidatePairs(from features: [CandidateFeature]) -> [CandidatePair] {
-        let index = HammingBKTree()
-        var pairs: [CandidatePair] = []
-
-        for feature in features.sorted(by: { $0.id < $1.id }) {
-            let matches = index.matches(
-                hash: feature.perceptualHash,
-                maximumDistance: maximumPerceptualHashDistance,
-                maximumResults: maximumHashMatchesPerImage
-            )
-
-            pairs.append(contentsOf: matches.map { match in
-                CandidatePair(firstID: match.id, secondID: feature.id)
-            })
-            index.insert(feature)
-        }
-
-        return pairs
+    nonisolated private static func candidatePairs(from features: [CandidateFeature]) -> CandidateSearchResult {
+        let orderedFeatures = features.sorted(by: { $0.id < $1.id })
+        let index = SegmentedHammingIndex(features: orderedFeatures)
+        let evaluationLimit = orderedFeatures.count >= 500_000 ? 4_096 : Int.max
+        let pairs = index.allPairs(
+            maximumDistance: maximumPerceptualHashDistance,
+            maximumResults: maximumHashMatchesPerImage,
+            maximumEvaluationsPerImage: evaluationLimit,
+            workerCount: min(4, ProcessInfo.processInfo.activeProcessorCount)
+        )
+        return CandidateSearchResult(features: orderedFeatures, pairs: pairs)
     }
 
     /// 创建 `makeConservativeGroups` 所需的值或资源，统一封装构造细节。
@@ -486,103 +495,178 @@ nonisolated private struct FeatureCacheKey: Hashable, Sendable {
 }
 
 /// 定义 `CandidateFeature` 的值语义数据与相关行为。
-private struct CandidateFeature: Sendable {
+nonisolated struct CandidateFeature: Sendable {
     let id: String
     let perceptualHash: UInt64
 }
 
 /// 定义 `FeatureOutcome` 的值语义数据与相关行为。
 private struct FeatureOutcome: Sendable { let feature: CandidateFeature? }
+nonisolated struct IndexedCandidatePair: Sendable {
+    let firstIndex: Int32
+    let secondIndex: Int32
+}
+nonisolated private struct CandidateSearchResult: Sendable {
+    let features: [CandidateFeature]
+    let pairs: [IndexedCandidatePair]
+}
 /// 定义 `CandidatePair` 的值语义数据与相关行为。
 private struct CandidatePair: Sendable { let firstID: String; let secondID: String }
 /// 定义 `AcceptedPair` 的值语义数据与相关行为。
 private struct AcceptedPair: Sendable { let firstID: String; let secondID: String; let distance: Float }
 
-/// 使用 BK-tree 按汉明距离索引全相册感知哈希，避免产生全量平方级图片对。
-private final class HammingBKTree {
-    /// 保存同一哈希的图片以及按汉明距离分叉的子节点。
-    private final class Node {
-        let hash: UInt64
-        var features: [CandidateFeature]
-        var children: [Int: Node] = [:]
-
-        /// 创建一个以首张图片为代表值的哈希节点。
-        init(feature: CandidateFeature) {
-            hash = feature.perceptualHash
-            features = [feature]
+/// 用多个重叠的 16 位分段建立倒排索引，再以完整 64 位汉明距离复核候选。
+///
+/// BK-tree 在 64 位哈希和较宽搜索半径下会访问大部分节点，十万级数据会退化为
+/// 接近平方复杂度。分段索引把一次查询限制为固定数量的桶查找；距离不超过 8
+/// 的哈希必然至少有一个分段相差不超过 2 位，因此强相似图片不会被初筛漏掉。
+nonisolated final class SegmentedHammingIndex: @unchecked Sendable {
+    private static let bandOffsets = [0, 16, 32, 48, 8, 24, 40, 56]
+    private static let probeMasks: [UInt16] = {
+        var masks: [UInt16] = [0]
+        masks.reserveCapacity(137)
+        for first in 0 ..< 16 {
+            masks.append(UInt16(1) << first)
         }
+        for first in 0 ..< 16 {
+            for second in (first + 1) ..< 16 {
+                masks.append((UInt16(1) << first) | (UInt16(1) << second))
+            }
+        }
+        return masks
+    }()
+
+    private let features: [CandidateFeature]
+    /// 8 × 65,536 的键空间是固定的；连续数组避免每次探测都执行 Dictionary 哈希。
+    private let buckets: [[Int32]]
+
+    init(features: [CandidateFeature]) {
+        self.features = features
+        var builtBuckets = [[Int32]](repeating: [], count: 8 * (1 << 16))
+        for (featureIndex, feature) in features.enumerated() {
+            for (band, offset) in Self.bandOffsets.enumerated() {
+                let value = Self.bandValue(of: feature.perceptualHash, offset: offset)
+                builtBuckets[Self.bucketIndex(band: band, value: value)].append(Int32(featureIndex))
+            }
+        }
+        buckets = builtBuckets
     }
 
-    private var root: Node?
+    func allPairs(
+        maximumDistance: Int,
+        maximumResults: Int,
+        maximumEvaluationsPerImage: Int,
+        workerCount: Int
+    ) -> [IndexedCandidatePair] {
+        guard maximumResults > 0, features.count > 1 else { return [] }
+        let workers = max(1, min(workerCount, features.count))
+        let resultLock = NSLock()
+        var combined: [IndexedCandidatePair] = []
 
-    /// 将图片特征插入对应汉明距离分支；相同哈希保存在同一节点。
-    func insert(_ feature: CandidateFeature) {
-        guard let root else {
-            self.root = Node(feature: feature)
+        DispatchQueue.concurrentPerform(iterations: workers) { worker in
+            var visited = [UInt32](repeating: 0, count: features.count)
+            var generation: UInt32 = 0
+            var localPairs: [IndexedCandidatePair] = []
+            let lowerBound = features.count * worker / workers
+            let upperBound = features.count * (worker + 1) / workers
+
+            for queryIndex in lowerBound ..< upperBound {
+                generation &+= 1
+                let matches = matches(
+                    queryIndex: queryIndex,
+                    maximumDistance: maximumDistance,
+                    maximumResults: maximumResults,
+                    maximumEvaluations: maximumEvaluationsPerImage,
+                    visited: &visited,
+                    generation: generation
+                )
+                localPairs.append(contentsOf: matches.map {
+                    IndexedCandidatePair(firstIndex: $0.index, secondIndex: Int32(queryIndex))
+                })
+            }
+
+            resultLock.withLock {
+                combined.append(contentsOf: localPairs)
+            }
+        }
+        return combined
+    }
+
+    private func matches(
+        queryIndex: Int,
+        maximumDistance: Int,
+        maximumResults: Int,
+        maximumEvaluations: Int,
+        visited: inout [UInt32],
+        generation: UInt32
+    ) -> [(index: Int32, distance: Int)] {
+        let hash = features[queryIndex].perceptualHash
+        let bandValues = Self.bandOffsets.map { Self.bandValue(of: hash, offset: $0) }
+        var matches: [(index: Int32, distance: Int)] = []
+        matches.reserveCapacity(maximumResults)
+        var evaluated = 0
+
+        search: for mask in Self.probeMasks {
+            for band in Self.bandOffsets.indices {
+                let indices = buckets[
+                    Self.bucketIndex(band: band, value: bandValues[band] ^ mask)
+                ]
+                for rawIndex in indices {
+                    let index = Int(rawIndex)
+                    guard index < queryIndex, visited[index] != generation else { continue }
+                    visited[index] = generation
+                    evaluated += 1
+                    let distance = (features[index].perceptualHash ^ hash).nonzeroBitCount
+                    if distance <= maximumDistance {
+                        Self.retainNearest(
+                            (rawIndex, distance),
+                            in: &matches,
+                            maximumResults: maximumResults
+                        )
+                    }
+                    if evaluated >= maximumEvaluations { break search }
+                }
+            }
+        }
+        matches.sort { Self.isPreferred($0, over: $1) }
+        return matches
+    }
+
+    private static func retainNearest(
+        _ candidate: (index: Int32, distance: Int),
+        in matches: inout [(index: Int32, distance: Int)],
+        maximumResults: Int
+    ) {
+        if matches.count < maximumResults {
+            matches.append(candidate)
+            if matches.count == maximumResults {
+                matches.sort { isPreferred($0, over: $1) }
+            }
             return
         }
-
-        var node = root
-        while true {
-            let distance = Self.distance(node.hash, feature.perceptualHash)
-            if distance == 0 {
-                node.features.append(feature)
-                return
-            }
-            if let child = node.children[distance] {
-                node = child
-            } else {
-                node.children[distance] = Node(feature: feature)
-                return
-            }
-        }
+        guard let worst = matches.last, isPreferred(candidate, over: worst) else { return }
+        matches[matches.count - 1] = candidate
+        matches.sort { isPreferred($0, over: $1) }
     }
 
-    /// 在查询阶段直接保留有限个最近邻，避免密集相似哈希先形成平方级临时候选数组。
-    func matches(
-        hash: UInt64,
-        maximumDistance: Int,
-        maximumResults: Int
-    ) -> [CandidateFeature] {
-        guard let root, maximumResults > 0 else { return [] }
-        var matches: [(feature: CandidateFeature, distance: Int)] = []
-        var pending = [root]
-
-        while let node = pending.popLast() {
-            let distance = Self.distance(node.hash, hash)
-            if distance <= maximumDistance {
-                // 同一节点中的图片拥有完全相同的哈希。最多取结果上限数量，
-                // 即使图库存在数千张相同截图，也不会逐次复制整个节点数组。
-                let nodeMatches = node.features.prefix(maximumResults).map {
-                    (feature: $0, distance: distance)
-                }
-                matches.append(contentsOf: nodeMatches)
-                matches.sort {
-                    if $0.distance != $1.distance { return $0.distance < $1.distance }
-                    return $0.feature.id < $1.feature.id
-                }
-                if matches.count > maximumResults {
-                    matches.removeLast(matches.count - maximumResults)
-                }
-            }
-
-            // 结果已满时可将搜索半径收紧到当前最差候选距离，减少无效分支。
-            let searchRadius = matches.count == maximumResults
-                ? min(maximumDistance, matches.last?.distance ?? maximumDistance)
-                : maximumDistance
-            let lowerBound = max(0, distance - searchRadius)
-            let upperBound = distance + searchRadius
-            pending.append(contentsOf: node.children.compactMap { edge, child in
-                (lowerBound ... upperBound).contains(edge) ? child : nil
-            })
-        }
-
-        return matches.map(\.feature)
+    private static func isPreferred(
+        _ lhs: (index: Int32, distance: Int),
+        over rhs: (index: Int32, distance: Int)
+    ) -> Bool {
+        if lhs.distance != rhs.distance { return lhs.distance < rhs.distance }
+        // features 已按 identifier 排序，索引顺序就是稳定的次级排序。
+        return lhs.index < rhs.index
     }
 
-    /// 计算两个 64 位感知哈希之间不同位的数量。
-    private static func distance(_ lhs: UInt64, _ rhs: UInt64) -> Int {
-        (lhs ^ rhs).nonzeroBitCount
+    private static func bandValue(of hash: UInt64, offset: Int) -> UInt16 {
+        let rotated = offset == 0
+            ? hash
+            : (hash >> offset) | (hash << (64 - offset))
+        return UInt16(truncatingIfNeeded: rotated)
+    }
+
+    private static func bucketIndex(band: Int, value: UInt16) -> Int {
+        band * (1 << 16) + Int(value)
     }
 }
 

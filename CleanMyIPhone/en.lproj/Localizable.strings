@@ -470,3 +470,6 @@
 "premium.lifetime.error.title" = "Purchase Unavailable";
 "premium.lifetime.error.load" = "The lifetime purchase could not be loaded. Please try again later.";
 "premium.lifetime.error.purchase" = "The purchase could not be completed. Please try again.";
+"Contact Developer" = "Contact Developer";
+"Send feedback, questions, or bug reports by email." = "Send feedback, questions, or bug reports by email.";
+"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Feedback";
