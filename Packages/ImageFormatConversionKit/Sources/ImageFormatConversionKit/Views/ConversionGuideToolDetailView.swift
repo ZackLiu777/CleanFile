@@ -366,7 +366,7 @@ private struct ConversionGuideTagGrid: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 11)
                     .padding(.vertical, 8)
-                    .background(theme.cardElevated, in: Capsule())
+                    .converterInsetCard(cornerRadius: 18)
             }
         }
     }

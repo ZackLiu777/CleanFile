@@ -920,6 +920,25 @@ private struct ConverterAccentCardModifier: ViewModifier {
     }
 }
 
+private struct ConverterInsetCardModifier: ViewModifier {
+    @Environment(\.conversionTheme) private var theme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    let cornerRadius: CGFloat
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        #if os(iOS)
+        if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
+            content.glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+        } else {
+            content.background(theme.cardElevated, in: .rect(cornerRadius: cornerRadius))
+        }
+        #else
+        content.background(theme.cardElevated, in: .rect(cornerRadius: cornerRadius))
+        #endif
+    }
+}
+
 /// 扩展 `View`，集中实现当前文件所需的附加能力。
 extension View {
     /// 执行 `converterCard` 转换流程，并按当前配置生成输出结果。
@@ -929,6 +948,10 @@ extension View {
 
     func converterAccentCard(cornerRadius: CGFloat = 20) -> some View {
         modifier(ConverterAccentCardModifier(cornerRadius: cornerRadius))
+    }
+
+    func converterInsetCard(cornerRadius: CGFloat = 14) -> some View {
+        modifier(ConverterInsetCardModifier(cornerRadius: cornerRadius))
     }
 
     /// 执行 `converterSoftScrollEdge` 转换流程，并按当前配置生成输出结果。

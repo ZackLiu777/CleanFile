@@ -53,15 +53,17 @@ struct CleanMyIPhoneApp: App {
 
     var body: some Scene {
         WindowGroup {
-            rootView
-                .environmentObject(themeSettings)
-                .fontDesign(themeSettings.fontStyle.inheritedDesign)
-                .appFontFamily(themeSettings.fontStyle.fontName)
-                .environmentObject(premiumEntitlementStore)
-                .environment(\.appTheme, themeSettings.theme)
-                .preferredColorScheme(themeSettings.effectiveColorScheme)
-                .tint(themeSettings.theme.accentPrimary)
-                .foregroundStyle(themeSettings.theme.textPrimary)
+            AppOpeningContainer {
+                rootView
+            }
+            .environmentObject(themeSettings)
+            .fontDesign(themeSettings.fontStyle.inheritedDesign)
+            .appFontFamily(themeSettings.fontStyle.fontName)
+            .environmentObject(premiumEntitlementStore)
+            .environment(\.appTheme, themeSettings.theme)
+            .preferredColorScheme(themeSettings.effectiveColorScheme)
+            .tint(themeSettings.theme.accentPrimary)
+            .foregroundStyle(themeSettings.theme.textPrimary)
         }
     }
 

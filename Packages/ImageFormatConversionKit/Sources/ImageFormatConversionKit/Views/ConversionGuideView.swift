@@ -155,20 +155,25 @@ struct ConversionGuideView: View {
 
 private struct ConversionGuideHero: View {
     @Environment(\.conversionTheme) private var theme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
                 .fill(
-                    LinearGradient(
-                        colors: [
-                            theme.accent.opacity(0.30),
-                            theme.cardHighlight,
-                            theme.cardSurface
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
+                    usesLiquidGlass
+                        ? AnyShapeStyle(.clear)
+                        : AnyShapeStyle(
+                            LinearGradient(
+                                colors: [
+                                    theme.accent.opacity(0.30),
+                                    theme.cardHighlight,
+                                    theme.cardSurface
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
                 )
 
             Circle()
@@ -205,12 +210,36 @@ private struct ConversionGuideHero: View {
             .padding(24)
         }
         .frame(minHeight: 270)
+        .modifier(ConversionGuideHeroCardModifier())
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .strokeBorder(theme.divider.opacity(0.45), lineWidth: 0.5)
-        }
         .accessibilityElement(children: .combine)
+    }
+
+    private var usesLiquidGlass: Bool {
+        if #available(iOS 26.0, *) {
+            return theme.liquidGlassCardsEnabled && !reduceTransparency
+        }
+        return false
+    }
+}
+
+private struct ConversionGuideHeroCardModifier: ViewModifier {
+    @Environment(\.conversionTheme) private var theme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
+            content.glassEffect(
+                .regular.tint(theme.accent.opacity(0.12)),
+                in: .rect(cornerRadius: 28)
+            )
+        } else {
+            content.overlay {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .strokeBorder(theme.divider.opacity(0.45), lineWidth: 0.5)
+            }
+        }
     }
 }
 
