@@ -16,7 +16,7 @@ concurrency:
 env:
   PROJECT: CleanMyIPhone.xcodeproj
   SCHEME: CleanMyIPhone
-  DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=27.0
+  DESTINATION: platform=iOS Simulator,name=iPhone 18 Pro,OS=27.0
 
 jobs:
   unit-tests:
