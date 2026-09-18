@@ -81,13 +81,36 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
 
+      - name: Prepare UI-test simulator
+        run: |
+          set -euo pipefail
+
+          xcrun simctl shutdown all || true
+
+          DEVICE_ID="$(
+            xcrun simctl list devices available |
+              sed -nE 's/^[[:space:]]*iPhone 18 Pro \(([0-9A-F-]{36})\).*/\1/p' |
+              head -n 1
+          )"
+
+          if [[ -z "$DEVICE_ID" ]]; then
+            echo "No available iPhone 18 Pro simulator was found."
+            xcrun simctl list devices available
+            exit 1
+          fi
+
+          echo "Using UI-test simulator: $DEVICE_ID"
+          xcrun simctl boot "$DEVICE_ID"
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+          echo "UI_DESTINATION=platform=iOS Simulator,id=$DEVICE_ID" >> "$GITHUB_ENV"
+
       - name: Build UI tests
         run: |
           set -o pipefail
           xcodebuild build-for-testing \
             -project "$PROJECT" \
             -scheme "$SCHEME" \
-            -destination "$DESTINATION" \
+            -destination "$UI_DESTINATION" \
             -only-testing:CleanMyIPhoneUITests \
             -derivedDataPath "$RUNNER_TEMP/CleanFileUIDerivedData" \
             CODE_SIGNING_ALLOWED=NO
@@ -98,7 +121,7 @@ jobs:
           xcodebuild test-without-building \
             -project "$PROJECT" \
             -scheme "$SCHEME" \
-            -destination "$DESTINATION" \
+            -destination "$UI_DESTINATION" \
             -only-testing:CleanMyIPhoneUITests \
             -derivedDataPath "$RUNNER_TEMP/CleanFileUIDerivedData" \
             -resultBundlePath "$RUNNER_TEMP/CleanFileUITests.xcresult" \
