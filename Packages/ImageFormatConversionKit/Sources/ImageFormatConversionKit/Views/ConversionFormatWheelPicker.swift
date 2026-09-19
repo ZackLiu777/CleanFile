@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 /// Presents related conversion settings as one clock-style multi-column wheel.
 /// Each conversion screen owns its strongly typed bindings; this component only
@@ -75,43 +76,12 @@ private struct ConversionSettingsTriggerButtonStyle: ButtonStyle {
     }
 }
 
-/// Encapsulates the repeated-row representation used by a looping wheel.
-/// Callers work with logical option offsets rather than repetition details.
-private struct LoopingWheelIndexMap {
-    let optionCount: Int
-    private let cycleCount = 101
-
-    var rowCount: Int {
-        optionCount * cycleCount
-    }
-
-    func centeredIndex(for optionOffset: Int) -> Int {
-        (cycleCount / 2) * optionCount + optionOffset
-    }
-
-    func optionOffset(for row: Int) -> Int {
-        guard optionCount > 0 else { return 0 }
-        return row % optionCount
-    }
-
-    func needsRecentering(_ row: Int) -> Bool {
-        let lowerBoundary = optionCount * 2
-        let upperBoundary = optionCount * (cycleCount - 2)
-        return row < lowerBoundary || row >= upperBoundary
-    }
-}
-
 /// 定义 `ConversionWheelColumn` 的值语义数据与相关行为。
 struct ConversionWheelColumn<Selection: Hashable>: View {
     let title: String
     @Binding var selection: Selection
     let options: [Selection]
     let optionTitle: (Selection) -> String
-    @State private var wheelIndex: Int
-
-    private var indexMap: LoopingWheelIndexMap {
-        LoopingWheelIndexMap(optionCount: options.count)
-    }
 
     init(
         title: String,
@@ -123,12 +93,6 @@ struct ConversionWheelColumn<Selection: Hashable>: View {
         _selection = selection
         self.options = options
         self.optionTitle = optionTitle
-
-        let selectedOffset = options.firstIndex(of: selection.wrappedValue) ?? 0
-        let indexMap = LoopingWheelIndexMap(optionCount: options.count)
-        _wheelIndex = State(
-            initialValue: options.isEmpty ? 0 : indexMap.centeredIndex(for: selectedOffset)
-        )
     }
 
     var body: some View {
@@ -139,62 +103,143 @@ struct ConversionWheelColumn<Selection: Hashable>: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 
-            Picker(title, selection: $wheelIndex) {
-                if options.isEmpty {
-                    Text("").tag(0)
-                } else {
-                    ForEach(0 ..< indexMap.rowCount, id: \.self) { index in
-                        Text(optionTitle(options[indexMap.optionOffset(for: index)]))
-                            .tag(index)
-                    }
-                }
-            }
-            .labelsHidden()
-            .pickerStyle(.wheel)
-            .onChange(of: wheelIndex) { _, newIndex in
-                guard !options.isEmpty else { return }
-                selection = options[indexMap.optionOffset(for: newIndex)]
-                recenterIfNeeded(newIndex)
-            }
-            .onChange(of: selection) { _, newSelection in
-                synchronizeWheel(with: newSelection)
-            }
-            .onChange(of: options) { _, _ in
-                synchronizeWheel(with: selection, force: true)
-            }
+            VirtualizedLoopingWheel(
+                accessibilityLabel: title,
+                selection: $selection,
+                options: options,
+                optionTitle: optionTitle
+            )
         }
-        .frame(maxWidth: .infinity)
+        .frame(minWidth: 0, maxWidth: .infinity)
         .clipped()
     }
+}
 
-    private func synchronizeWheel(with newSelection: Selection, force: Bool = false) {
-        guard !options.isEmpty else { return }
-        if !force,
-           wheelIndex >= 0,
-           wheelIndex < indexMap.rowCount,
-           options[indexMap.optionOffset(for: wheelIndex)] == newSelection {
-            return
-        }
-        let offset = options.firstIndex(of: newSelection) ?? 0
-        let target = indexMap.centeredIndex(for: offset)
-        guard wheelIndex != target else { return }
+/// UIPickerView virtualizes its rows, unlike SwiftUI's wheel Picker which creates
+/// every repeated Text child. A large logical row count therefore preserves the
+/// clock-like looping gesture without rebuilding hundreds of SwiftUI views when a
+/// neighboring setting changes.
+private struct VirtualizedLoopingWheel<Selection: Hashable>: UIViewRepresentable {
+    private static var cycleCount: Int { 10_001 }
 
-        var transaction = Transaction()
-        transaction.animation = nil
-        withTransaction(transaction) {
-            wheelIndex = target
-        }
+    let accessibilityLabel: String
+    @Binding var selection: Selection
+    let options: [Selection]
+    let optionTitle: (Selection) -> String
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
     }
 
-    private func recenterIfNeeded(_ index: Int) {
-        guard !options.isEmpty else { return }
-        guard indexMap.needsRecentering(index) else { return }
+    func makeUIView(context: Context) -> UIPickerView {
+        let picker = UIPickerView()
+        picker.dataSource = context.coordinator
+        picker.delegate = context.coordinator
+        picker.accessibilityLabel = accessibilityLabel
+        picker.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        picker.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        context.coordinator.reloadAndSynchronize(picker, forceReload: true)
+        return picker
+    }
 
-        let target = indexMap.centeredIndex(for: indexMap.optionOffset(for: index))
-        var transaction = Transaction()
-        transaction.animation = nil
-        withTransaction(transaction) {
-            wheelIndex = target
+    func sizeThatFits(
+        _ proposal: ProposedViewSize,
+        uiView: UIPickerView,
+        context: Context
+    ) -> CGSize? {
+        // Each wheel must use its HStack column's proposed width. UIKit's
+        // intrinsic picker width otherwise pushes neighboring columns offscreen.
+        CGSize(
+            width: max(proposal.width ?? 0, 0),
+            height: 216
+        )
+    }
+
+    func updateUIView(_ picker: UIPickerView, context: Context) {
+        let previousOptions = context.coordinator.parent.options
+        context.coordinator.parent = self
+        picker.accessibilityLabel = accessibilityLabel
+        context.coordinator.reloadAndSynchronize(
+            picker,
+            forceReload: previousOptions != options
+        )
+    }
+
+    final class Coordinator: NSObject, UIPickerViewDataSource, UIPickerViewDelegate {
+        var parent: VirtualizedLoopingWheel
+
+        init(parent: VirtualizedLoopingWheel) {
+            self.parent = parent
+        }
+
+        func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
+
+        func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
+            max(pickerView.bounds.width - 16, 0)
+        }
+
+        func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+            parent.options.count * VirtualizedLoopingWheel.cycleCount
+        }
+
+        func pickerView(
+            _ pickerView: UIPickerView,
+            viewForRow row: Int,
+            forComponent component: Int,
+            reusing view: UIView?
+        ) -> UIView {
+            let label = (view as? UILabel) ?? UILabel()
+            label.adjustsFontForContentSizeCategory = true
+            label.font = .preferredFont(forTextStyle: .title2)
+            label.textAlignment = .center
+            label.numberOfLines = 1
+            label.adjustsFontSizeToFitWidth = true
+            label.minimumScaleFactor = 0.68
+            label.text = title(for: row)
+            return label
+        }
+
+        func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+            guard !parent.options.isEmpty else { return }
+            let offset = row % parent.options.count
+            let value = parent.options[offset]
+            if parent.selection != value {
+                parent.selection = value
+            }
+
+            let lowerBoundary = parent.options.count * 2
+            let upperBoundary = parent.options.count * (VirtualizedLoopingWheel.cycleCount - 2)
+            if row < lowerBoundary || row >= upperBoundary {
+                pickerView.selectRow(centeredRow(for: offset), inComponent: 0, animated: false)
+            }
+        }
+
+        func reloadAndSynchronize(_ picker: UIPickerView, forceReload: Bool) {
+            guard !parent.options.isEmpty else {
+                if forceReload { picker.reloadAllComponents() }
+                return
+            }
+            if forceReload { picker.reloadAllComponents() }
+
+            let currentRow = picker.selectedRow(inComponent: 0)
+            let currentOffset = currentRow >= 0 ? currentRow % parent.options.count : -1
+            if currentOffset >= 0,
+               parent.options[currentOffset] == parent.selection,
+               !forceReload {
+                return
+            }
+
+            let selectedOffset = parent.options.firstIndex(of: parent.selection) ?? 0
+            picker.selectRow(centeredRow(for: selectedOffset), inComponent: 0, animated: false)
+        }
+
+        private func centeredRow(for offset: Int) -> Int {
+            (VirtualizedLoopingWheel.cycleCount / 2) * parent.options.count + offset
+        }
+
+        private func title(for row: Int) -> String {
+            guard !parent.options.isEmpty else { return "" }
+            return parent.optionTitle(parent.options[row % parent.options.count])
         }
     }
 }

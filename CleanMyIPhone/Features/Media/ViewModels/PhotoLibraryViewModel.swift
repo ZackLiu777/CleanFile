@@ -18,6 +18,10 @@ import UIKit
 @MainActor
 /// 封装 `PhotoLibraryViewModel` 的引用语义、状态与业务行为。
 final class PhotoLibraryViewModel: ObservableObject {
+    /// Process-lifetime gate: a cold launch analyzes once, while tab changes,
+    /// view reconstruction, and foreground transitions do not restart the scan.
+    private static var didStartColdLaunchAnalysis = false
+
     @Published private(set) var authorizationStatus: PHAuthorizationStatus
     @Published private(set) var assets: [PHAsset] = []
     @Published private(set) var isLoading = false
@@ -90,7 +94,9 @@ final class PhotoLibraryViewModel: ObservableObject {
         fetchAssets()
     }
 
-    /// 加载 `loadIfNeeded` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// Loads the latest PhotoKit inventory, restores reusable indexes, then starts
+    /// one analysis for this app process. ContentView calls this behind the opening
+    /// artwork so a cold-launch refresh does not wait for the Media tab to appear.
     func loadIfNeeded() async {
         guard !hasLoadedLibrary else { return }
         let interval = MediaPerformance.begin("Media Initial Load")
@@ -102,6 +108,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         refreshLibrary(resetAnalysis: false)
         restoreMediaSizeIndex(from: persistedSizes)
         restoreAnalysis(from: snapshot)
+        startColdLaunchAnalysisIfNeeded()
     }
 
     /// 封装 `requestAccess` 对应的局部行为，供当前类型在统一入口下复用。
@@ -115,8 +122,20 @@ final class PhotoLibraryViewModel: ObservableObject {
                 self?.authorizationStatus = status
                 self?.isLoading = false
                 self?.fetchAssetsIfAllowed()
+                self?.startColdLaunchAnalysisIfNeeded()
             }
         }
+    }
+
+    private func startColdLaunchAnalysisIfNeeded() {
+        guard !isRunningInPreviews,
+              authorizationStatus == .authorized || authorizationStatus == .limited,
+              !Self.didStartColdLaunchAnalysis else {
+            return
+        }
+
+        Self.didStartColdLaunchAnalysis = true
+        startAnalysis()
     }
 
     /// 控制 `presentLimitedLibraryPicker` 对应界面或资源的展示生命周期。

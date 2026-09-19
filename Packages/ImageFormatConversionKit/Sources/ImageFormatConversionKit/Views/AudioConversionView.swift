@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 import UniformTypeIdentifiers
 
 @MainActor
@@ -12,6 +13,7 @@ struct AudioConversionView: View {
     @State private var viewModel: AudioConversionViewModel
     @State private var importSession: ConversionImportSession
     @State private var mediaImporterPresented = false
+    @State private var selectedVideoItems: [PhotosPickerItem] = []
     @State private var isClearAllConfirmationPresented = false
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
@@ -49,6 +51,10 @@ struct AudioConversionView: View {
             case let .failure(error): viewModel.reportImportFailure(error.localizedDescription)
             }
         }
+        .onChange(of: selectedVideoItems) { _, items in
+            guard !items.isEmpty else { return }
+            Task { await importVideos(items) }
+        }
         .alert(
             L10n.string("conversion.delete_all.title"),
             isPresented: $isClearAllConfirmationPresented
@@ -64,15 +70,19 @@ struct AudioConversionView: View {
 
     private var shouldShowImportCard: Bool {
         viewModel.items.isEmpty
-            && viewModel.importProgress == nil
+            && activeImportProgress == nil
             && importSession.pendingCount == 0
+    }
+
+    private var activeImportProgress: ConversionImportProgress? {
+        importSession.libraryProgress ?? viewModel.importProgress
     }
 
     private var displayedFileCount: Int {
         max(
             viewModel.items.count,
             importSession.pendingCount,
-            viewModel.importProgress?.total ?? 0
+            activeImportProgress?.total ?? 0
         )
     }
 
@@ -97,14 +107,80 @@ struct AudioConversionView: View {
             Image(systemName: "waveform").font(.system(size: 34)).foregroundStyle(.tint)
             Text(L10n.string("audio.import.title")).appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
             Button { mediaImporterPresented = true } label: {
-                Label(L10n.string("audio.action.add_media"), systemImage: "doc.badge.plus")
+                Label(L10n.string("action.choose_files"), systemImage: "folder")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
-            .disabled(viewModel.isConverting || viewModel.importProgress != nil)
+            .disabled(viewModel.isConverting || activeImportProgress != nil)
+
+            PhotosPicker(
+                selection: $selectedVideoItems,
+                maxSelectionCount: 50,
+                matching: .videos
+            ) {
+                Label(L10n.string("action.choose_photos"), systemImage: "photo.on.rectangle")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .disabled(viewModel.isConverting || activeImportProgress != nil)
         }
         .padding(20)
         .converterCard()
+    }
+
+    private func importVideos(_ selections: [PhotosPickerItem]) async {
+        let sessionID = UUID()
+        importSession.librarySessionID = sessionID
+        importSession.pendingCount = selections.count
+        defer {
+            selectedVideoItems = []
+            if importSession.librarySessionID == sessionID {
+                importSession.librarySessionID = nil
+                importSession.libraryProgress = nil
+            }
+            importSession.pendingCount = 0
+            importSession.previewURLs = []
+        }
+
+        var urls: [URL] = []
+        for (index, selection) in selections.enumerated() {
+            importSession.libraryProgress = ConversionImportProgress(
+                completed: index,
+                total: selections.count,
+                currentFileName: nil
+            ).mapped(to: 0 ... 0.95)
+            do {
+                if let imported = try await PhotoLibraryImport.loadTransferable(
+                    from: selection,
+                    type: ImportedVideoFile.self,
+                    progress: { fraction in
+                        Task { @MainActor in
+                            guard importSession.librarySessionID == sessionID else { return }
+                            importSession.libraryProgress = ConversionImportProgress(
+                                completed: index,
+                                total: selections.count,
+                                currentFileName: nil,
+                                currentFileFraction: fraction
+                            ).mapped(to: 0 ... 0.95)
+                        }
+                    }
+                ) {
+                    urls.append(imported.url)
+                    importSession.previewURLs.append(imported.url)
+                }
+            } catch {
+                viewModel.reportImportFailure(error.localizedDescription)
+            }
+            importSession.libraryProgress = ConversionImportProgress(
+                completed: index + 1,
+                total: selections.count,
+                currentFileName: nil
+            ).mapped(to: 0 ... 0.95)
+        }
+
+        importSession.librarySessionID = nil
+        importSession.libraryProgress = nil
+        await viewModel.addFiles(urls, sourceKind: .video, progressRange: 0.95 ... 1)
     }
 
     /// 处理 `importMediaFiles` 导入流程，并将用户选择安全地交给后续处理。
@@ -151,20 +227,28 @@ struct AudioConversionView: View {
                             title: L10n.string("settings.format"),
                             selection: Binding(
                                 get: { viewModel.outputFormat },
-                                set: { viewModel.outputFormat = $0 }
+                                set: { format in
+                                    viewModel.outputFormat = format
+                                    if !format.isLossless,
+                                       !format.availableBitRates.contains(viewModel.bitRate) {
+                                        viewModel.bitRate = .veryHigh
+                                    }
+                                }
                             ),
                             options: AudioOutputFormat.allCases,
                             optionTitle: audioFormatTitle
                         )
-                        ConversionWheelColumn(
-                            title: L10n.string("audio.settings.quality"),
-                            selection: Binding(
-                                get: { viewModel.bitRate },
-                                set: { viewModel.bitRate = $0 }
-                            ),
-                            options: AudioBitRate.allCases,
-                            optionTitle: { "\($0.rawValue / 1_000) kbps" }
-                        )
+                        if !viewModel.outputFormat.isLossless {
+                            ConversionWheelColumn(
+                                title: L10n.string("audio.settings.quality"),
+                                selection: Binding(
+                                    get: { viewModel.bitRate },
+                                    set: { viewModel.bitRate = $0 }
+                                ),
+                                options: viewModel.outputFormat.availableBitRates,
+                                optionTitle: { "\($0.rawValue / 1_000) kbps" }
+                            )
+                        }
                     }
                 }
             }
@@ -212,12 +296,12 @@ struct AudioConversionView: View {
 
     private var selectedFilesCard: some View {
         ConversionFileTray(
-            title: viewModel.importProgress == nil
+            title: activeImportProgress == nil
                 ? L10n.format("files.audio.title", displayedFileCount)
                 : "\(L10n.string("import.progress.title")) · \(L10n.format("files.audio.title", displayedFileCount))",
-            progress: viewModel.importProgress,
+            progress: activeImportProgress,
             rowCount: displayedFileCount > 3 ? 2 : 1,
-            canClear: !viewModel.isConverting && viewModel.importProgress == nil,
+            canClear: !viewModel.isConverting && activeImportProgress == nil,
             onClear: { isClearAllConfirmationPresented = true }
         ) {
             ForEach(viewModel.items) { item in

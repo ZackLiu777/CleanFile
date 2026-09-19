@@ -151,6 +151,18 @@ struct ConversionModelEdgeCaseTests {
         #expect(request.bitRate == .veryHigh)
     }
 
+    @Test("Lossy formats expose 320 kbps while lossless formats ignore bitrate")
+    func audioFormatsExposeRelevantBitRates() {
+        #expect(AudioOutputFormat.mp3.availableBitRates.contains(.maximum))
+        #expect(AudioOutputFormat.aac.availableBitRates.contains(.maximum))
+        #expect(AudioOutputFormat.aacFile.availableBitRates.contains(.maximum))
+        #expect(AudioBitRate.maximum.rawValue == 320_000)
+        #expect(AudioOutputFormat.alac.availableBitRates.isEmpty)
+        #expect(AudioOutputFormat.cafALAC.availableBitRates.isEmpty)
+        #expect(AudioOutputFormat.alac.isLossless)
+        #expect(AudioOutputFormat.cafALAC.isLossless)
+    }
+
     @Test("Native video input extensions remain intentionally narrow")
     func nativeVideoExtensionsAreStable() {
         #expect(AudioConversionEngine.supportedVideoInputExtensions == ["mov", "mp4", "m4v"])

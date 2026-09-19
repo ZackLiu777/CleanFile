@@ -97,9 +97,6 @@ struct PhotosView: View {
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
         }
-        .task {
-            await viewModel.loadIfNeeded()
-        }
         .onAppear {
             animateStorageBarIfNeeded()
         }

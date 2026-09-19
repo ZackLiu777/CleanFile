@@ -49,8 +49,15 @@ public enum AudioBitRate: Int, CaseIterable, Identifiable, Sendable {
     case standard = 128_000
     case high = 192_000
     case veryHigh = 256_000
+    case maximum = 320_000
 
     public var id: Self { self }
+}
+
+extension AudioOutputFormat {
+    var availableBitRates: [AudioBitRate] {
+        isLossless ? [] : AudioBitRate.allCases
+    }
 }
 
 /// 定义 `AudioConversionStatus` 使用的有限状态或选项集合。

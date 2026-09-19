@@ -18,7 +18,7 @@ final class AudioConversionViewModel {
     private(set) var notice: String?
     private(set) var importProgress: ConversionImportProgress?
 
-    var outputFormat: AudioOutputFormat = .aac
+    var outputFormat: AudioOutputFormat = .mp3
     var bitRate: AudioBitRate = .high
     let outputDirectory: URL
 

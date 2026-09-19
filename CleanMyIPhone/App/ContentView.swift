@@ -155,6 +155,12 @@ struct ContentView: View {
             }
         }
         .environmentObject(tabBarVisibility)
+        .task {
+            // This view exists underneath AppOpeningView, so cold-launch media
+            // refresh begins during the opening animation even when another tab
+            // was selected in the previous session.
+            await mediaViewModel.loadIfNeeded()
+        }
         .onChange(of: selectedTab) { _, newTab in
             // Native TabView changes the persisted selection directly. Keep the
             // custom page layer ready if the Liquid Glass option is turned off.

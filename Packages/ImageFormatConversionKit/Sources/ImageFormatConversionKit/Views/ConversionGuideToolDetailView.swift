@@ -141,6 +141,11 @@ enum ConversionGuideTool: String, CaseIterable, Identifiable, Hashable {
                     detail: L10n.string("conversion.guide.audio.quality.detail")
                 ),
                 ConversionGuideSetting(
+                    symbol: "shippingbox",
+                    title: L10n.string("conversion.guide.audio.m4a.title"),
+                    detail: L10n.string("conversion.guide.audio.m4a.detail")
+                ),
+                ConversionGuideSetting(
                     symbol: "waveform.badge.checkmark",
                     title: L10n.string("conversion.guide.audio.lossless.title"),
                     detail: L10n.string("conversion.guide.audio.lossless.detail")

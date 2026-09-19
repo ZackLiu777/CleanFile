@@ -339,7 +339,7 @@ private enum ConversionHomeKind: String, CaseIterable, Identifiable, Hashable, S
         case .video:
             ["MP4", "MOV", "M4V", "HEVC"]
         case .audio:
-            ["M4A", "AAC", "WAV", "AIFF"]
+            ["MP3", "AAC", "WAV", "AIFF"]
         }
     }
 
