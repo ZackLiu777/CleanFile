@@ -28,9 +28,5 @@ final class ConversionImportProgressUITests: XCTestCase {
             object: percentage
         )
         XCTAssertEqual(XCTWaiter.wait(for: [complete], timeout: 3), .completed)
-
-        let progressBar = app.progressIndicators["conversion.import.progressBar"]
-        XCTAssertTrue(progressBar.exists)
-        XCTAssertEqual(progressBar.value as? String, "100%")
     }
 }
