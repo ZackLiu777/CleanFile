@@ -61,7 +61,7 @@ public final class ImageConversionViewModel {
             }
         }
     }
-    public var quality = 0.85
+    public var quality = 0.9
     public var metadataPolicy: ImageMetadataPolicy = .removeGPS
     public var resizePreset: ImageResizePreset = .original
     public var flattenColor: ImageFlattenColor = .white

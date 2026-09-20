@@ -10,6 +10,7 @@ import UniformTypeIdentifiers
 @MainActor
 /// 定义 `VideoConversionView` 的值语义数据与相关行为。
 struct VideoConversionView: View {
+    @Environment(\.conversionTheme) private var theme
     @State private var viewModel: VideoConversionViewModel
     @State private var importSession: ConversionImportSession
     @State private var importerPresented = false
@@ -320,7 +321,11 @@ struct VideoConversionView: View {
     @ViewBuilder private var action: some View {
         if viewModel.isConverting {
             VStack(spacing: 10) {
-                ProgressView(value: (Double(viewModel.completed) + viewModel.currentProgress) / Double(max(viewModel.total, 1)))
+                WaveProgressView(
+                    progress: (Double(viewModel.completed) + viewModel.currentProgress)
+                        / Double(max(viewModel.total, 1)),
+                    tint: theme.accent
+                )
                 HStack {
                     Text("\(viewModel.completed) / \(viewModel.total)").appTypeface(.footnote, size: 13, relativeTo: .footnote).foregroundStyle(.secondary)
                     Spacer()

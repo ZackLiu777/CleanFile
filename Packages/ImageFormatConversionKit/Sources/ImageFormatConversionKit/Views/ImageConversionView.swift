@@ -254,6 +254,7 @@ private struct FormatChipSection: View {
 @MainActor
 /// 定义 `ImageConversionContentView` 的值语义数据与相关行为。
 struct ImageConversionContentView: View {
+    @Environment(\.conversionTheme) private var theme
     @State private var viewModel: ImageConversionViewModel
     @State private var importSession: ConversionImportSession
     @State private var isImporterPresented = false
@@ -505,7 +506,10 @@ struct ImageConversionContentView: View {
     private var conversionAction: some View {
         if viewModel.isConverting {
             VStack(spacing: 12) {
-                ProgressView(value: viewModel.progress.fractionCompleted)
+                WaveProgressView(
+                    progress: viewModel.progress.fractionCompleted,
+                    tint: theme.accent
+                )
 
                 HStack {
                     Text(
@@ -577,31 +581,7 @@ private struct ImageConversionSettingsCard: View {
                 }
             }
 
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text(L10n.string("settings.quality"))
-                    Spacer()
-                    if viewModel.outputFormat.supportsQuality {
-                        Text(viewModel.quality, format: .percent.precision(.fractionLength(0)))
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
-                    } else {
-                        Text("—")
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                Slider(value: $viewModel.quality, in: 0.1 ... 1, step: 0.05)
-
-                HStack {
-                    Text(L10n.string("quality.smaller"))
-                    Spacer()
-                    Text(L10n.string("quality.balanced"))
-                    Spacer()
-                    Text(L10n.string("quality.best"))
-                }
-                .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
-                .foregroundStyle(.tertiary)
-            }
+            SegmentedStreamSlider(value: $viewModel.quality)
             .disabled(!viewModel.outputFormat.supportsQuality)
             .opacity(viewModel.outputFormat.supportsQuality ? 1 : 0.42)
             .animation(.easeInOut(duration: 0.18), value: viewModel.outputFormat)
@@ -620,9 +600,6 @@ private struct ImageConversionSettingsCard: View {
                     .labelsHidden()
                     .pickerStyle(.segmented)
                     .accessibilityIdentifier("conversion.image.background")
-                Text(L10n.string("settings.background.detail"))
-                    .appTypeface(.footnote, size: 13, relativeTo: .footnote, weight: .regular)
-                    .foregroundStyle(.secondary)
             }
 
             HStack(alignment: .firstTextBaseline) {

@@ -77,6 +77,14 @@ public actor VideoConversionEngine {
 
         await progress(0)
 
+        // `export(to:as:)` does not forward intermediate progress itself.
+        // Observe the same export session while the async export is suspended so
+        // the presentation layer receives a continuous 0...1 value.
+        let progressTask = Task {
+            await exporterCancellation.observeProgress(progress)
+        }
+        defer { progressTask.cancel() }
+
         let exportID = ConversionPerformance.begin("Conversion Video Export")
         do {
             try await withTaskCancellationHandler {
@@ -222,5 +230,23 @@ private final class ExporterCancellation: @unchecked Sendable {
     /// 取消 `cancel` 对应的进行中任务，并收敛到可继续操作的状态。
     func cancel() {
         exporter.cancelExport()
+    }
+
+    func observeProgress(
+        _ report: @escaping @Sendable (Double) async -> Void
+    ) async {
+        if #available(iOS 18.0, macOS 15.0, *) {
+            for await state in exporter.states(updateInterval: 0.1) {
+                guard !Task.isCancelled else { return }
+                if case let .exporting(progress) = state {
+                    await report(progress.fractionCompleted)
+                }
+            }
+        } else {
+            while !Task.isCancelled {
+                await report(Double(exporter.progress))
+                try? await Task.sleep(for: .milliseconds(100))
+            }
+        }
     }
 }

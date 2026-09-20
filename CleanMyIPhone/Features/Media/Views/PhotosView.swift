@@ -9,6 +9,7 @@
 //
 
 import Photos
+import ImageFormatConversionKit
 import SwiftUI
 //import UIKit
 
@@ -197,8 +198,10 @@ struct PhotosView: View {
             VStack(alignment: .leading, spacing: 10) {
                 Text(analysisTitle(for: progress.phase))
                     .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
-                ProgressView(value: progress.fractionCompleted)
-                    .tint(theme.accentPrimary)
+                WaveProgressView(
+                    progress: progress.fractionCompleted,
+                    tint: theme.accentPrimary
+                )
                 Text("Analyzed \(progress.completed) of \(progress.total)")
                     .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                     .foregroundStyle(.secondary)

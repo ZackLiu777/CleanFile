@@ -144,7 +144,7 @@ public struct ImageConversionRequest: Hashable, Sendable {
         sourceURL: URL,
         destinationDirectory: URL,
         outputFormat: ImageOutputFormat,
-        quality: Double = 0.85,
+        quality: Double = 0.9,
         metadataPolicy: ImageMetadataPolicy = .removeGPS,
         resizePolicy: ImageResizePolicy = .original,
         flattenColor: ImageFlattenColor = .white,
@@ -155,7 +155,13 @@ public struct ImageConversionRequest: Hashable, Sendable {
         self.sourceURL = sourceURL
         self.destinationDirectory = destinationDirectory
         self.outputFormat = outputFormat
-        self.quality = quality
+        if quality.isFinite, (0 ... 1).contains(quality) {
+            // Image quality is presented as ten stable presets from 10% to 100%.
+            self.quality = max(0.1, (quality * 10).rounded() / 10)
+        } else {
+            // Preserve invalid input so the engine can report its existing validation error.
+            self.quality = quality
+        }
         self.metadataPolicy = metadataPolicy
         self.resizePolicy = resizePolicy
         self.flattenColor = flattenColor

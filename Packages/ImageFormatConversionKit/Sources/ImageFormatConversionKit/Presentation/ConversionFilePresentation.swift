@@ -381,9 +381,10 @@ struct ConversionFileTray<Content: View>: View {
 
             if let progress {
                 VStack(spacing: 7) {
-                    ProgressView(value: progress.fractionCompleted)
-                        .tint(theme.accent)
-                        .animation(.linear(duration: 0.12), value: progress.fractionCompleted)
+                    WaveProgressView(
+                        progress: progress.fractionCompleted,
+                        tint: theme.accent
+                    )
 
                     HStack {
                         Text(L10n.string("import.progress.title"))
