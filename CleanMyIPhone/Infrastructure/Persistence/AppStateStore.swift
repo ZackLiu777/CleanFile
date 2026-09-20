@@ -14,6 +14,24 @@ import Foundation
 nonisolated struct MediaStateSnapshot: Codable, Sendable {
     let result: MediaClassificationResult
     let isPartial: Bool
+    let libraryRevision: MediaLibraryRevision?
+
+    init(
+        result: MediaClassificationResult,
+        isPartial: Bool,
+        libraryRevision: MediaLibraryRevision? = nil
+    ) {
+        self.result = result
+        self.isPartial = isPartial
+        self.libraryRevision = libraryRevision
+    }
+}
+
+/// A compact, deterministic description of the PhotoKit inventory used by an analysis.
+/// It lets cold launches validate cached results without loading every thumbnail again.
+nonisolated struct MediaLibraryRevision: Codable, Equatable, Sendable {
+    let assetCount: Int
+    let fingerprint: UInt64
 }
 
 /// Stores verified PhotoKit resource sizes. Modification dates invalidate stale entries.

@@ -41,6 +41,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     private var analysisTask: Task<Void, Never>?
     private var analysisGeneration = 0
     private var hasLoadedLibrary = false
+    private var libraryRevision: MediaLibraryRevision?
     private var assetsByIdentifier: [String: PHAsset] = [:]
     private var displayNamesByIdentifier: [String: String] = [:]
     private var pendingByteCountIdentifiers: [String] = []
@@ -64,7 +65,6 @@ final class PhotoLibraryViewModel: ObservableObject {
 
     /// 更新 `refresh` 对应的数据，使界面状态与底层结果保持一致。
     func refresh() {
-        Task { await stateStore.saveMediaState(nil) }
         refreshLibrary(resetAnalysis: true)
         startAnalysis()
     }
@@ -107,8 +107,8 @@ final class PhotoLibraryViewModel: ObservableObject {
         let (snapshot, persistedSizes) = await (stateSnapshot, sizeSnapshot)
         refreshLibrary(resetAnalysis: false)
         restoreMediaSizeIndex(from: persistedSizes)
-        restoreAnalysis(from: snapshot)
-        startColdLaunchAnalysisIfNeeded()
+        let canReuseAnalysis = restoreAnalysis(from: snapshot)
+        startColdLaunchAnalysisIfNeeded(requiresAnalysis: !canReuseAnalysis)
     }
 
     /// 封装 `requestAccess` 对应的局部行为，供当前类型在统一入口下复用。
@@ -127,7 +127,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    private func startColdLaunchAnalysisIfNeeded() {
+    private func startColdLaunchAnalysisIfNeeded(requiresAnalysis: Bool = true) {
         guard !isRunningInPreviews,
               authorizationStatus == .authorized || authorizationStatus == .limited,
               !Self.didStartColdLaunchAnalysis else {
@@ -135,7 +135,9 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
 
         Self.didStartColdLaunchAnalysis = true
-        startAnalysis()
+        if requiresAnalysis {
+            startAnalysis()
+        }
     }
 
     /// 控制 `presentLimitedLibraryPicker` 对应界面或资源的展示生命周期。
@@ -444,7 +446,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         let assetsToAnalyze = assets
         analysisGeneration &+= 1
         let generation = analysisGeneration
-        Task { await stateStore.saveMediaState(nil) }
         analysisTask = Task { [weak self] in
             guard let self else { return }
 
@@ -583,6 +584,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         assetsByIdentifier = Dictionary(
             uniqueKeysWithValues: assets.map { ($0.localIdentifier, $0) }
         )
+        libraryRevision = Self.makeLibraryRevision(for: assets)
         exactByteCountsByIdentifier = exactByteCountsByIdentifier.filter {
             assetsByIdentifier[$0.key] != nil
         }
@@ -740,10 +742,11 @@ final class PhotoLibraryViewModel: ObservableObject {
     }
 
     /// 加载 `restoreAnalysis` 所需的数据，并将结果转换为当前层可消费的状态。
-    private func restoreAnalysis(from snapshot: MediaStateSnapshot?) {
+    @discardableResult
+    private func restoreAnalysis(from snapshot: MediaStateSnapshot?) -> Bool {
         guard let snapshot else {
             if analysisState.isAnalyzing { analysisState = .cancelled }
-            return
+            return false
         }
         let availableIDs = Set(assetsByIdentifier.keys)
         let persistedIDs = Set(
@@ -754,6 +757,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         )
         let result = snapshot.result.removingAssetIDs(persistedIDs.subtracting(availableIDs))
         analysisState = snapshot.isPartial ? .partialFailure(result) : .success(result)
+        return snapshot.libraryRevision == libraryRevision
     }
 
     /// 持久化 `persistAnalysisState` 对应的数据，并保持后续恢复所需的信息完整。
@@ -761,13 +765,57 @@ final class PhotoLibraryViewModel: ObservableObject {
         let snapshot: MediaStateSnapshot?
         switch analysisState {
         case .success(let result):
-            snapshot = MediaStateSnapshot(result: result, isPartial: false)
+            snapshot = MediaStateSnapshot(
+                result: result,
+                isPartial: false,
+                libraryRevision: libraryRevision
+            )
         case .partialFailure(let result):
-            snapshot = MediaStateSnapshot(result: result, isPartial: true)
+            snapshot = MediaStateSnapshot(
+                result: result,
+                isPartial: true,
+                libraryRevision: libraryRevision
+            )
         default:
             snapshot = nil
         }
         Task { await stateStore.saveMediaState(snapshot) }
+    }
+
+    /// PhotoKit identifiers are stable for an asset. Mixing the metadata that affects
+    /// classification makes additions, removals, edits, and subtype changes invalidate
+    /// the cached analysis while keeping the persisted revision constant across launches.
+    private static func makeLibraryRevision(for assets: [PHAsset]) -> MediaLibraryRevision {
+        var fingerprint: UInt64 = 14_695_981_039_346_656_037
+        let prime: UInt64 = 1_099_511_628_211
+
+        @inline(__always)
+        func mix(_ value: UInt64, into fingerprint: inout UInt64) {
+            var remaining = value
+            for _ in 0 ..< MemoryLayout<UInt64>.size {
+                fingerprint ^= remaining & 0xff
+                fingerprint &*= prime
+                remaining >>= 8
+            }
+        }
+
+        for asset in assets {
+            for byte in asset.localIdentifier.utf8 {
+                fingerprint ^= UInt64(byte)
+                fingerprint &*= prime
+            }
+            // Separate adjacent identifiers so concatenated values cannot alias.
+            fingerprint ^= 0xff
+            fingerprint &*= prime
+            mix(asset.modificationDate?.timeIntervalSinceReferenceDate.bitPattern ?? 0, into: &fingerprint)
+            mix(asset.creationDate?.timeIntervalSinceReferenceDate.bitPattern ?? 0, into: &fingerprint)
+            mix(UInt64(UInt32(bitPattern: Int32(asset.pixelWidth))), into: &fingerprint)
+            mix(UInt64(UInt32(bitPattern: Int32(asset.pixelHeight))), into: &fingerprint)
+            mix(UInt64(asset.mediaType.rawValue), into: &fingerprint)
+            mix(UInt64(asset.mediaSubtypes.rawValue), into: &fingerprint)
+        }
+
+        return MediaLibraryRevision(assetCount: assets.count, fingerprint: fingerprint)
     }
 
     /// 加载 `loadStorageSnapshot` 所需的数据，并将结果转换为当前层可消费的状态。
