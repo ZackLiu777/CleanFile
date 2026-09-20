@@ -17,7 +17,7 @@ struct ImportedPhotoFile: Transferable, Sendable {
         FileRepresentation(contentType: .image) { value in
             SentTransferredFile(value.url)
         } importing: { received in
-            ImportedPhotoFile(url: try PhotoLibraryImport.copy(received.file))
+            ImportedPhotoFile(url: try PhotoLibraryImport.adopt(received))
         }
     }
 }
@@ -30,7 +30,7 @@ struct ImportedVideoFile: Transferable, Sendable {
         FileRepresentation(contentType: .movie) { value in
             SentTransferredFile(value.url)
         } importing: { received in
-            ImportedVideoFile(url: try PhotoLibraryImport.copy(received.file))
+            ImportedVideoFile(url: try PhotoLibraryImport.adopt(received))
         }
     }
 }
@@ -91,14 +91,56 @@ enum PhotoLibraryImport {
         }
     }
 
-    /// 封装 `copy` 对应的局部行为，供当前类型在统一入口下复用。
-    static func copy(_ sourceURL: URL) throws -> URL {
+    /// Persists a PhotosPicker delivery without moving a sender-owned original.
+    static func adopt(_ received: ReceivedTransferredFile) throws -> URL {
         let performanceID = ConversionPerformance.begin("Conversion Provider Copy")
         defer { ConversionPerformance.end("Conversion Provider Copy", id: performanceID) }
+        let sourceURL = received.file.standardizedFileURL
         let destination = try destinationURL(fileName: sourceURL.lastPathComponent)
+        let partial = destination
+            .deletingLastPathComponent()
+            .appendingPathComponent(".partial-\(UUID().uuidString)")
+            .appendingPathExtension(destination.pathExtension)
         let fileManager = FileManager.default
-        try fileManager.copyItem(at: sourceURL, to: destination)
-        return destination
+
+        do {
+            let sourceBytes = try sourceURL.resourceValues(forKeys: [.fileSizeKey]).fileSize
+            if !received.isOriginalFile,
+               isSameVolume(sourceURL, destination.deletingLastPathComponent()) {
+                do {
+                    try fileManager.moveItem(at: sourceURL, to: partial)
+                } catch {
+                    try? fileManager.removeItem(at: partial)
+                    try fileManager.copyItem(at: sourceURL, to: partial)
+                }
+            } else {
+                try fileManager.copyItem(at: sourceURL, to: partial)
+            }
+
+            guard let persistedBytes = try partial
+                .resourceValues(forKeys: [.fileSizeKey]).fileSize else {
+                throw CocoaError(.fileReadCorruptFile)
+            }
+            if let sourceBytes, sourceBytes != persistedBytes {
+                throw CocoaError(.fileReadCorruptFile)
+            }
+
+            try fileManager.moveItem(at: partial, to: destination)
+            return destination
+        } catch {
+            try? fileManager.removeItem(at: partial)
+            throw error
+        }
+    }
+
+    private static func isSameVolume(_ source: URL, _ destinationDirectory: URL) -> Bool {
+        let keys: Set<URLResourceKey> = [.volumeIdentifierKey]
+        guard let sourceVolume = try? source.resourceValues(forKeys: keys).volumeIdentifier,
+              let destinationVolume = try? destinationDirectory
+              .resourceValues(forKeys: keys).volumeIdentifier else {
+            return false
+        }
+        return sourceVolume.isEqual(destinationVolume)
     }
 
     /// 封装 `destinationURL` 对应的局部行为，供当前类型在统一入口下复用。
