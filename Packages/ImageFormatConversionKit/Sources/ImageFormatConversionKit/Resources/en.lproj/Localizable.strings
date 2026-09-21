@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "Pick a format that balances compatibility, quality, and file size for how the file will be used.";
 "conversion.guide.quality.detail" = "Use image quality, video codec and resolution, or AAC bitrate to reduce size. Lossless audio formats preserve quality but may not reduce size.";
 "conversion.guide.metadata.detail" = "Preserve all writable metadata, remove GPS only, or remove everything. GPS removal is the default.";
+"conversion.guide.replace.title" = "Replace originals";
+"conversion.guide.replace.detail" = "After compression, tap the trash button on the compression home screen and select image or video collections. The app saves compressed copies to Photos first, then iOS asks you to confirm deleting the matching originals. Only completed items imported from Photos are eligible; standalone audio and Files imports are not supported. Clear All removes the app’s working copies and makes replacement unavailable, but never deletes originals.";
 "conversion.guide.privacy.title" = "Your originals stay yours";
 "conversion.guide.privacy.detail" = "Everything is processed on this device. Clear All removes only app-managed copies and outputs, never your originals in Photos or Files.";
 "conversion.guide.learn_more" = "Explore this tool";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@ · about %d%%";
 "estimate.disclaimer" = "Estimate only. Actual size depends on the media content and encoder.";
 "estimate.calculating" = "Estimating output size…";
+"conversion.replace.button" = "Replace originals";
+"conversion.replace.title" = "Replace original media?";
+"conversion.replace.message" = "%d compressed items will be saved to Photos, then their originals will be deleted. This cannot be undone.";
+"conversion.replace.action" = "Replace Originals";
+"conversion.replace.failed" = "Some originals could not be replaced. They were kept for safety.";
+"conversion.replace.unavailable" = "No replaceable originals are available. Import from Photos and finish compression before using this action.";
+"conversion.replace.review.title" = "Replace Originals";
+"conversion.replace.review.summary" = "Compressed media ready";
+"conversion.replace.review.detail" = "Choose which originals to replace. Compressed copies are saved first.";
+"conversion.replace.select_all" = "Select All";
+"conversion.replace.deselect_all" = "Deselect All";
+"conversion.replace.selected" = "%d selected";

@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "호환성, 품질, 파일 크기의 균형이 용도에 맞는 형식을 선택하세요.";
 "conversion.guide.quality.detail" = "이미지 품질, 비디오 코덱과 해상도, AAC 비트 전송률로 크기를 줄일 수 있습니다. 무손실 형식은 품질을 보존하지만 크기가 줄지 않을 수 있습니다.";
 "conversion.guide.metadata.detail" = "기록 가능한 메타데이터를 모두 유지하거나 GPS만 또는 모두 제거할 수 있습니다. 기본값은 GPS만 제거입니다.";
+"conversion.guide.replace.title" = "원본 대치";
+"conversion.guide.replace.detail" = "압축 후 홈 화면의 휴지통을 탭하고 이미지 또는 비디오 모음을 선택하세요. 앱이 압축 사본을 사진에 먼저 저장한 다음 iOS가 해당 원본 삭제 확인을 요청합니다. 사진에서 가져와 압축이 완료된 항목만 사용할 수 있으며, 독립 오디오와 파일에서 가져온 항목은 지원하지 않습니다. 모두 지우기는 작업 사본만 제거하고 대치 기능을 사용할 수 없게 하며 원본은 삭제하지 않습니다.";
 "conversion.guide.privacy.title" = "원본은 그대로 유지됩니다";
 "conversion.guide.privacy.detail" = "모든 콘텐츠는 이 기기에서 처리됩니다. ‘모두 지우기’는 앱에서 관리하는 복사본과 출력만 제거하며 사진이나 파일의 원본은 삭제하지 않습니다.";
 "conversion.guide.learn_more" = "자세히 보기";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@ · 약 %d%%";
 "estimate.disclaimer" = "예상치이며 실제 크기는 미디어 내용과 인코더에 따라 달라집니다.";
 "estimate.calculating" = "출력 크기 계산 중…";
+"conversion.replace.button" = "원본 대체";
+"conversion.replace.title" = "원본 미디어를 대체할까요?";
+"conversion.replace.message" = "압축된 항목 %d개를 사진에 저장한 다음 해당 원본을 삭제합니다. 이 작업은 취소할 수 없습니다.";
+"conversion.replace.action" = "원본 대체";
+"conversion.replace.failed" = "일부 원본을 대체하지 못해 안전을 위해 보관했습니다.";
+"conversion.replace.unavailable" = "대체할 수 있는 원본이 없습니다. 사진에서 가져온 뒤 압축을 완료하세요.";
+"conversion.replace.review.title" = "원본 대체";
+"conversion.replace.review.summary" = "압축 미디어 준비 완료";
+"conversion.replace.review.detail" = "대체할 원본을 선택하세요. 압축 사본을 먼저 저장합니다.";
+"conversion.replace.select_all" = "모두 선택";
+"conversion.replace.deselect_all" = "모두 선택 해제";
+"conversion.replace.selected" = "%d개 선택됨";

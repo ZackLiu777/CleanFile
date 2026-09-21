@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "Valitse muoto, jossa yhteensopivuus, laatu ja tiedostokoko ovat tasapainossa tiedoston käytön suhteen.";
 "conversion.guide.quality.detail" = "Käytä kuvanlaatua, videon koodekkia ja resoluutiota tai AAC-bittinopeutta pienentääksesi kokoa. Häviöttömät äänimuodot säilyttävät laadun, mutta eivät välttämättä pienennä kokoa.";
 "conversion.guide.metadata.detail" = "Säilytä kaikki kirjoitettavat metatiedot, poista vain GPS tai poista kaikki. GPS-poisto on oletusarvo.";
+"conversion.guide.replace.title" = "Korvaa alkuperäiset";
+"conversion.guide.replace.detail" = "Pakkaamisen jälkeen napauta aloitusnäkymän roskakoria ja valitse kuva- tai videokokoelmat. Appi tallentaa ensin pakatut kopiot Kuviin, minkä jälkeen iOS pyytää vahvistamaan vastaavien alkuperäisten poistamisen. Vain Kuvista tuodut valmiit kohteet ovat käytettävissä; erillistä ääntä ja Tiedostoista tuotuja kohteita ei tueta. Tyhjennä kaikki poistaa vain työkopiot ja estää korvaamisen, mutta ei poista alkuperäisiä.";
 "conversion.guide.privacy.title" = "Alkuperäiset jäävät sinun";
 "conversion.guide.privacy.detail" = "Kaikki käsitellään tällä laitteella. Tyhjennä kaikki poistaa vain sovelluksen hallinnoimat kopiot ja tulosteet, ei koskaan alkuperäisiä kuviasi tai tiedostoistasi.";
 "conversion.guide.learn_more" = "Tutustu tähän työkaluun";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@ · noin %d%%";
 "estimate.disclaimer" = "Vain arvio. Todellinen koko riippuu mediasisällöstä ja kooderista.";
 "estimate.calculating" = "Arvioitu tulostuskoko…";
+"conversion.replace.button" = "Korvaa alkuperäiset";
+"conversion.replace.title" = "Korvataanko alkuperäinen media?";
+"conversion.replace.message" = "%d pakattua kohdetta tallennetaan Kuviin ja alkuperäiset poistetaan. Toimintoa ei voi kumota.";
+"conversion.replace.action" = "Korvaa alkuperäiset";
+"conversion.replace.failed" = "Joitakin alkuperäisiä ei voitu korvata, joten ne säilytettiin turvallisuuden vuoksi.";
+"conversion.replace.unavailable" = "Korvattavia alkuperäisiä ei ole. Tuo ensin Kuvista ja viimeistele pakkaus.";
+"conversion.replace.review.title" = "Korvaa alkuperäiset";
+"conversion.replace.review.summary" = "Pakatut mediat ovat valmiit";
+"conversion.replace.review.detail" = "Valitse korvattavat alkuperäiset. Pakatut kopiot tallennetaan ensin.";
+"conversion.replace.select_all" = "Valitse kaikki";
+"conversion.replace.deselect_all" = "Poista kaikki valinnat";
+"conversion.replace.selected" = "%d valittu";

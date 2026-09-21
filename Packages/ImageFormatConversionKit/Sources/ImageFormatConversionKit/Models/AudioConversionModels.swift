@@ -79,6 +79,7 @@ public struct AudioConversionItem: Identifiable, Hashable, Sendable {
     public let sampleRate: Double?
     public let channelCount: Int?
     public var status: AudioConversionStatus
+    public let photoAssetIdentifier: String?
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     public init(
@@ -89,7 +90,8 @@ public struct AudioConversionItem: Identifiable, Hashable, Sendable {
         duration: TimeInterval? = nil,
         sampleRate: Double? = nil,
         channelCount: Int? = nil,
-        status: AudioConversionStatus = .ready
+        status: AudioConversionStatus = .ready,
+        photoAssetIdentifier: String? = nil
     ) {
         self.id = id
         self.sourceURL = sourceURL
@@ -99,6 +101,7 @@ public struct AudioConversionItem: Identifiable, Hashable, Sendable {
         self.sampleRate = sampleRate
         self.channelCount = channelCount
         self.status = status
+        self.photoAssetIdentifier = photoAssetIdentifier
     }
 }
 

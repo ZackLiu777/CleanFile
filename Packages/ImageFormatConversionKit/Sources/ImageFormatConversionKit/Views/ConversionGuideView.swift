@@ -110,6 +110,15 @@ struct ConversionGuideView: View {
                                 title: L10n.string("settings.metadata"),
                                 detail: L10n.string("conversion.guide.metadata.detail")
                             )
+
+                            Divider()
+                                .padding(.leading, 54)
+
+                            ConversionGuideFeature(
+                                symbol: "trash",
+                                title: L10n.string("conversion.guide.replace.title"),
+                                detail: L10n.string("conversion.guide.replace.detail")
+                            )
                         }
                         .padding(.horizontal, 16)
                         .converterCard()

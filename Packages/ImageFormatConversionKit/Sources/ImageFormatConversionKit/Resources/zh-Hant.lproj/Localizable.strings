@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "根據相容性、品質與檔案大小，選擇適合用途的格式。";
 "conversion.guide.quality.detail" = "透過圖片品質、影片編碼器與解析度，或 AAC 位元率來減小檔案。無損音訊會保留品質，但不一定減小檔案。";
 "conversion.guide.metadata.detail" = "可保留目標格式能寫入的中繼資料、只移除 GPS 或全部移除；預設只移除 GPS。";
+"conversion.guide.replace.title" = "取代原始檔";
+"conversion.guide.replace.detail" = "壓縮完成後，返回壓縮主頁，點按右上角垃圾桶並選擇圖片或影片集合。App 會先將壓縮副本儲存到「照片」，再由 iOS 要求確認刪除對應原始檔。只支援從「照片」匯入且已完成壓縮的項目；獨立音訊與「檔案」來源暫不支援。「全部清除」只會移除 App 工作副本並使取代功能無法使用，不會刪除原始檔。";
 "conversion.guide.privacy.title" = "原始檔永遠屬於你";
 "conversion.guide.privacy.detail" = "所有內容都在這部裝置上處理。「全部清除」只會移除 App 管理的副本與輸出，不會刪除「照片」或「檔案」中的原始檔。";
 "conversion.guide.learn_more" = "進一步瞭解";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@ · 約 %d%%";
 "estimate.disclaimer" = "僅為預估值，實際大小取決於媒體內容和編碼器。";
 "estimate.calculating" = "正在預估輸出大小…";
+"conversion.replace.button" = "取代原始檔";
+"conversion.replace.title" = "取代原始媒體？";
+"conversion.replace.message" = "將把 %d 個壓縮檔案儲存到照片，然後刪除對應原件。此操作無法還原。";
+"conversion.replace.action" = "取代原始檔";
+"conversion.replace.failed" = "部分原件無法取代，已為安全起見保留。";
+"conversion.replace.unavailable" = "目前沒有可取代的原件。請先從照片匯入並完成壓縮。";
+"conversion.replace.review.title" = "取代原始檔";
+"conversion.replace.review.summary" = "壓縮檔案已就緒";
+"conversion.replace.review.detail" = "選擇要取代的原件。系統會先儲存壓縮副本。";
+"conversion.replace.select_all" = "全選";
+"conversion.replace.deselect_all" = "取消全選";
+"conversion.replace.selected" = "已選擇 %d 項";

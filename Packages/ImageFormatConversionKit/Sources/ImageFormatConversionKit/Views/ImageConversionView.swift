@@ -366,7 +366,8 @@ struct ImageConversionContentView: View {
             PhotosPicker(
                 selection: $selectedPhotoItems,
                 maxSelectionCount: 100,
-                matching: .images
+                matching: .images,
+                photoLibrary: .shared()
             ) {
                 Label(L10n.string("action.choose_photos"), systemImage: "photo.on.rectangle")
                     .frame(maxWidth: .infinity)
@@ -394,6 +395,7 @@ struct ImageConversionContentView: View {
             importSession.previewURLs = []
         }
         var urls: [URL] = []
+        var assetIdentifiers: [URL: String] = [:]
         for (index, selection) in selections.enumerated() {
             importSession.libraryProgress = ConversionImportProgress(
                 completed: index,
@@ -417,6 +419,9 @@ struct ImageConversionContentView: View {
                     }
                 ) {
                     urls.append(imported.url)
+                    if let identifier = selection.itemIdentifier {
+                        assetIdentifiers[imported.url.standardizedFileURL] = identifier
+                    }
                     importSession.previewURLs.append(imported.url)
                 }
             } catch {
@@ -430,7 +435,11 @@ struct ImageConversionContentView: View {
         }
         importSession.librarySessionID = nil
         importSession.libraryProgress = nil
-        await viewModel.addFiles(urls, progressRange: 0.95 ... 1)
+        await viewModel.addFiles(
+            urls,
+            photoAssetIdentifiers: assetIdentifiers,
+            progressRange: 0.95 ... 1
+        )
     }
 
     /// 处理 `importFiles` 导入流程，并将用户选择安全地交给后续处理。

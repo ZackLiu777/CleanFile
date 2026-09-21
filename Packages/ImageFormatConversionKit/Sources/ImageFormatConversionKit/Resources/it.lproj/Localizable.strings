@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "Scegli un formato che bilanci compatibilità, qualità e dimensione del file per come verrà utilizzato il file.";
 "conversion.guide.quality.detail" = "Utilizza la qualità dell'immagine, il codec video e la risoluzione o il bitrate AAC per ridurre le dimensioni. I formati audio senza perdita di dati preservano la qualità ma potrebbero non ridurre le dimensioni.";
 "conversion.guide.metadata.detail" = "Conserva tutti i metadati scrivibili, rimuovi solo il GPS o rimuovi tutto. La rimozione del GPS è l'impostazione predefinita.";
+"conversion.guide.replace.title" = "Sostituisci gli originali";
+"conversion.guide.replace.detail" = "Dopo la compressione, tocca il cestino nella schermata principale e seleziona le raccolte di immagini o video. L’app salva prima le copie compresse in Foto, poi iOS chiede di confermare l’eliminazione degli originali corrispondenti. Sono idonei solo gli elementi completati importati da Foto; audio autonomi e importazioni da File non sono supportati. Cancella tutto rimuove solo le copie di lavoro e disattiva la sostituzione, senza eliminare gli originali.";
 "conversion.guide.privacy.title" = "I tuoi originali rimangono tuoi";
 "conversion.guide.privacy.detail" = "Tutto viene elaborato su questo dispositivo. Cancella tutto rimuove solo le copie e gli output gestiti dall'app, mai gli originali in Foto o File.";
 "conversion.guide.learn_more" = "Esplora questo strumento";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@ · circa %d%%";
 "estimate.disclaimer" = "Solo stima. La dimensione effettiva dipende dal contenuto multimediale e dal codificatore.";
 "estimate.calculating" = "Stima delle dimensioni dell'output…";
+"conversion.replace.button" = "Sostituisci originali";
+"conversion.replace.title" = "Sostituire i file originali?";
+"conversion.replace.message" = "%d elementi compressi verranno salvati in Foto, quindi gli originali saranno eliminati. L'azione è irreversibile.";
+"conversion.replace.action" = "Sostituisci originali";
+"conversion.replace.failed" = "Non è stato possibile sostituire alcuni originali, che sono stati conservati per sicurezza.";
+"conversion.replace.unavailable" = "Nessun originale sostituibile. Importa prima da Foto e completa la compressione.";
+"conversion.replace.review.title" = "Sostituisci originali";
+"conversion.replace.review.summary" = "File compressi pronti";
+"conversion.replace.review.detail" = "Scegli gli originali da sostituire. Le copie compresse vengono salvate prima.";
+"conversion.replace.select_all" = "Seleziona tutto";
+"conversion.replace.deselect_all" = "Deseleziona tutto";
+"conversion.replace.selected" = "%d selezionati";

@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "Wählen Sie ein Format, das Kompatibilität, Qualität und Dateigröße für die Verwendung der Datei in Einklang bringt.";
 "conversion.guide.quality.detail" = "Verwenden Sie Bildqualität, Videocodec und -auflösung oder AAC-Bitrate, um die Größe zu reduzieren. Verlustfreie Audioformate bewahren die Qualität, verringern jedoch möglicherweise nicht die Größe.";
 "conversion.guide.metadata.detail" = "Behalten Sie alle beschreibbaren Metadaten bei, entfernen Sie nur GPS oder entfernen Sie alles. Die GPS-Entfernung ist die Standardeinstellung.";
+"conversion.guide.replace.title" = "Originale ersetzen";
+"conversion.guide.replace.detail" = "Tippen Sie nach der Komprimierung auf der Startseite auf den Papierkorb und wählen Sie Bild- oder Videosammlungen. Die App speichert zuerst die komprimierten Kopien in Fotos; anschließend bittet iOS um Bestätigung zum Löschen der Originale. Verfügbar ist dies nur für abgeschlossene Importe aus Fotos, nicht für einzelne Audiodateien oder Importe aus Dateien. Alle löschen entfernt nur Arbeitskopien und deaktiviert das Ersetzen, löscht aber keine Originale.";
 "conversion.guide.privacy.title" = "Ihre Originale bleiben Ihr Eigentum";
 "conversion.guide.privacy.detail" = "Alles wird auf diesem Gerät verarbeitet. „Alle löschen“ entfernt nur von der App verwaltete Kopien und Ausgaben, niemals Ihre Originale in Fotos oder Dateien.";
 "conversion.guide.learn_more" = "Entdecken Sie dieses Tool";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@ · ungefähr %d%%";
 "estimate.disclaimer" = "Nur Schätzung. Die tatsächliche Größe hängt vom Medieninhalt und Encoder ab.";
 "estimate.calculating" = "Schätzung der Ausgabegröße…";
+"conversion.replace.button" = "Originale ersetzen";
+"conversion.replace.title" = "Originalmedien ersetzen?";
+"conversion.replace.message" = "%d komprimierte Elemente werden in Fotos gesichert, danach werden die Originale gelöscht. Dies kann nicht rückgängig gemacht werden.";
+"conversion.replace.action" = "Originale ersetzen";
+"conversion.replace.failed" = "Einige Originale konnten nicht ersetzt werden und wurden sicherheitshalber behalten.";
+"conversion.replace.unavailable" = "Keine ersetzbaren Originale verfügbar. Importiere zuerst aus Fotos und schließe die Komprimierung ab.";
+"conversion.replace.review.title" = "Originale ersetzen";
+"conversion.replace.review.summary" = "Komprimierte Medien sind bereit";
+"conversion.replace.review.detail" = "Wähle die zu ersetzenden Originale. Komprimierte Kopien werden zuerst gespeichert.";
+"conversion.replace.select_all" = "Alle auswählen";
+"conversion.replace.deselect_all" = "Auswahl aufheben";
+"conversion.replace.selected" = "%d ausgewählt";

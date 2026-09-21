@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "根据兼容性、质量和文件大小选择适合用途的格式。";
 "conversion.guide.quality.detail" = "通过图片质量、视频编码器与分辨率，或 AAC 码率来减小体积。无损音频会保留质量，但不一定减小体积。";
 "conversion.guide.metadata.detail" = "可保留目标格式能写入的元数据、仅移除 GPS 或全部移除；默认仅移除 GPS。";
+"conversion.guide.replace.title" = "替换原文件";
+"conversion.guide.replace.detail" = "压缩完成后，返回压缩主页，点击右上角垃圾桶并选择图片或视频合集。App 会先把压缩副本保存到相册，再由 iOS 请求确认删除对应原件。仅从相册导入且已完成压缩的项目可用；独立音频和“文件”来源暂不支持。“全部清除”只移除 App 工作副本并会使替换功能不可用，不会删除原件。";
 "conversion.guide.privacy.title" = "原件始终属于你";
 "conversion.guide.privacy.detail" = "所有内容都在这台设备上处理。“全部清除”只移除 App 管理的副本和输出，不会删除“照片”或“文件”中的原件。";
 "conversion.guide.learn_more" = "查看详细介绍";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@ · 约 %d%%";
 "estimate.disclaimer" = "仅为估算值，实际大小取决于媒体内容和编码器。";
 "estimate.calculating" = "正在估算输出大小…";
+"conversion.replace.button" = "替换原文件";
+"conversion.replace.title" = "替换原媒体文件？";
+"conversion.replace.message" = "将把 %d 个压缩文件保存到相册，然后删除对应原件。此操作无法撤销。";
+"conversion.replace.action" = "替换原文件";
+"conversion.replace.failed" = "部分原件无法替换，已为安全起见保留。";
+"conversion.replace.unavailable" = "当前没有可替换的原件。请先从相册导入并完成压缩。";
+"conversion.replace.review.title" = "替换原文件";
+"conversion.replace.review.summary" = "压缩文件已就绪";
+"conversion.replace.review.detail" = "选择要替换的原件。系统会先保存压缩副本。";
+"conversion.replace.select_all" = "全选";
+"conversion.replace.deselect_all" = "取消全选";
+"conversion.replace.selected" = "已选择 %d 项";

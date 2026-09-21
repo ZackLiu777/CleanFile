@@ -23,6 +23,8 @@ public struct ConversionHomeView: View {
     @State private var navigationPath: [ConversionHomeKind]
     @State private var isHomeContentVisible = false
     @State private var isGuidePresented: Bool
+    @State private var isReplacementReviewPresented = false
+    @State private var isReplacementUnavailablePresented = false
     @State private var entranceGeneration = 0
     @State private var hasAppeared = false
     @Namespace private var navigationTransitionNamespace
@@ -55,7 +57,7 @@ public struct ConversionHomeView: View {
                     .appTypeface(.largeTitle.bold(), size: 34, relativeTo: .largeTitle, weight: .bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
-                    .padding(.top, -12)
+                    .padding(.top, 12)
                     .padding(.bottom, 12)
 
                 ScrollView(.vertical, showsIndicators: false) {
@@ -116,14 +118,29 @@ public struct ConversionHomeView: View {
             .background(converterBackground)
             .toolbar(.visible, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         isGuidePresented = true
                     } label: {
                         Image(systemName: "lightbulb.max.fill")
+                            .foregroundStyle(theme.accent)
                     }
                     .accessibilityLabel(L10n.string("conversion.guide.button"))
                     .accessibilityIdentifier("conversion.guide.button")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        if replaceableOriginalCount > 0 {
+                            isReplacementReviewPresented = true
+                        } else {
+                            isReplacementUnavailablePresented = true
+                        }
+                    } label: {
+                        Image(systemName: "trash")
+                            .foregroundStyle(theme.accent)
+                    }
+                    .accessibilityLabel(L10n.string("conversion.replace.button"))
+                    .accessibilityIdentifier("conversion.replace.button")
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -169,9 +186,34 @@ public struct ConversionHomeView: View {
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }
+        .fullScreenCover(isPresented: $isReplacementReviewPresented) {
+            ConversionReplacementReviewView(candidates: replacementCandidates) { selected in
+                let replacedIDs = try await ConversionOriginalReplacementService.replace(selected)
+                await imageViewModel.finishReplacement(replacedIDs)
+                await videoViewModel.finishReplacement(replacedIDs)
+                loadRecentRecords()
+            }
+            .environment(\.conversionTheme, theme)
+        }
+        .alert(
+            L10n.string("conversion.replace.button"),
+            isPresented: $isReplacementUnavailablePresented
+        ) {
+            Button(L10n.string("action.done")) {}
+        } message: {
+            Text(L10n.string("conversion.replace.unavailable"))
+        }
         .environment(\.conversionTheme, theme)
         .tint(theme.accent)
         .foregroundStyle(theme.textPrimary)
+    }
+
+    private var replaceableOriginalCount: Int {
+        replacementCandidates.count
+    }
+
+    private var replacementCandidates: [ConversionReplacementCandidate] {
+        imageViewModel.replacementCandidates + videoViewModel.replacementCandidates
     }
 
     @ViewBuilder
@@ -439,7 +481,7 @@ private struct ConversionHomeCard: View {
             HStack(spacing: 14) {
                 Image(systemName: kind.symbol)
                     .appTypeface(.system(size: 23, weight: .medium), size: 23, relativeTo: .body, weight: .medium)
-                    .foregroundStyle(theme.textPrimary)
+                    .foregroundStyle(theme.accent)
                     .frame(width: 54, height: 54)
                     .modifier(ConversionHomeInsetSurface(cornerRadius: 16))
 
@@ -458,16 +500,14 @@ private struct ConversionHomeCard: View {
 
                 Image(systemName: "chevron.right")
                     .appTypeface(.footnote.weight(.semibold), size: 13, relativeTo: .footnote, weight: .semibold)
-                    .foregroundStyle(
-                        theme.textSecondary.opacity(0.62)
-                    )
+                    .foregroundStyle(theme.accent.opacity(0.72))
             }
 
             HStack(spacing: 7) {
                 ForEach(kind.formats, id: \.self) { format in
                     Text(format)
                         .appTypeface(.caption2.weight(.semibold), size: 11, relativeTo: .caption2, weight: .semibold)
-                        .foregroundStyle(theme.textSecondary)
+                        .foregroundStyle(theme.accent)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 4)
                         .modifier(ConversionHomeInsetSurface(cornerRadius: 100))

@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "Välj ett format som balanserar kompatibilitet, kvalitet och filstorlek för hur filen kommer att användas.";
 "conversion.guide.quality.detail" = "Använd bildkvalitet, videocodec och upplösning eller AAC-bithastighet för att minska storleken. Förlustfria ljudformat bevarar kvaliteten men kanske inte minskar storleken.";
 "conversion.guide.metadata.detail" = "Bevara all skrivbar metadata, ta bort endast GPS eller ta bort allt. GPS-borttagning är standard.";
+"conversion.guide.replace.title" = "Ersätt original";
+"conversion.guide.replace.detail" = "Efter komprimeringen trycker du på papperskorgen på startsidan och väljer bild- eller videosamlingar. Appen sparar först de komprimerade kopiorna i Bilder och därefter ber iOS dig bekräfta att motsvarande original tas bort. Endast slutförda objekt som importerats från Bilder stöds; fristående ljud och import från Filer stöds inte. Rensa alla tar bara bort arbetskopior och gör ersättning otillgänglig, men raderar aldrig original.";
 "conversion.guide.privacy.title" = "Dina original förblir dina";
 "conversion.guide.privacy.detail" = "Allt bearbetas på den här enheten. Rensa alla tar bara bort apphanterade kopior och utdata, aldrig dina original i foton eller filer.";
 "conversion.guide.learn_more" = "Utforska det här verktyget";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@ · ungefär %d%%";
 "estimate.disclaimer" = "Endast uppskattning. Den faktiska storleken beror på medieinnehållet och kodaren.";
 "estimate.calculating" = "Uppskattar utdatastorlek...";
+"conversion.replace.button" = "Ersätt original";
+"conversion.replace.title" = "Ersätta originalmedier?";
+"conversion.replace.message" = "%d komprimerade objekt sparas i Bilder och därefter raderas originalen. Detta kan inte ångras.";
+"conversion.replace.action" = "Ersätt original";
+"conversion.replace.failed" = "Vissa original kunde inte ersättas och behölls för säkerhets skull.";
+"conversion.replace.unavailable" = "Det finns inga original som kan ersättas. Importera först från Bilder och slutför komprimeringen.";
+"conversion.replace.review.title" = "Ersätt original";
+"conversion.replace.review.summary" = "Komprimerade medier är klara";
+"conversion.replace.review.detail" = "Välj vilka original som ska ersättas. De komprimerade kopiorna sparas först.";
+"conversion.replace.select_all" = "Markera alla";
+"conversion.replace.deselect_all" = "Avmarkera alla";
+"conversion.replace.selected" = "%d markerade";

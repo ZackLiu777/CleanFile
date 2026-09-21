@@ -54,6 +54,7 @@ final class AudioConversionViewModel {
     func addFiles(
         _ urls: [URL],
         sourceKind: AudioSourceKind = .audioFile,
+        photoAssetIdentifiers: [URL: String] = [:],
         progressRange: ClosedRange<Double> = 0 ... 1
     ) async {
         guard !isConverting, importProgress == nil else { return }
@@ -110,7 +111,8 @@ final class AudioConversionViewModel {
                         sourceKind: sourceKind,
                         duration: inspection.duration,
                         sampleRate: inspection.sampleRate,
-                        channelCount: inspection.channelCount
+                        channelCount: inspection.channelCount,
+                        photoAssetIdentifier: photoAssetIdentifiers[url.standardizedFileURL]
                     ))
                 } catch {
                     _ = await workspace.delete(
@@ -264,7 +266,8 @@ final class AudioConversionViewModel {
                 duration: record.duration,
                 sampleRate: record.sampleRate,
                 channelCount: record.channelCount,
-                status: status
+                status: status,
+                photoAssetIdentifier: record.photoAssetIdentifier
             )
         }
         persist()
@@ -285,6 +288,7 @@ final class AudioConversionViewModel {
             sourceBytes: item.sourceBytes,
             status: persistedState.status,
             outputPath: persistedState.outputPath,
+            photoAssetIdentifier: item.photoAssetIdentifier,
             sourceKind: item.sourceKind,
             duration: item.duration,
             sampleRate: item.sampleRate,

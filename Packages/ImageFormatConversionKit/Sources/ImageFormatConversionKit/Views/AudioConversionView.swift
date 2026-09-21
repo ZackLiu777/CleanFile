@@ -117,7 +117,8 @@ struct AudioConversionView: View {
             PhotosPicker(
                 selection: $selectedVideoItems,
                 maxSelectionCount: 50,
-                matching: .videos
+                matching: .videos,
+                photoLibrary: .shared()
             ) {
                 Label(L10n.string("action.choose_photos"), systemImage: "photo.on.rectangle")
                     .frame(maxWidth: .infinity)
@@ -144,6 +145,7 @@ struct AudioConversionView: View {
         }
 
         var urls: [URL] = []
+        var assetIdentifiers: [URL: String] = [:]
         for (index, selection) in selections.enumerated() {
             importSession.libraryProgress = ConversionImportProgress(
                 completed: index,
@@ -167,6 +169,9 @@ struct AudioConversionView: View {
                     }
                 ) {
                     urls.append(imported.url)
+                    if let identifier = selection.itemIdentifier {
+                        assetIdentifiers[imported.url.standardizedFileURL] = identifier
+                    }
                     importSession.previewURLs.append(imported.url)
                 }
             } catch {
@@ -181,7 +186,12 @@ struct AudioConversionView: View {
 
         importSession.librarySessionID = nil
         importSession.libraryProgress = nil
-        await viewModel.addFiles(urls, sourceKind: .video, progressRange: 0.95 ... 1)
+        await viewModel.addFiles(
+            urls,
+            sourceKind: .video,
+            photoAssetIdentifiers: assetIdentifiers,
+            progressRange: 0.95 ... 1
+        )
     }
 
     /// 处理 `importMediaFiles` 导入流程，并将用户选择安全地交给后续处理。

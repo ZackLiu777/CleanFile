@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "Kies een indeling waarin compatibiliteit, kwaliteit en bestandsgrootte in balans zijn voor de manier waarop het bestand zal worden gebruikt.";
 "conversion.guide.quality.detail" = "Gebruik beeldkwaliteit, videocodec en resolutie, of AAC-bitsnelheid om de grootte te verkleinen. Lossless audioformaten behouden de kwaliteit, maar verkleinen mogelijk niet de grootte.";
 "conversion.guide.metadata.detail" = "Bewaar alle beschrijfbare metagegevens, verwijder alleen GPS of verwijder alles. GPS-verwijdering is de standaardinstelling.";
+"conversion.guide.replace.title" = "Originelen vervangen";
+"conversion.guide.replace.detail" = "Tik na het comprimeren op de prullenmand op het beginscherm en selecteer afbeeldings- of videoverzamelingen. De app bewaart eerst de gecomprimeerde kopieën in Foto’s; daarna vraagt iOS om het verwijderen van de bijbehorende originelen te bevestigen. Alleen voltooide items uit Foto’s komen in aanmerking; losse audio en import uit Bestanden worden niet ondersteund. Alles wissen verwijdert alleen werkkopieën en schakelt vervangen uit, maar verwijdert nooit originelen.";
 "conversion.guide.privacy.title" = "Uw originelen blijven van u";
 "conversion.guide.privacy.detail" = "Op dit apparaat wordt alles verwerkt. Alles wissen verwijdert alleen door de app beheerde kopieën en uitvoer, nooit uw originelen in Foto's of Bestanden.";
 "conversion.guide.learn_more" = "Ontdek dit hulpmiddel";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@ · ongeveer %d%%";
 "estimate.disclaimer" = "Alleen schatting. De werkelijke grootte is afhankelijk van de media-inhoud en de encoder.";
 "estimate.calculating" = "Uitvoergrootte schatten…";
+"conversion.replace.button" = "Originelen vervangen";
+"conversion.replace.title" = "Originele media vervangen?";
+"conversion.replace.message" = "%d gecomprimeerde items worden in Foto's bewaard, waarna de originelen worden verwijderd. Dit kan niet ongedaan worden gemaakt.";
+"conversion.replace.action" = "Originelen vervangen";
+"conversion.replace.failed" = "Sommige originelen konden niet worden vervangen en zijn voor de veiligheid bewaard.";
+"conversion.replace.unavailable" = "Er zijn geen vervangbare originelen. Importeer eerst uit Foto's en voltooi de compressie.";
+"conversion.replace.review.title" = "Originelen vervangen";
+"conversion.replace.review.summary" = "Gecomprimeerde media gereed";
+"conversion.replace.review.detail" = "Kies welke originelen worden vervangen. De gecomprimeerde kopieën worden eerst bewaard.";
+"conversion.replace.select_all" = "Selecteer alles";
+"conversion.replace.deselect_all" = "Deselecteer alles";
+"conversion.replace.selected" = "%d geselecteerd";

@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "Velg et format som balanserer kompatibilitet, kvalitet og filstørrelse for hvordan filen skal brukes.";
 "conversion.guide.quality.detail" = "Bruk bildekvalitet, videokodek og oppløsning, eller AAC-bithastighet for å redusere størrelsen. Tapsfrie lydformater bevarer kvaliteten, men reduserer kanskje ikke størrelsen.";
 "conversion.guide.metadata.detail" = "Ta vare på alle skrivbare metadata, fjern kun GPS eller fjern alt. GPS-fjerning er standard.";
+"conversion.guide.replace.title" = "Erstatt originaler";
+"conversion.guide.replace.detail" = "Etter komprimering trykker du på papirkurven på startsiden og velger bilde- eller videosamlinger. Appen lagrer først de komprimerte kopiene i Bilder, og deretter ber iOS deg bekrefte sletting av de tilsvarende originalene. Bare fullførte elementer importert fra Bilder støttes; frittstående lyd og import fra Filer støttes ikke. Fjern alt fjerner bare arbeidskopier og deaktiverer erstatning, men sletter aldri originaler.";
 "conversion.guide.privacy.title" = "Originalene dine forblir dine";
 "conversion.guide.privacy.detail" = "Alt behandles på denne enheten. Fjern alt fjerner bare app-administrerte kopier og utdata, aldri originalene dine i Bilder eller filer.";
 "conversion.guide.learn_more" = "Utforsk dette verktøyet";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@ · omtrent %d%%";
 "estimate.disclaimer" = "Kun estimat. Faktisk størrelse avhenger av medieinnholdet og koderen.";
 "estimate.calculating" = "Anslår utdatastørrelse …";
+"conversion.replace.button" = "Erstatt originaler";
+"conversion.replace.title" = "Erstatt originale medier?";
+"conversion.replace.message" = "%d komprimerte elementer lagres i Bilder, og deretter slettes originalene. Dette kan ikke angres.";
+"conversion.replace.action" = "Erstatt originaler";
+"conversion.replace.failed" = "Noen originaler kunne ikke erstattes og ble beholdt av sikkerhetshensyn.";
+"conversion.replace.unavailable" = "Ingen originaler kan erstattes. Importer først fra Bilder og fullfør komprimeringen.";
+"conversion.replace.review.title" = "Erstatt originaler";
+"conversion.replace.review.summary" = "Komprimerte medier er klare";
+"conversion.replace.review.detail" = "Velg originalene som skal erstattes. De komprimerte kopiene lagres først.";
+"conversion.replace.select_all" = "Velg alle";
+"conversion.replace.deselect_all" = "Opphev alle valg";
+"conversion.replace.selected" = "%d valgt";

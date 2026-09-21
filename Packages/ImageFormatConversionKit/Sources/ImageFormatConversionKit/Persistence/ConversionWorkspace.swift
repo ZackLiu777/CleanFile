@@ -6,7 +6,7 @@
 import Foundation
 
 /// 定义 `ConversionMediaKind` 使用的有限状态或选项集合。
-enum ConversionMediaKind: String, Codable, Sendable {
+enum ConversionMediaKind: String, Codable, Hashable, Sendable {
     case image
     case video
     case audio
@@ -101,6 +101,9 @@ struct PersistedConversionItem: Codable, Sendable {
     let sourceBytes: Int64
     let status: PersistedConversionStatus
     let outputPath: String?
+    /// The Photos asset that produced the staged copy. Nil for Files imports
+    /// and legacy records created before source tracking was introduced.
+    var photoAssetIdentifier: String? = nil
     var sourceKind: AudioSourceKind? = nil
     var duration: TimeInterval? = nil
     var sampleRate: Double? = nil

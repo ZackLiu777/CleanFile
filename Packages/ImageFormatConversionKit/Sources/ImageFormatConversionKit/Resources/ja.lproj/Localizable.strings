@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "互換性、品質、ファイルサイズのバランスが用途に合う形式を選びます。";
 "conversion.guide.quality.detail" = "画像の品質、ビデオのコーデックと解像度、AAC のビットレートでサイズを小さくできます。ロスレス形式は品質を保ちますが、サイズが小さくならない場合があります。";
 "conversion.guide.metadata.detail" = "書き出せるメタデータをすべて保持、GPSのみ削除、またはすべて削除できます。デフォルトはGPSのみ削除です。";
+"conversion.guide.replace.title" = "オリジナルを置き換える";
+"conversion.guide.replace.detail" = "圧縮後、ホーム画面のゴミ箱をタップして画像またはビデオのコレクションを選択します。Appは圧縮コピーを先に写真へ保存し、その後iOSが対応するオリジナルの削除確認を求めます。写真から読み込み、圧縮が完了した項目のみ対象です。単独のオーディオとファイルからの読み込みには対応していません。すべて消去は作業コピーだけを削除して置き換えを無効にし、オリジナルは削除しません。";
 "conversion.guide.privacy.title" = "オリジナルはそのまま";
 "conversion.guide.privacy.detail" = "すべてこのデバイス上で処理されます。「すべて消去」で削除されるのはAppが管理するコピーと出力のみで、「写真」や「ファイル」のオリジナルは削除されません。";
 "conversion.guide.learn_more" = "詳しく見る";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@・約%d%%";
 "estimate.disclaimer" = "推定値です。実際のサイズはメディア内容とエンコーダーによって異なります。";
 "estimate.calculating" = "出力サイズを推定中…";
+"conversion.replace.button" = "オリジナルを置き換える";
+"conversion.replace.title" = "元のメディアを置き換えますか？";
+"conversion.replace.message" = "%d個の圧縮済み項目を写真に保存してから、対応するオリジナルを削除します。この操作は取り消せません。";
+"conversion.replace.action" = "オリジナルを置き換える";
+"conversion.replace.failed" = "一部のオリジナルを置き換えられなかったため、安全のため保持しました。";
+"conversion.replace.unavailable" = "置き換え可能なオリジナルがありません。写真から読み込み、圧縮を完了してください。";
+"conversion.replace.review.title" = "オリジナルを置き換える";
+"conversion.replace.review.summary" = "圧縮済みメディアの準備完了";
+"conversion.replace.review.detail" = "置き換えるオリジナルを選択してください。圧縮コピーが先に保存されます。";
+"conversion.replace.select_all" = "すべて選択";
+"conversion.replace.deselect_all" = "すべて選択解除";
+"conversion.replace.selected" = "%d件選択済み";

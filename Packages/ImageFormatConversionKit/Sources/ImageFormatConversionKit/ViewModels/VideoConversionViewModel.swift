@@ -63,6 +63,33 @@ public final class VideoConversionViewModel {
         }
     }
 
+    public var replaceableOriginalCount: Int { replacementCandidates.count }
+
+    var replacementCandidates: [ConversionReplacementCandidate] {
+        items.compactMap { item in
+            guard let identifier = item.photoAssetIdentifier,
+                  case let .completed(outputURL) = item.status,
+                  FileManager.default.fileExists(atPath: outputURL.path) else { return nil }
+            return ConversionReplacementCandidate(
+                id: item.id,
+                outputURL: outputURL,
+                photoAssetIdentifier: identifier,
+                kind: .video,
+                sourceBytes: item.sourceBytes,
+                outputBytes: Int64((try? outputURL.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+            )
+        }
+    }
+
+    func finishReplacement(_ replacedIDs: Set<UUID>) async {
+        let records = items.filter { replacedIDs.contains($0.id) }.map(record)
+        let deletedIDs = await workspace.delete(records, kind: .video, outputRoot: outputDirectory)
+        items.removeAll { deletedIDs.contains($0.id) }
+        if deletedIDs.count != records.count { notice = L10n.string("conversion.replace.failed") }
+        scheduleSizeEstimate()
+        persist()
+    }
+
     public var availableContainers: [VideoOutputContainer] {
         switch codec {
         case .proRes422, .proRes4444: [.mov]
@@ -74,6 +101,7 @@ public final class VideoConversionViewModel {
     /// 封装 `addFiles` 对应的局部行为，供当前类型在统一入口下复用。
     public func addFiles(
         _ urls: [URL],
+        photoAssetIdentifiers: [URL: String] = [:],
         progressRange: ClosedRange<Double> = 0 ... 1
     ) async {
         guard !isConverting, importProgress == nil else { return }
@@ -118,7 +146,12 @@ public final class VideoConversionViewModel {
                         ).mapped(to: progressRange)
                     }
                 }
-                items.append(VideoConversionItem(id: id, sourceURL: stagedURL, sourceBytes: bytes))
+                items.append(VideoConversionItem(
+                    id: id,
+                    sourceURL: stagedURL,
+                    sourceBytes: bytes,
+                    photoAssetIdentifier: photoAssetIdentifiers[url.standardizedFileURL]
+                ))
             } catch {
                 notice = L10n.format("notice.import_failed", error.localizedDescription)
             }
@@ -265,7 +298,8 @@ public final class VideoConversionViewModel {
                 id: record.id,
                 sourceURL: URL(fileURLWithPath: record.sourcePath),
                 sourceBytes: record.sourceBytes,
-                status: status
+                status: status,
+                photoAssetIdentifier: record.photoAssetIdentifier
             )
         }
         persist()
@@ -334,7 +368,8 @@ public final class VideoConversionViewModel {
             sourcePath: item.sourceURL.path,
             sourceBytes: item.sourceBytes,
             status: persistedState.status,
-            outputPath: persistedState.outputPath
+            outputPath: persistedState.outputPath,
+            photoAssetIdentifier: item.photoAssetIdentifier
         )
     }
 }

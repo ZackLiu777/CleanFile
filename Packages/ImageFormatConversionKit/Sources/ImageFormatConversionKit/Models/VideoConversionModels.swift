@@ -52,18 +52,21 @@ public struct VideoConversionItem: Identifiable, Hashable, Sendable {
     public let sourceURL: URL
     public let sourceBytes: Int64
     public var status: VideoConversionStatus
+    public let photoAssetIdentifier: String?
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     public init(
         id: UUID = UUID(),
         sourceURL: URL,
         sourceBytes: Int64,
-        status: VideoConversionStatus = .ready
+        status: VideoConversionStatus = .ready,
+        photoAssetIdentifier: String? = nil
     ) {
         self.id = id
         self.sourceURL = sourceURL
         self.sourceBytes = sourceBytes
         self.status = status
+        self.photoAssetIdentifier = photoAssetIdentifier
     }
 }
 

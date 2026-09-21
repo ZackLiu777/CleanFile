@@ -194,6 +194,8 @@
 "conversion.guide.format.detail" = "Veldu snið sem kemur jafnvægi á eindrægni, gæði og skráarstærð fyrir hvernig skráin verður notuð.";
 "conversion.guide.quality.detail" = "Notaðu myndgæði, myndkóða og upplausn, eða AAC bitahraða til að minnka stærðina. Taplaus hljóðsnið varðveita gæði en gæti ekki minnkað stærðina.";
 "conversion.guide.metadata.detail" = "Geymdu öll skrifanleg lýsigögn, fjarlægðu aðeins GPS eða fjarlægðu allt. GPS fjarlæging er sjálfgefið.";
+"conversion.guide.replace.title" = "Skipta út frumritum";
+"conversion.guide.replace.detail" = "Eftir þjöppun skaltu ýta á ruslafötuna á heimaskjánum og velja mynda- eða myndbandasöfn. Forritið vistar fyrst þjöppuð afrit í Myndir og síðan biður iOS um staðfestingu á eyðingu samsvarandi frumrita. Aðeins lokin atriði sem flutt voru inn úr Myndum eru studd; sjálfstætt hljóð og innflutningur úr Skrám eru ekki studd. Hreinsa allt fjarlægir aðeins vinnuafrit og gerir útskiptingu óvirka, en eyðir aldrei frumritum.";
 "conversion.guide.privacy.title" = "Your originals stay yours";
 "conversion.guide.privacy.detail" = "Allt er unnið á þessu tæki. Hreinsa allt fjarlægir aðeins forritstýrð afrit og úttak, aldrei frumritin þín í myndum eða skrám.";
 "conversion.guide.learn_more" = "Skoðaðu þetta tól";
@@ -240,3 +242,15 @@
 "estimate.change" = "%@ · um %d%%";
 "estimate.disclaimer" = "Aðeins mat. Raunveruleg stærð fer eftir efni efnisins og kóðara.";
 "estimate.calculating" = "Áætlar úttakstærð...";
+"conversion.replace.button" = "Skipta út frumritum";
+"conversion.replace.title" = "Skipta út upprunalegum miðlum?";
+"conversion.replace.message" = "%d þjöppuð atriði verða vistuð í Myndir og frumritunum síðan eytt. Ekki er hægt að afturkalla þetta.";
+"conversion.replace.action" = "Skipta út frumritum";
+"conversion.replace.failed" = "Ekki tókst að skipta út sumum frumritum og þau voru varðveitt til öryggis.";
+"conversion.replace.unavailable" = "Engin frumrit eru tiltæk til útskiptingar. Flyttu fyrst inn úr Myndum og ljúktu þjöppun.";
+"conversion.replace.review.title" = "Skipta út frumritum";
+"conversion.replace.review.summary" = "Þjöppuð gögn eru tilbúin";
+"conversion.replace.review.detail" = "Veldu frumritin sem á að skipta út. Þjöppuðu afritin eru vistuð fyrst.";
+"conversion.replace.select_all" = "Velja allt";
+"conversion.replace.deselect_all" = "Afvelja allt";
+"conversion.replace.selected" = "%d valin";

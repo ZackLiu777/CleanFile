@@ -12,18 +12,21 @@ public struct ImageConversionItem: Identifiable, Hashable, Sendable {
     public let sourceURL: URL
     public var info: ImageAssetInfo?
     public var status: ImageConversionItemStatus
+    public let photoAssetIdentifier: String?
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     public init(
         id: UUID = UUID(),
         sourceURL: URL,
         info: ImageAssetInfo? = nil,
-        status: ImageConversionItemStatus = .inspecting
+        status: ImageConversionItemStatus = .inspecting,
+        photoAssetIdentifier: String? = nil
     ) {
         self.id = id
         self.sourceURL = sourceURL
         self.info = info
         self.status = status
+        self.photoAssetIdentifier = photoAssetIdentifier
     }
 }
 
@@ -104,6 +107,34 @@ public final class ImageConversionViewModel {
         }
     }
 
+    public var replaceableOriginalCount: Int {
+        replacementCandidates.count
+    }
+
+    var replacementCandidates: [ConversionReplacementCandidate] {
+        items.compactMap { item in
+            guard let identifier = item.photoAssetIdentifier,
+                  case let .completed(outputURL) = item.status,
+                  FileManager.default.fileExists(atPath: outputURL.path) else { return nil }
+            return ConversionReplacementCandidate(
+                id: item.id,
+                outputURL: outputURL,
+                photoAssetIdentifier: identifier,
+                kind: .image,
+                sourceBytes: item.info?.fileSizeBytes ?? 0,
+                outputBytes: Int64((try? outputURL.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+            )
+        }
+    }
+
+    func finishReplacement(_ replacedIDs: Set<UUID>) async {
+        let records = items.filter { replacedIDs.contains($0.id) }.map(record)
+        let deletedIDs = await workspace.delete(records, kind: .image, outputRoot: outputDirectory)
+        items.removeAll { deletedIDs.contains($0.id) }
+        if deletedIDs.count != records.count { notice = L10n.string("conversion.replace.failed") }
+        persist()
+    }
+
     var sizeEstimate: ConversionSizeEstimate? {
         ConversionSizeEstimate.image(
             infos: items.compactMap(\.info),
@@ -117,6 +148,7 @@ public final class ImageConversionViewModel {
     /// 封装 `addFiles` 对应的局部行为，供当前类型在统一入口下复用。
     public func addFiles(
         _ urls: [URL],
+        photoAssetIdentifiers: [URL: String] = [:],
         progressRange: ClosedRange<Double> = 0 ... 1
     ) async {
         guard !isConverting, importProgress == nil else { return }
@@ -165,7 +197,11 @@ public final class ImageConversionViewModel {
                         ).mapped(to: progressRange)
                     }
                 }
-                let item = ImageConversionItem(id: id, sourceURL: stagedURL)
+                let item = ImageConversionItem(
+                    id: id,
+                    sourceURL: stagedURL,
+                    photoAssetIdentifier: photoAssetIdentifiers[url.standardizedFileURL]
+                )
                 newItems.append(item)
                 items.append(item)
             } catch is CancellationError {
@@ -442,7 +478,11 @@ public final class ImageConversionViewModel {
         let records = await workspace.load(.image)
         for record in records {
             let sourceURL = URL(fileURLWithPath: record.sourcePath)
-            var item = ImageConversionItem(id: record.id, sourceURL: sourceURL)
+            var item = ImageConversionItem(
+                id: record.id,
+                sourceURL: sourceURL,
+                photoAssetIdentifier: record.photoAssetIdentifier
+            )
             do {
                 let info = try await engine.inspect(sourceURL)
                 item.info = info
@@ -479,7 +519,8 @@ public final class ImageConversionViewModel {
             sourcePath: item.sourceURL.path,
             sourceBytes: item.info?.fileSizeBytes ?? 0,
             status: persistedState.status,
-            outputPath: persistedState.outputPath
+            outputPath: persistedState.outputPath,
+            photoAssetIdentifier: item.photoAssetIdentifier
         )
     }
 
