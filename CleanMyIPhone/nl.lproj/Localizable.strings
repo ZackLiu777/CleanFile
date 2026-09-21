@@ -475,3 +475,6 @@
 "Contact Developer" = "Neem contact op met ontwikkelaar";
 "Send feedback, questions, or bug reports by email." = "Stuur feedback, vragen of bugrapporten per e-mail.";
 "File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter-feedback";
+"premium.connection.title" = "Netwerkverbinding vereist";
+"premium.connection.message" = "Maak verbinding met internet en probeer het opnieuw.";
+"premium.retry" = "Opnieuw proberen";

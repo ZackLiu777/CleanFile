@@ -4,6 +4,12 @@ import OSLog
 
 @MainActor
 final class PremiumEntitlementStore: ObservableObject {
+    enum StartupConnectivity: Equatable {
+        case pending
+        case available
+        case unavailable
+    }
+
     enum AccessState: Equatable {
         case checking
         case entitled
@@ -11,6 +17,7 @@ final class PremiumEntitlementStore: ObservableObject {
     }
 
     @Published private(set) var accessState: AccessState = .checking
+    @Published private(set) var startupConnectivity: StartupConnectivity = .pending
 
     private var updatesTask: Task<Void, Never>?
     private var hasStarted = false
@@ -29,9 +36,34 @@ final class PremiumEntitlementStore: ObservableObject {
             return
         }
         hasStarted = true
+        await refreshStartupConnectivity()
         listenForTransactionUpdates()
         await finishDeliveredTransactions()
         await refresh()
+    }
+
+    /// A normal app-owned request is required for iOS to present its cellular-data
+    /// choice. StoreKit traffic is system-owned and may not trigger that prompt.
+    @discardableResult
+    func refreshStartupConnectivity() async -> Bool {
+        var request = URLRequest(url: URL(string: "https://www.apple.com/library/test/success.html")!)
+        request.httpMethod = "GET"
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        request.timeoutInterval = 6
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let response = response as? HTTPURLResponse,
+                  (200..<400).contains(response.statusCode) else {
+                startupConnectivity = .unavailable
+                return false
+            }
+            startupConnectivity = .available
+            return true
+        } catch {
+            startupConnectivity = .unavailable
+            return false
+        }
     }
 
     func refresh() async {

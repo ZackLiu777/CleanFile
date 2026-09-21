@@ -473,3 +473,6 @@
 "Contact Developer" = "Contactar con el desarrollador";
 "Send feedback, questions, or bug reports by email." = "Envía comentarios, preguntas o informes de errores por correo electrónico.";
 "File Cleaner & Media Converter Feedback" = "Comentarios sobre File Cleaner & Media Converter";
+"premium.connection.title" = "Se requiere conexión de red";
+"premium.connection.message" = "Conéctate a internet e inténtalo de nuevo.";
+"premium.retry" = "Reintentar";

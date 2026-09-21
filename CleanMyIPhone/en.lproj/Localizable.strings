@@ -473,3 +473,6 @@
 "Contact Developer" = "Contact Developer";
 "Send feedback, questions, or bug reports by email." = "Send feedback, questions, or bug reports by email.";
 "File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Feedback";
+"premium.connection.title" = "Network Connection Required";
+"premium.connection.message" = "Connect to the internet, then try again.";
+"premium.retry" = "Retry";

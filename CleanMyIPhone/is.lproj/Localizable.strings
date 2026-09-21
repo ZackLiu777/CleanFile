@@ -475,3 +475,6 @@
 "Contact Developer" = "Hafðu samband við þróunaraðila";
 "Send feedback, questions, or bug reports by email." = "Sendu athugasemdir, spurningar eða villutilkynningar með tölvupósti.";
 "File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Feedback";
+"premium.connection.title" = "Nettenging nauðsynleg";
+"premium.connection.message" = "Tengstu internetinu og reyndu aftur.";
+"premium.retry" = "Reyna aftur";

@@ -473,3 +473,6 @@
 "Contact Developer" = "開発者に連絡";
 "Send feedback, questions, or bug reports by email." = "ご意見、ご質問、不具合報告をメールで送信します。";
 "File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter フィードバック";
+"premium.connection.title" = "ネットワーク接続が必要です";
+"premium.connection.message" = "インターネットに接続して、もう一度お試しください。";
+"premium.retry" = "再試行";

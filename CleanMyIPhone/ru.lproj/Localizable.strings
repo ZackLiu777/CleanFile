@@ -475,3 +475,6 @@
 "Contact Developer" = "Связаться с разработчиком";
 "Send feedback, questions, or bug reports by email." = "Отправляйте отзывы, вопросы или отчеты об ошибках по электронной почте.";
 "File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Отзыв";
+"premium.connection.title" = "Требуется подключение к сети";
+"premium.connection.message" = "Подключитесь к интернету и повторите попытку.";
+"premium.retry" = "Повторить";

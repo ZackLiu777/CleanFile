@@ -8,7 +8,8 @@ struct PremiumSubscriptionView: View {
     @State private var lifetimeProduct: Product?
     @State private var isLoadingLifetimeProduct = false
     @State private var isPurchasingLifetime = false
-    @State private var lifetimePurchaseError: String?
+    @State private var isStorefrontReady = false
+    @State private var isCheckingStorefront = true
 
     let allowsDismiss: Bool
 
@@ -21,37 +22,42 @@ struct PremiumSubscriptionView: View {
             Group {
                 if PremiumConfiguration.purchasesEnabled,
                    let groupID = PremiumConfiguration.subscriptionGroupID {
-                    SubscriptionStoreView(groupID: groupID) {
-                        introduction
-                    }
-                    .subscriptionStoreControlStyle(.prominentPicker)
-                    .subscriptionStoreControlBackground(theme.cardSurface)
-                    .subscriptionStoreButtonLabel(.multiline)
-                    .subscriptionStorePolicyDestination(
-                        url: PremiumConfiguration.privacyPolicyURL,
-                        for: .privacyPolicy
-                    )
-                    .subscriptionStorePolicyDestination(
-                        url: PremiumConfiguration.termsOfServiceURL,
-                        for: .termsOfService
-                    )
-                    .subscriptionStorePolicyForegroundStyle(theme.textSecondary)
-                    .storeButton(.visible, for: .restorePurchases)
-                    .onInAppPurchaseCompletion { _, result in
-                        guard case .success(let purchaseResult) = result else {
-                            if case .failure(let error) = result {
-                                entitlementStore.recordPurchaseError(error)
+                    if isStorefrontReady {
+                        SubscriptionStoreView(groupID: groupID) {
+                            introduction
+                        }
+                        .subscriptionStoreControlStyle(.prominentPicker)
+                        .subscriptionStoreControlBackground(theme.cardSurface)
+                        .subscriptionStoreButtonLabel(.multiline)
+                        .subscriptionStorePolicyDestination(
+                            url: PremiumConfiguration.privacyPolicyURL,
+                            for: .privacyPolicy
+                        )
+                        .subscriptionStorePolicyDestination(
+                            url: PremiumConfiguration.termsOfServiceURL,
+                            for: .termsOfService
+                        )
+                        .subscriptionStorePolicyForegroundStyle(theme.textSecondary)
+                        .storeButton(.visible, for: .restorePurchases)
+                        .onInAppPurchaseCompletion { _, result in
+                            guard case .success(let purchaseResult) = result else {
+                                if case .failure(let error) = result {
+                                    entitlementStore.recordPurchaseError(error)
+                                    isStorefrontReady = false
+                                }
+                                await entitlementStore.refresh()
+                                return
                             }
-                            await entitlementStore.refresh()
-                            return
+                            let didUnlock = await entitlementStore.handlePurchaseResult(purchaseResult)
+                            if didUnlock, allowsDismiss {
+                                dismiss()
+                            }
                         }
-                        let didUnlock = await entitlementStore.handlePurchaseResult(purchaseResult)
-                        if didUnlock, allowsDismiss {
-                            dismiss()
+                        .containerBackground(for: .subscriptionStoreFullHeight) {
+                            AppBackground()
                         }
-                    }
-                    .containerBackground(for: .subscriptionStoreFullHeight) {
-                        AppBackground()
+                    } else {
+                        offlineStorefront
                     }
                 } else {
                     ScrollView {
@@ -78,26 +84,55 @@ struct PremiumSubscriptionView: View {
             }
         }
         .task {
-            await loadLifetimeProduct()
+            await loadStorefront()
         }
         .onChange(of: entitlementStore.accessState) { _, state in
             if state == .entitled, allowsDismiss {
                 dismiss()
             }
         }
-        .alert(
-            "premium.lifetime.error.title",
-            isPresented: Binding(
-                get: { lifetimePurchaseError != nil },
-                set: { if !$0 { lifetimePurchaseError = nil } }
-            )
-        ) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(lifetimePurchaseError ?? "")
-        }
         .presentationDetents([.large])
         .accessibilityIdentifier("premium.screen")
+    }
+
+    private var offlineStorefront: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                introduction
+
+                if isCheckingStorefront {
+                    ProgressView()
+                        .controlSize(.large)
+                        .frame(maxWidth: .infinity, minHeight: 140)
+                        .accessibilityLabel("premium.entitlement.checking")
+                } else {
+                    VStack(spacing: 14) {
+                        Image(systemName: "wifi.exclamationmark")
+                            .font(.system(size: 34, weight: .medium))
+                            .foregroundStyle(theme.accentPrimary)
+                            .accessibilityHidden(true)
+                        Text("premium.connection.title")
+                            .appTypeface(.title3.bold(), size: 20, relativeTo: .title3, weight: .bold)
+                        Text("premium.connection.message")
+                            .font(.subheadline)
+                            .foregroundStyle(theme.textSecondary)
+                            .multilineTextAlignment(.center)
+                        Button("premium.retry") {
+                            Task { await loadStorefront() }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("premium.connection.retry")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(24)
+                    .appContentCard()
+                    .padding(.horizontal, 24)
+                    .frame(maxWidth: 640)
+                }
+            }
+            .padding(.bottom, 24)
+        }
     }
 
     private var introduction: some View {
@@ -223,17 +258,41 @@ struct PremiumSubscriptionView: View {
         }
     }
 
-    private func loadLifetimeProduct() async {
-        guard PremiumConfiguration.purchasesEnabled, lifetimeProduct == nil else { return }
+    private func loadStorefront() async {
+        guard PremiumConfiguration.purchasesEnabled else { return }
+        isCheckingStorefront = true
         isLoadingLifetimeProduct = true
-        defer { isLoadingLifetimeProduct = false }
+        defer {
+            isCheckingStorefront = false
+            isLoadingLifetimeProduct = false
+        }
+
+        if entitlementStore.startupConnectivity != .available {
+            // This request triggers the system cellular-data choice. A failure here
+            // can be stale for a moment after the user grants access, so StoreKit is
+            // the final authority for whether the purchase page can be shown.
+            _ = await entitlementStore.refreshStartupConnectivity()
+        }
 
         do {
-            lifetimeProduct = try await Product.products(
-                for: [PremiumConfiguration.lifetimeProductID]
-            ).first
+            var products = try await Product.products(for: PremiumConfiguration.productIDs)
+            if !products.contains(where: {
+                PremiumConfiguration.subscriptionProductIDs.contains($0.id)
+            }) {
+                try await Task.sleep(for: .milliseconds(650))
+                products = try await Product.products(for: PremiumConfiguration.productIDs)
+            }
+            guard products.contains(where: {
+                PremiumConfiguration.subscriptionProductIDs.contains($0.id)
+            }) else {
+                isStorefrontReady = false
+                return
+            }
+            lifetimeProduct = products.first { $0.id == PremiumConfiguration.lifetimeProductID }
+            isStorefrontReady = true
         } catch {
-            lifetimePurchaseError = String(localized: "premium.lifetime.error.load")
+            isStorefrontReady = false
+            entitlementStore.recordPurchaseError(error)
         }
     }
 
@@ -252,7 +311,7 @@ struct PremiumSubscriptionView: View {
             return
         } catch {
             entitlementStore.recordPurchaseError(error)
-            lifetimePurchaseError = error.localizedDescription
+            isStorefrontReady = false
         }
     }
 

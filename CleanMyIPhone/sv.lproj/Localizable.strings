@@ -475,3 +475,6 @@
 "Contact Developer" = "Kontakta utvecklare";
 "Send feedback, questions, or bug reports by email." = "Skicka feedback, frågor eller felrapporter via e-post.";
 "File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Feedback";
+"premium.connection.title" = "Nätverksanslutning krävs";
+"premium.connection.message" = "Anslut till internet och försök igen.";
+"premium.retry" = "Försök igen";

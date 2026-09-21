@@ -475,3 +475,6 @@
 "Contact Developer" = "اتصل بالمطور";
 "Send feedback, questions, or bug reports by email." = "إرسال التعليقات أو الأسئلة أو تقارير الأخطاء عبر البريد الإلكتروني.";
 "File Cleaner & Media Converter Feedback" = "تعليقات File Cleaner & Media Converter";
+"premium.connection.title" = "يلزم الاتصال بالشبكة";
+"premium.connection.message" = "اتصل بالإنترنت، ثم حاول مرة أخرى.";
+"premium.retry" = "إعادة المحاولة";

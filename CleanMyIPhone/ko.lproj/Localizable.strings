@@ -473,3 +473,6 @@
 "Contact Developer" = "개발자에게 문의";
 "Send feedback, questions, or bug reports by email." = "의견, 질문 또는 버그 신고를 이메일로 보내세요.";
 "File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter 피드백";
+"premium.connection.title" = "네트워크 연결 필요";
+"premium.connection.message" = "인터넷에 연결한 후 다시 시도하십시오.";
+"premium.retry" = "다시 시도";

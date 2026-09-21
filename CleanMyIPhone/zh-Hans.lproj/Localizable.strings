@@ -473,3 +473,6 @@
 "Contact Developer" = "联系开发者";
 "Send feedback, questions, or bug reports by email." = "通过电子邮件发送反馈、问题或错误报告。";
 "File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter 用户反馈";
+"premium.connection.title" = "需要网络连接";
+"premium.connection.message" = "请连接互联网，然后重试。";
+"premium.retry" = "重试";

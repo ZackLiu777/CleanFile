@@ -475,3 +475,6 @@
 "Contact Developer" = "Ota yhteyttä kehittäjään";
 "Send feedback, questions, or bug reports by email." = "Lähetä palautetta, kysymyksiä tai virheraportteja sähköpostitse.";
 "File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Palaute";
+"premium.connection.title" = "Verkkoyhteys tarvitaan";
+"premium.connection.message" = "Muodosta internetyhteys ja yritä uudelleen.";
+"premium.retry" = "Yritä uudelleen";
