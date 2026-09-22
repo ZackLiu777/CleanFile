@@ -254,7 +254,6 @@ private struct FormatChipSection: View {
 @MainActor
 /// 定义 `ImageConversionContentView` 的值语义数据与相关行为。
 struct ImageConversionContentView: View {
-    @Environment(\.conversionTheme) private var theme
     @State private var viewModel: ImageConversionViewModel
     @State private var importSession: ConversionImportSession
     @State private var isImporterPresented = false
@@ -272,7 +271,7 @@ struct ImageConversionContentView: View {
 
     public var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            LazyVStack(spacing: 16) {
+            LazyVStack(spacing: 14) {
                 if shouldShowImportCard {
                     importCard
                 } else {
@@ -284,15 +283,19 @@ struct ImageConversionContentView: View {
                 }
 
                 ImageConversionSettingsCard(viewModel: viewModel)
-                conversionAction
             }
-            .padding(.horizontal, 4)
-            .padding(.top, 4)
-            .padding(.bottom, 20)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
             .frame(maxWidth: 900)
             .frame(maxWidth: .infinity)
         }
         .converterSoftScrollEdge()
+        .safeAreaInset(edge: .bottom) {
+            if !shouldShowImportCard {
+                bottomActionBar
+            }
+        }
         .fileImporter(
             isPresented: $isImporterPresented,
             allowedContentTypes: ImageConversionEngine.supportedInputContentTypes,
@@ -344,7 +347,7 @@ struct ImageConversionContentView: View {
     }
 
     private var importCard: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             Image(systemName: "arrow.triangle.2.circlepath.camera")
                 .appTypeface(.system(size: 34, weight: .semibold), size: 34, relativeTo: .body, weight: .semibold)
                 .foregroundStyle(.tint)
@@ -354,25 +357,30 @@ struct ImageConversionContentView: View {
                     .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
             }
 
-            Button {
-                isImporterPresented = true
-            } label: {
-                Label(L10n.string("action.choose_files"), systemImage: "folder")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .disabled(viewModel.isConverting || viewModel.importProgress != nil)
+            HStack(spacing: 10) {
+                Button {
+                    isImporterPresented = true
+                } label: {
+                    ConversionImportButtonLabel(
+                        title: L10n.string("action.choose_files"),
+                        systemImage: "folder"
+                    )
+                }
+                .buttonStyle(.bordered)
 
-            PhotosPicker(
-                selection: $selectedPhotoItems,
-                maxSelectionCount: 100,
-                matching: .images,
-                photoLibrary: .shared()
-            ) {
-                Label(L10n.string("action.choose_photos"), systemImage: "photo.on.rectangle")
-                    .frame(maxWidth: .infinity)
+                PhotosPicker(
+                    selection: $selectedPhotoItems,
+                    maxSelectionCount: 100,
+                    matching: .images,
+                    photoLibrary: .shared()
+                ) {
+                    ConversionImportButtonLabel(
+                        title: L10n.string("action.choose_photos"),
+                        systemImage: "photo.on.rectangle"
+                    )
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.bordered)
             .disabled(viewModel.isConverting || viewModel.importProgress != nil)
         }
         .frame(maxWidth: .infinity)
@@ -511,128 +519,309 @@ struct ImageConversionContentView: View {
         )
     }
 
-    @ViewBuilder
-    private var conversionAction: some View {
-        if viewModel.isConverting {
-            VStack(spacing: 12) {
-                WaveProgressView(
-                    progress: viewModel.progress.fractionCompleted,
-                    tint: theme.accent
-                )
-
-                HStack {
-                    Text(
-                        L10n.format(
-                            "progress.summary",
-                            viewModel.progress.completed,
-                            viewModel.progress.total
-                        )
-                    )
-                    .appTypeface(.footnote, size: 13, relativeTo: .footnote, weight: .regular)
-                    .foregroundStyle(.secondary)
-
-                    Spacer()
-
-                    Button(L10n.string("action.cancel"), role: .cancel) {
-                        viewModel.cancelConversion()
-                    }
-                    .buttonStyle(.bordered)
-                }
-            }
-            .padding(16)
-            .converterCard()
-        } else {
-            PrimaryConversionButton(
-                title: L10n.string("action.convert"),
-                isEnabled: viewModel.canStartConversion,
-                action: viewModel.startConversion
-            )
-        }
+    private var bottomActionBar: some View {
+        ConversionNeoBrutalistActionBar(
+            countTitle: L10n.format("files.title", displayedFileCount),
+            isWorking: viewModel.isConverting,
+            progress: viewModel.progress.fractionCompleted,
+            progressTitle: L10n.format(
+                "progress.summary",
+                viewModel.progress.completed,
+                viewModel.progress.total
+            ),
+            isEnabled: viewModel.canStartConversion,
+            onStart: viewModel.startConversion,
+            onCancel: viewModel.cancelConversion
+        )
     }
 
 }
 
 @MainActor
-/// 定义 `ImageConversionSettingsCard` 的值语义数据与相关行为。
-private struct ImageConversionSettingsCard: View {
-    @Bindable var viewModel: ImageConversionViewModel
+struct ConversionNeoBrutalistActionBar: View {
+    @Environment(\.conversionTheme) private var theme
+
+    let countTitle: String
+    let isWorking: Bool
+    let progress: Double
+    let progressTitle: String
+    let isEnabled: Bool
+    let onStart: () -> Void
+    let onCancel: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            ConversionMicroText(L10n.string("settings.title"))
+        HStack(spacing: 12) {
+            if isWorking {
+                VStack(alignment: .leading, spacing: 4) {
+                    WaveProgressView(progress: progress, tint: theme.accent)
+                        .frame(height: 6)
 
+                    Text(progressTitle)
+                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                        .foregroundStyle(theme.textPrimary.opacity(0.65))
+                }
+
+                Spacer()
+                actionButton(
+                    title: L10n.string("action.cancel"),
+                    systemImage: "xmark",
+                    action: onCancel
+                )
+            } else {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(countTitle.uppercased())
+                        .font(.system(size: 13, weight: .black, design: .monospaced))
+                        .foregroundStyle(theme.textPrimary)
+
+                    Text(L10n.string("status.ready").uppercased())
+                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                        .foregroundStyle(theme.textPrimary.opacity(0.6))
+                }
+
+                Spacer()
+                actionButton(
+                    title: L10n.string("action.convert"),
+                    systemImage: "arrow.triangle.2.circlepath",
+                    action: onStart
+                )
+                .disabled(!isEnabled)
+                .opacity(isEnabled ? 1 : 0.48)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(
+            theme.cardSurface,
+            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(theme.textPrimary, lineWidth: 2.5)
+        }
+        .background {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(theme.textPrimary)
+                .offset(x: 4, y: 4)
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 8)
+    }
+
+    private func actionButton(
+        title: String,
+        systemImage: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 14, weight: .black))
+                Text(title.uppercased())
+                    .font(.system(size: 14, weight: .black, design: .monospaced))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+            }
+            .foregroundStyle(theme.textPrimary)
+            .padding(.horizontal, 16)
+            .frame(height: 40)
+        }
+        .buttonStyle(
+            ConversionPhysicalActionButtonStyle(
+                faceColor: theme.accent,
+                edgeColor: theme.textPrimary
+            )
+        )
+    }
+}
+
+private struct ConversionPhysicalActionButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    let faceColor: Color
+    let edgeColor: Color
+
+    func makeBody(configuration: Configuration) -> some View {
+        let isPressed = configuration.isPressed
+
+        configuration.label
+            .background(
+                faceColor,
+                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .strokeBorder(edgeColor, lineWidth: 2.5)
+            }
+            .background {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(edgeColor)
+                    .offset(x: isPressed ? 0 : 3, y: isPressed ? 0 : 4)
+            }
+            .offset(y: isPressed ? 4 : 0)
+            .scaleEffect(isPressed ? 0.995 : 1)
+            .animation(
+                reduceMotion
+                    ? .linear(duration: 0.01)
+                    : .spring(response: 0.16, dampingFraction: 0.72),
+                value: isPressed
+            )
+    }
+}
+
+struct ConversionImportButtonLabel: View {
+    let title: String
+    let systemImage: String
+
+    var body: some View {
+        Label(title, systemImage: systemImage)
+            .appTypeface(
+                .subheadline.weight(.medium),
+                size: 15,
+                relativeTo: .subheadline,
+                weight: .medium
+            )
+            .frame(maxWidth: .infinity)
+            .frame(height: 38)
+    }
+}
+
+@MainActor
+/// 定义 `ImageConversionSettingsCard` 的值语义数据与相关行为。
+private struct ImageConversionSettingsCard: View {
+    @Environment(\.conversionTheme) private var theme
+    @Bindable var viewModel: ImageConversionViewModel
+    @State private var isAdvancedExpanded = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 8) {
-                Text(L10n.string("settings.format"))
-                ConversionSettingsWheelPicker(
-                    summary: imageSettingsSummary,
-                    detail: L10n.dynamicString("format.image.\(viewModel.outputFormat.rawValue).detail")
-                ) {
-                    HStack(spacing: 0) {
-                        ConversionWheelColumn(
-                            title: L10n.string("settings.format"),
-                            selection: $viewModel.outputFormat,
-                            options: viewModel.availableFormats,
-                            optionTitle: { $0.displayName }
-                        )
-                        ConversionWheelColumn(
-                            title: L10n.string("settings.metadata"),
-                            selection: $viewModel.metadataPolicy,
-                            options: ImageMetadataPolicy.allCases,
-                            optionTitle: metadataTitle
-                        )
-                        ConversionWheelColumn(
-                            title: L10n.string("settings.resize"),
-                            selection: $viewModel.resizePreset,
-                            options: ImageResizePreset.allCases,
-                            optionTitle: resizeTitle
-                        )
+                ConversionMicroText(L10n.string("settings.format"))
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(viewModel.availableFormats, id: \.self) { format in
+                            let isSelected = viewModel.outputFormat == format
+                            Button {
+                                viewModel.outputFormat = format
+                            } label: {
+                                Text(format.displayName)
+                                    .font(.system(size: 13, weight: isSelected ? .bold : .medium, design: .rounded))
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 7)
+                                    .foregroundStyle(isSelected ? Color.white : theme.textPrimary)
+                                    .background(
+                                        isSelected ? theme.accent : theme.textPrimary.opacity(0.06),
+                                        in: Capsule()
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                 }
             }
 
-            SegmentedStreamSlider(value: $viewModel.quality)
-            .disabled(!viewModel.outputFormat.supportsQuality)
-            .opacity(viewModel.outputFormat.supportsQuality ? 1 : 0.42)
-            .animation(.easeInOut(duration: 0.18), value: viewModel.outputFormat)
+            Divider().opacity(0.4)
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text(L10n.string("settings.background"))
-                    Picker(
-                        L10n.string("settings.background"),
-                        selection: $viewModel.background
-                    ) {
-                        Text(L10n.string("color.white")).tag(ImageBackground.white)
-                        Text(L10n.string("color.black")).tag(ImageBackground.black)
-                        Text(L10n.string("color.transparent")).tag(ImageBackground.transparent)
-                            .disabled(!viewModel.outputFormat.supportsTransparentBackground)
+            if viewModel.outputFormat.supportsQuality {
+                SegmentedStreamSlider(value: $viewModel.quality)
+
+                Divider().opacity(0.4)
+            }
+
+            DisclosureGroup(isExpanded: $isAdvancedExpanded) {
+                VStack(spacing: 12) {
+                    compactPickerRow(
+                        title: L10n.string("settings.metadata"),
+                        selection: $viewModel.metadataPolicy,
+                        options: ImageMetadataPolicy.allCases,
+                        optionTitle: metadataTitle
+                    )
+
+                    compactPickerRow(
+                        title: L10n.string("settings.resize"),
+                        selection: $viewModel.resizePreset,
+                        options: ImageResizePreset.allCases,
+                        optionTitle: resizeTitle
+                    )
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(L10n.string("settings.background"))
+                            .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
+
+                        Picker(
+                            L10n.string("settings.background"),
+                            selection: $viewModel.background
+                        ) {
+                            Text(L10n.string("color.white")).tag(ImageBackground.white)
+                            Text(L10n.string("color.black")).tag(ImageBackground.black)
+                            Text(L10n.string("color.transparent")).tag(ImageBackground.transparent)
+                                .disabled(!viewModel.outputFormat.supportsTransparentBackground)
+                        }
+                        .labelsHidden()
+                        .pickerStyle(.segmented)
+                        .accessibilityIdentifier("conversion.image.background")
                     }
-                    .labelsHidden()
-                    .pickerStyle(.segmented)
-                    .accessibilityIdentifier("conversion.image.background")
-            }
 
-            HStack(alignment: .firstTextBaseline) {
-                Text(L10n.string("settings.output"))
-                Spacer()
-                Text(L10n.string("settings.output.images"))
-                    .font(.system(size: 12, weight: .medium, design: .monospaced))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(L10n.string("settings.output"))
+                        Spacer()
+                        Text(L10n.string("settings.output.images"))
+                            .font(.system(size: 12, weight: .medium, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+                .padding(.top, 10)
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(L10n.string("settings.title"))
+                        .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
+                    Spacer()
+                    if !isAdvancedExpanded {
+                        Text(advancedSummary)
+                            .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
+                            .foregroundStyle(.tertiary)
+                            .lineLimit(1)
+                    }
+                }
             }
+            .tint(theme.textPrimary)
 
             ConversionSizeEstimateView(estimate: viewModel.sizeEstimate)
         }
-        .padding(16)
+        .padding(14)
         .converterCard()
         .disabled(viewModel.isConverting)
     }
 
-    private var imageSettingsSummary: String {
+    private var advancedSummary: String {
         [
-            viewModel.outputFormat.displayName,
             metadataTitle(viewModel.metadataPolicy),
             resizeSummaryTitle(viewModel.resizePreset)
         ].joined(separator: " · ")
+    }
+
+    private func compactPickerRow<Option: Hashable>(
+        title: String,
+        selection: Binding<Option>,
+        options: [Option],
+        optionTitle: @escaping (Option) -> String
+    ) -> some View {
+        HStack {
+            Text(title)
+                .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
+            Spacer()
+            Picker("", selection: selection) {
+                ForEach(options, id: \.self) { option in
+                    Text(optionTitle(option)).tag(option)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+        }
     }
 
     /// 生成设置摘要使用的紧凑尺寸文本，仅省略“最长边不超过”的解释性前缀。

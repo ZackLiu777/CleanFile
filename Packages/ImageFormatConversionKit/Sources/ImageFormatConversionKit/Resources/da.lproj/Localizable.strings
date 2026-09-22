@@ -254,3 +254,5 @@
 "conversion.replace.select_all" = "Vælg alle";
 "conversion.replace.deselect_all" = "Fravælg alle";
 "conversion.replace.selected" = "%d valgt";
+"conversion.guide.audio_replace.title" = "Hvorfor lyd ikke kan erstatte originalen";
+"conversion.guide.audio_replace.detail" = "Lydfiler kommer fra Arkiver, og iPhone tillader ikke, at appen sikkert sletter originalerne dér for dig. Den komprimerede lyd gemmes som en ny fil. Kontrollér den, og slet derefter selv den gamle fil i Arkiver.";

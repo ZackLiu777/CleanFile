@@ -254,3 +254,5 @@
 "conversion.replace.select_all" = "すべて選択";
 "conversion.replace.deselect_all" = "すべて選択解除";
 "conversion.replace.selected" = "%d件選択済み";
+"conversion.guide.audio_replace.title" = "オーディオが元ファイルを置き換えられない理由";
+"conversion.guide.audio_replace.detail" = "オーディオは「ファイル」から読み込まれます。iPhone は、その場所の元ファイルを App が代わりに安全に削除することを許可していません。圧縮した音声は新しいファイルとして保存されます。確認後、「ファイル」で古いファイルをご自身で削除してください。";

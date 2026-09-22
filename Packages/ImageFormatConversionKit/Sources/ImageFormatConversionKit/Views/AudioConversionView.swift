@@ -28,19 +28,23 @@ struct AudioConversionView: View {
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            LazyVStack(spacing: 16) {
+            LazyVStack(spacing: 14) {
                 if shouldShowImportCard { importCard } else { selectedFilesCard }
                 if let notice = viewModel.notice { NoticeView(message: notice) }
                 settingsCard
-                conversionAction
             }
-            .padding(.horizontal, 4)
-            .padding(.top, 4)
-            .padding(.bottom, 20)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
             .frame(maxWidth: 900)
             .frame(maxWidth: .infinity)
         }
         .converterSoftScrollEdge()
+        .safeAreaInset(edge: .bottom) {
+            if !shouldShowImportCard {
+                bottomActionBar
+            }
+        }
         .fileImporter(
             isPresented: $mediaImporterPresented,
             allowedContentTypes: mediaInputTypes,
@@ -104,26 +108,31 @@ struct AudioConversionView: View {
     }
 
     private var importCard: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             Image(systemName: "waveform").font(.system(size: 34)).foregroundStyle(.tint)
             Text(L10n.string("audio.import.title")).appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
-            Button { mediaImporterPresented = true } label: {
-                Label(L10n.string("action.choose_files"), systemImage: "folder")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .disabled(viewModel.isConverting || activeImportProgress != nil)
+            HStack(spacing: 10) {
+                Button { mediaImporterPresented = true } label: {
+                    ConversionImportButtonLabel(
+                        title: L10n.string("action.choose_files"),
+                        systemImage: "folder"
+                    )
+                }
+                .buttonStyle(.bordered)
 
-            PhotosPicker(
-                selection: $selectedVideoItems,
-                maxSelectionCount: 50,
-                matching: .videos,
-                photoLibrary: .shared()
-            ) {
-                Label(L10n.string("action.choose_photos"), systemImage: "photo.on.rectangle")
-                    .frame(maxWidth: .infinity)
+                PhotosPicker(
+                    selection: $selectedVideoItems,
+                    maxSelectionCount: 50,
+                    matching: .videos,
+                    photoLibrary: .shared()
+                ) {
+                    ConversionImportButtonLabel(
+                        title: L10n.string("action.choose_photos"),
+                        systemImage: "photo.on.rectangle"
+                    )
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.bordered)
             .disabled(viewModel.isConverting || activeImportProgress != nil)
         }
         .padding(20)
@@ -225,49 +234,70 @@ struct AudioConversionView: View {
 
     private var settingsCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            ConversionMicroText(L10n.string("settings.title"))
-
             VStack(alignment: .leading, spacing: 8) {
-                Text(L10n.string("settings.format"))
-                ConversionSettingsWheelPicker(
-                    summary: audioSettingsSummary,
-                    detail: L10n.dynamicString("format.audio.\(viewModel.outputFormat.rawValue).detail")
-                ) {
-                    HStack(spacing: 0) {
-                        ConversionWheelColumn(
-                            title: L10n.string("settings.format"),
-                            selection: Binding(
-                                get: { viewModel.outputFormat },
-                                set: { format in
-                                    viewModel.outputFormat = format
-                                    if !format.isLossless,
-                                       !format.availableBitRates.contains(viewModel.bitRate) {
-                                        viewModel.bitRate = .veryHigh
-                                    }
+                ConversionMicroText(L10n.string("settings.format"))
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(AudioOutputFormat.allCases, id: \.self) { format in
+                            let isSelected = viewModel.outputFormat == format
+                            Button {
+                                viewModel.outputFormat = format
+                                if !format.isLossless,
+                                   !format.availableBitRates.contains(viewModel.bitRate) {
+                                    viewModel.bitRate = .veryHigh
                                 }
-                            ),
-                            options: AudioOutputFormat.allCases,
-                            optionTitle: audioFormatTitle
-                        )
-                        if !viewModel.outputFormat.isLossless {
-                            ConversionWheelColumn(
-                                title: L10n.string("audio.settings.quality"),
-                                selection: Binding(
-                                    get: { viewModel.bitRate },
-                                    set: { viewModel.bitRate = $0 }
-                                ),
-                                options: viewModel.outputFormat.availableBitRates,
-                                optionTitle: { "\($0.rawValue / 1_000) kbps" }
-                            )
+                            } label: {
+                                Text(audioFormatTitle(format))
+                                    .font(.system(size: 13, weight: isSelected ? .bold : .medium, design: .rounded))
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 7)
+                                    .foregroundStyle(isSelected ? Color.white : theme.textPrimary)
+                                    .background(
+                                        isSelected ? theme.accent : theme.textPrimary.opacity(0.06),
+                                        in: Capsule()
+                                    )
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
             }
+
+            Divider().opacity(0.4)
+
             if viewModel.outputFormat.isLossless {
                 Label(L10n.string("audio.lossless"), systemImage: "waveform.badge.checkmark")
                     .appTypeface(.caption, size: 12, relativeTo: .caption).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    ConversionMicroText(L10n.string("audio.settings.quality"))
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(viewModel.outputFormat.availableBitRates, id: \.self) { bitRate in
+                                let isSelected = viewModel.bitRate == bitRate
+                                Button {
+                                    viewModel.bitRate = bitRate
+                                } label: {
+                                    Text("\(bitRate.rawValue / 1_000) kbps")
+                                        .font(.system(size: 13, weight: isSelected ? .bold : .medium, design: .rounded))
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 7)
+                                        .foregroundStyle(isSelected ? Color.white : theme.textPrimary)
+                                        .background(
+                                            isSelected ? theme.accent : theme.textPrimary.opacity(0.06),
+                                            in: Capsule()
+                                        )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                }
             }
+
             ConversionSettingRow(L10n.string("settings.output")) {
                 Text(L10n.string("settings.output.audio"))
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
@@ -275,20 +305,9 @@ struct AudioConversionView: View {
             }
             ConversionSizeEstimateView(estimate: viewModel.sizeEstimate)
         }
-        .padding(16)
+        .padding(14)
         .converterCard()
         .disabled(viewModel.isConverting)
-    }
-
-    private var audioSettingsSummary: String {
-        guard !viewModel.outputFormat.isLossless else {
-            return audioFormatTitle(viewModel.outputFormat)
-        }
-
-        return [
-            audioFormatTitle(viewModel.outputFormat),
-            "\(viewModel.bitRate.rawValue / 1_000) kbps"
-        ].joined(separator: " · ")
     }
 
     /// 封装 `audioFormatTitle` 对应的局部行为，供当前类型在统一入口下复用。
@@ -357,23 +376,17 @@ struct AudioConversionView: View {
         }
     }
 
-    @ViewBuilder private var conversionAction: some View {
-        if viewModel.isConverting {
-            VStack(spacing: 10) {
-                WaveProgressView(
-                    progress: (Double(viewModel.completed) + viewModel.itemProgress)
-                        / Double(max(viewModel.total, 1)),
-                    tint: theme.accent
-                )
-                HStack {
-                    Text("\(viewModel.completed) / \(viewModel.total)").appTypeface(.footnote, size: 13, relativeTo: .footnote).foregroundStyle(.secondary)
-                    Spacer()
-                    Button(L10n.string("action.cancel"), role: .cancel) { viewModel.cancel() }
-                }
-            }.padding(16).converterCard()
-        } else {
-            PrimaryConversionButton(title: L10n.string("action.convert"), isEnabled: viewModel.canConvert, action: viewModel.start)
-        }
+    private var bottomActionBar: some View {
+        ConversionNeoBrutalistActionBar(
+            countTitle: L10n.format("files.audio.title", displayedFileCount),
+            isWorking: viewModel.isConverting,
+            progress: (Double(viewModel.completed) + viewModel.itemProgress)
+                / Double(max(viewModel.total, 1)),
+            progressTitle: "\(viewModel.completed) / \(viewModel.total)",
+            isEnabled: viewModel.canConvert,
+            onStart: viewModel.start,
+            onCancel: viewModel.cancel
+        )
     }
 
     /// 封装 `sourceDescription` 对应的局部行为，供当前类型在统一入口下复用。

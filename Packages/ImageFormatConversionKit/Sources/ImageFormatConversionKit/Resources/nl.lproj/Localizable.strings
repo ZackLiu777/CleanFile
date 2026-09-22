@@ -254,3 +254,5 @@
 "conversion.replace.select_all" = "Selecteer alles";
 "conversion.replace.deselect_all" = "Deselecteer alles";
 "conversion.replace.selected" = "%d geselecteerd";
+"conversion.guide.audio_replace.title" = "Waarom audio het origineel niet kan vervangen";
+"conversion.guide.audio_replace.detail" = "Audiobestanden komen uit Bestanden. De iPhone staat niet toe dat de app de originelen daar veilig voor je verwijdert. De gecomprimeerde audio wordt als nieuw bestand bewaard. Controleer het en verwijder daarna zelf het oude bestand in Bestanden.";

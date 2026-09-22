@@ -119,6 +119,15 @@ struct ConversionGuideView: View {
                                 title: L10n.string("conversion.guide.replace.title"),
                                 detail: L10n.string("conversion.guide.replace.detail")
                             )
+
+                            Divider()
+                                .padding(.leading, 54)
+
+                            ConversionGuideFeature(
+                                symbol: "waveform",
+                                title: L10n.string("conversion.guide.audio_replace.title"),
+                                detail: L10n.string("conversion.guide.audio_replace.detail")
+                            )
                         }
                         .padding(.horizontal, 16)
                         .converterCard()

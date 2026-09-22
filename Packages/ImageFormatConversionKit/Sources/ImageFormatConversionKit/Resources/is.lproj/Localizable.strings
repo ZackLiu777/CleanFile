@@ -254,3 +254,5 @@
 "conversion.replace.select_all" = "Velja allt";
 "conversion.replace.deselect_all" = "Afvelja allt";
 "conversion.replace.selected" = "%d valin";
+"conversion.guide.audio_replace.title" = "Af hverju hljóð getur ekki komið í stað frumritsins";
+"conversion.guide.audio_replace.detail" = "Hljóðskrár koma úr Skrám og iPhone leyfir forritinu ekki að eyða frumritunum þar á öruggan hátt fyrir þig. Þjappað hljóð er vistað sem ný skrá. Athugaðu hana og eyddu síðan gömlu skránni sjálf/ur í Skrám.";

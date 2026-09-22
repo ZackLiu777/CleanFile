@@ -254,3 +254,5 @@
 "conversion.replace.select_all" = "全選";
 "conversion.replace.deselect_all" = "取消全選";
 "conversion.replace.selected" = "已選擇 %d 項";
+"conversion.guide.audio_replace.title" = "為什麼音訊不能取代原始檔";
+"conversion.guide.audio_replace.detail" = "音訊來自「檔案」，iPhone 不允許 App 代替你安全刪除那裡的原始檔。壓縮後的音訊會另存為新檔案；確認新檔案正常後，請自行前往「檔案」刪除舊檔案。";

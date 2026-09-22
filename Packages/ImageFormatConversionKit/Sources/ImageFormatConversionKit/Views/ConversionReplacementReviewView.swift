@@ -3,13 +3,12 @@ import SwiftUI
 @MainActor
 struct ConversionReplacementReviewView: View {
     private enum Category: String, CaseIterable, Hashable {
-        case image, video, audio
+        case image, video
 
         var kind: ConversionMediaKind {
             switch self {
             case .image: .image
             case .video: .video
-            case .audio: .audio
             }
         }
 
@@ -21,7 +20,6 @@ struct ConversionReplacementReviewView: View {
             switch self {
             case .image: "photo.on.rectangle.angled"
             case .video: "film.stack"
-            case .audio: "waveform"
             }
         }
     }
@@ -364,7 +362,6 @@ struct ConversionReplacementReviewView: View {
         switch category {
         case .image: L10n.format("files.title", count)
         case .video: L10n.format("files.videos.title", count)
-        case .audio: L10n.format("files.audio.title", count)
         }
     }
 

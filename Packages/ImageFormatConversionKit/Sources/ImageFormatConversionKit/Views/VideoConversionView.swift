@@ -16,6 +16,7 @@ struct VideoConversionView: View {
     @State private var importerPresented = false
     @State private var selectedVideoItems: [PhotosPickerItem] = []
     @State private var isClearAllConfirmationPresented = false
+    @State private var isAdvancedExpanded = false
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(
@@ -28,19 +29,23 @@ struct VideoConversionView: View {
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            LazyVStack(spacing: 16) {
+            LazyVStack(spacing: 14) {
                 if shouldShowImportCard { importCard } else { selectedFilesCard }
                 if let notice = viewModel.notice { NoticeView(message: notice) }
                 settingsCard
-                action
             }
-            .padding(.horizontal, 4)
-            .padding(.top, 4)
-            .padding(.bottom, 20)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
             .frame(maxWidth: 900)
             .frame(maxWidth: .infinity)
         }
         .converterSoftScrollEdge()
+        .safeAreaInset(edge: .bottom) {
+            if !shouldShowImportCard {
+                bottomActionBar
+            }
+        }
         .fileImporter(
             isPresented: $importerPresented,
             allowedContentTypes: supportedVideoImportTypes,
@@ -94,26 +99,31 @@ struct VideoConversionView: View {
     }
 
     private var importCard: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             Image(systemName: "film.stack").font(.system(size: 34)).foregroundStyle(.tint)
             Text(L10n.string("video.import.title")).appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
-            Button { importerPresented = true } label: {
-                Label(L10n.string("action.choose_files"), systemImage: "folder")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .disabled(viewModel.isConverting || viewModel.importProgress != nil)
+            HStack(spacing: 10) {
+                Button { importerPresented = true } label: {
+                    ConversionImportButtonLabel(
+                        title: L10n.string("action.choose_files"),
+                        systemImage: "folder"
+                    )
+                }
+                .buttonStyle(.bordered)
 
-            PhotosPicker(
-                selection: $selectedVideoItems,
-                maxSelectionCount: 50,
-                matching: .videos,
-                photoLibrary: .shared()
-            ) {
-                Label(L10n.string("video.action.choose_library"), systemImage: "photo.on.rectangle")
-                    .frame(maxWidth: .infinity)
+                PhotosPicker(
+                    selection: $selectedVideoItems,
+                    maxSelectionCount: 50,
+                    matching: .videos,
+                    photoLibrary: .shared()
+                ) {
+                    ConversionImportButtonLabel(
+                        title: L10n.string("video.action.choose_library"),
+                        systemImage: "photo.on.rectangle"
+                    )
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.bordered)
             .disabled(viewModel.isConverting || viewModel.importProgress != nil)
         }
         .padding(20)
@@ -199,56 +209,87 @@ struct VideoConversionView: View {
 
     private var settingsCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            ConversionMicroText(L10n.string("settings.title"))
-
             VStack(alignment: .leading, spacing: 8) {
-                Text(L10n.string("settings.format"))
-                ConversionSettingsWheelPicker(
-                    summary: videoSettingsSummary,
-                    detail: L10n.dynamicString("format.video.\(viewModel.container.rawValue).detail")
-                ) {
-                    HStack(spacing: 0) {
-                        ConversionWheelColumn(
-                            title: L10n.string("settings.format"),
-                            selection: Binding(
-                                get: { viewModel.container },
-                                set: { viewModel.container = $0 }
-                            ),
-                            options: viewModel.availableContainers,
-                            optionTitle: { $0.rawValue.uppercased() }
-                        )
-                        ConversionWheelColumn(
-                            title: L10n.string("video.settings.codec"),
-                            selection: Binding(
-                                get: { viewModel.codec },
-                                set: { viewModel.codec = $0 }
-                            ),
-                            options: VideoCodec.allCases,
-                            optionTitle: videoCodecTitle
-                        )
-                        ConversionWheelColumn(
-                            title: L10n.string("video.settings.resolution"),
-                            selection: Binding(
-                                get: { viewModel.resolution },
-                                set: { viewModel.resolution = $0 }
-                            ),
-                            options: viewModel.availableResolutions,
-                            optionTitle: resolutionTitle
-                        )
+                ConversionMicroText(L10n.string("settings.format"))
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(viewModel.availableContainers, id: \.self) { container in
+                            let isSelected = viewModel.container == container
+                            Button {
+                                viewModel.container = container
+                            } label: {
+                                Text(container.rawValue.uppercased())
+                                    .font(.system(size: 13, weight: isSelected ? .bold : .medium, design: .rounded))
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 7)
+                                    .foregroundStyle(isSelected ? Color.white : theme.textPrimary)
+                                    .background(
+                                        isSelected ? theme.accent : theme.textPrimary.opacity(0.06),
+                                        in: Capsule()
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                 }
             }
-            ConversionSettingRow(L10n.string("settings.output")) {
-                Text(L10n.string("settings.output.videos"))
-                    .font(.system(size: 12, weight: .medium, design: .monospaced))
-                    .foregroundStyle(.secondary)
+
+            Divider().opacity(0.4)
+
+            DisclosureGroup(isExpanded: $isAdvancedExpanded) {
+                VStack(spacing: 12) {
+                    compactPickerRow(
+                        title: L10n.string("video.settings.codec"),
+                        selection: Binding(
+                            get: { viewModel.codec },
+                            set: { viewModel.codec = $0 }
+                        ),
+                        options: VideoCodec.allCases,
+                        optionTitle: videoCodecTitle
+                    )
+
+                    compactPickerRow(
+                        title: L10n.string("video.settings.resolution"),
+                        selection: Binding(
+                            get: { viewModel.resolution },
+                            set: { viewModel.resolution = $0 }
+                        ),
+                        options: viewModel.availableResolutions,
+                        optionTitle: resolutionTitle
+                    )
+
+                    ConversionSettingRow(L10n.string("settings.output")) {
+                        Text(L10n.string("settings.output.videos"))
+                            .font(.system(size: 12, weight: .medium, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.top, 10)
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(L10n.string("settings.title"))
+                        .appTypeface(.subheadline, size: 15, relativeTo: .subheadline)
+                    Spacer()
+                    if !isAdvancedExpanded {
+                        Text(videoAdvancedSummary)
+                            .appTypeface(.caption, size: 12, relativeTo: .caption)
+                            .foregroundStyle(.tertiary)
+                            .lineLimit(1)
+                    }
+                }
             }
+            .tint(theme.textPrimary)
+
             ConversionSizeEstimateView(
                 estimate: viewModel.sizeEstimate,
                 isLoading: viewModel.isEstimatingSize
             )
         }
-        .padding(16)
+        .padding(14)
         .converterCard()
         .disabled(viewModel.isConverting)
         .onChange(of: viewModel.codec) { _, _ in
@@ -270,12 +311,31 @@ struct VideoConversionView: View {
         }
     }
 
-    private var videoSettingsSummary: String {
+    private var videoAdvancedSummary: String {
         [
-            viewModel.container.rawValue.uppercased(),
             videoCodecTitle(viewModel.codec),
             resolutionTitle(viewModel.resolution)
         ].joined(separator: " · ")
+    }
+
+    private func compactPickerRow<Option: Hashable>(
+        title: String,
+        selection: Binding<Option>,
+        options: [Option],
+        optionTitle: @escaping (Option) -> String
+    ) -> some View {
+        HStack {
+            Text(title)
+                .appTypeface(.subheadline, size: 15, relativeTo: .subheadline)
+            Spacer()
+            Picker("", selection: selection) {
+                ForEach(options, id: \.self) { option in
+                    Text(optionTitle(option)).tag(option)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+        }
     }
 
     private var selectedFilesCard: some View {
@@ -327,27 +387,17 @@ struct VideoConversionView: View {
         }
     }
 
-    @ViewBuilder private var action: some View {
-        if viewModel.isConverting {
-            VStack(spacing: 10) {
-                WaveProgressView(
-                    progress: (Double(viewModel.completed) + viewModel.currentProgress)
-                        / Double(max(viewModel.total, 1)),
-                    tint: theme.accent
-                )
-                HStack {
-                    Text("\(viewModel.completed) / \(viewModel.total)").appTypeface(.footnote, size: 13, relativeTo: .footnote).foregroundStyle(.secondary)
-                    Spacer()
-                    Button(L10n.string("action.cancel"), role: .cancel) { viewModel.cancel() }
-                }
-            }.padding(16).converterCard()
-        } else {
-            PrimaryConversionButton(
-                title: L10n.string("action.convert"),
-                isEnabled: viewModel.canConvert,
-                action: viewModel.start
-            )
-        }
+    private var bottomActionBar: some View {
+        ConversionNeoBrutalistActionBar(
+            countTitle: L10n.format("files.videos.title", displayedFileCount),
+            isWorking: viewModel.isConverting,
+            progress: (Double(viewModel.completed) + viewModel.currentProgress)
+                / Double(max(viewModel.total, 1)),
+            progressTitle: "\(viewModel.completed) / \(viewModel.total)",
+            isEnabled: viewModel.canConvert,
+            onStart: viewModel.start,
+            onCancel: viewModel.cancel
+        )
     }
 
     /// 封装 `resolutionTitle` 对应的局部行为，供当前类型在统一入口下复用。

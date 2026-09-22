@@ -221,6 +221,16 @@
 				fr,
 				ja,
 				ko,
+				de,
+				fi,
+				ar,
+				nl,
+				da,
+				is,
+				nb,
+				ru,
+				it,
+				sv,
 			);
 			mainGroup = FF23C74B3033FBD500B13EBA;
 			minimizedProjectReferenceProxies = 1;
@@ -475,7 +485,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = ZaneLiao.CleanPhone;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -516,7 +526,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = ZaneLiao.CleanPhone;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

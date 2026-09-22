@@ -254,3 +254,5 @@
 "conversion.replace.select_all" = "Alle auswählen";
 "conversion.replace.deselect_all" = "Auswahl aufheben";
 "conversion.replace.selected" = "%d ausgewählt";
+"conversion.guide.audio_replace.title" = "Warum Audio das Original nicht ersetzen kann";
+"conversion.guide.audio_replace.detail" = "Audiodateien stammen aus „Dateien“. Das iPhone erlaubt der App nicht, die Originale dort sicher für dich zu löschen. Das komprimierte Audio wird als neue Datei gespeichert. Prüfe sie und lösche danach die alte Datei selbst in „Dateien“.";

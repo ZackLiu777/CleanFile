@@ -254,3 +254,5 @@
 "conversion.replace.select_all" = "모두 선택";
 "conversion.replace.deselect_all" = "모두 선택 해제";
 "conversion.replace.selected" = "%d개 선택됨";
+"conversion.guide.audio_replace.title" = "오디오가 원본을 교체할 수 없는 이유";
+"conversion.guide.audio_replace.detail" = "오디오 파일은 파일 앱에서 가져옵니다. iPhone은 이 앱이 그곳의 원본을 대신 안전하게 삭제하도록 허용하지 않습니다. 압축된 오디오는 새 파일로 저장됩니다. 새 파일을 확인한 뒤 파일 앱에서 이전 파일을 직접 삭제하세요.";

@@ -254,3 +254,5 @@
 "conversion.replace.select_all" = "تحديد الكل";
 "conversion.replace.deselect_all" = "إلغاء تحديد الكل";
 "conversion.replace.selected" = "تم تحديد %d";
+"conversion.guide.audio_replace.title" = "لماذا لا يمكن للصوت استبدال الملف الأصلي";
+"conversion.guide.audio_replace.detail" = "تأتي ملفات الصوت من تطبيق «الملفات»، ولا يسمح iPhone للتطبيق بحذف الملفات الأصلية هناك نيابةً عنك بأمان. يُحفظ الصوت المضغوط كملف جديد. بعد التأكد منه، احذف الملف القديم بنفسك من «الملفات».";

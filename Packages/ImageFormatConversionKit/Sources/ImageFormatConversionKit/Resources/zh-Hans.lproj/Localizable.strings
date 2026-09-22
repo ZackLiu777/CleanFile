@@ -254,3 +254,5 @@
 "conversion.replace.select_all" = "全选";
 "conversion.replace.deselect_all" = "取消全选";
 "conversion.replace.selected" = "已选择 %d 项";
+"conversion.guide.audio_replace.title" = "为什么音频不能替换原文件";
+"conversion.guide.audio_replace.detail" = "音频来自“文件”，iPhone 不允许 App 代替你安全删除那里的原文件。压缩后的音频会另存为新文件；确认新文件正常后，请自行前往“文件”删除旧文件。";

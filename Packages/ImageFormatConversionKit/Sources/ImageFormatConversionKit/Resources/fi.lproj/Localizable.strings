@@ -254,3 +254,5 @@
 "conversion.replace.select_all" = "Valitse kaikki";
 "conversion.replace.deselect_all" = "Poista kaikki valinnat";
 "conversion.replace.selected" = "%d valittu";
+"conversion.guide.audio_replace.title" = "Miksi ääni ei voi korvata alkuperäistä";
+"conversion.guide.audio_replace.detail" = "Äänitiedostot tulevat Tiedostot-apista, eikä iPhone anna sovelluksen poistaa siellä olevia alkuperäisiä turvallisesti puolestasi. Pakattu ääni tallennetaan uutena tiedostona. Tarkista se ja poista sitten vanha tiedosto itse Tiedostot-apissa.";
