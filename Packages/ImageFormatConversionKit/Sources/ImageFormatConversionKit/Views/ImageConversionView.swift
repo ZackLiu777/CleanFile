@@ -590,10 +590,7 @@ struct ConversionNeoBrutalistActionBar: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(
-            theme.cardSurface,
-            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
-        )
+        .modifier(ConversionActionBarSurfaceModifier())
         .overlay {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .strokeBorder(theme.textPrimary, lineWidth: 2.5)
@@ -605,6 +602,8 @@ struct ConversionNeoBrutalistActionBar: View {
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
+        .accessibilityIdentifier("conversion.actionBar")
+        .accessibilityValue(theme.liquidGlassCardsEnabled ? "liquidGlass" : "solid")
     }
 
     private func actionButton(
@@ -628,8 +627,38 @@ struct ConversionNeoBrutalistActionBar: View {
         .buttonStyle(
             ConversionPhysicalActionButtonStyle(
                 faceColor: theme.accent,
-                edgeColor: theme.textPrimary
+                edgeColor: theme.textPrimary,
+                usesLiquidGlass: theme.liquidGlassCardsEnabled
             )
+        )
+        .accessibilityIdentifier("conversion.actionButton")
+    }
+}
+
+private struct ConversionActionBarSurfaceModifier: ViewModifier {
+    @Environment(\.conversionTheme) private var theme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+#if os(iOS)
+        if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
+            content.glassEffect(
+                .regular.tint(theme.accent.opacity(0.08)),
+                in: .rect(cornerRadius: 12)
+            )
+        } else {
+            fallbackSurface(content)
+        }
+#else
+        fallbackSurface(content)
+#endif
+    }
+
+    private func fallbackSurface(_ content: Content) -> some View {
+        content.background(
+            theme.cardSurface,
+            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
         )
     }
 }
@@ -639,14 +668,17 @@ private struct ConversionPhysicalActionButtonStyle: ButtonStyle {
 
     let faceColor: Color
     let edgeColor: Color
+    let usesLiquidGlass: Bool
 
     func makeBody(configuration: Configuration) -> some View {
         let isPressed = configuration.isPressed
 
         configuration.label
-            .background(
-                faceColor,
-                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+            .modifier(
+                ConversionPhysicalButtonFaceModifier(
+                    color: faceColor,
+                    usesLiquidGlass: usesLiquidGlass
+                )
             )
             .overlay {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -665,6 +697,36 @@ private struct ConversionPhysicalActionButtonStyle: ButtonStyle {
                     : .spring(response: 0.16, dampingFraction: 0.72),
                 value: isPressed
             )
+    }
+}
+
+private struct ConversionPhysicalButtonFaceModifier: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    let color: Color
+    let usesLiquidGlass: Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+#if os(iOS)
+        if #available(iOS 26.0, *), usesLiquidGlass, !reduceTransparency {
+            content.glassEffect(
+                .regular.tint(color.opacity(0.34)),
+                in: .rect(cornerRadius: 8)
+            )
+        } else {
+            fallbackFace(content)
+        }
+#else
+        fallbackFace(content)
+#endif
+    }
+
+    private func fallbackFace(_ content: Content) -> some View {
+        content.background(
+            color,
+            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+        )
     }
 }
 

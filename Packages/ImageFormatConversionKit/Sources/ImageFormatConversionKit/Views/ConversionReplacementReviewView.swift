@@ -163,6 +163,7 @@ struct ConversionReplacementReviewView: View {
         }
         .buttonStyle(.plain)
         .disabled(items.isEmpty || isReplacing)
+        .accessibilityIdentifier("conversion.replace.category.\(category.rawValue)")
     }
 
     private var collectionReplacementBar: some View {
@@ -427,3 +428,34 @@ struct ConversionReplacementReviewView: View {
 #endif
     }
 }
+
+#if DEBUG
+@MainActor
+public struct ConversionReplacementReviewUITestHarness: View {
+    public init() {}
+
+    public var body: some View {
+        ConversionReplacementReviewView(
+            candidates: [
+                ConversionReplacementCandidate(
+                    id: UUID(),
+                    outputURL: URL(fileURLWithPath: "/tmp/compressed-image.jpg"),
+                    photoAssetIdentifier: "ui-test-image",
+                    kind: .image,
+                    sourceBytes: 2_000_000,
+                    outputBytes: 500_000
+                ),
+                ConversionReplacementCandidate(
+                    id: UUID(),
+                    outputURL: URL(fileURLWithPath: "/tmp/compressed-video.mp4"),
+                    photoAssetIdentifier: "ui-test-video",
+                    kind: .video,
+                    sourceBytes: 20_000_000,
+                    outputBytes: 8_000_000
+                )
+            ],
+            replace: { _ in }
+        )
+    }
+}
+#endif

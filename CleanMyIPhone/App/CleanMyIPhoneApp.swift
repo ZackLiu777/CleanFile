@@ -46,6 +46,9 @@ struct CleanMyIPhoneApp: App {
         if launchArguments.contains("--ui-testing-system-theme") {
             defaults.set(AppThemeID.system.rawValue, forKey: "appTheme")
         }
+        if launchArguments.contains("--ui-testing-liquid-glass") {
+            defaults.set(true, forKey: "appLiquidGlassCardsEnabled")
+        }
 #endif
         _themeSettings = StateObject(wrappedValue: ThemeSettings())
         _premiumEntitlementStore = StateObject(wrappedValue: PremiumEntitlementStore())
@@ -72,6 +75,8 @@ struct CleanMyIPhoneApp: App {
 #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-test-import-progress") {
             ConversionImportProgressUITestHarness()
+        } else if ProcessInfo.processInfo.arguments.contains("--ui-test-replacement-review") {
+            ConversionReplacementReviewUITestHarness()
         } else {
             PremiumAccessRootView(entitlementStore: premiumEntitlementStore)
         }

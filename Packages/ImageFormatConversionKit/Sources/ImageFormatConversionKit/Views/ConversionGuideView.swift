@@ -119,6 +119,7 @@ struct ConversionGuideView: View {
                                 title: L10n.string("conversion.guide.replace.title"),
                                 detail: L10n.string("conversion.guide.replace.detail")
                             )
+                            .accessibilityIdentifier("conversion.guide.replace")
 
                             Divider()
                                 .padding(.leading, 54)
@@ -128,6 +129,7 @@ struct ConversionGuideView: View {
                                 title: L10n.string("conversion.guide.audio_replace.title"),
                                 detail: L10n.string("conversion.guide.audio_replace.detail")
                             )
+                            .accessibilityIdentifier("conversion.guide.audioReplacement")
                         }
                         .padding(.horizontal, 16)
                         .converterCard()

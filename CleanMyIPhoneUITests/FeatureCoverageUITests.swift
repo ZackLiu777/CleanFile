@@ -40,6 +40,15 @@ final class FeatureCoverageUITests: XCTestCase {
             )
             tool.tap()
             XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5))
+            XCTAssertTrue(
+                app.descendants(matching: .any)["conversion.actionBar"]
+                    .waitForExistence(timeout: 3),
+                "Missing shared conversion action bar for \(id)"
+            )
+            XCTAssertTrue(
+                app.buttons["conversion.actionButton"].exists,
+                "Missing shared conversion action button for \(id)"
+            )
 
             let back = app.navigationBars.buttons.element(boundBy: 0)
             XCTAssertTrue(back.waitForExistence(timeout: 3))
@@ -68,6 +77,16 @@ final class FeatureCoverageUITests: XCTestCase {
             XCTAssertTrue(item.exists, "Missing guide item \(id)")
         }
 
+        let audioReplacement = reveal(
+            guideContent.descendants(matching: .any)["conversion.guide.audioReplacement"],
+            in: app,
+            maxSwipes: 10
+        )
+        XCTAssertTrue(audioReplacement.exists)
+        XCTAssertTrue(
+            app.staticTexts["Why audio cannot replace the original"].exists
+        )
+
         XCTAssertTrue(reveal(app.buttons["Done"], in: app).exists)
         app.buttons["Done"].tap()
         XCTAssertFalse(app.navigationBars["Compression Guide"].waitForExistence(timeout: 2))
@@ -94,6 +113,35 @@ final class FeatureCoverageUITests: XCTestCase {
         XCTAssertTrue(
             waitForSwitch(toggle, toEqual: originalValue),
             "Liquid Glass switch did not return to its original value"
+        )
+    }
+
+    @MainActor
+    func testConversionActionBarReflectsLiquidGlassSetting() throws {
+        let app = launchEnglishApp(additionalArguments: ["--ui-testing-liquid-glass"])
+        tab(in: app, id: "tab.convert", label: "Compress").tap()
+        reveal(app.buttons["conversion.home.image"], in: app).tap()
+
+        let actionBar = app.descendants(matching: .any)["conversion.actionBar"]
+        XCTAssertTrue(actionBar.waitForExistence(timeout: 5))
+        XCTAssertEqual(actionBar.value as? String, "liquidGlass")
+    }
+
+    @MainActor
+    func testReplacementReviewContainsOnlyImageAndVideoCollections() throws {
+        let app = launchEnglishApp(
+            additionalArguments: ["--ui-test-replacement-review"]
+        )
+
+        XCTAssertTrue(app.navigationBars["Replace Originals"].waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            app.descendants(matching: .any)["conversion.replace.category.image"].exists
+        )
+        XCTAssertTrue(
+            app.descendants(matching: .any)["conversion.replace.category.video"].exists
+        )
+        XCTAssertFalse(
+            app.descendants(matching: .any)["conversion.replace.category.audio"].exists
         )
     }
 
