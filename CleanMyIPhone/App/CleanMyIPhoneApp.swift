@@ -78,7 +78,10 @@ struct CleanMyIPhoneApp: App {
         } else if ProcessInfo.processInfo.arguments.contains("--ui-test-replacement-review") {
             ConversionReplacementReviewUITestHarness()
         } else {
-            PremiumAccessRootView(entitlementStore: premiumEntitlementStore)
+            // Temporary local-development bypass: keep the Premium
+            // implementation intact while opening Debug builds directly on
+            // the main app for device and simulator testing.
+            ContentView()
         }
 #else
         PremiumAccessRootView(entitlementStore: premiumEntitlementStore)
