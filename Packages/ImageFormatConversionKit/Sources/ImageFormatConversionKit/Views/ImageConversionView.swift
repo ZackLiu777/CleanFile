@@ -602,6 +602,10 @@ struct ConversionNeoBrutalistActionBar: View {
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
+        // Liquid Glass and decorative backgrounds can otherwise leave this
+        // HStack as a layout-only node. Expose a stable container while
+        // preserving the action button as its own accessible child.
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("conversion.actionBar")
         .accessibilityValue(theme.liquidGlassCardsEnabled ? "liquidGlass" : "solid")
     }
