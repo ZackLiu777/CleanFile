@@ -49,6 +49,8 @@
 "Liquid Glass Cards" = "Fljótandi glerkort";
 "Use system glass surfaces for content cards throughout the app." = "Notaðu kerfisglerfleti fyrir efniskort í gegnum appið.";
 "Tab Bar" = "Flipaslá";
+"Custom Tab Bar" = "Sérsniðin flipaslá";
+"Turn on to use the app's custom tab bar instead of the system tab bar." = "Kveiktu til að nota flipaslá appsins í stað flipasláar kerfisins.";
 "Liquid Glass Tab" = "Fljótandi glerflipi";
 "Use the native Liquid Glass tab bar for primary navigation." = "Notaðu innfædda Liquid Glass flipastikuna fyrir aðalleiðsögn.";
 "Choose the appearance used throughout the app." = "Veldu útlitið sem notað er í gegnum forritið.";
@@ -448,6 +450,17 @@
 "premium.entry.subtitle" = "Kannaðu eiginleika og áskriftaráætlanir";
 "premium.close" = "Loka";
 "premium.retry" = "Reyna aftur";
+"intro.media.title" = "Sjáðu geymslurýmið í hnotskurn";
+"intro.media.detail" = "Sjáðu hversu mikið pláss myndir, myndskeið og annað efni taka og hversu mikið er laust. Tölurnar eru dæmi.";
+"intro.files.title" = "Sjáðu hvað tekur pláss";
+"intro.files.detail" = "Skoðaðu valdar möppur og finndu stórar skrár í fljótu bragði.";
+"intro.compress.title" = "Forskoðaðu þjöppun";
+"intro.compress.detail" = "Skoðaðu valkosti fyrir myndir, myndskeið og hljóð ásamt dæmi um framvindu. Engum skrám er þjappað hér.";
+"intro.appearance.title" = "Sérsníddu útlitið";
+"intro.appearance.detail" = "Veldu liti og útlit sem henta þér.";
+"intro.next" = "Halda áfram";
+"intro.start" = "Hefjast handa";
+"intro.demo" = "Dæmi";
 "premium.continueTemporarily" = "Halda áfram í bili";
 "premium.title" = "Meira pláss fyrir það sem skiptir máli";
 "premium.subtitle" = "Miðlar, skrár og þjöppun á einum stað.";

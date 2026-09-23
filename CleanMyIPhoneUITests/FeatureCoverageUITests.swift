@@ -41,13 +41,12 @@ final class FeatureCoverageUITests: XCTestCase {
             tool.tap()
             XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5))
             XCTAssertTrue(
-                app.descendants(matching: .any)["conversion.actionBar"]
-                    .waitForExistence(timeout: 3),
-                "Missing shared conversion action bar for \(id)"
+                app.buttons["Choose from Files"].waitForExistence(timeout: 3),
+                "Missing empty-state import action for \(id)"
             )
-            XCTAssertTrue(
-                app.buttons["conversion.actionButton"].exists,
-                "Missing shared conversion action button for \(id)"
+            XCTAssertFalse(
+                app.descendants(matching: .any)["conversion.actionBar"].exists,
+                "The conversion action bar should appear only after files are imported"
             )
 
             let back = app.navigationBars.buttons.element(boundBy: 0)
@@ -118,13 +117,15 @@ final class FeatureCoverageUITests: XCTestCase {
 
     @MainActor
     func testConversionActionBarReflectsLiquidGlassSetting() throws {
-        let app = launchEnglishApp(additionalArguments: ["--ui-testing-liquid-glass"])
-        tab(in: app, id: "tab.convert", label: "Compress").tap()
-        reveal(app.buttons["conversion.home.image"], in: app).tap()
+        let app = launchEnglishApp(additionalArguments: [
+            "--ui-testing-liquid-glass",
+            "--ui-test-conversion-action-bar"
+        ])
 
         let actionBar = app.descendants(matching: .any)["conversion.actionBar"]
         XCTAssertTrue(actionBar.waitForExistence(timeout: 5))
         XCTAssertEqual(actionBar.value as? String, "liquidGlass")
+        XCTAssertTrue(app.buttons["conversion.actionButton"].exists)
     }
 
     @MainActor

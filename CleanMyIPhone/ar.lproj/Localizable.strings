@@ -49,6 +49,8 @@
 "Liquid Glass Cards" = "بطاقات زجاجية سائلة";
 "Use system glass surfaces for content cards throughout the app." = "استخدم الأسطح الزجاجية للنظام لبطاقات المحتوى في جميع أنحاء التطبيق.";
 "Tab Bar" = "شريط علامات التبويب";
+"Custom Tab Bar" = "شريط تبويبات مخصص";
+"Turn on to use the app's custom tab bar instead of the system tab bar." = "فعّل هذا الخيار لاستخدام شريط تبويبات التطبيق بدلاً من شريط النظام.";
 "Liquid Glass Tab" = "علامة تبويب زجاجية سائلة";
 "Use the native Liquid Glass tab bar for primary navigation." = "استخدم شريط علامات التبويب Liquid Glass الأصلي للتنقل الأساسي.";
 "Choose the appearance used throughout the app." = "اختر المظهر المستخدم في جميع أنحاء التطبيق.";
@@ -448,6 +450,17 @@
 "premium.entry.subtitle" = "استكشاف الميزات وخطط الاشتراك";
 "premium.close" = "إغلاق";
 "premium.retry" = "إعادة المحاولة";
+"intro.media.title" = "نظرة سريعة على مساحة جهازك";
+"intro.media.detail" = "شاهد المساحة التي تشغلها الصور والفيديوهات والمحتويات الأخرى، والمساحة المتاحة. البيانات المعروضة أمثلة.";
+"intro.files.title" = "اعرف ما يشغل المساحة";
+"intro.files.detail" = "تصفح المجلدات التي اخترتها واعثر سريعًا على الملفات الكبيرة.";
+"intro.compress.title" = "معاينة ضغط الوسائط";
+"intro.compress.detail" = "تعرّف على خيارات ضغط الصور والفيديوهات والصوت وتقدّم العملية. شريط التقدّم للعرض فقط.";
+"intro.appearance.title" = "اجعل التطبيق يناسبك";
+"intro.appearance.detail" = "اختر الألوان والمظهر اللذين تفضلهما.";
+"intro.next" = "متابعة";
+"intro.start" = "ابدأ";
+"intro.demo" = "مثال";
 "premium.continueTemporarily" = "المتابعة الآن";
 "premium.title" = "مساحة أكبر لما يهم";
 "premium.subtitle" = "الوسائط والملفات والضغط في مكان واحد.";

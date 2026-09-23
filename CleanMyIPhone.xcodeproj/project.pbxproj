@@ -231,6 +231,8 @@
 				ru,
 				it,
 				sv,
+				"pt-BR",
+				pl,
 			);
 			mainGroup = FF23C74B3033FBD500B13EBA;
 			minimizedProjectReferenceProxies = 1;

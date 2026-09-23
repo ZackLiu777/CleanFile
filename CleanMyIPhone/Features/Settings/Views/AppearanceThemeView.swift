@@ -45,7 +45,7 @@ struct AppearanceThemeView: View {
         .sensoryFeedback(.selection, trigger: themeSettings.selectedThemeID)
         .sensoryFeedback(.selection, trigger: themeSettings.customBackgroundStyle.kind)
         .sensoryFeedback(.selection, trigger: themeSettings.liquidGlassCardsEnabled)
-        .sensoryFeedback(.selection, trigger: themeSettings.liquidGlassTabEnabled)
+        .sensoryFeedback(.selection, trigger: themeSettings.customTabBarEnabled)
         .onAppear {
             tabBarVisibility.setHidden(
                 true,
@@ -347,15 +347,15 @@ struct AppearanceThemeView: View {
     private var glassTabSection: some View {
         Section {
             Toggle(
-                "Liquid Glass Tab",
-                isOn: $themeSettings.liquidGlassTabEnabled
+                "Custom Tab Bar",
+                isOn: $themeSettings.customTabBarEnabled
             )
-            .accessibilityIdentifier("appearance.liquidGlassTab")
-            .accessibilityValue(themeSettings.liquidGlassTabEnabled ? "1" : "0")
+            .accessibilityIdentifier("appearance.customTabBar")
+            .accessibilityValue(themeSettings.customTabBarEnabled ? "1" : "0")
         } header: {
             Text("Tab Bar")
         } footer: {
-            Text("Use the native Liquid Glass tab bar for primary navigation.")
+            Text("Turn on to use the app's custom tab bar instead of the system tab bar.")
         }
         .appListCard()
     }
@@ -507,8 +507,9 @@ struct AppearanceThemeView: View {
 // MARK: - AppearanceThemePreview
 
 /// 用最少元素预览背景、表面、文字、强调色和语义色之间的实际关系。
-private struct AppearanceThemePreview: View {
+struct AppearanceThemePreview: View {
     @Environment(\.appTheme) private var theme
+    var previewTint: Color? = nil
 
     /// 绘制一个静态的存储摘要示例，避免预览读取真实媒体或文件数据。
     var body: some View {
@@ -561,6 +562,8 @@ private struct AppearanceThemePreview: View {
             }
         }
         .padding(18)
+        .background(previewTint?.opacity(0.14) ?? .clear,
+                    in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .appContentCard(cornerRadius: 24)
     }
 

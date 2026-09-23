@@ -49,6 +49,8 @@
 "Liquid Glass Cards" = "Vloeibare glaskaarten";
 "Use system glass surfaces for content cards throughout the app." = "Gebruik systeemglasoppervlakken voor inhoudskaarten in de hele app.";
 "Tab Bar" = "Tabbladbalk";
+"Custom Tab Bar" = "Aangepaste tabbladbalk";
+"Turn on to use the app's custom tab bar instead of the system tab bar." = "Schakel in om de tabbladbalk van de app te gebruiken in plaats van die van het systeem.";
 "Liquid Glass Tab" = "Vloeibaar glazen tabblad";
 "Use the native Liquid Glass tab bar for primary navigation." = "Gebruik de native Liquid Glass-tabbalk voor primaire navigatie.";
 "Choose the appearance used throughout the app." = "Kies het uiterlijk dat in de hele app wordt gebruikt.";
@@ -448,6 +450,17 @@
 "premium.entry.subtitle" = "Ontdek functies en abonnementen";
 "premium.close" = "Sluiten";
 "premium.retry" = "Opnieuw proberen";
+"intro.media.title" = "Bekijk je opslag in één oogopslag";
+"intro.media.detail" = "Zie hoeveel ruimte foto's, video's en andere inhoud gebruiken en hoeveel er vrij is. De cijfers zijn voorbeelden.";
+"intro.files.title" = "Zie wat ruimte inneemt";
+"intro.files.detail" = "Blader door geselecteerde mappen en ontdek grote bestanden in één oogopslag.";
+"intro.compress.title" = "Bekijk mediacompressie";
+"intro.compress.detail" = "Verken opties voor afbeeldingen, video's en audio met een voorbeeld van de voortgang. Er worden hier geen bestanden gecomprimeerd.";
+"intro.appearance.title" = "Maak de app persoonlijk";
+"intro.appearance.detail" = "Kies kleuren en een uiterlijk die bij je passen.";
+"intro.next" = "Doorgaan";
+"intro.start" = "Aan de slag";
+"intro.demo" = "Voorbeeld";
 "premium.continueTemporarily" = "Voorlopig doorgaan";
 "premium.title" = "Meer ruimte voor wat ertoe doet";
 "premium.subtitle" = "Media, bestanden en compressie op één plek.";

@@ -206,6 +206,22 @@ struct ThemePersistenceTests {
         #expect(!restored.mediaDateHeadersEnabled)
     }
 
+    @Test("System tab bar is the default and custom tab choice persists")
+    func customTabBarPreferencePersists() {
+        let defaults = isolatedDefaults()
+        defaults.set(true, forKey: "appLiquidGlassCardsEnabled")
+        defaults.set(false, forKey: "appLiquidGlassTabEnabled")
+
+        let settings = ThemeSettings(userDefaults: defaults)
+        #expect(!settings.customTabBarEnabled)
+
+        settings.customTabBarEnabled = true
+        #expect(ThemeSettings(userDefaults: defaults).customTabBarEnabled)
+
+        settings.customTabBarEnabled = false
+        #expect(!ThemeSettings(userDefaults: defaults).customTabBarEnabled)
+    }
+
     @Test("Theme restores a persisted dark value")
     func themeRestoresPersistedDarkValue() {
         let defaults = isolatedDefaults()

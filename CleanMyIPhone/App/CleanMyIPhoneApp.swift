@@ -25,6 +25,14 @@ struct CleanMyIPhoneApp: App {
         defaults.removeObject(forKey: "appLanguageOverride")
 #if DEBUG
         let launchArguments = ProcessInfo.processInfo.arguments
+        if !defaults.bool(forKey: "hasPreviewedIntroductionRevisionTwo") {
+            // Show this local development revision once on the connected phone.
+            defaults.set(false, forKey: "hasCompletedFirstLaunchIntroduction")
+            defaults.set(true, forKey: "hasPreviewedIntroductionRevisionTwo")
+        }
+        if launchArguments.contains("--preview-onboarding") {
+            defaults.set(false, forKey: "hasCompletedFirstLaunchIntroduction")
+        }
         if launchArguments.contains("--ui-testing-reset-state") {
             for key in [
                 "appAppearance",
@@ -35,7 +43,7 @@ struct CleanMyIPhoneApp: App {
                 "appCustomBackgroundStyle",
                 "appUsesCustomBackground",
                 "appLiquidGlassCardsEnabled",
-                "appLiquidGlassTabEnabled",
+                "appCustomTabBarEnabled",
                 "appInterfaceAnimationsEnabled",
                 "appMediaDateHeadersEnabled",
                 "selectedAppTab"
@@ -57,7 +65,9 @@ struct CleanMyIPhoneApp: App {
     var body: some Scene {
         WindowGroup {
             AppOpeningContainer {
-                rootView
+                FirstLaunchIntroductionContainer {
+                    rootView
+                }
             }
             .environmentObject(themeSettings)
             .fontDesign(themeSettings.fontStyle.inheritedDesign)
@@ -75,6 +85,8 @@ struct CleanMyIPhoneApp: App {
 #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-test-import-progress") {
             ConversionImportProgressUITestHarness()
+        } else if ProcessInfo.processInfo.arguments.contains("--ui-test-conversion-action-bar") {
+            ConversionActionBarUITestHarness(theme: themeSettings.theme.conversionTheme)
         } else if ProcessInfo.processInfo.arguments.contains("--ui-test-replacement-review") {
             ConversionReplacementReviewUITestHarness()
         } else {

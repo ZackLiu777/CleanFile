@@ -49,6 +49,8 @@
 "Liquid Glass Cards" = "Liquid Glass Cards";
 "Use system glass surfaces for content cards throughout the app." = "Use system glass surfaces for content cards throughout the app.";
 "Tab Bar" = "Tab Bar";
+"Custom Tab Bar" = "Custom Tab Bar";
+"Turn on to use the app's custom tab bar instead of the system tab bar." = "Turn on to use the app's custom tab bar instead of the system tab bar.";
 "Liquid Glass Tab" = "Liquid Glass Tab";
 "Use the native Liquid Glass tab bar for primary navigation." = "Use the native Liquid Glass tab bar for primary navigation.";
 "Choose the appearance used throughout the app." = "Choose the appearance used throughout the app.";
@@ -476,3 +478,14 @@
 "premium.connection.title" = "Network Connection Required";
 "premium.connection.message" = "Connect to the internet, then try again.";
 "premium.retry" = "Retry";
+"intro.media.title" = "See your storage at a glance";
+"intro.media.detail" = "See how much space photos, videos, and other content use—and how much is free. The figures are examples.";
+"intro.files.title" = "See what takes up space";
+"intro.files.detail" = "Browse selected folders and spot larger files at a glance.";
+"intro.compress.title" = "Preview media compression";
+"intro.compress.detail" = "Explore image, video, and audio options with a sample progress animation. No files are compressed here.";
+"intro.appearance.title" = "Make it yours";
+"intro.appearance.detail" = "Choose the colors and appearance that feel right for you.";
+"intro.next" = "Continue";
+"intro.start" = "Get Started";
+"intro.demo" = "Example";

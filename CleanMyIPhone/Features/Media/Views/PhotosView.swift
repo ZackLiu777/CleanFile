@@ -485,7 +485,7 @@ private struct MediaDashboardResultsView: View {
 }
 
 /// 定义 `MediaStorageOverview` 的值语义数据与相关行为。
-private struct MediaStorageOverview: View {
+struct MediaStorageOverview: View {
     @Environment(\.appTheme) private var theme
     let storage: DeviceStorageSnapshot
     let photoBytes: Int64

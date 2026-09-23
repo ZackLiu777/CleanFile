@@ -49,6 +49,8 @@
 "Liquid Glass Cards" = "Carte in vetro liquido";
 "Use system glass surfaces for content cards throughout the app." = "Utilizza le superfici in vetro del sistema per le schede dei contenuti in tutta l'app.";
 "Tab Bar" = "Barra delle schede";
+"Custom Tab Bar" = "Barra delle schede personalizzata";
+"Turn on to use the app's custom tab bar instead of the system tab bar." = "Attiva per usare la barra delle schede dell’app al posto di quella di sistema.";
 "Liquid Glass Tab" = "Scheda in vetro liquido";
 "Use the native Liquid Glass tab bar for primary navigation." = "Utilizza la barra delle schede nativa Liquid Glass per la navigazione principale.";
 "Choose the appearance used throughout the app." = "Scegli l'aspetto utilizzato in tutta l'app.";
@@ -448,6 +450,17 @@
 "premium.entry.subtitle" = "Esplora funzionalità e piani di abbonamento";
 "premium.close" = "Chiudi";
 "premium.retry" = "Riprova";
+"intro.media.title" = "Controlla lo spazio a colpo d’occhio";
+"intro.media.detail" = "Scopri quanto spazio occupano foto, video e altri contenuti e quanto ne resta. I dati sono esempi.";
+"intro.files.title" = "Scopri cosa occupa spazio";
+"intro.files.detail" = "Esplora le cartelle selezionate e individua subito i file più grandi.";
+"intro.compress.title" = "Anteprima della compressione";
+"intro.compress.detail" = "Esplora le opzioni per immagini, video e audio con un’animazione di avanzamento. Qui non viene compresso alcun file.";
+"intro.appearance.title" = "Personalizza l’app";
+"intro.appearance.detail" = "Scegli i colori e l’aspetto che preferisci.";
+"intro.next" = "Continua";
+"intro.start" = "Inizia";
+"intro.demo" = "Esempio";
 "premium.continueTemporarily" = "Continua per ora";
 "premium.title" = "Più spazio per ciò che conta";
 "premium.subtitle" = "Supporti, file e compressione in un unico posto.";

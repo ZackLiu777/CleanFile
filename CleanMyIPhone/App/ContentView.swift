@@ -148,10 +148,10 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if themeSettings.liquidGlassTabEnabled {
-                nativeTabView
-            } else {
+            if themeSettings.customTabBarEnabled {
                 customTabView
+            } else {
+                nativeTabView
             }
         }
         .environmentObject(tabBarVisibility)
@@ -163,11 +163,11 @@ struct ContentView: View {
         }
         .onChange(of: selectedTab) { _, newTab in
             // Native TabView changes the persisted selection directly. Keep the
-            // custom page layer ready if the Liquid Glass option is turned off.
-            guard themeSettings.liquidGlassTabEnabled else { return }
+            // custom page layer ready if the custom tab bar is turned on.
+            guard !themeSettings.customTabBarEnabled else { return }
             settleTransition(to: newTab)
         }
-        .onChange(of: themeSettings.liquidGlassTabEnabled) { _, _ in
+        .onChange(of: themeSettings.customTabBarEnabled) { _, _ in
             // Switching implementations must never leave an in-flight custom
             // transition or a stale displayed tab behind.
             settleTransition(to: selectedTab)
@@ -514,7 +514,7 @@ struct ContentView: View {
 }
 
 /// 扩展 `Theme`，集中实现当前文件所需的附加能力。
-private extension Theme {
+extension Theme {
     var conversionTheme: ConversionTheme {
         ConversionTheme(
             background: conversionBackground,
@@ -531,7 +531,7 @@ private extension Theme {
         )
     }
 
-    var conversionBackground: ConversionBackground {
+    private var conversionBackground: ConversionBackground {
         switch background {
         case let .solid(color):
             .solid(color)

@@ -49,6 +49,8 @@
 "Liquid Glass Cards" = "Карты из жидкого стекла";
 "Use system glass surfaces for content cards throughout the app." = "Используйте системные стеклянные поверхности для карточек содержимого во всем приложении.";
 "Tab Bar" = "Панель вкладок";
+"Custom Tab Bar" = "Своя панель вкладок";
+"Turn on to use the app's custom tab bar instead of the system tab bar." = "Включите, чтобы использовать панель вкладок приложения вместо системной.";
 "Liquid Glass Tab" = "Вкладка «Жидкое стекло»";
 "Use the native Liquid Glass tab bar for primary navigation." = "Используйте встроенную панель вкладок Liquid Glass для основной навигации.";
 "Choose the appearance used throughout the app." = "Выберите внешний вид, используемый во всем приложении.";
@@ -448,6 +450,17 @@
 "premium.entry.subtitle" = "Изучите функции и планы подписки";
 "premium.close" = "Закрыть";
 "premium.retry" = "Повторить";
+"intro.media.title" = "Оцените свободное место";
+"intro.media.detail" = "Узнайте, сколько места занимают фото, видео и другие данные и сколько осталось свободным. Цифры приведены для примера.";
+"intro.files.title" = "Узнайте, что занимает место";
+"intro.files.detail" = "Просматривайте выбранные папки и быстро находите крупные файлы.";
+"intro.compress.title" = "Посмотрите, как работает сжатие";
+"intro.compress.detail" = "Изучите варианты для изображений, видео и аудио с примером хода процесса. Здесь файлы не сжимаются.";
+"intro.appearance.title" = "Настройте под себя";
+"intro.appearance.detail" = "Выберите цвета и оформление по своему вкусу.";
+"intro.next" = "Продолжить";
+"intro.start" = "Начать";
+"intro.demo" = "Пример";
 "premium.continueTemporarily" = "Продолжить пока";
 "premium.title" = "Больше места для важного";
 "premium.subtitle" = "Мультимедиа, файлы и сжатие в одном месте.";

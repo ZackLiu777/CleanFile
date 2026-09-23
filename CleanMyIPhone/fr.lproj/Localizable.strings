@@ -49,6 +49,8 @@
 "Liquid Glass Cards" = "Cartes Liquid Glass";
 "Use system glass surfaces for content cards throughout the app." = "Utilisez les surfaces en verre du système pour les cartes de contenu dans toute l’app.";
 "Tab Bar" = "Barre d’onglets";
+"Custom Tab Bar" = "Barre d’onglets personnalisée";
+"Turn on to use the app's custom tab bar instead of the system tab bar." = "Activez cette option pour utiliser la barre d’onglets de l’app au lieu de celle du système.";
 "Liquid Glass Tab" = "Barre d’onglets Liquid Glass";
 "Use the native Liquid Glass tab bar for primary navigation." = "Utilisez la barre d’onglets Liquid Glass native pour la navigation principale.";
 "Choose the appearance used throughout the app." = "Choisissez l’apparence utilisée dans toute l’app.";
@@ -476,3 +478,14 @@
 "premium.connection.title" = "Connexion réseau requise";
 "premium.connection.message" = "Connectez-vous à Internet, puis réessayez.";
 "premium.retry" = "Réessayer";
+"intro.media.title" = "Visualisez votre stockage";
+"intro.media.detail" = "Voyez l’espace occupé par les photos, vidéos et autres contenus, ainsi que l’espace libre. Ces chiffres sont des exemples.";
+"intro.files.title" = "Voyez ce qui prend de la place";
+"intro.files.detail" = "Parcourez les dossiers choisis et repérez les fichiers volumineux.";
+"intro.compress.title" = "Découvrez la compression";
+"intro.compress.detail" = "Explorez les options pour images, vidéos et audio avec une animation de progression. Aucun fichier n’est compressé ici.";
+"intro.appearance.title" = "Personnalisez l’application";
+"intro.appearance.detail" = "Choisissez les couleurs et l’apparence qui vous plaisent.";
+"intro.next" = "Continuer";
+"intro.start" = "Commencer";
+"intro.demo" = "Exemple";

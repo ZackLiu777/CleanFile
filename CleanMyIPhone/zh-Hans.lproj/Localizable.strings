@@ -49,6 +49,8 @@
 "Liquid Glass Cards" = "Liquid Glass 卡片";
 "Use system glass surfaces for content cards throughout the app." = "将整个 App 的内容卡片切换为系统玻璃外观。";
 "Tab Bar" = "标签栏";
+"Custom Tab Bar" = "自定义标签栏";
+"Turn on to use the app's custom tab bar instead of the system tab bar." = "开启后使用应用自定义标签栏；关闭后使用系统标签栏。";
 "Liquid Glass Tab" = "Liquid Glass 标签栏";
 "Use the native Liquid Glass tab bar for primary navigation." = "使用原生 Liquid Glass 标签栏进行主要导航。";
 "Choose the appearance used throughout the app." = "选择整个 App 使用的外观。";
@@ -476,3 +478,14 @@
 "premium.connection.title" = "需要网络连接";
 "premium.connection.message" = "请连接互联网，然后重试。";
 "premium.retry" = "重试";
+"intro.media.title" = "一眼看清设备空间";
+"intro.media.detail" = "查看照片、视频和其他内容占用多少空间，以及还剩多少可用空间。画面中的数据仅为示例。";
+"intro.files.title" = "看看空间用在哪里";
+"intro.files.detail" = "浏览你选择的文件夹，轻松找出占空间的大文件。";
+"intro.compress.title" = "预览媒体压缩";
+"intro.compress.detail" = "了解图片、视频与音频的压缩选项和进度动画。此处不会压缩实际文件。";
+"intro.appearance.title" = "打造喜欢的外观";
+"intro.appearance.detail" = "挑选适合自己的应用颜色和界面风格。";
+"intro.next" = "继续";
+"intro.start" = "开始使用";
+"intro.demo" = "示例";

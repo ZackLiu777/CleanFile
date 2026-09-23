@@ -588,6 +588,11 @@ struct ConversionNeoBrutalistActionBar: View {
                 .opacity(isEnabled ? 1 : 0.48)
             }
         }
+        // Keep the accessibility container on the content itself. Surface
+        // modifiers and decorative overlays are not stable XCUI elements.
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("conversion.actionBar")
+        .accessibilityValue(theme.liquidGlassCardsEnabled ? "liquidGlass" : "solid")
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .modifier(ConversionActionBarSurfaceModifier())
@@ -602,12 +607,6 @@ struct ConversionNeoBrutalistActionBar: View {
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
-        // Liquid Glass and decorative backgrounds can otherwise leave this
-        // HStack as a layout-only node. Expose a stable container while
-        // preserving the action button as its own accessible child.
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("conversion.actionBar")
-        .accessibilityValue(theme.liquidGlassCardsEnabled ? "liquidGlass" : "solid")
     }
 
     private func actionButton(
@@ -638,6 +637,33 @@ struct ConversionNeoBrutalistActionBar: View {
         .accessibilityIdentifier("conversion.actionButton")
     }
 }
+
+#if DEBUG
+@MainActor
+public struct ConversionActionBarUITestHarness: View {
+    private let theme: ConversionTheme
+
+    public init(theme: ConversionTheme = .system) {
+        self.theme = theme
+    }
+
+    public var body: some View {
+        VStack {
+            Spacer()
+            ConversionNeoBrutalistActionBar(
+                countTitle: "1 Image",
+                isWorking: false,
+                progress: 0,
+                progressTitle: "",
+                isEnabled: true,
+                onStart: {},
+                onCancel: {}
+            )
+        }
+        .environment(\.conversionTheme, theme)
+    }
+}
+#endif
 
 private struct ConversionActionBarSurfaceModifier: ViewModifier {
     @Environment(\.conversionTheme) private var theme

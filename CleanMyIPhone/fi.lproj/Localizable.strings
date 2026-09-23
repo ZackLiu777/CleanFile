@@ -49,6 +49,8 @@
 "Liquid Glass Cards" = "Nestemäiset lasikortit";
 "Use system glass surfaces for content cards throughout the app." = "Käytä järjestelmän lasipintoja sisältökorteissa koko sovelluksessa.";
 "Tab Bar" = "Välilehtipalkki";
+"Custom Tab Bar" = "Mukautettu välilehtipalkki";
+"Turn on to use the app's custom tab bar instead of the system tab bar." = "Ota käyttöön sovelluksen välilehtipalkki järjestelmän palkin sijaan.";
 "Liquid Glass Tab" = "Liquid Glass Tab";
 "Use the native Liquid Glass tab bar for primary navigation." = "Käytä natiivia Liquid Glass -välilehtipalkkia ensisijaiseen navigointiin.";
 "Choose the appearance used throughout the app." = "Valitse koko sovelluksessa käytettävä ulkoasu.";
@@ -448,6 +450,17 @@
 "premium.entry.subtitle" = "Tutustu ominaisuuksiin ja tilaussuunnitelmiin";
 "premium.close" = "Sulje";
 "premium.retry" = "Yritä uudelleen";
+"intro.media.title" = "Näe tallennustila yhdellä silmäyksellä";
+"intro.media.detail" = "Katso, paljonko kuvat, videot ja muu sisältö vievät tilaa ja paljonko tilaa on jäljellä. Luvut ovat esimerkkejä.";
+"intro.files.title" = "Näe, mikä vie tilaa";
+"intro.files.detail" = "Selaa valittuja kansioita ja löydä suuret tiedostot helposti.";
+"intro.compress.title" = "Esikatsele median pakkausta";
+"intro.compress.detail" = "Tutustu kuvien, videoiden ja äänen pakkausvaihtoehtoihin sekä esimerkkiedistymiseen. Tässä ei pakata tiedostoja.";
+"intro.appearance.title" = "Tee sovelluksesta omasi";
+"intro.appearance.detail" = "Valitse itsellesi sopivat värit ja ulkoasu.";
+"intro.next" = "Jatka";
+"intro.start" = "Aloita";
+"intro.demo" = "Esimerkki";
 "premium.continueTemporarily" = "Jatka toistaiseksi";
 "premium.title" = "Enemmän tilaa tärkeille";
 "premium.subtitle" = "Media, tiedostot ja pakkaus yhdessä paikassa.";

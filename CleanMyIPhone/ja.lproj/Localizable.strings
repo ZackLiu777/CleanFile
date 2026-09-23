@@ -49,6 +49,8 @@
 "Liquid Glass Cards" = "Liquid Glassカード";
 "Use system glass surfaces for content cards throughout the app." = "App全体のコンテンツカードにシステムのガラスサーフェスを使用します。";
 "Tab Bar" = "タブバー";
+"Custom Tab Bar" = "カスタムタブバー";
+"Turn on to use the app's custom tab bar instead of the system tab bar." = "オンにすると、システムのタブバーの代わりにアプリ独自のタブバーを使います。";
 "Liquid Glass Tab" = "Liquid Glassタブバー";
 "Use the native Liquid Glass tab bar for primary navigation." = "主要なナビゲーションにネイティブのLiquid Glassタブバーを使用します。";
 "Choose the appearance used throughout the app." = "App 全体で使用する外観を選択します。";
@@ -476,3 +478,14 @@
 "premium.connection.title" = "ネットワーク接続が必要です";
 "premium.connection.message" = "インターネットに接続して、もう一度お試しください。";
 "premium.retry" = "再試行";
+"intro.media.title" = "ストレージの使用状況をひと目で";
+"intro.media.detail" = "写真、動画、その他のデータが使う容量と空き容量を確認できます。表示される数値はサンプルです。";
+"intro.files.title" = "容量の使い道を確認";
+"intro.files.detail" = "選択したフォルダを調べ、大きなファイルをひと目で見つけられます。";
+"intro.compress.title" = "メディア圧縮をプレビュー";
+"intro.compress.detail" = "画像、動画、音声の圧縮オプションと進行状況のアニメーションを紹介します。ここではファイルを圧縮しません。";
+"intro.appearance.title" = "自分好みの外観に";
+"intro.appearance.detail" = "好きな色と表示スタイルを選べます。";
+"intro.next" = "続ける";
+"intro.start" = "使い始める";
+"intro.demo" = "サンプル";

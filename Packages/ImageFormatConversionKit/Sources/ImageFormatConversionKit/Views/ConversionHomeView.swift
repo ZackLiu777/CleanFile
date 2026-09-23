@@ -301,6 +301,27 @@ public struct ConversionHomeView: View {
     }
 }
 
+/// Displays the production conversion card with sample-free, local-only content.
+public struct ConversionIntroductionPreview: View {
+    private let theme: ConversionTheme
+    private let step: Int
+
+    public init(theme: ConversionTheme, step: Int) {
+        self.theme = theme
+        self.step = step
+    }
+
+    public var body: some View {
+        ConversionHomeCard(
+            kind: ConversionHomeKind.allCases[
+                min(max(step, 0), ConversionHomeKind.allCases.count - 1)
+            ],
+            recentRecord: nil
+        )
+        .environment(\.conversionTheme, theme)
+    }
+}
+
 private enum ConversionMotion {
     static let entranceDuration: TimeInterval = 0.38
     static let entranceOffset: CGFloat = 18

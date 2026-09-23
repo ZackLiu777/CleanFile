@@ -878,9 +878,9 @@ final class ThemeSettings: ObservableObject {
             userDefaults.set(liquidGlassCardsEnabled, forKey: Self.liquidGlassCardsKey)
         }
     }
-    @Published var liquidGlassTabEnabled: Bool {
+    @Published var customTabBarEnabled: Bool {
         didSet {
-            userDefaults.set(liquidGlassTabEnabled, forKey: Self.liquidGlassTabKey)
+            userDefaults.set(customTabBarEnabled, forKey: Self.customTabBarKey)
         }
     }
     @Published var interfaceAnimationsEnabled: Bool {
@@ -919,7 +919,7 @@ final class ThemeSettings: ObservableObject {
     private static let customBackgroundStyleKey = "appCustomBackgroundStyle"
     private static let usesCustomBackgroundKey = "appUsesCustomBackground"
     private static let liquidGlassCardsKey = "appLiquidGlassCardsEnabled"
-    private static let liquidGlassTabKey = "appLiquidGlassTabEnabled"
+    private static let customTabBarKey = "appCustomTabBarEnabled"
     private static let interfaceAnimationsKey = "appInterfaceAnimationsEnabled"
     private static let mediaDateHeadersKey = "appMediaDateHeadersEnabled"
     private let userDefaults: UserDefaults
@@ -973,8 +973,7 @@ final class ThemeSettings: ObservableObject {
         usesCustomBackground = userDefaults.bool(forKey: Self.usesCustomBackgroundKey)
         let storedLiquidGlassCards = userDefaults.bool(forKey: Self.liquidGlassCardsKey)
         liquidGlassCardsEnabled = storedLiquidGlassCards
-        liquidGlassTabEnabled = userDefaults.object(forKey: Self.liquidGlassTabKey) as? Bool
-            ?? storedLiquidGlassCards
+        customTabBarEnabled = userDefaults.bool(forKey: Self.customTabBarKey)
         interfaceAnimationsEnabled = userDefaults.object(forKey: Self.interfaceAnimationsKey) as? Bool ?? true
         mediaDateHeadersEnabled = userDefaults.object(forKey: Self.mediaDateHeadersKey) as? Bool ?? true
 
@@ -984,7 +983,7 @@ final class ThemeSettings: ObservableObject {
         Self.persist(storedCustomAccentColor, forKey: Self.customAccentColorKey, in: userDefaults)
         Self.persist(storedCustomBackgroundStyle, forKey: Self.customBackgroundStyleKey, in: userDefaults)
         Self.persist(storedCustomBackgroundStyle.primaryColor, forKey: Self.customBackgroundColorKey, in: userDefaults)
-        userDefaults.set(liquidGlassTabEnabled, forKey: Self.liquidGlassTabKey)
+        userDefaults.set(customTabBarEnabled, forKey: Self.customTabBarKey)
 
         if storedTheme != nil, storedTheme != migratedTheme.rawValue {
             userDefaults.set(migratedTheme.rawValue, forKey: Self.themeKey)

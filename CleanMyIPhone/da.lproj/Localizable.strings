@@ -49,6 +49,8 @@
 "Liquid Glass Cards" = "Flydende glas kort";
 "Use system glass surfaces for content cards throughout the app." = "Brug systemglasoverflader til indholdskort i hele appen.";
 "Tab Bar" = "Fanebar";
+"Custom Tab Bar" = "Tilpasset fanebar";
+"Turn on to use the app's custom tab bar instead of the system tab bar." = "Slå til for at bruge appens fanebar i stedet for systemets.";
 "Liquid Glass Tab" = "Flig af flydende glas";
 "Use the native Liquid Glass tab bar for primary navigation." = "Brug den oprindelige Liquid Glass-fanelinje til primær navigation.";
 "Choose the appearance used throughout the app." = "Vælg det udseende, der bruges i hele appen.";
@@ -448,6 +450,17 @@
 "premium.entry.subtitle" = "Udforsk funktioner og abonnementsplaner";
 "premium.close" = "Luk";
 "premium.retry" = "Prøv igen";
+"intro.media.title" = "Få overblik over lagerpladsen";
+"intro.media.detail" = "Se, hvor meget plads fotos, videoer og andet indhold bruger, og hvor meget der er ledigt. Tallene er eksempler.";
+"intro.files.title" = "Se, hvad der fylder";
+"intro.files.detail" = "Gennemse valgte mapper, og find hurtigt store filer.";
+"intro.compress.title" = "Se, hvordan komprimering virker";
+"intro.compress.detail" = "Se mulighederne for billeder, videoer og lyd samt et eksempel på forløbet. Statuslinjen er kun en demonstration.";
+"intro.appearance.title" = "Gør appen til din egen";
+"intro.appearance.detail" = "Vælg de farver og det udseende, der passer dig.";
+"intro.next" = "Fortsæt";
+"intro.start" = "Kom i gang";
+"intro.demo" = "Eksempel";
 "premium.continueTemporarily" = "Fortsæt indtil videre";
 "premium.title" = "Mere plads til det, der betyder noget";
 "premium.subtitle" = "Medier, filer og komprimering på ét sted.";
