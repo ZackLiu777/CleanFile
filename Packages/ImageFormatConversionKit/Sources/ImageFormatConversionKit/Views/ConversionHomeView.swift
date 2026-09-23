@@ -189,9 +189,10 @@ public struct ConversionHomeView: View {
         .fullScreenCover(isPresented: $isReplacementReviewPresented) {
             ConversionReplacementReviewView(candidates: replacementCandidates) { selected in
                 let replacedIDs = try await ConversionOriginalReplacementService.replace(selected)
-                await imageViewModel.finishReplacement(replacedIDs)
-                await videoViewModel.finishReplacement(replacedIDs)
+                let imagesCleaned = await imageViewModel.finishReplacement(replacedIDs)
+                let videosCleaned = await videoViewModel.finishReplacement(replacedIDs)
                 loadRecentRecords()
+                return imagesCleaned && videosCleaned
             }
             .environment(\.conversionTheme, theme)
         }

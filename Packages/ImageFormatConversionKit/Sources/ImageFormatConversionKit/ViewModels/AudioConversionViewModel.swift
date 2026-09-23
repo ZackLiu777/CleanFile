@@ -249,6 +249,7 @@ final class AudioConversionViewModel {
     private func restore() async {
         guard items.isEmpty, !isConverting else { return }
         let records = await workspace.load(.audio)
+        guard items.isEmpty, importProgress == nil, !isConverting else { return }
         items = records.map { record in
             let outputURL = record.outputPath.map { URL(fileURLWithPath: $0) }
             let status: AudioConversionStatus

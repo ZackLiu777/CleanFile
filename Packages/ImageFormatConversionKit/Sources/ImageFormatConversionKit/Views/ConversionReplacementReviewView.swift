@@ -25,7 +25,7 @@ struct ConversionReplacementReviewView: View {
     }
 
     let candidates: [ConversionReplacementCandidate]
-    let replace: ([ConversionReplacementCandidate]) async throws -> Void
+    let replace: ([ConversionReplacementCandidate]) async throws -> Bool
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.conversionTheme) private var theme
@@ -38,13 +38,14 @@ struct ConversionReplacementReviewView: View {
     @State private var isConfirmationPresented = false
     @State private var isReplacing = false
     @State private var failurePresented = false
+    @State private var cleanupFailurePresented = false
     @State private var pendingReplacementIDs: Set<UUID> = []
     @State private var categoryFrames: [String: CGRect] = [:]
     @State private var hiddenCategories: Set<Category> = []
 
     init(
         candidates: [ConversionReplacementCandidate],
-        replace: @escaping ([ConversionReplacementCandidate]) async throws -> Void
+        replace: @escaping ([ConversionReplacementCandidate]) async throws -> Bool
     ) {
         self.candidates = candidates
         self.replace = replace
@@ -103,6 +104,9 @@ struct ConversionReplacementReviewView: View {
         }
         .alert(L10n.string("conversion.replace.failed"), isPresented: $failurePresented) {
             Button(L10n.string("action.done")) {}
+        }
+        .alert(L10n.string("conversion.delete.failed"), isPresented: $cleanupFailurePresented) {
+            Button(L10n.string("action.done")) { dismiss() }
         }
     }
 
@@ -372,7 +376,12 @@ struct ConversionReplacementReviewView: View {
         isReplacing = true
         Task {
             do {
-                try await replace(selected)
+                let cleanupSucceeded = try await replace(selected)
+                if !cleanupSucceeded {
+                    isReplacing = false
+                    cleanupFailurePresented = true
+                    return
+                }
                 await animateRemovedCategories(Set(selected.map(\.kind)))
                 dismiss()
             } catch {
@@ -454,7 +463,7 @@ public struct ConversionReplacementReviewUITestHarness: View {
                     outputBytes: 8_000_000
                 )
             ],
-            replace: { _ in }
+            replace: { _ in true }
         )
     }
 }

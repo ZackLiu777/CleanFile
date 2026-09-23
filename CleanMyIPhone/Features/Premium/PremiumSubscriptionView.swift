@@ -10,6 +10,7 @@ struct PremiumSubscriptionView: View {
     @State private var isPurchasingLifetime = false
     @State private var isStorefrontReady = false
     @State private var isCheckingStorefront = true
+    @State private var storefrontFailureIsNetwork = true
 
     let allowsDismiss: Bool
 
@@ -43,7 +44,6 @@ struct PremiumSubscriptionView: View {
                             guard case .success(let purchaseResult) = result else {
                                 if case .failure(let error) = result {
                                     entitlementStore.recordPurchaseError(error)
-                                    isStorefrontReady = false
                                 }
                                 await entitlementStore.refresh()
                                 return
@@ -107,13 +107,13 @@ struct PremiumSubscriptionView: View {
                         .accessibilityLabel("premium.entitlement.checking")
                 } else {
                     VStack(spacing: 14) {
-                        Image(systemName: "wifi.exclamationmark")
+                        Image(systemName: storefrontFailureIsNetwork ? "wifi.exclamationmark" : "info.circle")
                             .font(.system(size: 34, weight: .medium))
                             .foregroundStyle(theme.accentPrimary)
                             .accessibilityHidden(true)
-                        Text("premium.connection.title")
+                        Text(storefrontFailureIsNetwork ? "premium.connection.title" : "premium.plans.title")
                             .appTypeface(.title3.bold(), size: 20, relativeTo: .title3, weight: .bold)
-                        Text("premium.connection.message")
+                        Text(storefrontFailureIsNetwork ? "premium.connection.message" : "premium.plans.retryLater")
                             .font(.subheadline)
                             .foregroundStyle(theme.textSecondary)
                             .multilineTextAlignment(.center)
@@ -285,12 +285,14 @@ struct PremiumSubscriptionView: View {
             guard products.contains(where: {
                 PremiumConfiguration.subscriptionProductIDs.contains($0.id)
             }) else {
+                storefrontFailureIsNetwork = false
                 isStorefrontReady = false
                 return
             }
             lifetimeProduct = products.first { $0.id == PremiumConfiguration.lifetimeProductID }
             isStorefrontReady = true
         } catch {
+            storefrontFailureIsNetwork = error is URLError
             isStorefrontReady = false
             entitlementStore.recordPurchaseError(error)
         }
@@ -311,7 +313,6 @@ struct PremiumSubscriptionView: View {
             return
         } catch {
             entitlementStore.recordPurchaseError(error)
-            isStorefrontReady = false
         }
     }
 

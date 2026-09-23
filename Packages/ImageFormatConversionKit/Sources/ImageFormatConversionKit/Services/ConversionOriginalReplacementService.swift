@@ -13,6 +13,8 @@ struct ConversionReplacementCandidate: Identifiable, Hashable, Sendable {
 enum ConversionOriginalReplacementError: Error {
     case missingOriginal
     case unsupportedOutput
+    case missingOutput
+    case creationFailed
 }
 
 /// Commits every compressed copy to Photos before deleting its matching original.
@@ -25,26 +27,40 @@ enum ConversionOriginalReplacementService {
         guard candidates.allSatisfy({ supportedKinds.contains($0.kind) }) else {
             throw ConversionOriginalReplacementError.unsupportedOutput
         }
+        guard candidates.allSatisfy({ candidate in
+            var isDirectory: ObjCBool = false
+            return FileManager.default.fileExists(atPath: candidate.outputURL.path, isDirectory: &isDirectory)
+                && !isDirectory.boolValue
+        }) else {
+            throw ConversionOriginalReplacementError.missingOutput
+        }
         let identifiers = candidates.map(\.photoAssetIdentifier)
         let originals = PHAsset.fetchAssets(withLocalIdentifiers: identifiers, options: nil)
         guard originals.count == identifiers.count else {
             throw ConversionOriginalReplacementError.missingOriginal
         }
 
+        var createdEveryCopy = true
         try await PHPhotoLibrary.shared().performChanges {
             for candidate in candidates {
+                let request: PHAssetChangeRequest?
                 switch candidate.kind {
                 case .image:
-                    PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: candidate.outputURL)
+                    request = PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: candidate.outputURL)
                 case .video:
-                    PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: candidate.outputURL)
+                    request = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: candidate.outputURL)
                 case .audio:
                     // Rejected by the validation above; retained for exhaustive switching.
-                    break
+                    request = nil
+                }
+                if request == nil {
+                    createdEveryCopy = false
+                    return
                 }
             }
             PHAssetChangeRequest.deleteAssets(originals)
         }
+        guard createdEveryCopy else { throw ConversionOriginalReplacementError.creationFailed }
         return Set(candidates.map(\.id))
     }
 }

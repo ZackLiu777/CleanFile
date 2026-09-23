@@ -81,13 +81,19 @@ public final class VideoConversionViewModel {
         }
     }
 
-    func finishReplacement(_ replacedIDs: Set<UUID>) async {
+    func finishReplacement(_ replacedIDs: Set<UUID>) async -> Bool {
         let records = items.filter { replacedIDs.contains($0.id) }.map(record)
+        for index in items.indices where replacedIDs.contains(items[index].id) {
+            items[index].photoAssetIdentifier = nil
+        }
+        await workspace.save(items.map(record), kind: .video)
         let deletedIDs = await workspace.delete(records, kind: .video, outputRoot: outputDirectory)
         items.removeAll { deletedIDs.contains($0.id) }
-        if deletedIDs.count != records.count { notice = L10n.string("conversion.replace.failed") }
+        let succeeded = deletedIDs.count == records.count
+        if !succeeded { notice = L10n.string("conversion.delete.failed") }
         scheduleSizeEstimate()
         persist()
+        return succeeded
     }
 
     public var availableContainers: [VideoOutputContainer] {

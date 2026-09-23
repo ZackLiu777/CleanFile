@@ -272,18 +272,20 @@ actor ConversionWorkspace {
     ) -> Bool {
         var succeeded = true
         let source = URL(fileURLWithPath: record.sourcePath).standardizedFileURL
-        if isDescendant(source, of: importsURL) {
-            let itemDirectory = source.deletingLastPathComponent()
-            if fileManager.fileExists(atPath: itemDirectory.path) {
-                do { try fileManager.removeItem(at: itemDirectory) } catch { succeeded = false }
-            }
-        }
-
         if let outputPath = record.outputPath {
             let output = URL(fileURLWithPath: outputPath).standardizedFileURL
             let root = outputRoot.standardizedFileURL
             if isDescendant(output, of: root), fileManager.fileExists(atPath: output.path) {
                 do { try fileManager.removeItem(at: output) } catch { succeeded = false }
+            }
+        }
+        // Keep the staged source when output removal fails so the manifest can
+        // still restore this item and the user can retry the cleanup.
+        guard succeeded else { return false }
+        if isDescendant(source, of: importsURL) {
+            let itemDirectory = source.deletingLastPathComponent()
+            if fileManager.fileExists(atPath: itemDirectory.path) {
+                do { try fileManager.removeItem(at: itemDirectory) } catch { succeeded = false }
             }
         }
         return succeeded

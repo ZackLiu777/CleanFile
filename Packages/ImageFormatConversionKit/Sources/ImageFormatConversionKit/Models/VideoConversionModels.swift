@@ -52,7 +52,7 @@ public struct VideoConversionItem: Identifiable, Hashable, Sendable {
     public let sourceURL: URL
     public let sourceBytes: Int64
     public var status: VideoConversionStatus
-    public let photoAssetIdentifier: String?
+    public internal(set) var photoAssetIdentifier: String?
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     public init(

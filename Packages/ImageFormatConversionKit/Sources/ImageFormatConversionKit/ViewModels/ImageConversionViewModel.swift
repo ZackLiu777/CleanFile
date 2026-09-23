@@ -12,7 +12,7 @@ public struct ImageConversionItem: Identifiable, Hashable, Sendable {
     public let sourceURL: URL
     public var info: ImageAssetInfo?
     public var status: ImageConversionItemStatus
-    public let photoAssetIdentifier: String?
+    public internal(set) var photoAssetIdentifier: String?
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     public init(
@@ -127,12 +127,18 @@ public final class ImageConversionViewModel {
         }
     }
 
-    func finishReplacement(_ replacedIDs: Set<UUID>) async {
+    func finishReplacement(_ replacedIDs: Set<UUID>) async -> Bool {
         let records = items.filter { replacedIDs.contains($0.id) }.map(record)
+        for index in items.indices where replacedIDs.contains(items[index].id) {
+            items[index].photoAssetIdentifier = nil
+        }
+        await workspace.save(items.map(record), kind: .image)
         let deletedIDs = await workspace.delete(records, kind: .image, outputRoot: outputDirectory)
         items.removeAll { deletedIDs.contains($0.id) }
-        if deletedIDs.count != records.count { notice = L10n.string("conversion.replace.failed") }
+        let succeeded = deletedIDs.count == records.count
+        if !succeeded { notice = L10n.string("conversion.delete.failed") }
         persist()
+        return succeeded
     }
 
     var sizeEstimate: ConversionSizeEstimate? {
@@ -476,6 +482,8 @@ public final class ImageConversionViewModel {
     private func restore() async {
         guard items.isEmpty, !isConverting else { return }
         let records = await workspace.load(.image)
+        guard items.isEmpty, importProgress == nil, !isConverting else { return }
+        var restoredItems: [ImageConversionItem] = []
         for record in records {
             let sourceURL = URL(fileURLWithPath: record.sourcePath)
             var item = ImageConversionItem(
@@ -500,8 +508,10 @@ public final class ImageConversionViewModel {
             } catch {
                 item.status = .failed(message: error.localizedDescription)
             }
-            items.append(item)
+            restoredItems.append(item)
         }
+        guard items.isEmpty, importProgress == nil, !isConverting else { return }
+        items = restoredItems
         persist()
     }
 
