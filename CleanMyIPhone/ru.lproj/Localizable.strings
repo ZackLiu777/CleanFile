@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Разрешите доступ к изображениям в вашей библиотеке фотографий.";
 "Allow Photo Access" = "Разрешить доступ к фотографиям";
 "Continue" = "Продолжить";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Продолжайте выбирать, какие фотографии и видео File Cleaner & Media Converter может отображать, анализировать и помогать вам систематизировать.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "Продолжайте выбирать, какие фотографии и видео Filevra может отображать, анализировать и помогать вам систематизировать.";
 "Photo access is off" = "Доступ к фотографиям закрыт";
 "Enable Photos access in Settings to display your images." = "Включите доступ к фотографиям в настройках, чтобы отображать ваши изображения.";
 "Open Settings" = "Открыть настройки";
@@ -21,7 +21,7 @@
 "No Photos" = "Нет фотографий";
 "No images are available in your Photos library." = "В вашей библиотеке фотографий нет доступных изображений.";
 "Limited Photo Access" = "Ограниченный доступ к фотографиям";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "File Cleaner & Media Converter доступны только выбранные вами фотографии.";
+"Only the photos you selected are available to Filevra." = "Filevra доступны только выбранные вами фотографии.";
 "Manage Selected Photos" = "Управление выбранными фотографиями";
 "Choose Folder" = "Выберите папку";
 "Analyzed Folder" = "Анализируемая папка";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Вкладка «Жидкое стекло»";
 "Use the native Liquid Glass tab bar for primary navigation." = "Используйте встроенную панель вкладок Liquid Glass для основной навигации.";
 "Choose the appearance used throughout the app." = "Выберите внешний вид, используемый во всем приложении.";
-"CleanMyIPhone Pink" = "CleanMyIPhone Розовый";
+"Filevra Pink" = "Filevra Розовый";
 "Accent Color" = "Акцентный цвет";
 "The brand accent is used for selection, progress, and primary actions." = "Акцент бренда используется для выбора, продвижения и основных действий.";
 "Videos" = "Видео";
@@ -487,7 +487,10 @@
 "premium.lifetime.error.purchase" = "Покупка не может быть завершена. Пожалуйста, попробуйте еще раз.";
 "Contact Developer" = "Связаться с разработчиком";
 "Send feedback, questions, or bug reports by email." = "Отправляйте отзывы, вопросы или отчеты об ошибках по электронной почте.";
-"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Отзыв";
+"Filevra Feedback" = "Filevra Отзыв";
 "premium.connection.title" = "Требуется подключение к сети";
 "premium.connection.message" = "Подключитесь к интернету и повторите попытку.";
 "premium.retry" = "Повторить";
+"settings.intro.title" = "Знакомство с приложением";
+"settings.intro.detail" = "Просмотрите четыре вводные страницы Filevra.";
+"settings.intro.close" = "Закрыть";

@@ -71,7 +71,7 @@ struct PremiumSubscriptionView: View {
             }
             .background(AppBackground())
             .foregroundStyle(theme.textPrimary)
-            .navigationTitle("CleanFile Premium")
+            .navigationTitle("Filevra Premium")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if allowsDismiss {

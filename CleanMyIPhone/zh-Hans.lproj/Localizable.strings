@@ -1,4 +1,9 @@
 "Photos" = "照片";
+"Import to Filevra" = "导入 Filevra";
+"Choose what to compress. Originals will remain in Photos." = "选择要压缩的内容。相册中的原件不会改变。";
+"Compress Images" = "压缩图片";
+"Compress Videos" = "压缩视频";
+"Later" = "稍后";
 "Storage" = "存储";
 "Compress" = "压缩";
 "storage.heading" = "存储分布";
@@ -8,7 +13,7 @@
 "Allow access to display the images in your Photos library." = "允许访问以显示照片图库中的图片。";
 "Allow Photo Access" = "允许访问照片";
 "Continue" = "继续";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "继续选择允许 File Cleaner & Media Converter 显示、分析并协助整理的照片和视频。";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "继续选择允许 Filevra 显示、分析并协助整理的照片和视频。";
 "Photo access is off" = "照片访问已关闭";
 "Enable Photos access in Settings to display your images." = "请在“设置”中启用照片访问权限以显示图片。";
 "Open Settings" = "打开设置";
@@ -21,7 +26,7 @@
 "No Photos" = "没有照片";
 "No images are available in your Photos library." = "照片图库中没有可用图片。";
 "Limited Photo Access" = "有限照片访问";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "File Cleaner & Media Converter 只能访问您选择的照片。";
+"Only the photos you selected are available to Filevra." = "Filevra 只能访问您选择的照片。";
 "Manage Selected Photos" = "管理所选照片";
 "Choose Folder" = "选择文件夹";
 "Analyzed Folder" = "已分析文件夹";
@@ -54,7 +59,7 @@
 "Liquid Glass Tab" = "Liquid Glass 标签栏";
 "Use the native Liquid Glass tab bar for primary navigation." = "使用原生 Liquid Glass 标签栏进行主要导航。";
 "Choose the appearance used throughout the app." = "选择整个 App 使用的外观。";
-"CleanMyIPhone Pink" = "CleanMyIPhone 粉色";
+"Filevra Pink" = "Filevra 粉色";
 "Accent Color" = "强调色";
 "The brand accent is used for selection, progress, and primary actions." = "品牌强调色用于选择、进度和主要操作。";
 "Videos" = "视频";
@@ -474,7 +479,7 @@
 "premium.lifetime.error.purchase" = "无法完成购买，请重试。";
 "Contact Developer" = "联系开发者";
 "Send feedback, questions, or bug reports by email." = "通过电子邮件发送反馈、问题或错误报告。";
-"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter 用户反馈";
+"Filevra Feedback" = "Filevra 用户反馈";
 "premium.connection.title" = "需要网络连接";
 "premium.connection.message" = "请连接互联网，然后重试。";
 "premium.retry" = "重试";
@@ -489,3 +494,6 @@
 "intro.next" = "继续";
 "intro.start" = "开始使用";
 "intro.demo" = "示例";
+"settings.intro.title" = "功能介绍";
+"settings.intro.detail" = "浏览 Filevra 的四页功能介绍。";
+"settings.intro.close" = "关闭";

@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Permita o acesso para mostrar as imagens da sua fototeca.";
 "Allow Photo Access" = "Permitir acesso às fotos";
 "Continue" = "Continuar";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Continue para escolher quais fotos e vídeos o app pode mostrar, analisar e ajudar você a organizar.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "Continue para escolher quais fotos e vídeos o app pode mostrar, analisar e ajudar você a organizar.";
 "Photo access is off" = "O acesso às fotos está desativado";
 "Enable Photos access in Settings to display your images." = "Ative o acesso às fotos nos Ajustes para mostrar suas imagens.";
 "Open Settings" = "Abrir Ajustes";
@@ -21,7 +21,7 @@
 "No Photos" = "Nenhuma foto";
 "No images are available in your Photos library." = "Não há imagens disponíveis na sua fototeca.";
 "Limited Photo Access" = "Acesso limitado às fotos";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "Apenas as fotos selecionadas estão disponíveis para o app.";
+"Only the photos you selected are available to Filevra." = "Apenas as fotos selecionadas estão disponíveis para o app.";
 "Manage Selected Photos" = "Gerenciar fotos selecionadas";
 "Choose Folder" = "Escolher pasta";
 "Analyzed Folder" = "Pasta analisada";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Aba Liquid Glass";
 "Use the native Liquid Glass tab bar for primary navigation." = "Use a barra de abas Liquid Glass nativa na navegação principal.";
 "Choose the appearance used throughout the app." = "Escolha a aparência usada em todo o app.";
-"CleanMyIPhone Pink" = "Rosa CleanMyIPhone";
+"Filevra Pink" = "Rosa Filevra";
 "Accent Color" = "Cor de destaque";
 "The brand accent is used for selection, progress, and primary actions." = "A cor de destaque é usada em seleções, progresso e ações principais.";
 "Videos" = "Vídeos";
@@ -474,7 +474,7 @@
 "premium.lifetime.error.purchase" = "Não foi possível concluir a compra. Tente novamente.";
 "Contact Developer" = "Contatar o desenvolvedor";
 "Send feedback, questions, or bug reports by email." = "Envie comentários, perguntas ou relatos de erros por e-mail.";
-"File Cleaner & Media Converter Feedback" = "Comentários sobre File Cleaner & Media Converter";
+"Filevra Feedback" = "Comentários sobre Filevra";
 "premium.connection.title" = "Conexão necessária";
 "premium.connection.message" = "Conecte-se à internet e tente novamente.";
 "premium.retry" = "Tentar novamente";
@@ -489,3 +489,6 @@
 "intro.next" = "Continuar";
 "intro.start" = "Começar a usar";
 "intro.demo" = "Exemplo";
+"settings.intro.title" = "Apresentação";
+"settings.intro.detail" = "Conheça as quatro páginas de apresentação do Filevra.";
+"settings.intro.close" = "Fechar";

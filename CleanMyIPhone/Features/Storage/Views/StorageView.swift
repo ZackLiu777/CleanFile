@@ -689,7 +689,7 @@ private struct ScannedFilesView: View {
                 }
             }
         } message: {
-            Text("These \(selectedURLs.count) file(s) may not be recoverable. This action cannot be undone in CleanMyIPhone.")
+            Text("These \(selectedURLs.count) file(s) may not be recoverable. This action cannot be undone in Filevra.")
         }
         .alert(
             deletionResultTitle ?? "",

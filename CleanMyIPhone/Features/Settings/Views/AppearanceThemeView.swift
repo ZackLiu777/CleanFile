@@ -519,7 +519,7 @@ struct AppearanceThemePreview: View {
                     Text("Live Preview")
                         .appTypeface(.caption.weight(.semibold), size: 12, relativeTo: .caption, weight: .semibold)
                         .foregroundStyle(theme.textSecondary)
-                    Text(verbatim: "CleanFile")
+                    Text(verbatim: "Filevra")
                         .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
                         .foregroundStyle(theme.textPrimary)
                 }

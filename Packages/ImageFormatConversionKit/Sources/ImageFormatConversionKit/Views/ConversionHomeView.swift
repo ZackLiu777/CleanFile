@@ -13,6 +13,8 @@ public struct ConversionHomeView: View {
     private let isTabActive: Bool
     private let animationsEnabled: Bool
     private let onDetailVisibilityChanged: (Bool) -> Void
+    private let shareImport: ShareImportRequest?
+    private let onShareImportComplete: (UUID, Set<UUID>) -> Void
     @State private var recentRecords: [ConversionHomeKind: ConversionHomeRecord] = [:]
     @State private var imageViewModel: ImageConversionViewModel
     @State private var videoViewModel: VideoConversionViewModel
@@ -27,6 +29,7 @@ public struct ConversionHomeView: View {
     @State private var isReplacementUnavailablePresented = false
     @State private var entranceGeneration = 0
     @State private var hasAppeared = false
+    @State private var handledShareRequestID: UUID?
     @Namespace private var navigationTransitionNamespace
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -34,12 +37,16 @@ public struct ConversionHomeView: View {
         theme: ConversionTheme = .system,
         isTabActive: Bool = true,
         animationsEnabled: Bool = true,
-        onDetailVisibilityChanged: @escaping (Bool) -> Void = { _ in }
+        onDetailVisibilityChanged: @escaping (Bool) -> Void = { _ in },
+        shareImport: ShareImportRequest? = nil,
+        onShareImportComplete: @escaping (UUID, Set<UUID>) -> Void = { _, _ in }
     ) {
         self.theme = theme
         self.isTabActive = isTabActive
         self.animationsEnabled = animationsEnabled
         self.onDetailVisibilityChanged = onDetailVisibilityChanged
+        self.shareImport = shareImport
+        self.onShareImportComplete = onShareImportComplete
         _imageViewModel = State(initialValue: ImageConversionViewModel())
         _videoViewModel = State(initialValue: VideoConversionViewModel())
         _audioViewModel = State(initialValue: AudioConversionViewModel())
@@ -169,16 +176,21 @@ public struct ConversionHomeView: View {
                     }
                 }
                 loadRecentRecords()
+                receiveSharedFilesIfNeeded()
             }
             .onChange(of: isTabActive) { _, isActive in
                 if isActive {
                     playEntrance()
+                    receiveSharedFilesIfNeeded()
                 } else {
                     cancelAndResetEntrance()
                 }
             }
             .onChange(of: navigationPath) { _, newPath in
                 onDetailVisibilityChanged(!newPath.isEmpty)
+            }
+            .onChange(of: shareImport?.id) { _, _ in
+                receiveSharedFilesIfNeeded()
             }
         }
         .sheet(isPresented: $isGuidePresented) {
@@ -207,6 +219,25 @@ public struct ConversionHomeView: View {
         .environment(\.conversionTheme, theme)
         .tint(theme.accent)
         .foregroundStyle(theme.textPrimary)
+    }
+
+    private func receiveSharedFilesIfNeeded() {
+        guard isTabActive, let request = shareImport,
+              handledShareRequestID != request.id else { return }
+        handledShareRequestID = request.id
+        navigationPath = [request.kind == .image ? .image : .video]
+        Task {
+            let urls = request.files.map(\.url)
+            let importedURLs = if request.kind == .image {
+                await imageViewModel.addFiles(urls)
+            } else {
+                await videoViewModel.addFiles(urls)
+            }
+            let importedIDs = Set(request.files.compactMap { file in
+                importedURLs.contains(file.url.standardizedFileURL) ? file.id : nil
+            })
+            onShareImportComplete(request.batchID, importedIDs)
+        }
     }
 
     private var replaceableOriginalCount: Int {

@@ -388,7 +388,7 @@ enum AppAccentPaletteID: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .automatic: "Automatic"
         case .custom: "Custom"
-        case .pink: "CleanMyIPhone Pink"
+        case .pink: "Filevra Pink"
         case .coral: "Coral"
         case .gold: "Graphite Gold"
         case .sage: "Sage"

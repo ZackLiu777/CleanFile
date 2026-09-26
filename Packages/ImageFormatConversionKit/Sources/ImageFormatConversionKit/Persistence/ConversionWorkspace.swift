@@ -119,6 +119,7 @@ actor ConversionWorkspace {
     private let importsURL: URL
     private let manifestsURL: URL
     private let legacyPhotoImportsURL: URL
+    private let sharedImportsURL: URL?
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(fileManager: FileManager = .default, rootURL customRootURL: URL? = nil) {
@@ -133,6 +134,9 @@ actor ConversionWorkspace {
             "Media Conversion Imports",
             isDirectory: true
         )
+        sharedImportsURL = fileManager.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.ZaneLiao.CleanPhone"
+        )?.appendingPathComponent("Share Imports", isDirectory: true)
     }
 
     /// 封装 `stage` 对应的局部行为，供当前类型在统一入口下复用。
@@ -179,6 +183,22 @@ actor ConversionWorkspace {
         let destination = itemDirectory.appendingPathComponent(fileName)
         if fileManager.fileExists(atPath: destination.path) {
             try fileManager.removeItem(at: destination)
+        }
+
+        // Shared-import files remain available for retry until the app has
+        // staged them. A filesystem copy can use the volume's copy-on-write
+        // optimization, avoiding a second byte-by-byte pass over large videos.
+        if let sharedImportsURL, isDescendant(source, of: sharedImportsURL) {
+            do {
+                try fileManager.copyItem(at: source, to: destination)
+                let copiedBytes = fileSize(destination)
+                guard copiedBytes == sourceBytes else { throw CocoaError(.fileReadCorruptFile) }
+                await progress(copiedBytes, copiedBytes)
+                return (destination, copiedBytes)
+            } catch {
+                try? fileManager.removeItem(at: destination)
+                // Fall back to the streaming path when cloning is unavailable.
+            }
         }
 
         // PhotosPicker has already created a stable file in our Application

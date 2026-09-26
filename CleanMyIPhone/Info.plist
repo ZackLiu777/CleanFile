@@ -7,7 +7,23 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>File Cleaner &amp; Media Converter</string>
+	<string>Filevra: Cleanup</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Images and Videos</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.image</string>
+				<string>public.movie</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -26,8 +42,10 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<false/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>File Cleaner &amp; Media Converter uses your photo library to display and analyze photos and videos, group similar items, and let you choose items to delete—for example, to find similar photos for cleanup.</string>
+	<string>Filevra uses your photo library to display and analyze photos and videos, group similar items, and let you choose items to delete—for example, to find similar photos for cleanup.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

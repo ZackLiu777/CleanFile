@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Salli kuvien näyttäminen Kuvakirjastossasi.";
 "Allow Photo Access" = "Salli valokuvien käyttö";
 "Continue" = "Jatka";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Valitse edelleen, mitä kuvia ja videoita File Cleaner & Media Converter voi näyttää, analysoida ja auttaa järjestämään.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "Valitse edelleen, mitä kuvia ja videoita Filevra voi näyttää, analysoida ja auttaa järjestämään.";
 "Photo access is off" = "Valokuvien käyttö on pois päältä";
 "Enable Photos access in Settings to display your images." = "Salli kuvien käyttöoikeus asetuksista näyttääksesi kuvat.";
 "Open Settings" = "Avaa Asetukset";
@@ -21,7 +21,7 @@
 "No Photos" = "Ei valokuvia";
 "No images are available in your Photos library." = "Kuvakirjastossasi ei ole kuvia.";
 "Limited Photo Access" = "Rajoitettu pääsy kuviin";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "Vain valitsemasi valokuvat ovat File Cleaner & Media Converter:n käytettävissä.";
+"Only the photos you selected are available to Filevra." = "Vain valitsemasi valokuvat ovat Filevra:n käytettävissä.";
 "Manage Selected Photos" = "Hallitse valittuja valokuvia";
 "Choose Folder" = "Valitse Kansio";
 "Analyzed Folder" = "Analysoitu kansio";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Liquid Glass Tab";
 "Use the native Liquid Glass tab bar for primary navigation." = "Käytä natiivia Liquid Glass -välilehtipalkkia ensisijaiseen navigointiin.";
 "Choose the appearance used throughout the app." = "Valitse koko sovelluksessa käytettävä ulkoasu.";
-"CleanMyIPhone Pink" = "CleanMyIPhone vaaleanpunainen";
+"Filevra Pink" = "Filevra vaaleanpunainen";
 "Accent Color" = "Aksenttiväri";
 "The brand accent is used for selection, progress, and primary actions." = "Brändin korostusta käytetään valintaan, edistymiseen ja ensisijaisiin toimiin.";
 "Videos" = "Videot";
@@ -487,7 +487,10 @@
 "premium.lifetime.error.purchase" = "Ostoa ei voitu suorittaa loppuun. Yritä uudelleen.";
 "Contact Developer" = "Ota yhteyttä kehittäjään";
 "Send feedback, questions, or bug reports by email." = "Lähetä palautetta, kysymyksiä tai virheraportteja sähköpostitse.";
-"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Palaute";
+"Filevra Feedback" = "Filevra Palaute";
 "premium.connection.title" = "Verkkoyhteys tarvitaan";
 "premium.connection.message" = "Muodosta internetyhteys ja yritä uudelleen.";
 "premium.retry" = "Yritä uudelleen";
+"settings.intro.title" = "Esittely";
+"settings.intro.detail" = "Tutustu Filevran neljään esittelysivuun.";
+"settings.intro.close" = "Sulje";

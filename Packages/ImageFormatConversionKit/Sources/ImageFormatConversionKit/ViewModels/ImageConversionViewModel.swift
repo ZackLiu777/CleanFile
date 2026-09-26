@@ -152,12 +152,13 @@ public final class ImageConversionViewModel {
     }
 
     /// 封装 `addFiles` 对应的局部行为，供当前类型在统一入口下复用。
+    @discardableResult
     public func addFiles(
         _ urls: [URL],
         photoAssetIdentifiers: [URL: String] = [:],
         progressRange: ClosedRange<Double> = 0 ... 1
-    ) async {
-        guard !isConverting, importProgress == nil else { return }
+    ) async -> Set<URL> {
+        guard !isConverting, importProgress == nil else { return [] }
         notice = nil
 
         var seenURLs = Set(items.map { $0.sourceURL.standardizedFileURL })
@@ -169,7 +170,7 @@ public final class ImageConversionViewModel {
             if !urls.isEmpty {
                 notice = L10n.string("notice.duplicates_ignored")
             }
-            return
+            return []
         }
 
         importProgress = ConversionImportProgress(
@@ -179,6 +180,7 @@ public final class ImageConversionViewModel {
         ).mapped(to: progressRange)
         defer { importProgress = nil }
         var newItems: [ImageConversionItem] = []
+        var importedURLs = Set<URL>()
         for (index, url) in uniqueURLs.enumerated() {
             if Task.isCancelled { break }
             importProgress = ConversionImportProgress(
@@ -210,6 +212,7 @@ public final class ImageConversionViewModel {
                 )
                 newItems.append(item)
                 items.append(item)
+                importedURLs.insert(url.standardizedFileURL)
             } catch is CancellationError {
                 break
             } catch {
@@ -296,6 +299,7 @@ public final class ImageConversionViewModel {
             }
         }
         persist()
+        return importedURLs
     }
 
     private static var inspectionConcurrencyLimit: Int {

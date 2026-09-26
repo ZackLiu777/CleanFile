@@ -1,0 +1,8 @@
+"Import to Filevra" = "导入 Filevra";
+"Preparing files…" = "正在准备文件…";
+"Done" = "完成";
+"Importing %d of %d…" = "正在导入第 %d 个，共 %d 个…";
+"No supported photos or videos could be imported." = "没有可导入的图片或视频。";
+"Imported. Open Filevra to choose compression settings." = "导入完成。打开 Filevra 选择压缩设置。";
+"Imported %d files; %d could not be imported. Open Filevra to continue." = "已导入 %d 个文件，另有 %d 个导入失败。打开 Filevra 继续。";
+"Import failed. Check available storage and try again." = "导入失败。请检查可用空间后重试。";

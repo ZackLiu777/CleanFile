@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Allow access to display the images in your Photos library.";
 "Allow Photo Access" = "Allow Photo Access";
 "Continue" = "Continue";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "Continue to choose which photos and videos Filevra can display, analyze, and help you organize.";
 "Photo access is off" = "Photo access is off";
 "Enable Photos access in Settings to display your images." = "Enable Photos access in Settings to display your images.";
 "Open Settings" = "Open Settings";
@@ -21,7 +21,7 @@
 "No Photos" = "No Photos";
 "No images are available in your Photos library." = "No images are available in your Photos library.";
 "Limited Photo Access" = "Limited Photo Access";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "Only the photos you selected are available to File Cleaner & Media Converter.";
+"Only the photos you selected are available to Filevra." = "Only the photos you selected are available to Filevra.";
 "Manage Selected Photos" = "Manage Selected Photos";
 "Choose Folder" = "Choose Folder";
 "Analyzed Folder" = "Analyzed Folder";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Liquid Glass Tab";
 "Use the native Liquid Glass tab bar for primary navigation." = "Use the native Liquid Glass tab bar for primary navigation.";
 "Choose the appearance used throughout the app." = "Choose the appearance used throughout the app.";
-"CleanMyIPhone Pink" = "CleanMyIPhone Pink";
+"Filevra Pink" = "Filevra Pink";
 "Accent Color" = "Accent Color";
 "The brand accent is used for selection, progress, and primary actions." = "The brand accent is used for selection, progress, and primary actions.";
 "Videos" = "Videos";
@@ -474,7 +474,7 @@
 "premium.lifetime.error.purchase" = "The purchase could not be completed. Please try again.";
 "Contact Developer" = "Contact Developer";
 "Send feedback, questions, or bug reports by email." = "Send feedback, questions, or bug reports by email.";
-"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Feedback";
+"Filevra Feedback" = "Filevra Feedback";
 "premium.connection.title" = "Network Connection Required";
 "premium.connection.message" = "Connect to the internet, then try again.";
 "premium.retry" = "Retry";
@@ -489,3 +489,6 @@
 "intro.next" = "Continue";
 "intro.start" = "Get Started";
 "intro.demo" = "Example";
+"settings.intro.title" = "Introduction";
+"settings.intro.detail" = "Explore Filevra's four feature pages.";
+"settings.intro.close" = "Close";

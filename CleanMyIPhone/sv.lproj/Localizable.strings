@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Tillåt åtkomst för att visa bilderna i ditt fotobibliotek.";
 "Allow Photo Access" = "Tillåt fotoåtkomst";
 "Continue" = "Fortsätt";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Fortsätt att välja vilka foton och videor File Cleaner & Media Converter kan visa, analysera och hjälpa dig att organisera.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "Fortsätt att välja vilka foton och videor Filevra kan visa, analysera och hjälpa dig att organisera.";
 "Photo access is off" = "Fotoåtkomst är avstängd";
 "Enable Photos access in Settings to display your images." = "Aktivera Fotoåtkomst i Inställningar för att visa dina bilder.";
 "Open Settings" = "Öppna Inställningar";
@@ -21,7 +21,7 @@
 "No Photos" = "Inga foton";
 "No images are available in your Photos library." = "Inga bilder är tillgängliga i ditt fotobibliotek.";
 "Limited Photo Access" = "Begränsad tillgång till foton";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "Endast de foton du valt är tillgängliga för File Cleaner & Media Converter.";
+"Only the photos you selected are available to Filevra." = "Endast de foton du valt är tillgängliga för Filevra.";
 "Manage Selected Photos" = "Hantera valda foton";
 "Choose Folder" = "Välj Mapp";
 "Analyzed Folder" = "Analyserad mapp";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Flik för flytande glas";
 "Use the native Liquid Glass tab bar for primary navigation." = "Använd den inbyggda fliken Liquid Glass för primär navigering.";
 "Choose the appearance used throughout the app." = "Välj det utseende som används i appen.";
-"CleanMyIPhone Pink" = "CleanMyIPhone Rosa";
+"Filevra Pink" = "Filevra Rosa";
 "Accent Color" = "Accentfärg";
 "The brand accent is used for selection, progress, and primary actions." = "Varumärkesaccenten används för urval, framsteg och primära åtgärder.";
 "Videos" = "Videor";
@@ -487,7 +487,10 @@
 "premium.lifetime.error.purchase" = "Köpet kunde inte genomföras. Försök igen.";
 "Contact Developer" = "Kontakta utvecklare";
 "Send feedback, questions, or bug reports by email." = "Skicka feedback, frågor eller felrapporter via e-post.";
-"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Feedback";
+"Filevra Feedback" = "Filevra Feedback";
 "premium.connection.title" = "Nätverksanslutning krävs";
 "premium.connection.message" = "Anslut till internet och försök igen.";
 "premium.retry" = "Försök igen";
+"settings.intro.title" = "Introduktion";
+"settings.intro.detail" = "Se Filevras fyra introduktionssidor.";
+"settings.intro.close" = "Stäng";

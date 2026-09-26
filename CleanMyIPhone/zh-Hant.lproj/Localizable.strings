@@ -1,4 +1,9 @@
 "Photos" = "照片";
+"Import to Filevra" = "匯入 Filevra";
+"Choose what to compress. Originals will remain in Photos." = "選擇要壓縮的內容。相簿中的原始檔不會改變。";
+"Compress Images" = "壓縮圖片";
+"Compress Videos" = "壓縮影片";
+"Later" = "稍後";
 "Storage" = "儲存空間";
 "Compress" = "壓縮";
 "storage.heading" = "儲存分布";
@@ -8,7 +13,7 @@
 "Allow access to display the images in your Photos library." = "允許存取以顯示照片圖庫中的圖片。";
 "Allow Photo Access" = "允許存取照片";
 "Continue" = "繼續";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "繼續選擇允許 File Cleaner & Media Converter 顯示、分析並協助整理的照片和影片。";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "繼續選擇允許 Filevra 顯示、分析並協助整理的照片和影片。";
 "Photo access is off" = "照片存取已關閉";
 "Enable Photos access in Settings to display your images." = "請在「設定」中啟用照片存取權限以顯示圖片。";
 "Open Settings" = "開啟設定";
@@ -21,7 +26,7 @@
 "No Photos" = "沒有照片";
 "No images are available in your Photos library." = "照片圖庫中沒有可用的圖片。";
 "Limited Photo Access" = "有限照片存取";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "File Cleaner & Media Converter 只能存取您選擇的照片。";
+"Only the photos you selected are available to Filevra." = "Filevra 只能存取您選擇的照片。";
 "Manage Selected Photos" = "管理所選照片";
 "Choose Folder" = "選擇資料夾";
 "Analyzed Folder" = "已分析資料夾";
@@ -54,7 +59,7 @@
 "Liquid Glass Tab" = "Liquid Glass 標籤列";
 "Use the native Liquid Glass tab bar for primary navigation." = "使用原生 Liquid Glass 標籤列進行主要導覽。";
 "Choose the appearance used throughout the app." = "選擇整個 App 使用的外觀。";
-"CleanMyIPhone Pink" = "CleanMyIPhone 粉紅色";
+"Filevra Pink" = "Filevra 粉紅色";
 "Accent Color" = "強調色";
 "The brand accent is used for selection, progress, and primary actions." = "品牌強調色用於選擇、進度和主要操作。";
 "Videos" = "影片";
@@ -474,7 +479,7 @@
 "premium.lifetime.error.purchase" = "無法完成購買，請再試一次。";
 "Contact Developer" = "聯絡開發者";
 "Send feedback, questions, or bug reports by email." = "透過電子郵件傳送意見、問題或錯誤報告。";
-"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter 使用者意見";
+"Filevra Feedback" = "Filevra 使用者意見";
 "premium.connection.title" = "需要網路連線";
 "premium.connection.message" = "請連接網際網路，然後再試一次。";
 "premium.retry" = "重試";
@@ -489,3 +494,6 @@
 "intro.next" = "繼續";
 "intro.start" = "開始使用";
 "intro.demo" = "示例";
+"settings.intro.title" = "功能介紹";
+"settings.intro.detail" = "瀏覽 Filevra 的四頁功能介紹。";
+"settings.intro.close" = "關閉";

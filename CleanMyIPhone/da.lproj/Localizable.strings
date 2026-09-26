@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Tillad adgang til at vise billederne i dit fotobibliotek.";
 "Allow Photo Access" = "Tillad billedadgang";
 "Continue" = "Fortsæt";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Fortsæt med at vælge, hvilke billeder og videoer File Cleaner & Media Converter kan vise, analysere og hjælpe dig med at organisere.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "Fortsæt med at vælge, hvilke billeder og videoer Filevra kan vise, analysere og hjælpe dig med at organisere.";
 "Photo access is off" = "Fotoadgang er slået fra";
 "Enable Photos access in Settings to display your images." = "Aktiver adgang til billeder i Indstillinger for at vise dine billeder.";
 "Open Settings" = "Åbn Indstillinger";
@@ -21,7 +21,7 @@
 "No Photos" = "Ingen billeder";
 "No images are available in your Photos library." = "Der er ingen tilgængelige billeder i dit Fotos-bibliotek.";
 "Limited Photo Access" = "Begrænset billedadgang";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "Kun de billeder, du har valgt, er tilgængelige for File Cleaner & Media Converter.";
+"Only the photos you selected are available to Filevra." = "Kun de billeder, du har valgt, er tilgængelige for Filevra.";
 "Manage Selected Photos" = "Administrer valgte fotos";
 "Choose Folder" = "Vælg Mappe";
 "Analyzed Folder" = "Analyseret mappe";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Flig af flydende glas";
 "Use the native Liquid Glass tab bar for primary navigation." = "Brug den oprindelige Liquid Glass-fanelinje til primær navigation.";
 "Choose the appearance used throughout the app." = "Vælg det udseende, der bruges i hele appen.";
-"CleanMyIPhone Pink" = "CleanMyIPhone Pink";
+"Filevra Pink" = "Filevra Pink";
 "Accent Color" = "Accent farve";
 "The brand accent is used for selection, progress, and primary actions." = "Brandaccenten bruges til udvælgelse, fremskridt og primære handlinger.";
 "Videos" = "Videoer";
@@ -487,7 +487,10 @@
 "premium.lifetime.error.purchase" = "Købet kunne ikke gennemføres. Prøv venligst igen.";
 "Contact Developer" = "Kontakt udvikler";
 "Send feedback, questions, or bug reports by email." = "Send feedback, spørgsmål eller fejlrapporter via e-mail.";
-"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Feedback";
+"Filevra Feedback" = "Filevra Feedback";
 "premium.connection.title" = "Netværksforbindelse kræves";
 "premium.connection.message" = "Opret forbindelse til internettet, og prøv igen.";
 "premium.retry" = "Prøv igen";
+"settings.intro.title" = "Introduktion";
+"settings.intro.detail" = "Se de fire introduktionssider til Filevra.";
+"settings.intro.close" = "Luk";

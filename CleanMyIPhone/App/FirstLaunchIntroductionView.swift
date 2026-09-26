@@ -65,18 +65,28 @@ struct FirstLaunchIntroductionView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var page = 0
     @State private var animationOrigin = Date()
+    var showsCloseButton = false
     let onComplete: () -> Void
 
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 HStack {
-                    Text("CleanFile")
+                    Text("Filevra")
                         .font(.headline.weight(.bold))
                     Spacer()
                     Text("\(page + 1) / 4")
                         .font(.subheadline.monospacedDigit())
                         .foregroundStyle(theme.textSecondary)
+                    if showsCloseButton {
+                        Button(action: onComplete) {
+                            Image(systemName: "xmark")
+                                .font(.headline)
+                                .frame(width: 44, height: 44)
+                        }
+                        .accessibilityLabel(Text("settings.intro.close"))
+                        .accessibilityIdentifier("intro.close")
+                    }
                 }
                 .padding(.top, 18)
 

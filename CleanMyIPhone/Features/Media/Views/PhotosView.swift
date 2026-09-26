@@ -32,7 +32,7 @@ struct PhotosView: View {
                     case .notDetermined:
                         permissionView(
                             title: "Access your photos",
-                            message: "Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize.",
+                            message: "Continue to choose which photos and videos Filevra can display, analyze, and help you organize.",
                             buttonTitle: "Continue",
                             action: viewModel.requestAccess
                         )
@@ -137,7 +137,7 @@ struct PhotosView: View {
             Label("Limited Photo Access", systemImage: "photo.badge.checkmark")
                 .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
 
-            Text("Only the photos you selected are available to File Cleaner & Media Converter.")
+            Text("Only the photos you selected are available to Filevra.")
                 .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

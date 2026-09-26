@@ -124,6 +124,7 @@ private struct TabBarDragState {
 /// 定义 `ContentView` 的值语义数据与相关行为。
 struct ContentView: View {
     @Environment(\.appTheme) private var theme
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var themeSettings: ThemeSettings
     @StateObject private var tabBarVisibility = TabBarVisibilityCoordinator()
     @StateObject private var mediaViewModel = PhotoLibraryViewModel()
@@ -140,6 +141,10 @@ struct ContentView: View {
     @State private var transitionGeneration = 0
     @State private var tabButtonFrames: [AppTab: CGRect] = [:]
     @GestureState private var tabBarDragState: TabBarDragState?
+    @State private var pendingShareBatch: ShareImportInbox.Batch?
+    @State private var activeShareImport: ShareImportRequest?
+    @State private var incomingDocumentURLs: [URL] = []
+    @State private var documentImportTask: Task<Void, Never>?
 
     init() {
         let storedTab = UserDefaults.standard.string(forKey: "selectedAppTab")
@@ -156,12 +161,64 @@ struct ContentView: View {
         }
         .environmentObject(tabBarVisibility)
         .task {
+            showPendingShareBatchIfNeeded()
             // This view exists underneath AppOpeningView, so cold-launch media
             // refresh begins during the opening animation even when another tab
             // was selected in the previous session.
             await mediaViewModel.loadIfNeeded()
         }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { showPendingShareBatchIfNeeded() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .cleanFileShareImportReady)) { _ in
+            showPendingShareBatchIfNeeded()
+        }
+        .onOpenURL { url in
+            if url.isFileURL {
+                receiveDocument(url)
+                return
+            }
+        }
+        .sheet(item: $pendingShareBatch) { batch in
+            VStack(spacing: 22) {
+                Image(systemName: "square.and.arrow.down")
+                    .font(.system(size: 42))
+                    .foregroundStyle(theme.accentPrimary)
+                Text("Import to Filevra")
+                    .font(.title2.bold())
+                Text("Choose what to compress. Originals will remain in Photos.")
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(theme.textSecondary)
+                if batch.imageCount > 0 {
+                    Button {
+                        startShareImport(batch, kind: .image)
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("Compress Images")
+                            Text("(\(batch.imageCount))")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                if batch.videoCount > 0 {
+                    Button {
+                        startShareImport(batch, kind: .video)
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("Compress Videos")
+                            Text("(\(batch.videoCount))")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                Button("Later") { pendingShareBatch = nil }
+                    .buttonStyle(.plain)
+            }
+            .padding(28)
+            .presentationDetents([.medium])
+        }
         .onChange(of: selectedTab) { _, newTab in
+            if newTab == .conversion { showPendingShareBatchIfNeeded() }
             // Native TabView changes the persisted selection directly. Keep the
             // custom page layer ready if the custom tab bar is turned on.
             guard !themeSettings.customTabBarEnabled else { return }
@@ -172,6 +229,57 @@ struct ContentView: View {
             // transition or a stale displayed tab behind.
             settleTransition(to: selectedTab)
         }
+    }
+
+    private func receiveDocument(_ url: URL) {
+        incomingDocumentURLs.append(url)
+        documentImportTask?.cancel()
+        // SwiftUI may deliver one callback per selected file; coalesce nearby URLs.
+        documentImportTask = Task {
+            try? await Task.sleep(for: .milliseconds(350))
+            guard !Task.isCancelled else { return }
+            let urls = incomingDocumentURLs
+            incomingDocumentURLs.removeAll()
+            guard let batch = try? await ShareImportInbox.importDocumentURLs(urls) else { return }
+            showPendingShareBatchIfNeeded(preferredID: batch.id)
+        }
+    }
+
+    private func showPendingShareBatchIfNeeded(preferredID: UUID? = nil) {
+        guard pendingShareBatch == nil, activeShareImport == nil else { return }
+        guard let batches = try? ShareImportInbox.batches(),
+              let batch = batches.first(where: { $0.id == preferredID }) ?? batches.first else { return }
+        if batch.imageCount > 0 && batch.videoCount == 0 {
+            startShareImport(batch, kind: .image)
+        } else if batch.videoCount > 0 && batch.imageCount == 0 {
+            startShareImport(batch, kind: .video)
+        } else {
+            pendingShareBatch = batch
+        }
+    }
+
+    private func startShareImport(_ batch: ShareImportInbox.Batch, kind: ShareImportInbox.Kind) {
+        let files = batch.entries.filter { $0.kind == kind }.compactMap { entry -> ShareImportRequest.File? in
+            guard let url = try? ShareImportInbox.fileURL(for: entry, in: batch),
+                  FileManager.default.fileExists(atPath: url.path) else { return nil }
+            return ShareImportRequest.File(id: entry.id, url: url)
+        }
+        guard !files.isEmpty else { return }
+        activeShareImport = ShareImportRequest(
+            batchID: batch.id, kind: kind == .image ? .image : .video, files: files
+        )
+        pendingShareBatch = nil
+        selectedTab = .conversion
+        settleTransition(to: .conversion)
+    }
+
+    private func finishShareImport(batchID: UUID, importedIDs: Set<UUID>) {
+        if let batch = try? ShareImportInbox.batches().first(where: { $0.id == batchID }),
+           !importedIDs.isEmpty {
+            try? ShareImportInbox.remove(importedIDs, from: batch)
+        }
+        activeShareImport = nil
+        // Any failed or mixed-type files remain in the inbox for a later attempt.
     }
 
     private var nativeTabView: some View {
@@ -199,7 +307,9 @@ struct ContentView: View {
             ConversionHomeView(
                 theme: theme.conversionTheme,
                 isTabActive: selectedTab == .conversion,
-                animationsEnabled: themeSettings.interfaceAnimationsEnabled
+                animationsEnabled: themeSettings.interfaceAnimationsEnabled,
+                shareImport: activeShareImport,
+                onShareImportComplete: finishShareImport
             )
                 .tabItem {
                     Label("Compress", systemImage: "arrow.triangle.2.circlepath")
@@ -287,7 +397,9 @@ struct ContentView: View {
                         source: "conversion.tool",
                         scope: .conversion
                     )
-                }
+                },
+                shareImport: activeShareImport,
+                onShareImportComplete: finishShareImport
             )
         case .settings:
             SettingsView()
@@ -558,7 +670,7 @@ extension Theme {
             .appTypeface(.largeTitle, size: 34, relativeTo: .largeTitle, weight: .regular)
             .foregroundStyle(Theme.system.accentPrimary)
 
-        Text("CleanMyIPhone")
+        Text("Filevra")
             .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
 
         Text("Run the app to choose a folder or access the photo library.")

@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Sta toegang toe om de afbeeldingen in uw fotobibliotheek weer te geven.";
 "Allow Photo Access" = "Sta fototoegang toe";
 "Continue" = "Ga door";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Ga door met kiezen welke foto's en video's File Cleaner & Media Converter kan weergeven, analyseren en u kan helpen bij het ordenen.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "Ga door met kiezen welke foto's en video's Filevra kan weergeven, analyseren en u kan helpen bij het ordenen.";
 "Photo access is off" = "Fototoegang is uitgeschakeld";
 "Enable Photos access in Settings to display your images." = "Schakel toegang tot Foto's in Instellingen in om uw afbeeldingen weer te geven.";
 "Open Settings" = "Instellingen openen";
@@ -21,7 +21,7 @@
 "No Photos" = "Geen foto's";
 "No images are available in your Photos library." = "Er zijn geen afbeeldingen beschikbaar in uw Foto's-bibliotheek.";
 "Limited Photo Access" = "Beperkte fototoegang";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "Alleen de foto's die u hebt geselecteerd, zijn beschikbaar voor File Cleaner & Media Converter.";
+"Only the photos you selected are available to Filevra." = "Alleen de foto's die u hebt geselecteerd, zijn beschikbaar voor Filevra.";
 "Manage Selected Photos" = "Beheer geselecteerde foto's";
 "Choose Folder" = "Kies Map";
 "Analyzed Folder" = "Geanalyseerde map";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Vloeibaar glazen tabblad";
 "Use the native Liquid Glass tab bar for primary navigation." = "Gebruik de native Liquid Glass-tabbalk voor primaire navigatie.";
 "Choose the appearance used throughout the app." = "Kies het uiterlijk dat in de hele app wordt gebruikt.";
-"CleanMyIPhone Pink" = "CleanMyIPhone Roze";
+"Filevra Pink" = "Filevra Roze";
 "Accent Color" = "Accentkleur";
 "The brand accent is used for selection, progress, and primary actions." = "Het merkaccent wordt gebruikt voor selectie, voortgang en primaire acties.";
 "Videos" = "Video's";
@@ -487,7 +487,10 @@
 "premium.lifetime.error.purchase" = "De aankoop kon niet worden voltooid. Probeer het opnieuw.";
 "Contact Developer" = "Neem contact op met ontwikkelaar";
 "Send feedback, questions, or bug reports by email." = "Stuur feedback, vragen of bugrapporten per e-mail.";
-"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter-feedback";
+"Filevra Feedback" = "Filevra-feedback";
 "premium.connection.title" = "Netwerkverbinding vereist";
 "premium.connection.message" = "Maak verbinding met internet en probeer het opnieuw.";
 "premium.retry" = "Opnieuw proberen";
+"settings.intro.title" = "Introductie";
+"settings.intro.detail" = "Bekijk de vier introductiepagina's van Filevra.";
+"settings.intro.close" = "Sluiten";

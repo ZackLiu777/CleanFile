@@ -105,12 +105,13 @@ public final class VideoConversionViewModel {
     }
 
     /// 封装 `addFiles` 对应的局部行为，供当前类型在统一入口下复用。
+    @discardableResult
     public func addFiles(
         _ urls: [URL],
         photoAssetIdentifiers: [URL: String] = [:],
         progressRange: ClosedRange<Double> = 0 ... 1
-    ) async {
-        guard !isConverting, importProgress == nil else { return }
+    ) async -> Set<URL> {
+        guard !isConverting, importProgress == nil else { return [] }
         let allowedExtensions = Set(["mov", "mp4", "m4v"])
         let supportedURLs = urls.filter {
             allowedExtensions.contains($0.pathExtension.lowercased())
@@ -122,13 +123,14 @@ public final class VideoConversionViewModel {
         let uniqueURLs = supportedURLs.filter {
             knownURLs.insert($0.standardizedFileURL).inserted
         }
-        guard !uniqueURLs.isEmpty else { return }
+        guard !uniqueURLs.isEmpty else { return [] }
         importProgress = ConversionImportProgress(
             completed: 0,
             total: uniqueURLs.count,
             currentFileName: uniqueURLs.first?.lastPathComponent
         ).mapped(to: progressRange)
         defer { importProgress = nil }
+        var importedURLs = Set<URL>()
         for (index, url) in uniqueURLs.enumerated() {
             importProgress = ConversionImportProgress(
                 completed: index,
@@ -158,6 +160,7 @@ public final class VideoConversionViewModel {
                     sourceBytes: bytes,
                     photoAssetIdentifier: photoAssetIdentifiers[url.standardizedFileURL]
                 ))
+                importedURLs.insert(url.standardizedFileURL)
             } catch {
                 notice = L10n.format("notice.import_failed", error.localizedDescription)
             }
@@ -169,6 +172,7 @@ public final class VideoConversionViewModel {
         }
         persist()
         scheduleSizeEstimate()
+        return importedURLs
     }
 
     /// 执行 `remove` 移除流程，并同步更新受影响的业务状态。

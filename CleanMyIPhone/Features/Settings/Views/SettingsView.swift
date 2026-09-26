@@ -21,6 +21,7 @@ struct SettingsView: View {
     @State private var photoAuthorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
     @State private var showsPremium = false
     @State private var showsHelp = false
+    @State private var showsIntroductionPreview = false
 
     var body: some View {
         NavigationStack {
@@ -40,7 +41,7 @@ struct SettingsView: View {
                     } label: {
                         Label {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("CleanFile Premium")
+                                Text("Filevra Premium")
                                     .foregroundStyle(theme.textPrimary)
                                 Text("premium.entry.subtitle")
                                     .foregroundStyle(theme.textSecondary)
@@ -76,6 +77,27 @@ struct SettingsView: View {
                     Text("Personalization")
                 } footer: {
                     Text("Choose app colors, background, and appearance in one place.")
+                }
+                .appListCard()
+
+                Section {
+                    Button {
+                        showsIntroductionPreview = true
+                    } label: {
+                        Label {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("settings.intro.title")
+                                Text("settings.intro.detail")
+                                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
+                                    .foregroundStyle(theme.textSecondary)
+                            }
+                        } icon: {
+                            Image(systemName: "play.rectangle.on.rectangle")
+                                .foregroundStyle(theme.accentPrimary)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
+                    }
+                    .accessibilityIdentifier("settings.introductionPreview")
                 }
                 .appListCard()
 
@@ -199,6 +221,11 @@ struct SettingsView: View {
         .sheet(isPresented: $showsPremium) {
             PremiumSubscriptionView()
         }
+        .fullScreenCover(isPresented: $showsIntroductionPreview) {
+            FirstLaunchIntroductionView(showsCloseButton: true) {
+                showsIntroductionPreview = false
+            }
+        }
     }
 
     private var photoAccessDescription: LocalizedStringKey {
@@ -226,7 +253,7 @@ struct SettingsView: View {
         components.queryItems = [
             URLQueryItem(
                 name: "subject",
-                value: String(localized: "File Cleaner & Media Converter Feedback")
+                value: String(localized: "Filevra Feedback")
             )
         ]
         return components.url

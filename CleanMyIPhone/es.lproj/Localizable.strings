@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Permite el acceso para mostrar las imágenes de tu fototeca.";
 "Allow Photo Access" = "Permitir acceso a Fotos";
 "Continue" = "Continuar";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Continúa para elegir qué fotos y vídeos puede mostrar y analizar File Cleaner & Media Converter y ayudarte a organizar.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "Continúa para elegir qué fotos y vídeos puede mostrar y analizar Filevra y ayudarte a organizar.";
 "Photo access is off" = "El acceso a Fotos está desactivado";
 "Enable Photos access in Settings to display your images." = "Activa el acceso a Fotos en Ajustes para mostrar tus imágenes.";
 "Open Settings" = "Abrir Ajustes";
@@ -21,7 +21,7 @@
 "No Photos" = "No hay fotos";
 "No images are available in your Photos library." = "No hay imágenes disponibles en tu fototeca.";
 "Limited Photo Access" = "Acceso limitado a Fotos";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "File Cleaner & Media Converter solo puede acceder a las fotos seleccionadas.";
+"Only the photos you selected are available to Filevra." = "Filevra solo puede acceder a las fotos seleccionadas.";
 "Manage Selected Photos" = "Gestionar fotos seleccionadas";
 "Choose Folder" = "Elegir carpeta";
 "Analyzed Folder" = "Carpeta analizada";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Barra de pestañas Liquid Glass";
 "Use the native Liquid Glass tab bar for primary navigation." = "Usa la barra de pestañas Liquid Glass nativa para la navegación principal.";
 "Choose the appearance used throughout the app." = "Elige la apariencia que se usará en toda la app.";
-"CleanMyIPhone Pink" = "Rosa CleanMyIPhone";
+"Filevra Pink" = "Rosa Filevra";
 "Accent Color" = "Color de énfasis";
 "The brand accent is used for selection, progress, and primary actions." = "El color de la marca se usa para la selección, el progreso y las acciones principales.";
 "Videos" = "Vídeos";
@@ -474,7 +474,7 @@
 "premium.lifetime.error.purchase" = "No se pudo completar la compra. Inténtalo de nuevo.";
 "Contact Developer" = "Contactar con el desarrollador";
 "Send feedback, questions, or bug reports by email." = "Envía comentarios, preguntas o informes de errores por correo electrónico.";
-"File Cleaner & Media Converter Feedback" = "Comentarios sobre File Cleaner & Media Converter";
+"Filevra Feedback" = "Comentarios sobre Filevra";
 "premium.connection.title" = "Se requiere conexión de red";
 "premium.connection.message" = "Conéctate a internet e inténtalo de nuevo.";
 "premium.retry" = "Reintentar";
@@ -489,3 +489,6 @@
 "intro.next" = "Continuar";
 "intro.start" = "Empezar";
 "intro.demo" = "Ejemplo";
+"settings.intro.title" = "Presentación";
+"settings.intro.detail" = "Explora las cuatro páginas de presentación de Filevra.";
+"settings.intro.close" = "Cerrar";

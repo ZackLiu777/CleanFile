@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* ImageFormatConversionKit in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000003 /* ImageFormatConversionKit */; };
+		B10000000000000000000001 /* CleanMyIPhone/Shared/ShareImportInbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* CleanMyIPhone/Shared/ShareImportInbox.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +29,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B10000000000000000000002 /* CleanMyIPhone/Shared/ShareImportInbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanMyIPhone/Shared/ShareImportInbox.swift; sourceTree = "<group>"; };
+		B10000000000000000000004 /* CleanFileShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CleanFileShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF23C7543033FBD500B13EBA /* CleanMyIPhone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CleanMyIPhone.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF23C7633033FBD600B13EBA /* CleanMyIPhoneTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CleanMyIPhoneTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF23C76D3033FBD600B13EBA /* CleanMyIPhoneUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CleanMyIPhoneUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -41,12 +44,27 @@
 			);
 			target = FF23C7533033FBD500B13EBA /* CleanMyIPhone */;
 		};
+		B10000000000000000000005 /* Exceptions for "CleanFileShareExtension" folder in "CleanFileShareExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = B10000000000000000000008 /* CleanFileShareExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A20000000000000000000001 /* Packages/ImageFormatConversionKit/Tests/ImageFormatConversionKitTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Packages/ImageFormatConversionKit/Tests/ImageFormatConversionKitTests;
+			sourceTree = "<group>";
+		};
+		B10000000000000000000006 /* CleanFileShareExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B10000000000000000000005 /* Exceptions for "CleanFileShareExtension" folder in "CleanFileShareExtension" target */,
+			);
+			path = CleanFileShareExtension;
 			sourceTree = "<group>";
 		};
 		FF23C7563033FBD500B13EBA /* CleanMyIPhone */ = {
@@ -70,6 +88,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		B10000000000000000000009 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FF23C7513033FBD500B13EBA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -99,6 +124,8 @@
 			isa = PBXGroup;
 			children = (
 				FF23C7563033FBD500B13EBA /* CleanMyIPhone */,
+				B10000000000000000000006 /* CleanFileShareExtension */,
+				B10000000000000000000002 /* CleanMyIPhone/Shared/ShareImportInbox.swift */,
 				FF23C7663033FBD600B13EBA /* CleanMyIPhoneTests */,
 				A20000000000000000000001 /* Packages/ImageFormatConversionKit/Tests/ImageFormatConversionKitTests */,
 				FF23C7703033FBD600B13EBA /* CleanMyIPhoneUITests */,
@@ -112,6 +139,7 @@
 				FF23C7543033FBD500B13EBA /* CleanMyIPhone.app */,
 				FF23C7633033FBD600B13EBA /* CleanMyIPhoneTests.xctest */,
 				FF23C76D3033FBD600B13EBA /* CleanMyIPhoneUITests.xctest */,
+				B10000000000000000000004 /* CleanFileShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -119,6 +147,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		B10000000000000000000008 /* CleanFileShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B10000000000000000000013 /* Build configuration list for PBXNativeTarget "CleanFileShareExtension" */;
+			buildPhases = (
+				B1000000000000000000000A /* Sources */,
+				B10000000000000000000009 /* Frameworks */,
+				B1000000000000000000000B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				B10000000000000000000006 /* CleanFileShareExtension */,
+			);
+			name = CleanFileShareExtension;
+			productName = CleanFileShareExtension;
+			productReference = B10000000000000000000004 /* CleanFileShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		FF23C7533033FBD500B13EBA /* CleanMyIPhone */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FF23C7753033FBD600B13EBA /* Build configuration list for PBXNativeTarget "CleanMyIPhone" */;
@@ -196,6 +244,9 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					B10000000000000000000008 = {
+						CreatedOnToolsVersion = 27.0;
+					};
 					FF23C7533033FBD500B13EBA = {
 						CreatedOnToolsVersion = 26.0;
 					};
@@ -233,6 +284,7 @@
 				sv,
 				"pt-BR",
 				pl,
+				"pt-PT",
 			);
 			mainGroup = FF23C74B3033FBD500B13EBA;
 			minimizedProjectReferenceProxies = 1;
@@ -247,11 +299,19 @@
 				FF23C7533033FBD500B13EBA /* CleanMyIPhone */,
 				FF23C7623033FBD600B13EBA /* CleanMyIPhoneTests */,
 				FF23C76C3033FBD600B13EBA /* CleanMyIPhoneUITests */,
+				B10000000000000000000008 /* CleanFileShareExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		B1000000000000000000000B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FF23C7523033FBD500B13EBA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -306,6 +366,14 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		B1000000000000000000000A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B10000000000000000000001 /* CleanMyIPhone/Shared/ShareImportInbox.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FF23C7503033FBD500B13EBA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -343,6 +411,58 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		B10000000000000000000014 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = CleanFileShareExtension/CleanFileShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NL82DMN369;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CleanFileShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1.6;
+				PRODUCT_BUNDLE_IDENTIFIER = ZaneLiao.CleanPhone.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B10000000000000000000015 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = CleanFileShareExtension/CleanFileShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NL82DMN369;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CleanFileShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1.6;
+				PRODUCT_BUNDLE_IDENTIFIER = ZaneLiao.CleanPhone.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		FF23C7733033FBD600B13EBA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -469,14 +589,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CleanMyIPhone/CleanMyIPhone.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NL82DMN369;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = CleanMyIPhone/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "File Cleaner & Media Converter";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CleanFile uses your photo library to display and analyze photos and videos, group similar items, and let you choose items to delete—for example, to find similar photos for cleanup.";
+				INFOPLIST_KEY_CFBundleDisplayName = "Filevra: Cleanup";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Filevra uses your photo library to display and analyze photos and videos, group similar items, and let you choose items to delete—for example, to find similar photos for cleanup.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -487,7 +608,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = ZaneLiao.CleanPhone;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -509,6 +630,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CleanMyIPhone/CleanMyIPhone.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NL82DMN369;
@@ -516,8 +638,8 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = CleanMyIPhone/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "File Cleaner & Media Converter";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CleanFile uses your photo library to display and analyze photos and videos, group similar items, and let you choose items to delete—for example, to find similar photos for cleanup.";
+				INFOPLIST_KEY_CFBundleDisplayName = "Filevra: Cleanup";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Filevra uses your photo library to display and analyze photos and videos, group similar items, and let you choose items to delete—for example, to find similar photos for cleanup.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -528,7 +650,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = ZaneLiao.CleanPhone;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -636,6 +758,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		B10000000000000000000013 /* Build configuration list for PBXNativeTarget "CleanFileShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B10000000000000000000014 /* Debug */,
+				B10000000000000000000015 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		FF23C74F3033FBD500B13EBA /* Build configuration list for PBXProject "CleanMyIPhone" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

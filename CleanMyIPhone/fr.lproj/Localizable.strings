@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Autorisez l’accès pour afficher les images de votre photothèque.";
 "Allow Photo Access" = "Autoriser l’accès aux photos";
 "Continue" = "Continuer";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Continuez pour choisir les photos et vidéos que File Cleaner & Media Converter peut afficher, analyser et vous aider à organiser.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "Continuez pour choisir les photos et vidéos que Filevra peut afficher, analyser et vous aider à organiser.";
 "Photo access is off" = "L’accès aux photos est désactivé";
 "Enable Photos access in Settings to display your images." = "Activez l’accès aux photos dans Réglages pour afficher vos images.";
 "Open Settings" = "Ouvrir Réglages";
@@ -21,7 +21,7 @@
 "No Photos" = "Aucune photo";
 "No images are available in your Photos library." = "Aucune image n’est disponible dans votre photothèque.";
 "Limited Photo Access" = "Accès limité aux photos";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "Seules les photos sélectionnées sont accessibles à File Cleaner & Media Converter.";
+"Only the photos you selected are available to Filevra." = "Seules les photos sélectionnées sont accessibles à Filevra.";
 "Manage Selected Photos" = "Gérer les photos sélectionnées";
 "Choose Folder" = "Choisir un dossier";
 "Analyzed Folder" = "Dossier analysé";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Barre d’onglets Liquid Glass";
 "Use the native Liquid Glass tab bar for primary navigation." = "Utilisez la barre d’onglets Liquid Glass native pour la navigation principale.";
 "Choose the appearance used throughout the app." = "Choisissez l’apparence utilisée dans toute l’app.";
-"CleanMyIPhone Pink" = "Rose CleanMyIPhone";
+"Filevra Pink" = "Rose Filevra";
 "Accent Color" = "Couleur d’accentuation";
 "The brand accent is used for selection, progress, and primary actions." = "La couleur de la marque est utilisée pour la sélection, la progression et les actions principales.";
 "Videos" = "Vidéos";
@@ -474,7 +474,7 @@
 "premium.lifetime.error.purchase" = "Impossible de finaliser l’achat. Réessayez.";
 "Contact Developer" = "Contacter le développeur";
 "Send feedback, questions, or bug reports by email." = "Envoyez vos commentaires, questions ou signalements de bugs par e-mail.";
-"File Cleaner & Media Converter Feedback" = "Commentaires sur File Cleaner & Media Converter";
+"Filevra Feedback" = "Commentaires sur Filevra";
 "premium.connection.title" = "Connexion réseau requise";
 "premium.connection.message" = "Connectez-vous à Internet, puis réessayez.";
 "premium.retry" = "Réessayer";
@@ -489,3 +489,6 @@
 "intro.next" = "Continuer";
 "intro.start" = "Commencer";
 "intro.demo" = "Exemple";
+"settings.intro.title" = "Présentation";
+"settings.intro.detail" = "Découvrez les quatre pages de présentation de Filevra.";
+"settings.intro.close" = "Fermer";

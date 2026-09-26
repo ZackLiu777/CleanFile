@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Erlauben Sie den Zugriff, um die Bilder in Ihrer Fotobibliothek anzuzeigen.";
 "Allow Photo Access" = "Fotozugriff zulassen";
 "Continue" = "Weiter";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Wählen Sie weiterhin aus, welche Fotos und Videos File Cleaner & Media Converter anzeigen, analysieren und Ihnen bei der Organisation helfen kann.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "Wählen Sie weiterhin aus, welche Fotos und Videos Filevra anzeigen, analysieren und Ihnen bei der Organisation helfen kann.";
 "Photo access is off" = "Der Fotozugriff ist deaktiviert";
 "Enable Photos access in Settings to display your images." = "Aktivieren Sie den Fotozugriff in den Einstellungen, um Ihre Bilder anzuzeigen.";
 "Open Settings" = "Öffnen Sie Einstellungen";
@@ -21,7 +21,7 @@
 "No Photos" = "Keine Fotos";
 "No images are available in your Photos library." = "In Ihrer Fotobibliothek sind keine Bilder verfügbar.";
 "Limited Photo Access" = "Eingeschränkter Fotozugang";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "Nur die von Ihnen ausgewählten Fotos stehen File Cleaner & Media Converter zur Verfügung.";
+"Only the photos you selected are available to Filevra." = "Nur die von Ihnen ausgewählten Fotos stehen Filevra zur Verfügung.";
 "Manage Selected Photos" = "Ausgewählte Fotos verwalten";
 "Choose Folder" = "Wählen Sie Ordner";
 "Analyzed Folder" = "Analysierter Ordner";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Flüssigglas-Tab";
 "Use the native Liquid Glass tab bar for primary navigation." = "Verwenden Sie die native Liquid Glass-Registerkartenleiste für die primäre Navigation.";
 "Choose the appearance used throughout the app." = "Wählen Sie das in der gesamten App verwendete Erscheinungsbild.";
-"CleanMyIPhone Pink" = "CleanMyIPhone Pink";
+"Filevra Pink" = "Filevra Pink";
 "Accent Color" = "Akzentfarbe";
 "The brand accent is used for selection, progress, and primary actions." = "Der Markenakzent wird für Auswahl, Fortschritt und primäre Aktionen verwendet.";
 "Videos" = "Videos";
@@ -487,7 +487,10 @@
 "premium.lifetime.error.purchase" = "Der Kauf konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.";
 "Contact Developer" = "Kontaktieren Sie den Entwickler";
 "Send feedback, questions, or bug reports by email." = "Senden Sie Feedback, Fragen oder Fehlerberichte per E-Mail.";
-"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Feedback";
+"Filevra Feedback" = "Filevra Feedback";
 "premium.connection.title" = "Netzwerkverbindung erforderlich";
 "premium.connection.message" = "Stelle eine Internetverbindung her und versuche es erneut.";
 "premium.retry" = "Erneut versuchen";
+"settings.intro.title" = "Einführung";
+"settings.intro.detail" = "Entdecke die vier Einführungsseiten von Filevra.";
+"settings.intro.close" = "Schließen";

@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "写真ライブラリの画像を表示するにはアクセスを許可してください。";
 "Allow Photo Access" = "写真へのアクセスを許可";
 "Continue" = "続ける";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "続けて、File Cleaner & Media Converterが表示、分析、整理できる写真とビデオを選択します。";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "続けて、Filevraが表示、分析、整理できる写真とビデオを選択します。";
 "Photo access is off" = "写真へのアクセスがオフです";
 "Enable Photos access in Settings to display your images." = "画像を表示するには「設定」で写真へのアクセスを有効にしてください。";
 "Open Settings" = "設定を開く";
@@ -21,7 +21,7 @@
 "No Photos" = "写真がありません";
 "No images are available in your Photos library." = "写真ライブラリに利用できる画像がありません。";
 "Limited Photo Access" = "写真への制限付きアクセス";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "選択した写真のみ File Cleaner & Media Converter で利用できます。";
+"Only the photos you selected are available to Filevra." = "選択した写真のみ Filevra で利用できます。";
 "Manage Selected Photos" = "選択した写真を管理";
 "Choose Folder" = "フォルダを選択";
 "Analyzed Folder" = "解析済みフォルダ";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Liquid Glassタブバー";
 "Use the native Liquid Glass tab bar for primary navigation." = "主要なナビゲーションにネイティブのLiquid Glassタブバーを使用します。";
 "Choose the appearance used throughout the app." = "App 全体で使用する外観を選択します。";
-"CleanMyIPhone Pink" = "CleanMyIPhone ピンク";
+"Filevra Pink" = "Filevra ピンク";
 "Accent Color" = "アクセントカラー";
 "The brand accent is used for selection, progress, and primary actions." = "ブランドのアクセントカラーは、選択、進行状況、主要操作に使用されます。";
 "Videos" = "ビデオ";
@@ -474,7 +474,7 @@
 "premium.lifetime.error.purchase" = "購入を完了できませんでした。もう一度お試しください。";
 "Contact Developer" = "開発者に連絡";
 "Send feedback, questions, or bug reports by email." = "ご意見、ご質問、不具合報告をメールで送信します。";
-"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter フィードバック";
+"Filevra Feedback" = "Filevra フィードバック";
 "premium.connection.title" = "ネットワーク接続が必要です";
 "premium.connection.message" = "インターネットに接続して、もう一度お試しください。";
 "premium.retry" = "再試行";
@@ -489,3 +489,6 @@
 "intro.next" = "続ける";
 "intro.start" = "使い始める";
 "intro.demo" = "サンプル";
+"settings.intro.title" = "機能紹介";
+"settings.intro.detail" = "Filevra の4ページの機能紹介をご覧ください。";
+"settings.intro.close" = "閉じる";

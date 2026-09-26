@@ -13,9 +13,20 @@ struct PremiumAccessRootView: View {
                 case .checking:
                     ZStack {
                         AppBackground()
-                        ProgressView()
-                            .controlSize(.large)
-                            .accessibilityLabel("premium.entitlement.checking")
+                        if entitlementStore.verificationUnavailable {
+                            VStack(spacing: 16) {
+                                Text("premium.connection.message")
+                                    .multilineTextAlignment(.center)
+                                Button("premium.retry") {
+                                    Task { await entitlementStore.refresh() }
+                                }
+                            }
+                            .padding()
+                        } else {
+                            ProgressView()
+                                .controlSize(.large)
+                                .accessibilityLabel("premium.entitlement.checking")
+                        }
                     }
                 case .entitled:
                     ContentView()

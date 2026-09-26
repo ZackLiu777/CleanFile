@@ -18,13 +18,23 @@ final class PremiumEntitlementStore: ObservableObject {
 
     @Published private(set) var accessState: AccessState = .checking
     @Published private(set) var startupConnectivity: StartupConnectivity = .pending
+    @Published private(set) var verificationUnavailable = false
 
     private var updatesTask: Task<Void, Never>?
     private var hasStarted = false
+    private let subscriptionStatusLookup: @MainActor (String) async throws -> [Product.SubscriptionInfo.Status]
     /// Prevents an entitlement refresh started before a verified transaction
     /// from overwriting the newer purchase result when it completes later.
     private var entitlementRevision = 0
     private static let logger = Logger(subsystem: "ZaneLiao.CleanPhone", category: "Premium")
+
+    init(
+        subscriptionStatusLookup: @escaping @MainActor (String) async throws -> [Product.SubscriptionInfo.Status] = {
+            try await Product.SubscriptionInfo.status(for: $0)
+        }
+    ) {
+        self.subscriptionStatusLookup = subscriptionStatusLookup
+    }
 
     deinit {
         updatesTask?.cancel()
@@ -72,10 +82,11 @@ final class PremiumEntitlementStore: ObservableObject {
 
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result,
-                  isActivePremiumTransaction(transaction) else {
+                  isCurrentPremiumEntitlement(transaction) else {
                 continue
             }
             guard revisionAtStart == entitlementRevision, !Task.isCancelled else { return }
+            verificationUnavailable = false
             accessState = .entitled
             return
         }
@@ -89,20 +100,30 @@ final class PremiumEntitlementStore: ObservableObject {
             let isActive = isActivePremiumTransaction(transaction)
             Self.logger.debug("Latest entitlement: product=\(productID, privacy: .public) active=\(isActive) revoked=\(transaction.revocationDate != nil) upgraded=\(transaction.isUpgraded)")
             guard isActive else { continue }
+            verificationUnavailable = false
             accessState = .entitled
             return
         }
 
         // Subscription status is also queried because Xcode StoreKit testing can
         // surface an existing subscription without replaying a transaction update.
-        if await hasActiveSubscriptionStatus() {
+        let subscriptionStatus = await hasActiveSubscriptionStatus()
+        if subscriptionStatus == true {
             guard revisionAtStart == entitlementRevision, !Task.isCancelled else { return }
+            verificationUnavailable = false
             accessState = .entitled
             return
         }
 
         guard revisionAtStart == entitlementRevision, !Task.isCancelled else { return }
-        accessState = .notEntitled
+        verificationUnavailable = subscriptionStatus == nil
+        // A failed StoreKit lookup is not evidence that a purchase expired.
+        // Keep existing access, or keep checking on a fresh installation.
+        if subscriptionStatus == false {
+            accessState = .notEntitled
+        } else if accessState != .entitled {
+            accessState = .checking
+        }
     }
 
     /// Returns true only when StoreKit delivered a verified Premium transaction.
@@ -120,6 +141,7 @@ final class PremiumEntitlementStore: ObservableObject {
 
             // Access is delivered before finishing, as required by StoreKit.
             entitlementRevision &+= 1
+            verificationUnavailable = false
             accessState = .entitled
             await transaction.finish()
             return true
@@ -143,6 +165,7 @@ final class PremiumEntitlementStore: ObservableObject {
 
                 if self?.isActivePremiumTransaction(transaction) == true {
                     self?.entitlementRevision &+= 1
+                    self?.verificationUnavailable = false
                     self?.accessState = .entitled
                 } else {
                     self?.entitlementRevision &+= 1
@@ -166,11 +189,9 @@ final class PremiumEntitlementStore: ObservableObject {
         }
     }
 
-    private func hasActiveSubscriptionStatus() async -> Bool {
-        guard let groupID = PremiumConfiguration.subscriptionGroupID,
-              let statuses = try? await Product.SubscriptionInfo.status(for: groupID) else {
-            return false
-        }
+    private func hasActiveSubscriptionStatus() async -> Bool? {
+        guard let groupID = PremiumConfiguration.subscriptionGroupID else { return false }
+        guard let statuses = try? await subscriptionStatusLookup(groupID) else { return nil }
 
         return statuses.contains { status in
             guard status.state == .subscribed || status.state == .inGracePeriod,
@@ -193,6 +214,17 @@ final class PremiumEntitlementStore: ObservableObject {
         }
         return transaction.productType == .autoRenewable
             && (transaction.expirationDate.map { $0 > Date() } ?? false)
+    }
+
+    private func isCurrentPremiumEntitlement(_ transaction: Transaction) -> Bool {
+        guard PremiumConfiguration.productIDs.contains(transaction.productID),
+              transaction.revocationDate == nil, !transaction.isUpgraded else { return false }
+        if transaction.productID == PremiumConfiguration.lifetimeProductID {
+            return transaction.productType == .nonConsumable
+        }
+        // StoreKit includes both subscribed and in-grace-period subscriptions
+        // in currentEntitlements, even if the original transaction has expired.
+        return transaction.productType == .autoRenewable
     }
 
     func recordPurchaseError(_ error: Error) {

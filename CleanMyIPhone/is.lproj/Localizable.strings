@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "Leyfðu aðgang til að birta myndirnar í myndasafninu þínu.";
 "Allow Photo Access" = "Leyfa myndaaðgang";
 "Continue" = "Halda áfram";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "Haltu áfram að velja hvaða myndir og myndbönd File Cleaner & Media Converter getur sýnt, greint og hjálpað þér að skipuleggja.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "Haltu áfram að velja hvaða myndir og myndbönd Filevra getur sýnt, greint og hjálpað þér að skipuleggja.";
 "Photo access is off" = "Slökkt er á myndaaðgangi";
 "Enable Photos access in Settings to display your images." = "Virkjaðu myndaaðgang í stillingum til að birta myndirnar þínar.";
 "Open Settings" = "Opnaðu Stillingar";
@@ -21,7 +21,7 @@
 "No Photos" = "Engar myndir";
 "No images are available in your Photos library." = "Engar myndir eru tiltækar í myndasafninu þínu.";
 "Limited Photo Access" = "Takmarkaður myndaaðgangur";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "Aðeins myndirnar sem þú valdir eru tiltækar fyrir File Cleaner & Media Converter.";
+"Only the photos you selected are available to Filevra." = "Aðeins myndirnar sem þú valdir eru tiltækar fyrir Filevra.";
 "Manage Selected Photos" = "Stjórna völdum myndum";
 "Choose Folder" = "Veldu Mappa";
 "Analyzed Folder" = "Greinuð mappa";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "Fljótandi glerflipi";
 "Use the native Liquid Glass tab bar for primary navigation." = "Notaðu innfædda Liquid Glass flipastikuna fyrir aðalleiðsögn.";
 "Choose the appearance used throughout the app." = "Veldu útlitið sem notað er í gegnum forritið.";
-"CleanMyIPhone Pink" = "CleanMyIPhone bleikur";
+"Filevra Pink" = "Filevra bleikur";
 "Accent Color" = "Hreim litur";
 "The brand accent is used for selection, progress, and primary actions." = "Vörumerkjahreimurinn er notaður fyrir val, framfarir og aðalaðgerðir.";
 "Videos" = "Myndbönd";
@@ -487,7 +487,10 @@
 "premium.lifetime.error.purchase" = "Ekki tókst að ganga frá kaupunum. Vinsamlegast reyndu aftur.";
 "Contact Developer" = "Hafðu samband við þróunaraðila";
 "Send feedback, questions, or bug reports by email." = "Sendu athugasemdir, spurningar eða villutilkynningar með tölvupósti.";
-"File Cleaner & Media Converter Feedback" = "File Cleaner & Media Converter Feedback";
+"Filevra Feedback" = "Filevra Feedback";
 "premium.connection.title" = "Nettenging nauðsynleg";
 "premium.connection.message" = "Tengstu internetinu og reyndu aftur.";
 "premium.retry" = "Reyna aftur";
+"settings.intro.title" = "Kynning";
+"settings.intro.detail" = "Skoðaðu fjórar kynningarsíður Filevra.";
+"settings.intro.close" = "Loka";

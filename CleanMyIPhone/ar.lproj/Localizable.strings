@@ -8,7 +8,7 @@
 "Allow access to display the images in your Photos library." = "السماح بالوصول لعرض الصور في مكتبة الصور الخاصة بك.";
 "Allow Photo Access" = "السماح بالوصول إلى الصور";
 "Continue" = "تابع";
-"Continue to choose which photos and videos File Cleaner & Media Converter can display, analyze, and help you organize." = "استمر في اختيار الصور ومقاطع الفيديو التي يمكن لـ File Cleaner & Media Converter عرضها وتحليلها ومساعدتك في تنظيمها.";
+"Continue to choose which photos and videos Filevra can display, analyze, and help you organize." = "استمر في اختيار الصور ومقاطع الفيديو التي يمكن لـ Filevra عرضها وتحليلها ومساعدتك في تنظيمها.";
 "Photo access is off" = "الوصول إلى الصور متاح إيقاف";
 "Enable Photos access in Settings to display your images." = "تمكين الوصول إلى الصور في الإعدادات لعرض صورك.";
 "Open Settings" = "افتح الإعدادات";
@@ -21,7 +21,7 @@
 "No Photos" = "لا توجد صور";
 "No images are available in your Photos library." = "لا توجد صور متاحة في صورك المكتبة.";
 "Limited Photo Access" = "وصول محدود للصور";
-"Only the photos you selected are available to File Cleaner & Media Converter." = "فقط الصور التي حددتها متاحة لـ File Cleaner & Media Converter.";
+"Only the photos you selected are available to Filevra." = "فقط الصور التي حددتها متاحة لـ Filevra.";
 "Manage Selected Photos" = "إدارة الصور المحددة";
 "Choose Folder" = "اختيار المجلد";
 "Analyzed Folder" = "المجلد المُحلل";
@@ -54,7 +54,7 @@
 "Liquid Glass Tab" = "علامة تبويب زجاجية سائلة";
 "Use the native Liquid Glass tab bar for primary navigation." = "استخدم شريط علامات التبويب Liquid Glass الأصلي للتنقل الأساسي.";
 "Choose the appearance used throughout the app." = "اختر المظهر المستخدم في جميع أنحاء التطبيق.";
-"CleanMyIPhone Pink" = "CleanMyIPhone Pink";
+"Filevra Pink" = "Filevra Pink";
 "Accent Color" = "لون التمييز";
 "The brand accent is used for selection, progress, and primary actions." = "يتم استخدام لهجة العلامة التجارية للاختيار والتقدم والإجراءات الأساسية.";
 "Videos" = "مقاطع الفيديو";
@@ -487,7 +487,10 @@
 "premium.lifetime.error.purchase" = "تعذر إكمال عملية الشراء. يرجى المحاولة مرة أخرى.";
 "Contact Developer" = "اتصل بالمطور";
 "Send feedback, questions, or bug reports by email." = "إرسال التعليقات أو الأسئلة أو تقارير الأخطاء عبر البريد الإلكتروني.";
-"File Cleaner & Media Converter Feedback" = "تعليقات File Cleaner & Media Converter";
+"Filevra Feedback" = "تعليقات Filevra";
 "premium.connection.title" = "يلزم الاتصال بالشبكة";
 "premium.connection.message" = "اتصل بالإنترنت، ثم حاول مرة أخرى.";
 "premium.retry" = "إعادة المحاولة";
+"settings.intro.title" = "مقدمة التطبيق";
+"settings.intro.detail" = "تصفح صفحات التعريف الأربع بتطبيق Filevra.";
+"settings.intro.close" = "إغلاق";
