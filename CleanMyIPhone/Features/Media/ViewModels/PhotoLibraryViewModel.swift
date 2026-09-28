@@ -43,6 +43,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     private var analysisGeneration = 0
     private var hasLoadedLibrary = false
     private var initialLoadTask: Task<Void, Never>?
+    private var storageSnapshotTask: Task<Void, Never>?
     private var libraryRevision: MediaLibraryRevision?
     private var assetsByIdentifier: [String: PHAsset] = [:]
     private var displayNamesByIdentifier: [String: String] = [:]
@@ -75,7 +76,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     private func refreshLibrary(resetAnalysis: Bool) {
         guard !isRunningInPreviews else { return }
 
-        storageSnapshot = Self.loadStorageSnapshot()
+        refreshStorageSnapshot()
 
         analysisGeneration &+= 1
         analysisTask?.cancel()
@@ -122,21 +123,15 @@ final class PhotoLibraryViewModel: ObservableObject {
         defer {
             if generation == analysisGeneration { isLoading = false }
         }
+        // Device capacity does not require Photos permission. Start it even when
+        // this launch still needs the user to grant access to the photo library.
+        refreshStorageSnapshot()
         authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
         guard authorizationStatus == .authorized || authorizationStatus == .limited else {
             hasLoadedLibrary = true
             return
         }
 
-        // Capacity queries may contact system services after reboot. They must not
-        // hold up the media inventory or the opening animation.
-        Task { [weak self] in
-            let storage = await Task.detached(priority: .utility) {
-                Self.loadStorageSnapshot()
-            }.value
-            guard let self, storageSnapshot == nil else { return }
-            storageSnapshot = storage
-        }
         async let stateSnapshot = stateStore.loadMediaState()
         async let sizeSnapshot = stateStore.loadMediaSizeIndex()
         let fetchedAssets: [PHAsset]
@@ -166,6 +161,7 @@ final class PhotoLibraryViewModel: ObservableObject {
             Task { @MainActor [weak self] in
                 self?.authorizationStatus = status
                 self?.isLoading = false
+                self?.refreshStorageSnapshot()
                 self?.fetchAssetsIfAllowed()
                 self?.startColdLaunchAnalysisIfNeeded()
             }
@@ -567,7 +563,7 @@ final class PhotoLibraryViewModel: ObservableObject {
             scheduleMediaSizeIndexSave()
             updateAnalysisAfterDeleting(deletedIDs)
             persistAnalysisState()
-            storageSnapshot = Self.loadStorageSnapshot()
+            refreshStorageSnapshot()
             deletionState = .success(
                 deletedCount: deletedIDs.count,
                 estimatedBytes: estimatedBytes
@@ -865,22 +861,53 @@ final class PhotoLibraryViewModel: ObservableObject {
         return MediaLibraryRevision(assetCount: assets.count, fingerprint: fingerprint)
     }
 
-    /// 加载 `loadStorageSnapshot` 所需的数据，并将结果转换为当前层可消费的状态。
-    nonisolated private static func loadStorageSnapshot() -> DeviceStorageSnapshot? {
-        let baseURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-            ?? FileManager.default.temporaryDirectory
-        guard let values = try? baseURL.resourceValues(forKeys: [
-            .volumeTotalCapacityKey,
-            .volumeAvailableCapacityForImportantUsageKey
-        ]),
-              let totalCapacity = values.volumeTotalCapacity,
-              let availableCapacity = values.volumeAvailableCapacityForImportantUsage else {
-            return nil
+    /// Capacity queries can be temporarily unavailable after reboot. Keep the last
+    /// successful value and retry without blocking the UI or duplicating requests.
+    private func refreshStorageSnapshot() {
+        guard !isRunningInPreviews, storageSnapshotTask == nil else { return }
+        storageSnapshotTask = Task { [weak self] in
+            defer { self?.storageSnapshotTask = nil }
+            for attempt in 0..<3 {
+                guard !Task.isCancelled else { return }
+                if attempt > 0 {
+                    do {
+                        try await Task.sleep(for: .milliseconds(500 * attempt))
+                    } catch { return }
+                }
+                let storage = await Task.detached(priority: .utility) {
+                    Self.loadStorageSnapshot()
+                }.value
+                guard !Task.isCancelled else { return }
+                if let storage {
+                    self?.storageSnapshot = storage
+                    return
+                }
+            }
         }
+    }
 
+    /// Read from the existing sandbox root; Documents may not have been created yet.
+    nonisolated private static func loadStorageSnapshot() -> DeviceStorageSnapshot? {
+        let baseURL = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
+        let values = try? baseURL.resourceValues(forKeys: [
+            .volumeTotalCapacityKey,
+            .volumeAvailableCapacityForImportantUsageKey,
+            .volumeAvailableCapacityKey
+        ])
+        if let total = values?.volumeTotalCapacity, total > 0,
+           let available = values?.volumeAvailableCapacityForImportantUsage
+                ?? values?.volumeAvailableCapacity.map({ Int64($0) }) {
+            return DeviceStorageSnapshot(
+                totalBytes: Int64(total), availableBytes: min(max(0, available), Int64(total))
+            )
+        }
+        // Some volumes do not provide the important-usage estimate. The standard
+        // filesystem attributes still provide real capacity values for the chart.
+        guard let attributes = try? FileManager.default.attributesOfFileSystem(forPath: baseURL.path),
+              let total = (attributes[.systemSize] as? NSNumber)?.int64Value, total > 0,
+              let available = (attributes[.systemFreeSize] as? NSNumber)?.int64Value else { return nil }
         return DeviceStorageSnapshot(
-            totalBytes: Int64(totalCapacity),
-            availableBytes: availableCapacity
+            totalBytes: total, availableBytes: min(max(0, available), total)
         )
     }
 
