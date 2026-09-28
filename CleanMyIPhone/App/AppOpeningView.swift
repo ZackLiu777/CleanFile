@@ -35,31 +35,43 @@ struct AppOpeningView: View {
 /// Keeps startup presentation separate from the application's navigation and business state.
 struct AppOpeningContainer<Content: View>: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var showsOpening: Bool
+    @State private var launchState: AppLaunchState
+    private let destination: AppLaunchState.Destination
     private let content: Content
 
-    init(@ViewBuilder content: () -> Content) {
+    init(destination: AppLaunchState.Destination, @ViewBuilder content: () -> Content) {
         self.content = content()
+        self.destination = destination
         let arguments = ProcessInfo.processInfo.arguments
-        _showsOpening = State(initialValue: !arguments.contains { $0.hasPrefix("--ui-test") })
+        _launchState = State(initialValue: AppLaunchState(
+            destination: destination,
+            skipsAnimation: arguments.contains { $0.hasPrefix("--ui-test") }
+        ))
     }
 
     var body: some View {
         ZStack {
             content
-            if showsOpening {
+                .allowsHitTesting(!launchState.showsOpening)
+                .accessibilityHidden(launchState.showsOpening)
+            if launchState.showsOpening {
                 AppOpeningView(animationsEnabled: !reduceMotion)
                     .transition(.opacity)
                     .zIndex(1)
             }
         }
-        .task(id: showsOpening) {
-            guard showsOpening else { return }
+        .onChange(of: destination) { _, value in
+            withAnimation(.easeOut(duration: reduceMotion ? 0.15 : 0.32)) {
+                launchState.destinationChanged(to: value)
+            }
+        }
+        .task {
+            guard launchState.phase == .animating else { return }
             let duration: Duration = reduceMotion ? .milliseconds(450) : .milliseconds(2050)
             try? await Task.sleep(for: duration)
             guard !Task.isCancelled else { return }
             withAnimation(.easeOut(duration: reduceMotion ? 0.15 : 0.32)) {
-                showsOpening = false
+                launchState.animationFinished()
             }
         }
     }

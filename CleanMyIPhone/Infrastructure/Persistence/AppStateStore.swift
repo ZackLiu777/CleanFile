@@ -44,6 +44,23 @@ nonisolated struct MediaSizeIndexEntry: Codable, Sendable {
     let byteCount: Int64
 }
 
+/// Hashes are tied to both the source metadata and the dHash pipeline version.
+/// This cache never establishes a deletion decision; Vision still verifies pairs.
+nonisolated struct MediaHashCacheSnapshot: Codable, Sendable {
+    static let currentVersion = 1
+    let version: Int
+    let entries: [String: Entry]
+
+    nonisolated struct Entry: Codable, Sendable {
+        let cacheKey: FeatureCacheKey
+        let hash: UInt64
+    }
+
+    var compatibleEntries: [String: Entry] {
+        version == Self.currentVersion ? entries : [:]
+    }
+}
+
 /// 定义 `FileStateSnapshot` 的值语义数据与相关行为。
 nonisolated struct FileStateSnapshot: Codable, Sendable {
     static let currentSchemaVersion = 3
@@ -192,6 +209,7 @@ actor AppStateStore {
     private enum SnapshotName: String {
         case media = "media-state.json"
         case mediaSizes = "media-size-index.json"
+        case mediaHashes = "media-hash-cache.json"
         case files = "file-state.json"
         case fileDashboard = "file-dashboard.json"
     }
@@ -228,6 +246,14 @@ actor AppStateStore {
 
     func saveMediaSizeIndex(_ snapshot: MediaSizeIndexSnapshot?) {
         save(snapshot, name: .mediaSizes)
+    }
+
+    func loadMediaHashCache() -> MediaHashCacheSnapshot? {
+        load(MediaHashCacheSnapshot.self, name: .mediaHashes)
+    }
+
+    func saveMediaHashCache(_ snapshot: MediaHashCacheSnapshot) {
+        save(snapshot, name: .mediaHashes)
     }
 
     /// 加载 `loadFileState` 所需的数据，并将结果转换为当前层可消费的状态。

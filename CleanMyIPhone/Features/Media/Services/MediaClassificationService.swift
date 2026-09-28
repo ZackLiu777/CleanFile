@@ -60,6 +60,9 @@ struct MediaClassificationService {
         )
         try Task.checkCancellation()
 
+        await featureEngine.persistHashes()
+        try Task.checkCancellation()
+
         let availableHashes = hashOutcomes.compactMap(\.feature)
         let hashSkippedCount = hashOutcomes.count - availableHashes.count
         // 哈希索引在大图库中属于 CPU 密集工作，不能继承 MediaClassificationService
@@ -197,12 +200,30 @@ struct MediaClassificationService {
     ) async -> [FeatureOutcome] {
         guard !candidates.isEmpty else { return [] }
         var outcomes: [FeatureOutcome] = []
+        // Restore every reusable result before scheduling cold PhotoKit requests.
+        // Otherwise four new/iCloud-backed assets at the front can hold all cached
+        // assets behind them and leave the displayed count at zero.
+        let cached = await featureEngine.cachedHashes(for: candidates)
+        var pending: [SimilarityCandidate] = []
+        for candidate in candidates {
+            if let hash = cached[candidate.id] {
+                outcomes.append(FeatureOutcome(feature: CandidateFeature(
+                    id: candidate.id, perceptualHash: hash
+                )))
+            } else {
+                pending.append(candidate)
+            }
+        }
+        progress(MediaAnalysisProgress(
+            phase: .generatingFeatures, completed: outcomes.count, total: candidates.count
+        ))
+        guard !pending.isEmpty, !Task.isCancelled else { return outcomes }
         var nextIndex = 0
 
         await withTaskGroup(of: FeatureOutcome.self) { group in
-            let initialCount = min(maximumConcurrentHashRequests, candidates.count)
+            let initialCount = min(maximumConcurrentHashRequests, pending.count)
             for _ in 0 ..< initialCount {
-                let candidate = candidates[nextIndex]
+                let candidate = pending[nextIndex]
                 let asset = assetsByIdentifier[candidate.id]
                 group.addTask { @MainActor in
                     await generateHash(for: candidate, asset: asset)
@@ -221,8 +242,8 @@ struct MediaClassificationService {
                 }
                 if Task.isCancelled {
                     group.cancelAll()
-                } else if nextIndex < candidates.count {
-                    let candidate = candidates[nextIndex]
+                } else if nextIndex < pending.count {
+                    let candidate = pending[nextIndex]
                     let asset = assetsByIdentifier[candidate.id]
                     group.addTask { @MainActor in
                         await generateHash(for: candidate, asset: asset)
@@ -488,7 +509,7 @@ private struct SimilarityCandidate: Sendable {
 }
 
 /// 定义 `FeatureCacheKey` 的值语义数据与相关行为。
-nonisolated private struct FeatureCacheKey: Hashable, Sendable {
+nonisolated struct FeatureCacheKey: Codable, Hashable, Sendable {
     let modificationDate: Date?
     let pixelWidth: Int
     let pixelHeight: Int
@@ -680,16 +701,46 @@ private actor VisionFeatureEngine {
     }
 
     private var features: [String: CachedFeature] = [:]
+    private var hasLoadedPersistedHashes = false
 
     /// 封装 `retainFeatures` 对应的局部行为，供当前类型在统一入口下复用。
-    func retainFeatures(for identifiers: Set<String>) {
+    func retainFeatures(for identifiers: Set<String>) async {
+        if !hasLoadedPersistedHashes {
+            if let snapshot = await AppStateStore.shared.loadMediaHashCache() {
+                let restored = snapshot.compatibleEntries.mapValues {
+                    CachedFeature(cacheKey: $0.cacheKey, perceptualHash: $0.hash, observation: nil)
+                }
+                features.merge(restored) { current, _ in current }
+            }
+            hasLoadedPersistedHashes = true
+        }
         features = features.filter { identifiers.contains($0.key) }
+    }
+
+    func persistHashes() async {
+        let snapshot = MediaHashCacheSnapshot(
+            version: MediaHashCacheSnapshot.currentVersion,
+            entries: features.mapValues {
+                MediaHashCacheSnapshot.Entry(cacheKey: $0.cacheKey, hash: $0.perceptualHash)
+            }
+        )
+        await AppStateStore.shared.saveMediaHashCache(snapshot)
     }
 
     /// 封装 `cachedHash` 对应的局部行为，供当前类型在统一入口下复用。
     func cachedHash(id: String, cacheKey: FeatureCacheKey) -> UInt64? {
         guard let feature = features[id], feature.cacheKey == cacheKey else { return nil }
         return feature.perceptualHash
+    }
+
+    func cachedHashes(for candidates: [SimilarityCandidate]) -> [String: UInt64] {
+        var hashes: [String: UInt64] = [:]
+        for candidate in candidates {
+            if let hash = cachedHash(id: candidate.id, cacheKey: candidate.cacheKey) {
+                hashes[candidate.id] = hash
+            }
+        }
+        return hashes
     }
 
     /// 保存全相册轻量 dHash；资源版本变化时一并淘汰旧 Vision 特征。

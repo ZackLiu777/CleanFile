@@ -36,11 +36,13 @@ final class PhotoLibraryViewModel: ObservableObject {
     private let imageManager = PHCachingImageManager()
     private let thumbnailCache = NSCache<NSString, UIImage>()
     private let classificationService = MediaClassificationService()
+    private let inventory = MediaLibraryInventory()
     private let stateStore = AppStateStore.shared
     private let isRunningInPreviews: Bool
     private var analysisTask: Task<Void, Never>?
     private var analysisGeneration = 0
     private var hasLoadedLibrary = false
+    private var initialLoadTask: Task<Void, Never>?
     private var libraryRevision: MediaLibraryRevision?
     private var assetsByIdentifier: [String: PHAsset] = [:]
     private var displayNamesByIdentifier: [String: String] = [:]
@@ -94,20 +96,63 @@ final class PhotoLibraryViewModel: ObservableObject {
         fetchAssets()
     }
 
-    /// Loads the latest PhotoKit inventory, restores reusable indexes, then starts
-    /// one analysis for this app process. ContentView calls this behind the opening
-    /// artwork so a cold-launch refresh does not wait for the Media tab to appear.
+    /// Overlap disk/PhotoKit initialization with the original opening animation.
+    /// A view reconstruction joins this load instead of starting another one.
     func loadIfNeeded() async {
+        guard !isRunningInPreviews else { return }
+        if let initialLoadTask {
+            await initialLoadTask.value
+            return
+        }
         guard !hasLoadedLibrary else { return }
+        let generation = analysisGeneration
+        let task = Task { [weak self] in
+            guard let self else { return }
+            defer { initialLoadTask = nil }
+            await loadInitialLibrary(generation: generation)
+        }
+        initialLoadTask = task
+        await task.value
+    }
+
+    private func loadInitialLibrary(generation: Int) async {
         let interval = MediaPerformance.begin("Media Initial Load")
         defer { MediaPerformance.end("Media Initial Load", id: interval) }
-        hasLoadedLibrary = true
+        isLoading = true
+        defer {
+            if generation == analysisGeneration { isLoading = false }
+        }
+        authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        guard authorizationStatus == .authorized || authorizationStatus == .limited else {
+            hasLoadedLibrary = true
+            return
+        }
+
+        // Capacity queries may contact system services after reboot. They must not
+        // hold up the media inventory or the opening animation.
+        Task { [weak self] in
+            let storage = await Task.detached(priority: .utility) {
+                Self.loadStorageSnapshot()
+            }.value
+            guard let self, storageSnapshot == nil else { return }
+            storageSnapshot = storage
+        }
         async let stateSnapshot = stateStore.loadMediaState()
         async let sizeSnapshot = stateStore.loadMediaSizeIndex()
+        let fetchedAssets: [PHAsset]
+        do {
+            fetchedAssets = try await inventory.fetch()
+        } catch {
+            return
+        }
         let (snapshot, persistedSizes) = await (stateSnapshot, sizeSnapshot)
-        refreshLibrary(resetAnalysis: false)
+        guard generation == analysisGeneration, !Task.isCancelled else { return }
+        assets = fetchedAssets
+        rebuildAssetIndex()
         restoreMediaSizeIndex(from: persistedSizes)
+        hasLoadedLibrary = true
         let canReuseAnalysis = restoreAnalysis(from: snapshot)
+        isLoading = false
         startColdLaunchAnalysisIfNeeded(requiresAnalysis: !canReuseAnalysis)
     }
 
@@ -799,7 +844,9 @@ final class PhotoLibraryViewModel: ObservableObject {
             }
         }
 
-        for asset in assets {
+        // PhotoKit may return equal-date assets in a different order after reboot.
+        // Inventory identity must not depend on that display ordering.
+        for asset in assets.sorted(by: { $0.localIdentifier < $1.localIdentifier }) {
             for byte in asset.localIdentifier.utf8 {
                 fingerprint ^= UInt64(byte)
                 fingerprint &*= prime
@@ -819,7 +866,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     }
 
     /// 加载 `loadStorageSnapshot` 所需的数据，并将结果转换为当前层可消费的状态。
-    private static func loadStorageSnapshot() -> DeviceStorageSnapshot? {
+    nonisolated private static func loadStorageSnapshot() -> DeviceStorageSnapshot? {
         let baseURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         guard let values = try? baseURL.resourceValues(forKeys: [

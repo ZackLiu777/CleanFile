@@ -24,6 +24,7 @@ final class PremiumEntitlementStore: ObservableObject {
     private var connectivityTask: Task<Void, Never>?
     private var unfinishedTransactionsTask: Task<Void, Never>?
     private var startupTimeoutTask: Task<Void, Never>?
+    private var refreshTask: Task<Void, Never>?
     private var hasStarted = false
     private let subscriptionStatusLookup: @MainActor (String) async throws -> [Product.SubscriptionInfo.Status]
     /// Prevents an entitlement refresh started before a verified transaction
@@ -44,6 +45,7 @@ final class PremiumEntitlementStore: ObservableObject {
         connectivityTask?.cancel()
         unfinishedTransactionsTask?.cancel()
         startupTimeoutTask?.cancel()
+        refreshTask?.cancel()
     }
 
     func start() async {
@@ -101,8 +103,28 @@ final class PremiumEntitlementStore: ObservableObject {
     }
 
     func refresh() async {
-        entitlementRevision &+= 1
-        let revisionAtStart = entitlementRevision
+        // Launch, scene activation, and unfinished transactions share one lookup.
+        // Only a transaction event invalidates its result, not another caller.
+        if let refreshTask {
+            await refreshTask.value
+            return
+        }
+        let task = Task { [weak self] in
+            guard let self else { return }
+            defer { refreshTask = nil }
+            repeat {
+                let revision = entitlementRevision
+                await refreshEntitlements(revisionAtStart: revision)
+                if revision == entitlementRevision { break }
+                // A purchase/revocation arrived while the lookup was suspended.
+                // Re-evaluate instead of losing that event to a stale in-flight call.
+            } while !Task.isCancelled
+        }
+        refreshTask = task
+        await task.value
+    }
+
+    private func refreshEntitlements(revisionAtStart: Int) async {
 
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result,

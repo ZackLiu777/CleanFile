@@ -119,7 +119,7 @@ struct PhotosView: View {
     @ViewBuilder
     private var mediaContent: some View {
         if viewModel.isLoading {
-            ProgressView("Loading media…")
+            mediaDashboard
         } else if viewModel.assets.isEmpty {
             ContentUnavailableView(
                 "No Media",
@@ -181,7 +181,9 @@ struct PhotosView: View {
             VStack(alignment: .leading, spacing: 14) {
                 Label("Smart Media Analysis", systemImage: "sparkles")
                     .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
-                Text("Find visually similar photos and organize videos, screenshots, and Live Photos.")
+                Text(viewModel.isLoading
+                     ? LocalizedStringKey("Loading media…")
+                     : LocalizedStringKey("Find visually similar photos and organize videos, screenshots, and Live Photos."))
                     .foregroundStyle(.secondary)
                 Button {
                     viewModel.startAnalysis()
@@ -191,6 +193,7 @@ struct PhotosView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(theme.accentPrimary)
+                .disabled(viewModel.isLoading)
             }
             .mediaAnalysisCard()
 

@@ -18,6 +18,7 @@ import SwiftUI
 struct CleanMyIPhoneApp: App {
     @StateObject private var themeSettings: ThemeSettings
     @StateObject private var premiumEntitlementStore: PremiumEntitlementStore
+    @AppStorage("hasCompletedFirstLaunchIntroduction") private var hasCompletedIntroduction = false
 
     init() {
         let defaults = UserDefaults.standard
@@ -64,7 +65,7 @@ struct CleanMyIPhoneApp: App {
 
     var body: some Scene {
         WindowGroup {
-            AppOpeningContainer {
+            AppOpeningContainer(destination: launchDestination) {
                 FirstLaunchIntroductionContainer {
                     rootView
                 }
@@ -78,6 +79,14 @@ struct CleanMyIPhoneApp: App {
             .tint(themeSettings.theme.accentPrimary)
             .foregroundStyle(themeSettings.theme.textPrimary)
         }
+    }
+
+    private var launchDestination: AppLaunchState.Destination {
+        if !hasCompletedIntroduction || PremiumConfiguration.bypassesEntitlementForUITesting {
+            return .ready
+        }
+        if premiumEntitlementStore.accessState != .checking { return .ready }
+        return premiumEntitlementStore.verificationUnavailable ? .recovery : .preparing
     }
 
     @ViewBuilder
