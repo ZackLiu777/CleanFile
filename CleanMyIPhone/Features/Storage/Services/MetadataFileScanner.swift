@@ -371,7 +371,11 @@ struct MetadataFileScanner: Sendable {
                 }
 
                 let file = ScannedFile(
-                    url: url,
+                    // Coordinated URLs belong to this read operation. Retain the
+                    // selected root's namespace for later scoped operations.
+                    url: relativePath.reduce(selectedDirectory) {
+                        $0.appendingPathComponent($1)
+                    },
                     resourceValues: values,
                     relativePathComponents: relativePath
                 )

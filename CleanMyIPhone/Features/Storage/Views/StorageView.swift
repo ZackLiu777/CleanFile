@@ -695,7 +695,14 @@ private struct ScannedFilesView: View {
             deletionResultTitle ?? "",
             isPresented: Binding(
                 get: { deletionResultTitle != nil },
-                set: { if !$0 { viewModel.clearDeletionResult() } }
+                set: { isPresented in
+                    guard !isPresented else { return }
+                    // SwiftUI can write this binding during reconciliation.
+                    // Defer publishing model state until that update ends.
+                    Task { @MainActor in
+                        viewModel.clearDeletionResult()
+                    }
+                }
             )
         ) {
             Button("OK") { viewModel.clearDeletionResult() }

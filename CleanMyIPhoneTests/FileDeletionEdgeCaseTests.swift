@@ -4,6 +4,29 @@ import Testing
 
 @Suite("File deletion safety boundaries")
 struct FileDeletionEdgeCaseTests {
+    @Test("Directory aliases match, but links escaping the root remain rejected")
+    func canonicalDirectoryBoundaries() throws {
+        let manager = FileManager.default
+        let workspace = manager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try manager.createDirectory(at: workspace, withIntermediateDirectories: true)
+        defer { try? manager.removeItem(at: workspace) }
+        let root = workspace.appendingPathComponent("Root", isDirectory: true)
+        let alias = workspace.appendingPathComponent("Alias", isDirectory: true)
+        let outside = workspace.appendingPathComponent("Outside", isDirectory: true)
+        try manager.createDirectory(at: root, withIntermediateDirectories: true)
+        try manager.createDirectory(at: outside, withIntermediateDirectories: true)
+        try manager.createSymbolicLink(at: alias, withDestinationURL: root)
+        try Data([1]).write(to: root.appendingPathComponent("inside.txt"))
+        try Data([2]).write(to: outside.appendingPathComponent("outside.txt"))
+        try manager.createSymbolicLink(
+            at: root.appendingPathComponent("Escape"), withDestinationURL: outside
+        )
+        #expect(FileDeletionService.contains(root.appendingPathComponent("inside.txt"), root: alias))
+        #expect(FileDeletionService.contains(alias.appendingPathComponent("inside.txt"), root: root))
+        #expect(!FileDeletionService.contains(root.appendingPathComponent("Escape/outside.txt"), root: root))
+        #expect(!FileDeletionService.contains(root, root: alias))
+    }
+
     @Test("Deleting an empty selection is rejected before touching the file system")
     func emptySelectionIsRejected() async {
         let service = FileDeletionService()

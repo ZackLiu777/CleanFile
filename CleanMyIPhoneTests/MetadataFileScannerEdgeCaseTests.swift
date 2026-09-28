@@ -5,6 +5,26 @@ import Testing
 
 @Suite("Metadata scanner edge cases")
 struct MetadataFileScannerEdgeCaseTests {
+    @Test("Scanning through a directory alias keeps deletion URLs under the selected root")
+    func selectedRootNamespaceIsPreserved() async throws {
+        let workspace = try TemporaryScanWorkspace()
+        defer { workspace.remove() }
+        let actual = workspace.root.appendingPathComponent("Actual", isDirectory: true)
+        let selected = workspace.root.appendingPathComponent("Selected", isDirectory: true)
+        try workspace.fileManager.createDirectory(at: actual, withIntermediateDirectories: true)
+        try Data([1]).write(to: actual.appendingPathComponent("item.txt"))
+        try workspace.fileManager.createSymbolicLink(at: selected, withDestinationURL: actual)
+
+        let events = try await collectEvents(
+            from: MetadataFileScanner(fileAccess: UnrestrictedFileAccess()),
+            directory: selected
+        )
+        let result = try #require(completedResult(in: events))
+        let file = try #require(result.files.first)
+        #expect(file.url == selected.appendingPathComponent("item.txt"))
+        #expect(file.relativePathComponents == ["item.txt"])
+    }
+
     @Test("Scanning an empty directory emits a completed zero-file result")
     func emptyDirectoryCompletesWithZeroFiles() async throws {
         let workspace = try TemporaryScanWorkspace()
@@ -61,6 +81,7 @@ struct MetadataFileScannerEdgeCaseTests {
         let file = try #require(result.files.first)
 
         #expect(file.relativePathComponents == ["资料", "Project Files", "报告.pdf"])
+        #expect(file.url == nested.appendingPathComponent("报告.pdf"))
         #expect(result.summary.totalBytes == 10)
         #expect(result.fileTree.byteCount == 10)
         #expect(FileTreeDiagnostics.maximumDepth(of: result.fileTree) == 3)

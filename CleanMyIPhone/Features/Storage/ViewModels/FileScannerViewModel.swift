@@ -39,7 +39,9 @@ nonisolated enum FileStateRestorer {
             return nil
         }
 
-        let bookmark = isStale
+        let hasAccess = restoredRoot.startAccessingSecurityScopedResource()
+        defer { if hasAccess { restoredRoot.stopAccessingSecurityScopedResource() } }
+        let bookmark = isStale && hasAccess
             ? (try? restoredRoot.bookmarkData(
                 options: [],
                 includingResourceValuesForKeys: nil,
@@ -162,6 +164,7 @@ final class FileScannerViewModel: ObservableObject {
     private let stateStore = AppStateStore.shared
     private var selectedDirectoryURL: URL?
     private var selectedSourceURLs: [URL] = []
+    private var activeSourceAccessURLs: [URL] = []
     private var selectedDirectoryBookmark: Data?
     private var skippedFileCount = 0
     private var restoredDashboardAvailable = false
@@ -176,6 +179,15 @@ final class FileScannerViewModel: ObservableObject {
         scanTask?.cancel()
         restoreTask?.cancel()
         persistenceTask?.cancel()
+        activeSourceAccessURLs.forEach { $0.stopAccessingSecurityScopedResource() }
+    }
+
+    private func retainSourceAccess(to sources: [URL]) {
+        // Acquire the next grants before releasing old ones, including when
+        // rescanning the same folder. Keep the original picker/bookmark URLs.
+        let acquired = sources.filter { $0.startAccessingSecurityScopedResource() }
+        activeSourceAccessURLs.forEach { $0.stopAccessingSecurityScopedResource() }
+        activeSourceAccessURLs = acquired
     }
 
     /// Restores the previous scan only when the storage experience is opened.
@@ -213,6 +225,7 @@ final class FileScannerViewModel: ObservableObject {
 
     /// 执行 `scan` 分析流程，在遵守文件访问边界的前提下生成结果。
     func scan(directory: URL) {
+        retainSourceAccess(to: [directory])
         hasAttemptedRestore = true
         restoreTask?.cancel()
         restoreTask = nil
@@ -261,6 +274,7 @@ final class FileScannerViewModel: ObservableObject {
             reportSelectionFailure()
             return
         }
+        retainSourceAccess(to: uniqueSources)
         hasAttemptedRestore = true
         restoreTask?.cancel()
         restoreTask = nil
@@ -344,6 +358,9 @@ final class FileScannerViewModel: ObservableObject {
 
         let knownFiles = files.filter { selectedURLs.contains($0.url) }
         guard knownFiles.count == selectedURLs.count else {
+            #if DEBUG
+            debugPrint("Storage deletion rejected: selection no longer matches current scan")
+            #endif
             deletionState = .failure(.invalidSelection)
             return
         }
@@ -448,6 +465,7 @@ final class FileScannerViewModel: ObservableObject {
     /// Applies already-prepared values without running O(n) work on MainActor.
     private func applyRestoredState(_ prepared: PreparedFileState) {
         guard selectedDirectoryURL == nil else { return }
+        retainSourceAccess(to: [prepared.rootURL])
         selectedDirectoryURL = prepared.rootURL
         selectedSourceURLs = [prepared.rootURL]
         selectedSourceCount = 1
