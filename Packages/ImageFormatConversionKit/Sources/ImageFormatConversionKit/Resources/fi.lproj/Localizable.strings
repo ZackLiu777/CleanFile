@@ -130,6 +130,7 @@
 "quality.explanation.balanced" = "Tasapainottaa kuvan yksityiskohtia ja tiedostokokoa.";
 "quality.explanation.high" = "Säilyttää enemmän yksityiskohtia ja luo yleensä suuremman tiedoston.";
 "video.settings.codec" = "Codec";
+"video.settings.bitrate" = "Bittinopeus";
 "video.settings.resolution" = "Resoluutio";
 "video.empty.title" = "Ei videoita";
 "video.empty.subtitle" = "Aloita pakkaus valitsemalla yksi tai useampi video.";
@@ -256,3 +257,5 @@
 "conversion.replace.selected" = "%d valittu";
 "conversion.guide.audio_replace.title" = "Miksi ääni ei voi korvata alkuperäistä";
 "conversion.guide.audio_replace.detail" = "Äänitiedostot tulevat Tiedostot-apista, eikä iPhone anna sovelluksen poistaa siellä olevia alkuperäisiä turvallisesti puolestasi. Pakattu ääni tallennetaan uutena tiedostona. Tarkista se ja poista sitten vanha tiedosto itse Tiedostot-apissa.";
+"video.settings.bitrate.help" = "100 % käyttää automaattista asetusta. Pienemmät arvot vähentävät bittinopeutta alkuperäisestä.";
+"video.error.hdr_bitrate" = "Säilytä HDR-videon värit ja kirkkaus valitsemalla 100 % (Auto).";

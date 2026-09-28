@@ -130,6 +130,7 @@
 "quality.explanation.balanced" = "在圖片細節與檔案大小之間取得平衡。";
 "quality.explanation.high" = "保留更多圖片細節，檔案通常也會更大。";
 "video.settings.codec" = "編碼器";
+"video.settings.bitrate" = "影片位元率";
 "video.settings.resolution" = "解析度";
 "video.empty.title" = "沒有影片";
 "video.empty.subtitle" = "選擇一個或多個影片開始壓縮。";
@@ -256,3 +257,5 @@
 "conversion.replace.selected" = "已選擇 %d 項";
 "conversion.guide.audio_replace.title" = "為什麼音訊不能取代原始檔";
 "conversion.guide.audio_replace.detail" = "音訊來自「檔案」，iPhone 不允許 App 代替你安全刪除那裡的原始檔。壓縮後的音訊會另存為新檔案；確認新檔案正常後，請自行前往「檔案」刪除舊檔案。";
+"video.settings.bitrate.help" = "100% 使用自動設定。調低後會按原影片位元率的相應比例壓縮。";
+"video.error.hdr_bitrate" = "HDR 影片請使用 100%（自動），以保留原有色彩和亮度。";

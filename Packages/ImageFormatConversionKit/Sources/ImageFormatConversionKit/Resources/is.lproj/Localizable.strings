@@ -130,6 +130,7 @@
 "quality.explanation.balanced" = "Jafnvægi myndupplýsinga og skráarstærð.";
 "quality.explanation.high" = "Geymir meiri smáatriði og býr venjulega til stærri skrá.";
 "video.settings.codec" = "Merkjamál";
+"video.settings.bitrate" = "Bitahraði";
 "video.settings.resolution" = "Upplausn";
 "video.empty.title" = "Engin myndbönd";
 "video.empty.subtitle" = "Veldu eitt eða fleiri myndbönd til að hefja þjöppun.";
@@ -256,3 +257,5 @@
 "conversion.replace.selected" = "%d valin";
 "conversion.guide.audio_replace.title" = "Af hverju hljóð getur ekki komið í stað frumritsins";
 "conversion.guide.audio_replace.detail" = "Hljóðskrár koma úr Skrám og iPhone leyfir forritinu ekki að eyða frumritunum þar á öruggan hátt fyrir þig. Þjappað hljóð er vistað sem ný skrá. Athugaðu hana og eyddu síðan gömlu skránni sjálf/ur í Skrám.";
+"video.settings.bitrate.help" = "100% notar sjálfvirkar stillingar. Lægri gildi lækka bitahraða miðað við upprunalegt myndskeið.";
+"video.error.hdr_bitrate" = "Notaðu 100% (Sjálfvirkt) fyrir HDR-myndskeið til að varðveita liti og birtu.";

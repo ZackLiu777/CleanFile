@@ -77,6 +77,9 @@ public struct VideoConversionRequest: Sendable {
     public let container: VideoOutputContainer
     public let codec: VideoCodec
     public let resolution: VideoResolutionPreset
+    /// Nil keeps the existing system export preset. A value below 1 requests
+    /// a fraction of the source video's bit rate through the explicit encoder.
+    public let bitRateFraction: Double?
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     public init(
@@ -84,13 +87,15 @@ public struct VideoConversionRequest: Sendable {
         destinationDirectory: URL,
         container: VideoOutputContainer,
         codec: VideoCodec,
-        resolution: VideoResolutionPreset
+        resolution: VideoResolutionPreset,
+        bitRateFraction: Double? = nil
     ) {
         self.sourceURL = sourceURL
         self.destinationDirectory = destinationDirectory
         self.container = container
         self.codec = codec
         self.resolution = resolution
+        self.bitRateFraction = bitRateFraction
     }
 }
 
@@ -106,6 +111,7 @@ public struct VideoConversionResult: Sendable {
 public enum VideoConversionError: Error, LocalizedError, Hashable, Sendable {
     case sourceNotReachable
     case unsupportedSettings
+    case hdrBitrateUnsupported
     case cannotCreateExporter
     case exportFailed(String)
     case commitFailed(String)
@@ -115,6 +121,7 @@ public enum VideoConversionError: Error, LocalizedError, Hashable, Sendable {
         switch self {
         case .sourceNotReachable: L10n.string("video.error.source")
         case .unsupportedSettings: L10n.string("video.error.unsupported")
+        case .hdrBitrateUnsupported: L10n.string("video.error.hdr_bitrate")
         case .cannotCreateExporter: L10n.string("video.error.exporter")
         case let .exportFailed(message): L10n.format("video.error.export", message)
         case let .commitFailed(message): L10n.format("video.error.commit", message)

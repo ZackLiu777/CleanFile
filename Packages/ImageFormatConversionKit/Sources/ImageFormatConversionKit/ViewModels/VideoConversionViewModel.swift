@@ -29,6 +29,14 @@ public final class VideoConversionViewModel {
     public var resolution: VideoResolutionPreset = .original {
         didSet { scheduleSizeEstimate() }
     }
+    /// 100% preserves the previous automatic export behavior.
+    public var bitRateFraction: Double = 1 {
+        didSet { scheduleSizeEstimate() }
+    }
+    private var effectiveBitRateFraction: Double? {
+        guard codec == .h264 || codec == .hevc, bitRateFraction < 1 else { return nil }
+        return bitRateFraction
+    }
     public let outputDirectory: URL
 
     private let engine: VideoConversionEngine
@@ -256,7 +264,8 @@ public final class VideoConversionViewModel {
                 destinationDirectory: outputDirectory,
                 container: container,
                 codec: codec,
-                resolution: resolution
+                resolution: resolution,
+                bitRateFraction: effectiveBitRateFraction
             )
             do {
                 let result = try await engine.convert(request) { [weak self] value in
@@ -328,6 +337,7 @@ public final class VideoConversionViewModel {
         let container = container
         let codec = codec
         let resolution = resolution
+        let bitRateFraction = effectiveBitRateFraction
         let outputDirectory = outputDirectory
         let engine = engine
         isEstimatingSize = true
@@ -343,7 +353,8 @@ public final class VideoConversionViewModel {
                         destinationDirectory: outputDirectory,
                         container: container,
                         codec: codec,
-                        resolution: resolution
+                        resolution: resolution,
+                        bitRateFraction: bitRateFraction
                     )
                     estimatedBytes += try await engine.estimateOutputBytes(request)
                 }

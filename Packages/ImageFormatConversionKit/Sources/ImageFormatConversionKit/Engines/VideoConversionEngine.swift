@@ -9,6 +9,7 @@ import Foundation
 /// 使用 Actor 隔离 `VideoConversionEngine` 的可变状态，确保并发访问安全。
 public actor VideoConversionEngine {
     private var activeExporters: [UUID: AVAssetExportSession] = [:]
+    private var activeBitrateEncoders: [UUID: VideoBitrateEncoder] = [:]
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     public init() {}
@@ -48,19 +49,6 @@ public actor VideoConversionEngine {
         try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
 
         let asset = AVURLAsset(url: source)
-        let preset = exportPreset(codec: request.codec, resolution: request.resolution)
-        guard await AVAssetExportSession.compatibility(
-            ofExportPreset: preset,
-            with: asset,
-            outputFileType: fileType(request.container)
-        ) else {
-            throw VideoConversionError.unsupportedSettings
-        }
-        guard let exporter = AVAssetExportSession(asset: asset, presetName: preset) else {
-            throw VideoConversionError.cannotCreateExporter
-        }
-        let exporterCancellation = ExporterCancellation(exporter)
-
         let operationID = UUID()
         let temporaryURL = directory
             .appendingPathComponent(".video-conversion-\(operationID.uuidString)")
@@ -72,25 +60,40 @@ public actor VideoConversionEngine {
         )
         defer { try? fileManager.removeItem(at: temporaryURL) }
 
-        activeExporters[operationID] = exporter
-        defer { activeExporters[operationID] = nil }
-
         await progress(0)
-
-        // `export(to:as:)` does not forward intermediate progress itself.
-        // Observe the same export session while the async export is suspended so
-        // the presentation layer receives a continuous 0...1 value.
-        let progressTask = Task {
-            await exporterCancellation.observeProgress(progress)
-        }
-        defer { progressTask.cancel() }
-
         let exportID = ConversionPerformance.begin("Conversion Video Export")
         do {
-            try await withTaskCancellationHandler {
-                try await exporter.export(to: temporaryURL, as: fileType(request.container))
-            } onCancel: {
-                exporterCancellation.cancel()
+            if request.bitRateFraction != nil {
+                let encoder = VideoBitrateEncoder()
+                activeBitrateEncoders[operationID] = encoder
+                defer { activeBitrateEncoders[operationID] = nil }
+                try await withTaskCancellationHandler {
+                    try await encoder.encode(asset: asset, request: request, to: temporaryURL, progress: progress)
+                } onCancel: {
+                    encoder.cancel()
+                }
+            } else {
+                let preset = exportPreset(codec: request.codec, resolution: request.resolution)
+                guard await AVAssetExportSession.compatibility(
+                    ofExportPreset: preset,
+                    with: asset,
+                    outputFileType: fileType(request.container)
+                ) else {
+                    throw VideoConversionError.unsupportedSettings
+                }
+                guard let exporter = AVAssetExportSession(asset: asset, presetName: preset) else {
+                    throw VideoConversionError.cannotCreateExporter
+                }
+                let exporterCancellation = ExporterCancellation(exporter)
+                activeExporters[operationID] = exporter
+                defer { activeExporters[operationID] = nil }
+                let progressTask = Task { await exporterCancellation.observeProgress(progress) }
+                defer { progressTask.cancel() }
+                try await withTaskCancellationHandler {
+                    try await exporter.export(to: temporaryURL, as: fileType(request.container))
+                } onCancel: {
+                    exporterCancellation.cancel()
+                }
             }
         } catch is CancellationError {
             ConversionPerformance.end("Conversion Video Export", id: exportID)
@@ -125,11 +128,34 @@ public actor VideoConversionEngine {
     /// 取消 `cancelAll` 对应的进行中任务，并收敛到可继续操作的状态。
     public func cancelAll() {
         activeExporters.values.forEach { $0.cancelExport() }
+        activeBitrateEncoders.values.forEach { $0.cancel() }
     }
 
     /// Uses the same export preset as conversion so estimates follow codec and resolution changes.
     public func estimateOutputBytes(_ request: VideoConversionRequest) async throws -> Int64 {
         let asset = AVURLAsset(url: request.sourceURL.standardizedFileURL)
+        if let fraction = request.bitRateFraction {
+            guard fraction >= 0.1, fraction < 1,
+                  let track = try await asset.loadTracks(withMediaType: .video).first else {
+                throw VideoConversionError.unsupportedSettings
+            }
+            let rate = Double(try await track.load(.estimatedDataRate))
+            let size = try await track.load(.naturalSize)
+            let duration = (try await asset.load(.duration)).seconds
+            guard rate > 0, size.width > 0, size.height > 0, duration.isFinite, duration > 0 else {
+                throw VideoConversionError.unsupportedSettings
+            }
+            let output = VideoBitratePlan.dimensions(source: size, resolution: request.resolution)
+            let videoRate = VideoBitratePlan.rate(
+                sourceRate: rate,
+                fraction: fraction,
+                source: size,
+                output: output
+            )
+            let hasAudio = !(try await asset.loadTracks(withMediaType: .audio)).isEmpty
+            let audioRate = hasAudio ? 192_000.0 : 0
+            return Int64((Double(videoRate) + audioRate) * duration / 8 * 1.03)
+        }
         let preset = exportPreset(codec: request.codec, resolution: request.resolution)
         guard await AVAssetExportSession.compatibility(
             ofExportPreset: preset,

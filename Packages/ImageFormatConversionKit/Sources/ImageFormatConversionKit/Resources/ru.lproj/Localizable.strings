@@ -130,6 +130,7 @@
 "quality.explanation.balanced" = "Балансирует детализацию изображения и размер файла.";
 "quality.explanation.high" = "Сохраняет больше деталей и обычно создает файл большего размера.";
 "video.settings.codec" = "Кодек";
+"video.settings.bitrate" = "Битрейт";
 "video.settings.resolution" = "Разрешение";
 "video.empty.title" = "Нет видео";
 "video.empty.subtitle" = "Выберите одно или несколько видео, чтобы начать сжатие.";
@@ -256,3 +257,5 @@
 "conversion.replace.selected" = "Выбрано: %d";
 "conversion.guide.audio_replace.title" = "Почему аудио не заменяет оригинал";
 "conversion.guide.audio_replace.detail" = "Аудиофайлы берутся из «Файлов», а iPhone не разрешает приложению безопасно удалять там оригиналы за вас. Сжатое аудио сохраняется как новый файл. Проверьте его, а затем самостоятельно удалите старый файл в «Файлах».";
+"video.settings.bitrate.help" = "100 % — автоматическая настройка. Меньшие значения снижают битрейт относительно оригинала.";
+"video.error.hdr_bitrate" = "Для сохранения цвета и яркости HDR-видео выберите 100 % (Авто).";

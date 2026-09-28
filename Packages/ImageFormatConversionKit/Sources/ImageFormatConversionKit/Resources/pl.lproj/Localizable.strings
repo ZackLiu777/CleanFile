@@ -130,6 +130,7 @@
 "quality.explanation.balanced" = "Równowaga między szczegółami obrazu a rozmiarem pliku.";
 "quality.explanation.high" = "Zachowuje więcej szczegółów, ale zwykle tworzy większy plik.";
 "video.settings.codec" = "Kodek";
+"video.settings.bitrate" = "Szybkość transmisji";
 "video.settings.resolution" = "Rozdzielczość";
 "video.empty.title" = "Brak filmów";
 "video.empty.subtitle" = "Wybierz co najmniej jeden film, aby rozpocząć kompresję.";
@@ -256,3 +257,5 @@
 "conversion.replace.selected" = "Zaznaczono %d";
 "conversion.guide.audio_replace.title" = "Dlaczego nie można zastąpić oryginalnego pliku audio";
 "conversion.guide.audio_replace.detail" = "Pliki audio pochodzą z Plików, a iPhone nie pozwala tej aplikacji bezpiecznie usuwać ich oryginałów. Skompresowany dźwięk jest zapisywany jako nowy plik. Po sprawdzeniu wyniku usuń stary plik samodzielnie w Plikach.";
+"video.settings.bitrate.help" = "100% używa ustawień automatycznych. Niższe wartości zmniejszają szybkość transmisji względem oryginału.";
+"video.error.hdr_bitrate" = "Aby zachować kolory i jasność wideo HDR, użyj 100% (Auto).";

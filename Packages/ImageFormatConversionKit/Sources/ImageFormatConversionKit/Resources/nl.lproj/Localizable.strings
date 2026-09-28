@@ -130,6 +130,7 @@
 "quality.explanation.balanced" = "Brengt beelddetails en bestandsgrootte in evenwicht.";
 "quality.explanation.high" = "Behoudt meer details en creëert meestal een groter bestand.";
 "video.settings.codec" = "Codec";
+"video.settings.bitrate" = "Bitsnelheid";
 "video.settings.resolution" = "Resolutie";
 "video.empty.title" = "Geen video's";
 "video.empty.subtitle" = "Kies een of meer video's om de compressie te starten.";
@@ -256,3 +257,5 @@
 "conversion.replace.selected" = "%d geselecteerd";
 "conversion.guide.audio_replace.title" = "Waarom audio het origineel niet kan vervangen";
 "conversion.guide.audio_replace.detail" = "Audiobestanden komen uit Bestanden. De iPhone staat niet toe dat de app de originelen daar veilig voor je verwijdert. De gecomprimeerde audio wordt als nieuw bestand bewaard. Controleer het en verwijder daarna zelf het oude bestand in Bestanden.";
+"video.settings.bitrate.help" = "100% gebruikt automatische instellingen. Lagere waarden verlagen de bitsnelheid ten opzichte van het origineel.";
+"video.error.hdr_bitrate" = "Gebruik voor HDR-video's 100% (Auto) om kleur en helderheid te behouden.";

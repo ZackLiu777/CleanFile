@@ -130,6 +130,7 @@
 "quality.explanation.balanced" = "在图片细节和文件大小之间取得平衡。";
 "quality.explanation.high" = "保留更多图片细节，文件通常也会更大。";
 "video.settings.codec" = "编码器";
+"video.settings.bitrate" = "视频码率";
 "video.settings.resolution" = "分辨率";
 "video.empty.title" = "没有视频";
 "video.empty.subtitle" = "选择一个或多个视频开始压缩。";
@@ -256,3 +257,5 @@
 "conversion.replace.selected" = "已选择 %d 项";
 "conversion.guide.audio_replace.title" = "为什么音频不能替换原文件";
 "conversion.guide.audio_replace.detail" = "音频来自“文件”，iPhone 不允许 App 代替你安全删除那里的原文件。压缩后的音频会另存为新文件；确认新文件正常后，请自行前往“文件”删除旧文件。";
+"video.settings.bitrate.help" = "100% 使用自动设置。调低后会按原视频码率的相应比例压缩。";
+"video.error.hdr_bitrate" = "HDR 视频请使用 100%（自动），以保留原有色彩和亮度。";

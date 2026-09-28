@@ -130,6 +130,7 @@
 "quality.explanation.balanced" = "이미지 디테일과 파일 크기의 균형을 맞춥니다.";
 "quality.explanation.high" = "더 많은 디테일을 보존하며 파일도 대체로 커집니다.";
 "video.settings.codec" = "코덱";
+"video.settings.bitrate" = "비트레이트";
 "video.settings.resolution" = "해상도";
 "video.empty.title" = "비디오 없음";
 "video.empty.subtitle" = "압축할 비디오를 하나 이상 선택하세요.";
@@ -256,3 +257,5 @@
 "conversion.replace.selected" = "%d개 선택됨";
 "conversion.guide.audio_replace.title" = "오디오가 원본을 교체할 수 없는 이유";
 "conversion.guide.audio_replace.detail" = "오디오 파일은 파일 앱에서 가져옵니다. iPhone은 이 앱이 그곳의 원본을 대신 안전하게 삭제하도록 허용하지 않습니다. 압축된 오디오는 새 파일로 저장됩니다. 새 파일을 확인한 뒤 파일 앱에서 이전 파일을 직접 삭제하세요.";
+"video.settings.bitrate.help" = "100%는 자동 설정입니다. 낮추면 원본 비트 전송률에 비례해 압축합니다.";
+"video.error.hdr_bitrate" = "HDR 영상의 색상과 밝기를 유지하려면 100%(자동)를 사용하세요.";

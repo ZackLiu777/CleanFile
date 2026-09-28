@@ -130,6 +130,7 @@
 "quality.explanation.balanced" = "يوازن بين تفاصيل الصورة وحجم الملف.";
 "quality.explanation.high" = "يحتفظ بمزيد من التفاصيل وعادة ما ينشئ ملفًا أكبر.";
 "video.settings.codec" = "برنامج الترميز";
+"video.settings.bitrate" = "معدل البت";
 "video.settings.resolution" = "الدقة";
 "video.empty.title" = "لا توجد مقاطع فيديو";
 "video.empty.subtitle" = "اختر مقطع فيديو واحدًا أو أكثر لبدء الضغط.";
@@ -256,3 +257,5 @@
 "conversion.replace.selected" = "تم تحديد %d";
 "conversion.guide.audio_replace.title" = "لماذا لا يمكن للصوت استبدال الملف الأصلي";
 "conversion.guide.audio_replace.detail" = "تأتي ملفات الصوت من تطبيق «الملفات»، ولا يسمح iPhone للتطبيق بحذف الملفات الأصلية هناك نيابةً عنك بأمان. يُحفظ الصوت المضغوط كملف جديد. بعد التأكد منه، احذف الملف القديم بنفسك من «الملفات».";
+"video.settings.bitrate.help" = "يستخدم 100% الإعدادات التلقائية. تقلّل القيم الأقل معدل البت مقارنة بالأصل.";
+"video.error.hdr_bitrate" = "للحفاظ على ألوان وسطوع فيديو HDR، استخدم 100% (تلقائي).";

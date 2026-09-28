@@ -130,6 +130,7 @@
 "quality.explanation.balanced" = "画像の細部とファイルサイズのバランスを取ります。";
 "quality.explanation.high" = "細部を多く保持し、通常はファイルも大きくなります。";
 "video.settings.codec" = "コーデック";
+"video.settings.bitrate" = "ビットレート";
 "video.settings.resolution" = "解像度";
 "video.empty.title" = "ビデオがありません";
 "video.empty.subtitle" = "圧縮するビデオを 1 つ以上選択してください。";
@@ -256,3 +257,5 @@
 "conversion.replace.selected" = "%d件選択済み";
 "conversion.guide.audio_replace.title" = "オーディオが元ファイルを置き換えられない理由";
 "conversion.guide.audio_replace.detail" = "オーディオは「ファイル」から読み込まれます。iPhone は、その場所の元ファイルを App が代わりに安全に削除することを許可していません。圧縮した音声は新しいファイルとして保存されます。確認後、「ファイル」で古いファイルをご自身で削除してください。";
+"video.settings.bitrate.help" = "100% は自動設定です。下げると元の動画のビットレートに対する割合で圧縮します。";
+"video.error.hdr_bitrate" = "HDR 動画の色と明るさを保つには、100%（自動）を使用してください。";

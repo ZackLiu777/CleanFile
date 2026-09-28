@@ -13,6 +13,7 @@ struct SegmentedStreamSlider: View {
     private let range: ClosedRange<Double>
     private let step: Double
     private let totalSegments: Int
+    private let title: String
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.conversionTheme) private var theme
@@ -21,18 +22,20 @@ struct SegmentedStreamSlider: View {
         value: Binding<Double>,
         in range: ClosedRange<Double> = 0.1 ... 1,
         step: Double = 0.1,
-        totalSegments: Int = 10
+        totalSegments: Int = 10,
+        title: String = L10n.string("settings.quality")
     ) {
         _value = value
         self.range = range
         self.step = step
         self.totalSegments = max(totalSegments, 2)
+        self.title = title
     }
 
     var body: some View {
         VStack(spacing: 8) {
             HStack {
-                Text(L10n.string("settings.quality"))
+                Text(title)
                     .appTypeface(.body, size: 15, relativeTo: .body, weight: .medium)
                     .foregroundStyle(theme.textPrimary.opacity(0.85))
 
@@ -71,7 +74,7 @@ struct SegmentedStreamSlider: View {
             .foregroundStyle(.tertiary)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(L10n.string("settings.quality"))
+        .accessibilityLabel(title)
         .accessibilityValue(Text(value, format: .percent.precision(.fractionLength(0))))
         .accessibilityAdjustableAction { direction in
             switch direction {

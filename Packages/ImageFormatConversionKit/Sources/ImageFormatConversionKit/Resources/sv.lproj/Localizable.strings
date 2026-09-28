@@ -130,6 +130,7 @@
 "quality.explanation.balanced" = "Balanserar bilddetaljer och filstorlek.";
 "quality.explanation.high" = "Bevarar fler detaljer och skapar vanligtvis en större fil.";
 "video.settings.codec" = "Codec";
+"video.settings.bitrate" = "Bithastighet";
 "video.settings.resolution" = "Upplösning";
 "video.empty.title" = "Inga videor";
 "video.empty.subtitle" = "Välj en eller flera videor för att påbörja komprimeringen.";
@@ -256,3 +257,5 @@
 "conversion.replace.selected" = "%d markerade";
 "conversion.guide.audio_replace.title" = "Varför ljud inte kan ersätta originalet";
 "conversion.guide.audio_replace.detail" = "Ljudfiler kommer från Filer och iPhone tillåter inte att appen säkert tar bort originalen där åt dig. Det komprimerade ljudet sparas som en ny fil. Kontrollera det och radera sedan själv den gamla filen i Filer.";
+"video.settings.bitrate.help" = "100 % använder automatiska inställningar. Lägre värden minskar bithastigheten jämfört med originalet.";
+"video.error.hdr_bitrate" = "Använd 100 % (Auto) för HDR-video för att bevara färg och ljusstyrka.";

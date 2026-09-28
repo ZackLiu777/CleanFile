@@ -237,6 +237,21 @@ struct VideoConversionView: View {
 
             Divider().opacity(0.4)
 
+            if viewModel.codec == .h264 || viewModel.codec == .hevc {
+                SegmentedStreamSlider(
+                    value: Binding(
+                        get: { viewModel.bitRateFraction },
+                        set: { viewModel.bitRateFraction = $0 }
+                    ),
+                    title: L10n.string("video.settings.bitrate")
+                )
+                Text(L10n.string("video.settings.bitrate.help"))
+                    .appTypeface(.caption2, size: 11, relativeTo: .caption2)
+                    .foregroundStyle(.secondary)
+            }
+
+            Divider().opacity(0.4)
+
             DisclosureGroup(isExpanded: $isAdvancedExpanded) {
                 VStack(spacing: 12) {
                     compactPickerRow(
