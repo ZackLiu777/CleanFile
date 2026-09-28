@@ -384,7 +384,11 @@ private struct MediaDashboardResultsView: View {
             MediaCategorySummary(
                 title: AppL10n.string("Similar Photos"),
                 assetIDs: result.similarImageIDs,
-                systemImage: "photo.stack"
+                systemImage: "photo.stack",
+                protectedAssetIDs: Set(result.similarImageGroups.map(\.suggestedKeeperID)),
+                suggestedDeletionIDs: Set(result.similarImageGroups.flatMap { group in
+                    group.items.map(\.id).filter { $0 != group.suggestedKeeperID }
+                })
             ),
             MediaCategorySummary(
                 title: AppL10n.string("Videos"),
@@ -440,6 +444,8 @@ private struct MediaDashboardResultsView: View {
             MediaCategoryDetailView(
                 title: category.title,
                 assetIDs: category.assetIDs,
+                protectedAssetIDs: category.protectedAssetIDs,
+                suggestedDeletionIDs: category.suggestedDeletionIDs,
                 viewModel: viewModel
             )
         } label: {
@@ -651,6 +657,17 @@ private struct MediaCategorySummary: Identifiable {
     let title: String
     let assetIDs: [String]
     let systemImage: String
+    let protectedAssetIDs: Set<String>
+    let suggestedDeletionIDs: Set<String>
+
+    init(title: String, assetIDs: [String], systemImage: String,
+         protectedAssetIDs: Set<String> = [], suggestedDeletionIDs: Set<String> = []) {
+        self.title = title
+        self.assetIDs = assetIDs
+        self.systemImage = systemImage
+        self.protectedAssetIDs = protectedAssetIDs
+        self.suggestedDeletionIDs = suggestedDeletionIDs
+    }
 
     var id: String { title }
 }
@@ -717,6 +734,8 @@ private struct MediaCategoryDetailView: View {
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
     let title: String
     let assetIDs: [String]
+    let protectedAssetIDs: Set<String>
+    let suggestedDeletionIDs: Set<String>
     @ObservedObject var viewModel: PhotoLibraryViewModel
     @Environment(\.displayScale) private var displayScale
     @State private var isSelecting = false
@@ -913,6 +932,8 @@ private struct MediaCategoryDetailView: View {
                 MediaPreviewGallery(
                     assetIDs: chronologicallySortedAssetIDs,
                     initialAssetID: previewAssetID,
+                    protectedAssetIDs: protectedAssetIDs,
+                    suggestedDeletionIDs: suggestedDeletionIDs,
                     viewModel: viewModel,
                     onDismiss: { self.previewAssetID = nil }
                 )

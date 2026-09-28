@@ -24,28 +24,55 @@ private enum MediaPreviewState: Equatable {
 struct MediaPreviewGallery: View {
     let assetIDs: [String]
     let initialAssetID: String
+    let protectedAssetIDs: Set<String>
+    let suggestedDeletionIDs: Set<String>
+    let allowsSwipeReview: Bool
     @ObservedObject var viewModel: PhotoLibraryViewModel
     let onDismiss: () -> Void
+    @Environment(\.appTheme) private var theme
+    @EnvironmentObject private var themeSettings: ThemeSettings
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
 
     @State private var selectedAssetID: String
+    @State private var isSwipeReviewPresented = false
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(
         assetIDs: [String],
         initialAssetID: String,
+        protectedAssetIDs: Set<String> = [],
+        suggestedDeletionIDs: Set<String> = [],
+        allowsSwipeReview: Bool = true,
         viewModel: PhotoLibraryViewModel,
         onDismiss: @escaping () -> Void
     ) {
         self.assetIDs = assetIDs
         self.initialAssetID = initialAssetID
+        self.protectedAssetIDs = protectedAssetIDs
+        self.suggestedDeletionIDs = suggestedDeletionIDs
+        self.allowsSwipeReview = allowsSwipeReview
         self.viewModel = viewModel
         self.onDismiss = onDismiss
         _selectedAssetID = State(initialValue: initialAssetID)
     }
 
     var body: some View {
-        NavigationStack {
+        VStack(spacing: 0) {
+            HStack {
+                Button("Close", systemImage: "xmark", action: onDismiss)
+                    .labelStyle(.iconOnly)
+                    .accessibilityIdentifier("media.preview.close")
+                Spacer()
+                Text(positionText)
+                    .font(.system(.headline, design: .rounded))
+                    .monospacedDigit()
+                Spacer()
+                Image(systemName: "xmark").hidden()
+            }
+            .font(.title3)
+            .padding(.horizontal, 20)
+            .frame(height: 52)
+
             TabView(selection: $selectedAssetID) {
                 ForEach(assetIDs, id: \.self) { assetID in
                     MediaPreviewPage(assetID: assetID, viewModel: viewModel)
@@ -53,20 +80,40 @@ struct MediaPreviewGallery: View {
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
-            .background(.black)
-            .navigationTitle(positionText)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
-            .toolbarBackground(.black.opacity(0.72), for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done", action: onDismiss)
-                        .foregroundStyle(.white)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            if assetIDs.count > 1 { thumbnailStrip }
+
+            if allowsSwipeReview,
+               viewModel.asset(withIdentifier: selectedAssetID)?.mediaType == .image {
+                Button {
+                    isSwipeReviewPresented = true
+                } label: {
+                    Label("Swipe Review", systemImage: "rectangle.stack")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .background(theme.cardSurface, in: Capsule())
                 }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .accessibilityIdentifier("media.swipeReview.open")
             }
         }
-        .preferredColorScheme(.dark)
+        .background { AppBackground() }
+        .foregroundStyle(theme.textPrimary)
+        .preferredColorScheme(themeSettings.effectiveColorScheme)
+        .fullScreenCover(isPresented: $isSwipeReviewPresented) {
+            MediaSwipeReviewView(
+                assetIDs: assetIDs.filter { viewModel.asset(withIdentifier: $0)?.mediaType == .image },
+                protectedAssetIDs: protectedAssetIDs,
+                suggestedDeletionIDs: suggestedDeletionIDs,
+                initialAssetID: selectedAssetID,
+                photoLibrary: viewModel,
+                onDismiss: { isSwipeReviewPresented = false }
+            )
+        }
         .onAppear {
             tabBarVisibility.setHidden(
                 true,
@@ -87,12 +134,80 @@ struct MediaPreviewGallery: View {
         guard let index = assetIDs.firstIndex(of: selectedAssetID) else { return "" }
         return "\(index + 1) / \(assetIDs.count)"
     }
+
+    private var thumbnailStrip: some View {
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal) {
+                LazyHStack(spacing: 6) {
+                    ForEach(assetIDs, id: \.self) { identifier in
+                        Button { selectedAssetID = identifier } label: {
+                            GalleryThumbnail(asset: viewModel.asset(withIdentifier: identifier), viewModel: viewModel)
+                                .frame(width: 48, height: 58)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .strokeBorder(selectedAssetID == identifier ? theme.accentPrimary : .clear, lineWidth: 2)
+                                }
+                        }
+                        .buttonStyle(.plain)
+                        .id(identifier)
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+            .scrollIndicators(.hidden)
+            .onChange(of: selectedAssetID) { _, identifier in
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    proxy.scrollTo(identifier, anchor: .center)
+                }
+            }
+        }
+        .frame(height: 64)
+        .accessibilityIdentifier("media.preview.thumbnails")
+    }
+}
+
+private struct GalleryThumbnail: View {
+    let asset: PHAsset?
+    @ObservedObject var viewModel: PhotoLibraryViewModel
+    @Environment(\.appTheme) private var theme
+    @Environment(\.displayScale) private var displayScale
+    @State private var image: UIImage?
+    @State private var requestID: PHImageRequestID?
+
+    var body: some View {
+        ZStack {
+            theme.cardSurface
+            if let image {
+                Image(uiImage: image).resizable().scaledToFill()
+            } else {
+                Image(systemName: "photo").foregroundStyle(theme.textTertiary)
+            }
+        }
+        .frame(width: 48, height: 58)
+        .clipped()
+        .onAppear {
+            guard let asset else { return }
+            image = viewModel.cachedThumbnail(for: asset.localIdentifier)
+            requestID = viewModel.requestThumbnail(
+                for: asset,
+                targetSize: CGSize(width: 48 * displayScale, height: 58 * displayScale)
+            ) { loadedImage in
+                if let loadedImage { image = loadedImage }
+            }
+        }
+        .onDisappear {
+            if let requestID { viewModel.cancelThumbnail(requestID) }
+            requestID = nil
+        }
+    }
 }
 
 /// 定义 `MediaPreviewPage` 的值语义数据与相关行为。
 private struct MediaPreviewPage: View {
     let assetID: String
     @ObservedObject var viewModel: PhotoLibraryViewModel
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         if let asset = viewModel.asset(withIdentifier: assetID) {
@@ -114,9 +229,8 @@ private struct MediaPreviewPage: View {
             systemImage: "icloud.slash",
             description: Text("This item could not be loaded from the photo library.")
         )
-        .foregroundStyle(.white)
+        .foregroundStyle(theme.textPrimary)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.black)
     }
 }
 
@@ -124,6 +238,7 @@ private struct MediaPreviewPage: View {
 private struct ZoomablePhotoPreview: View {
     let asset: PHAsset
     @ObservedObject var viewModel: PhotoLibraryViewModel
+    @Environment(\.appTheme) private var theme
     @Environment(\.displayScale) private var displayScale
     @State private var image: UIImage?
     @State private var state: MediaPreviewState = .loading
@@ -132,13 +247,12 @@ private struct ZoomablePhotoPreview: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                Color.black
                 if let image {
                     NativeZoomableImage(image: image)
                 } else if state == .loading {
                     ProgressView("Loading…")
-                        .tint(.white)
-                        .foregroundStyle(.white)
+                        .tint(theme.accentPrimary)
+                        .foregroundStyle(theme.textPrimary)
                 } else {
                     unavailableView
                 }
@@ -158,7 +272,7 @@ private struct ZoomablePhotoPreview: View {
 
     private var unavailableView: some View {
         Label("Photo Unavailable", systemImage: "icloud.slash")
-            .foregroundStyle(.white)
+            .foregroundStyle(theme.textPrimary)
     }
 
     /// 封装 `requestImage` 对应的局部行为，供当前类型在统一入口下复用。
@@ -194,7 +308,9 @@ private struct NativeZoomableImage: UIViewRepresentable {
 
     func makeUIView(context: Context) -> ZoomScrollView {
         let scrollView = ZoomScrollView()
-        scrollView.backgroundColor = .black
+        scrollView.backgroundColor = .clear
+        scrollView.isOpaque = false
+        scrollView.zoomContentView.backgroundColor = .clear
         scrollView.minimumZoomScale = 1
         scrollView.maximumZoomScale = 5
         scrollView.bouncesZoom = true
@@ -327,23 +443,23 @@ private final class ZoomScrollView: UIScrollView {
 private struct VideoAssetPreview: View {
     let asset: PHAsset
     @ObservedObject var viewModel: PhotoLibraryViewModel
+    @Environment(\.appTheme) private var theme
     @State private var player: AVPlayer?
     @State private var state: MediaPreviewState = .loading
     @State private var requestID: PHImageRequestID?
 
     var body: some View {
         ZStack {
-            Color.black
             if let player {
                 VideoPlayer(player: player)
                     .onAppear { player.play() }
             } else if state == .loading {
                 ProgressView("Loading Video…")
-                    .tint(.white)
-                    .foregroundStyle(.white)
+                    .tint(theme.accentPrimary)
+                    .foregroundStyle(theme.textPrimary)
             } else {
                 Label("Video Unavailable", systemImage: "icloud.slash")
-                    .foregroundStyle(.white)
+                    .foregroundStyle(theme.textPrimary)
             }
         }
         .task(id: asset.localIdentifier, loadPlayer)
@@ -373,6 +489,7 @@ private struct VideoAssetPreview: View {
 private struct LivePhotoAssetPreview: View {
     let asset: PHAsset
     @ObservedObject var viewModel: PhotoLibraryViewModel
+    @Environment(\.appTheme) private var theme
     @State private var livePhoto: PHLivePhoto?
     @State private var state: MediaPreviewState = .loading
     @State private var requestID: PHImageRequestID?
@@ -381,7 +498,6 @@ private struct LivePhotoAssetPreview: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                Color.black
                 if let livePhoto {
                     LivePhotoPlayerView(
                         livePhoto: livePhoto,
@@ -393,11 +509,11 @@ private struct LivePhotoAssetPreview: View {
                     }
                 } else if state == .loading {
                     ProgressView("Loading Live Photo…")
-                        .tint(.white)
-                        .foregroundStyle(.white)
+                        .tint(theme.accentPrimary)
+                        .foregroundStyle(theme.textPrimary)
                 } else {
                     Label("Live Photo Unavailable", systemImage: "icloud.slash")
-                        .foregroundStyle(.white)
+                        .foregroundStyle(theme.textPrimary)
                 }
 
                 if livePhoto != nil {
