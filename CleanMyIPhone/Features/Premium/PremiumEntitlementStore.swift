@@ -21,6 +21,9 @@ final class PremiumEntitlementStore: ObservableObject {
     @Published private(set) var verificationUnavailable = false
 
     private var updatesTask: Task<Void, Never>?
+    private var connectivityTask: Task<Void, Never>?
+    private var unfinishedTransactionsTask: Task<Void, Never>?
+    private var startupTimeoutTask: Task<Void, Never>?
     private var hasStarted = false
     private let subscriptionStatusLookup: @MainActor (String) async throws -> [Product.SubscriptionInfo.Status]
     /// Prevents an entitlement refresh started before a verified transaction
@@ -38,6 +41,9 @@ final class PremiumEntitlementStore: ObservableObject {
 
     deinit {
         updatesTask?.cancel()
+        connectivityTask?.cancel()
+        unfinishedTransactionsTask?.cancel()
+        startupTimeoutTask?.cancel()
     }
 
     func start() async {
@@ -46,10 +52,28 @@ final class PremiumEntitlementStore: ObservableObject {
             return
         }
         hasStarted = true
-        await refreshStartupConnectivity()
         listenForTransactionUpdates()
-        await finishDeliveredTransactions()
+        // Neither a cellular-data probe nor unfinished-transaction cleanup may hold
+        // the first entitlement check behind network-dependent work.
+        connectivityTask = Task { [weak self] in
+            _ = await self?.refreshStartupConnectivity()
+        }
+        unfinishedTransactionsTask = Task { [weak self] in
+            await self?.finishDeliveredTransactions()
+        }
+        startupTimeoutTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            self?.markStartupVerificationDelayed()
+        }
         await refresh()
+    }
+
+    /// A slow StoreKit response is not proof that an existing subscription expired.
+    /// Stop displaying an indefinite spinner while verification continues in the background.
+    func markStartupVerificationDelayed() {
+        guard accessState == .checking else { return }
+        verificationUnavailable = true
     }
 
     /// A normal app-owned request is required for iOS to present its cellular-data
@@ -88,6 +112,7 @@ final class PremiumEntitlementStore: ObservableObject {
             guard revisionAtStart == entitlementRevision, !Task.isCancelled else { return }
             verificationUnavailable = false
             accessState = .entitled
+            startupTimeoutTask?.cancel()
             return
         }
 
@@ -102,6 +127,7 @@ final class PremiumEntitlementStore: ObservableObject {
             guard isActive else { continue }
             verificationUnavailable = false
             accessState = .entitled
+            startupTimeoutTask?.cancel()
             return
         }
 
@@ -112,6 +138,7 @@ final class PremiumEntitlementStore: ObservableObject {
             guard revisionAtStart == entitlementRevision, !Task.isCancelled else { return }
             verificationUnavailable = false
             accessState = .entitled
+            startupTimeoutTask?.cancel()
             return
         }
 
@@ -121,6 +148,7 @@ final class PremiumEntitlementStore: ObservableObject {
         // Keep existing access, or keep checking on a fresh installation.
         if subscriptionStatus == false {
             accessState = .notEntitled
+            startupTimeoutTask?.cancel()
         } else if accessState != .entitled {
             accessState = .checking
         }

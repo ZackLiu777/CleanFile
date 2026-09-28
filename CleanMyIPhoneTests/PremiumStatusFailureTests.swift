@@ -37,6 +37,9 @@ struct PremiumStatusFailureTests {
         await store.refresh()
 
         #expect(store.accessState == .entitled)
+        store.markStartupVerificationDelayed()
+        #expect(store.accessState == .entitled)
+        #expect(!store.verificationUnavailable)
     }
 
     @Test("Unavailable status and no local transaction keep verification pending")
@@ -55,5 +58,8 @@ struct PremiumStatusFailureTests {
 
         #expect(lookupWasCalled)
         #expect(store.accessState == .checking)
+        store.markStartupVerificationDelayed()
+        #expect(store.accessState == .checking)
+        #expect(store.verificationUnavailable)
     }
 }
