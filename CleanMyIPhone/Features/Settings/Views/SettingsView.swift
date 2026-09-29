@@ -19,7 +19,6 @@ struct SettingsView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
     @State private var photoAuthorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
-    @State private var showsPremium = false
     @State private var showsHelp = false
     @State private var showsIntroductionPreview = false
 
@@ -34,27 +33,6 @@ struct SettingsView: View {
                     )
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-
-                Section {
-                    Button {
-                        showsPremium = true
-                    } label: {
-                        Label {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Filevra Premium")
-                                    .foregroundStyle(theme.textPrimary)
-                                Text("premium.entry.subtitle")
-                                    .foregroundStyle(theme.textSecondary)
-                                    .font(.caption)
-                            }
-                        } icon: {
-                            Image(systemName: "crown.fill")
-                                .foregroundStyle(theme.accentPrimary)
-                        }
-                    }
-                    .accessibilityIdentifier("settings.premium")
-                }
-                .appListCard()
 
                 Section {
                     NavigationLink {
@@ -218,9 +196,6 @@ struct SettingsView: View {
             }
         }
         .accessibilityIdentifier("settings.screen")
-        .sheet(isPresented: $showsPremium) {
-            PremiumSubscriptionView()
-        }
         .fullScreenCover(isPresented: $showsIntroductionPreview) {
             FirstLaunchIntroductionView(showsCloseButton: true) {
                 showsIntroductionPreview = false

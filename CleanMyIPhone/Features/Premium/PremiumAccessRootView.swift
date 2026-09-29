@@ -6,7 +6,8 @@ struct PremiumAccessRootView: View {
 
     var body: some View {
         Group {
-            if PremiumConfiguration.bypassesEntitlementForUITesting {
+            if PremiumConfiguration.temporarilyUnlocksAllFeatures
+                || PremiumConfiguration.bypassesEntitlementForUITesting {
                 ContentView()
             } else {
                 switch entitlementStore.accessState {

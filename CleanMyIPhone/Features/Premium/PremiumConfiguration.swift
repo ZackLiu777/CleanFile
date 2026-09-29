@@ -2,6 +2,9 @@ import Foundation
 
 /// App Store Connect identifiers used by both the subscription store and entitlement verification.
 enum PremiumConfiguration {
+    // Temporary product decision: allow every user into the app while keeping
+    // StoreKit entitlements and product identifiers unchanged for restoration.
+    static let temporarilyUnlocksAllFeatures = true
     static let purchasesEnabled = true
     static let subscriptionGroupID: String? = "22356442"
     static let annualProductID = "LZQ777"

@@ -82,7 +82,9 @@ struct CleanMyIPhoneApp: App {
     }
 
     private var launchDestination: AppLaunchState.Destination {
-        if !hasCompletedIntroduction || PremiumConfiguration.bypassesEntitlementForUITesting {
+        if !hasCompletedIntroduction
+            || PremiumConfiguration.temporarilyUnlocksAllFeatures
+            || PremiumConfiguration.bypassesEntitlementForUITesting {
             return .ready
         }
         if premiumEntitlementStore.accessState != .checking { return .ready }
