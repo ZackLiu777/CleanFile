@@ -914,6 +914,9 @@ struct SunburstChartView: View {
         // The surrounding cards use leading-aligned stacks. Expand the chart
         // wrapper to the available width so the square canvas stays centered.
         .frame(maxWidth: .infinity, alignment: .center)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Folder Map")
+        .accessibilityValue(viewModel.chartRoot.name)
         .onChange(of: rootSignature) { _, _ in
             viewModel.replaceRoot(root)
         }

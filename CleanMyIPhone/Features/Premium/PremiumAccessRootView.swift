@@ -1,48 +1,43 @@
+import ImageFormatConversionKit
 import SwiftUI
 
 struct PremiumAccessRootView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @EnvironmentObject private var themeSettings: ThemeSettings
     @ObservedObject var entitlementStore: PremiumEntitlementStore
+    @StateObject private var accessStore: PremiumFeatureAccessStore
+
+    init(entitlementStore: PremiumEntitlementStore) {
+        self.entitlementStore = entitlementStore
+        let state: PremiumEntitlementStore.AccessState = PremiumConfiguration.bypassesEntitlementForUITesting
+            ? .entitled : PremiumConfiguration.usesFreeTierForUITesting ? .notEntitled : entitlementStore.accessState
+        _accessStore = StateObject(wrappedValue: PremiumFeatureAccessStore(accessState: state))
+    }
 
     var body: some View {
-        Group {
-            if PremiumConfiguration.bypassesEntitlementForUITesting {
-                ContentView()
-            } else {
-                switch entitlementStore.accessState {
-                case .checking:
-                    ZStack {
-                        AppBackground()
-                        if entitlementStore.verificationUnavailable {
-                            VStack(spacing: 16) {
-                                Text("premium.connection.message")
-                                    .multilineTextAlignment(.center)
-                                Button("premium.retry") {
-                                    Task { await entitlementStore.refresh() }
-                                }
-                            }
-                            .padding()
-                        } else {
-                            ProgressView()
-                                .controlSize(.large)
-                                .accessibilityLabel("premium.entitlement.checking")
-                        }
-                    }
-                case .entitled:
-                    ContentView()
-                case .notEntitled:
-                    PremiumSubscriptionView(allowsDismiss: false)
-                }
+        ContentView(accessStore: accessStore)
+            .environmentObject(accessStore)
+            .environment(\.conversionUsagePolicy, accessStore.conversionPolicy)
+            .task {
+                synchronizeAccess()
+                guard !PremiumConfiguration.bypassesEntitlementForUITesting,
+                      !PremiumConfiguration.usesFreeTierForUITesting else { return }
+                await entitlementStore.start()
             }
+            .onChange(of: entitlementStore.accessState) { _, _ in synchronizeAccess() }
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active,
+                      !PremiumConfiguration.bypassesEntitlementForUITesting,
+                      !PremiumConfiguration.usesFreeTierForUITesting else { return }
+                Task { await entitlementStore.refresh() }
+            }
+    }
+
+    private func synchronizeAccess() {
+        if !PremiumConfiguration.bypassesEntitlementForUITesting,
+           !PremiumConfiguration.usesFreeTierForUITesting {
+            accessStore.update(entitlementStore.accessState)
         }
-        .task {
-            guard !PremiumConfiguration.bypassesEntitlementForUITesting else { return }
-            await entitlementStore.start()
-        }
-        .onChange(of: scenePhase) { _, phase in
-            guard phase == .active,
-                  !PremiumConfiguration.bypassesEntitlementForUITesting else { return }
-            Task { await entitlementStore.refresh() }
-        }
+        themeSettings.setPremiumAppearanceAllowed(accessStore.preservesPremiumAppearance)
     }
 }

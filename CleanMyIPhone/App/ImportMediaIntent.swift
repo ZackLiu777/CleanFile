@@ -7,9 +7,12 @@ import UniformTypeIdentifiers
 struct ImportMediaIntent: AppIntent {
     static let title: LocalizedStringResource = "Import to Filevra"
     static let description = IntentDescription("Open Filevra to compress shared images or videos.")
+    static let openAppWhenRun = true
+
+    @available(iOS 26.0, *)
     static let supportedModes: IntentModes = .foreground(.immediate)
 
-    @Parameter(title: "Media", supportedContentTypes: [.image, .movie])
+    @Parameter(title: "Media", supportedTypeIdentifiers: ["public.image", "public.movie"])
     var files: [IntentFile]
 
     static var parameterSummary: some ParameterSummary {
@@ -74,16 +77,27 @@ struct ImportMediaIntent: AppIntent {
                                            fileName: "\(UUID().uuidString).\(ext)")
         let destination = directory.appendingPathComponent(entry.fileName)
         do {
-            try await file.withFile(contentType: type, allowOpenInPlace: true) { source, _ in
-                let scoped = source.startAccessingSecurityScopedResource()
-                defer { if scoped { source.stopAccessingSecurityScopedResource() } }
-                try FileManager.default.copyItem(at: source, to: destination)
+            if #available(iOS 18.0, *) {
+                try await file.withFile(contentType: type, allowOpenInPlace: true) { source, _ in
+                    try copyFile(at: source, to: destination)
+                }
+            } else if let source = file.fileURL {
+                try copyFile(at: source, to: destination)
+            } else {
+                // Data-backed shortcut input has no URL to stream from on iOS 17.
+                try file.data.write(to: destination, options: .atomic)
             }
             return entry
         } catch {
             try? FileManager.default.removeItem(at: destination)
             return nil
         }
+    }
+
+    private static func copyFile(at source: URL, to destination: URL) throws {
+        let scoped = source.startAccessingSecurityScopedResource()
+        defer { if scoped { source.stopAccessingSecurityScopedResource() } }
+        try FileManager.default.copyItem(at: source, to: destination)
     }
 
     private enum ImportError: LocalizedError {

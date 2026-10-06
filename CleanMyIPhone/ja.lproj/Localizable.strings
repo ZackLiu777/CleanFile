@@ -1,3 +1,42 @@
+"premium.plan.annual" = "年間サブスクリプション";
+"premium.plan.monthly" = "月間サブスクリプション";
+"premium.price.recurring" = "%@ / %@";
+"premium.offer.free" = "%@無料、その後%@";
+"premium.price.unavailable" = "価格を取得できません";
+"premium.pricing.loading" = "App Storeの価格を読み込み中…";
+"premium.pricing.unavailable" = "一部の価格を取得できません。インターネットに接続して再試行してください。このページの閲覧と無料での利用は可能です。";
+"premium.purchase.continue" = "Premiumに進む";
+"premium.purchase.pending" = "購入は承認待ちです。Appleの確認後にPremiumが有効になります。";
+"premium.purchase.unverified" = "購入を確認できませんでした。新しい利用権限は付与されていません。購入を復元するか、再試行してください。";
+"premium.restore" = "購入を復元";
+"premium.restore.none" = "このApp Storeアカウントに有効なPremiumの購入が見つかりません。";
+"premium.restore.failed" = "購入を復元できませんでした。接続とApp Storeアカウントを確認して再試行してください。";
+"premium.active" = "Premiumは有効です";
+"premium.subscription.terms" = "キャンセルしない限り自動更新されます。Apple Accountの設定で管理・キャンセルできます。";
+"premium.terms" = "利用規約";
+"premium.privacy.link" = "プライバシーポリシー";
+
+"premium.quickClean.detail" = "複数の整理カテゴリをまとめて選択。類似写真の各グループではおすすめの1枚を残します。";
+"storage.preview.title" = "操作プレビュー · サンプルデータ";
+"storage.preview.detail" = "サンプルデータでフォルダマップを体験できます。Premiumでフォルダの選択とファイル管理を利用できます。";
+"storage.preview.folder" = "サンプルフォルダ";
+
+"premium.feature.all" = "すべてのPremium機能を利用";
+"premium.feature.required" = "この機能にはPremiumが必要です";
+"premium.feature.unlock" = "Premiumでロック解除";
+"premium.feature.media" = "メディア整理";
+"premium.feature.videoConversion" = "動画圧縮";
+"premium.feature.storage" = "ファイル整理";
+"premium.feature.imageConversion" = "画像圧縮";
+"premium.feature.audioConversion" = "音声変換";
+"premium.feature.darkAppearance" = "ダークモード";
+"premium.feature.customColors" = "カスタムカラー";
+"premium.feature.compression.title" = "画像と音声を圧縮";
+"premium.feature.compression.detail" = "設定を調整して画像と音声ファイルを変換。";
+"premium.feature.appearance.title" = "自分らしい外観に";
+"premium.feature.appearance.detail" = "ダークモードとアプリ・背景のカスタムカラーを利用。";
+"premium.continue.free" = "無料で続ける";
+
 "Photos" = "写真";
 "Storage" = "ストレージ";
 "Compress" = "圧縮";

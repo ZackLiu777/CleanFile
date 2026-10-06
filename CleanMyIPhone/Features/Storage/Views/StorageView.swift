@@ -16,6 +16,7 @@ struct StorageView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var themeSettings: ThemeSettings
+    @EnvironmentObject private var accessStore: PremiumFeatureAccessStore
     @ObservedObject var viewModel: FileScannerViewModel
     let isTabActive: Bool
     @State private var isImporterPresented = false
@@ -23,6 +24,12 @@ struct StorageView: View {
     @State private var sunburstRevealProgress = 0.0
     @State private var summaryBarProgress = 0.0
     @State private var animationGeneration = 0
+    @State private var showsPremium = false
+
+    private var preview: StorageDashboardPreview { StorageDashboardPreview.example }
+    private var isPreview: Bool { !accessStore.allows(.storage) }
+    private var displayedSummary: StorageSummary? { isPreview ? preview.summary : viewModel.summary }
+    private var displayedTree: FileNode? { isPreview ? preview.fileTree : viewModel.fileTree }
 
     var body: some View {
         NavigationStack {
@@ -40,17 +47,15 @@ struct StorageView: View {
                         folderCard
                         statusCard
 
-                        if let summary = viewModel.summary {
-                            if let fileTree = viewModel.fileTree, fileTree.byteCount > 0 {
+                        if let summary = displayedSummary {
+                            if let fileTree = displayedTree, fileTree.byteCount > 0 {
                                 sunburstCard(root: fileTree)
                             }
 
                             summaryCard(summary)
 
-                            if !viewModel.files.isEmpty {
-                                NavigationLink {
-                                    ScannedFilesView(viewModel: viewModel)
-                                } label: {
+                            if isPreview || !viewModel.files.isEmpty {
+                                fileDetailsLink {
                                     HStack(spacing: 14) {
                                         Image(systemName: "trash")
                                             .appTypeface(.title2, size: 22, relativeTo: .title2, weight: .regular)
@@ -68,6 +73,7 @@ struct StorageView: View {
                                     .appContentCard()
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityIdentifier("storage.reviewFiles")
                             }
                         }
                     }
@@ -82,14 +88,14 @@ struct StorageView: View {
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button {
-                        isSourceImporterPresented = true
+                        chooseSources()
                     } label: {
                         Label("Add Files", systemImage: "plus")
                     }
                     .accessibilityIdentifier("storage.addSources.toolbar")
 
                     Button {
-                        isImporterPresented = true
+                        chooseFolder()
                     } label: {
                         Label("Choose Folder", systemImage: "folder.badge.plus")
                     }
@@ -113,21 +119,36 @@ struct StorageView: View {
                 handleSourceImport(result)
             }
         }
+        // Drop any pushed real file list when ownership expires, without touching its saved index.
+        .id(isPreview)
+        .sheet(isPresented: $showsPremium) {
+            PremiumSubscriptionView(requiredFeature: .storage)
+        }
         .onAppear {
-            if isTabActive {
+            if isTabActive, !isPreview {
                 viewModel.loadIfNeeded()
             }
             animateStorageDashboardIfNeeded()
         }
         .onChange(of: isTabActive) { _, isActive in
             if isActive {
-                viewModel.loadIfNeeded()
+                if !isPreview { viewModel.loadIfNeeded() }
                 animateStorageDashboardIfNeeded()
             } else {
                 resetStorageAnimations()
             }
         }
-        .onChange(of: viewModel.summary) { _, _ in
+        .onChange(of: displayedSummary) { _, _ in
+            animateStorageDashboardIfNeeded()
+        }
+        .onChange(of: isPreview) { _, previewing in
+            isImporterPresented = false
+            isSourceImporterPresented = false
+            if previewing {
+                viewModel.cancelScan()
+            } else if isTabActive {
+                viewModel.loadIfNeeded()
+            }
             animateStorageDashboardIfNeeded()
         }
         .onChange(of: themeSettings.interfaceAnimationsEnabled) { _, _ in
@@ -143,12 +164,12 @@ struct StorageView: View {
                     .foregroundStyle(theme.accentPrimary)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(viewModel.isSourceSelection
+                    Text(!isPreview && viewModel.isSourceSelection
                         ? LocalizedStringKey("Analyzed Files")
                         : LocalizedStringKey("Analyzed Folder"))
                         .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                         .foregroundStyle(.secondary)
-                    Text(viewModel.selectedDirectoryName ?? "No folder selected")
+                    Text(isPreview ? preview.fileTree.name : viewModel.selectedDirectoryName ?? "No folder selected")
                         .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                         .lineLimit(1)
                 }
@@ -156,14 +177,14 @@ struct StorageView: View {
                 Spacer()
 
                 Button("Choose") {
-                    isImporterPresented = true
+                    chooseFolder()
                 }
                 .buttonStyle(.bordered)
                 .accessibilityIdentifier("storage.chooseFolder.card")
             }
 
             Button {
-                isSourceImporterPresented = true
+                chooseSources()
             } label: {
                 Label("Add Files", systemImage: "doc.badge.plus")
                     .frame(maxWidth: .infinity)
@@ -171,7 +192,7 @@ struct StorageView: View {
             .buttonStyle(.bordered)
             .accessibilityIdentifier("storage.addSources.card")
 
-            if viewModel.state.isScanning {
+            if !isPreview, viewModel.state.isScanning {
                 Button("Cancel Scan", role: .cancel) {
                     viewModel.cancelScan()
                 }
@@ -192,7 +213,11 @@ struct StorageView: View {
             // The compact dashboard cache is deliberately published before the
             // full 20k+ file index. Do not replace that usable cached state with
             // a blocking spinner while details restore in the background.
-            if viewModel.isRestoringStoredFiles, viewModel.summary == nil {
+            if isPreview {
+                Label(AppL10n.string("storage.preview.title"), systemImage: "hand.tap")
+                    .foregroundStyle(theme.accentPrimary)
+                    .accessibilityIdentifier("storage.preview.notice")
+            } else if viewModel.isRestoringStoredFiles, viewModel.summary == nil {
                 ProgressView()
                     .tint(theme.accentPrimary)
                 Text("Loading…")
@@ -238,13 +263,14 @@ struct StorageView: View {
                     .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                 Spacer()
                 NavigationLink {
-                    FolderMapView(root: root)
+                    FolderMapView(root: root, isPreview: isPreview)
                 } label: {
                     Label("Expand", systemImage: "arrow.up.left.and.arrow.down.right")
                         .labelStyle(.iconOnly)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(theme.accentPrimary)
+                .accessibilityIdentifier("storage.folderMap.expand")
             }
 
             SunburstChartView(
@@ -252,6 +278,7 @@ struct StorageView: View {
                 revealProgress: sunburstRevealProgress
             )
                 .frame(height: 300)
+                .accessibilityIdentifier("storage.sunburst")
         }
         .storageCard()
     }
@@ -277,9 +304,7 @@ struct StorageView: View {
             }
 
             ForEach(summary.nonEmptyCategories) { category in
-                NavigationLink {
-                    ScannedFilesView(viewModel: viewModel, category: category.category)
-                } label: {
+                fileDetailsLink(category: category.category) {
                     HStack(spacing: 12) {
                         Image(systemName: categorySymbol(category.category))
                             .appTypeface(.system(size: 15, weight: .semibold), size: 15, relativeTo: .body, weight: .semibold)
@@ -325,9 +350,40 @@ struct StorageView: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("storage.category.\(category.category.rawValue)")
             }
         }
         .storageCard()
+    }
+
+    @ViewBuilder
+    private func fileDetailsLink<Label: View>(
+        category: FileCategory? = nil,
+        @ViewBuilder label: () -> Label
+    ) -> some View {
+        if isPreview {
+            Button { showsPremium = true } label: { label() }
+        } else {
+            NavigationLink {
+                ScannedFilesView(viewModel: viewModel, category: category)
+            } label: { label() }
+        }
+    }
+
+    private func chooseFolder() {
+        guard !isPreview else {
+            showsPremium = true
+            return
+        }
+        isImporterPresented = true
+    }
+
+    private func chooseSources() {
+        guard !isPreview else {
+            showsPremium = true
+            return
+        }
+        isSourceImporterPresented = true
     }
 
     /// 封装 `metric` 对应的局部行为，供当前类型在统一入口下复用。
@@ -410,7 +466,7 @@ struct StorageView: View {
 
     /// 启动 `animateStorageDashboardIfNeeded` 动画，并确保展示状态与当前页面生命周期一致。
     private func animateStorageDashboardIfNeeded() {
-        guard isTabActive, viewModel.summary != nil else { return }
+        guard isTabActive, displayedSummary != nil else { return }
         animationGeneration += 1
         let generation = animationGeneration
         sunburstRevealProgress = 0
@@ -452,6 +508,7 @@ struct StorageView: View {
 
     /// 处理 `handleImport` 输入，并根据结果推进当前业务状态。
     private func handleImport(_ result: Result<[URL], Error>) {
+        guard !isPreview else { return }
         switch result {
         case .success(let urls):
             guard let url = urls.first else {
@@ -465,6 +522,7 @@ struct StorageView: View {
     }
 
     private func handleSourceImport(_ result: Result<[URL], Error>) {
+        guard !isPreview else { return }
         switch result {
         case .success(let urls):
             guard !urls.isEmpty else {
@@ -521,16 +579,23 @@ private struct StorageBarStripeTexture: View {
 /// 定义 `FolderMapView` 的值语义数据与相关行为。
 private struct FolderMapView: View {
     let root: FileNode
+    let isPreview: Bool
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
+                if isPreview {
+                    Label(AppL10n.string("storage.preview.title"), systemImage: "hand.tap")
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("storage.preview.notice")
+                }
                 Text("Tap a folder segment to drill down. Tap the center to go back.")
                     .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                     .foregroundStyle(.secondary)
 
                 SunburstChartView(root: root)
+                    .accessibilityIdentifier("storage.sunburst.expanded")
             }
             .padding(.horizontal, 4)
             .padding(.vertical, 16)
@@ -627,6 +692,7 @@ private struct ScannedFilesView: View {
             }
         }
         .navigationTitle(category?.displayName ?? AppL10n.string("Scanned Files"))
+        .accessibilityIdentifier("storage.fileList")
         .navigationBarTitleDisplayMode(.inline)
         .task(id: FileDisplayRequest(
             filesRevision: viewModel.filesRevision,
@@ -671,7 +737,7 @@ private struct ScannedFilesView: View {
                         Label("Delete", systemImage: "trash")
                     }
                 }
-                .buttonStyle(.glass)
+                .appGlassButtonStyle()
                 .foregroundStyle(theme.negativeRed)
                 .disabled(selectedURLs.isEmpty || viewModel.deletionState.isDeleting)
             }

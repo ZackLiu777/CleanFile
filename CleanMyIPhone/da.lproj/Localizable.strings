@@ -1,3 +1,42 @@
+"premium.plan.annual" = "Årsabonnement";
+"premium.plan.monthly" = "Månedsabonnement";
+"premium.price.recurring" = "%@ pr. %@";
+"premium.offer.free" = "%@ gratis, derefter %@";
+"premium.price.unavailable" = "Pris ikke tilgængelig";
+"premium.pricing.loading" = "Indlæser App Store-priser…";
+"premium.pricing.unavailable" = "Nogle priser er ikke tilgængelige. Opret forbindelse til internettet, og prøv igen. Du kan stadig se denne side og fortsætte gratis.";
+"premium.purchase.continue" = "Fortsæt med Premium";
+"premium.purchase.pending" = "Købet afventer godkendelse. Premium aktiveres, når Apple bekræfter det.";
+"premium.purchase.unverified" = "Købet kunne ikke bekræftes. Der er ikke givet ny adgang. Gendan køb, eller prøv igen.";
+"premium.restore" = "Gendan køb";
+"premium.restore.none" = "Der blev ikke fundet et aktivt Premium-køb for denne App Store-konto.";
+"premium.restore.failed" = "Køb kunne ikke gendannes. Kontroller forbindelsen og din App Store-konto, og prøv igen.";
+"premium.active" = "Premium er aktivt";
+"premium.subscription.terms" = "Abonnementer fornyes automatisk, medmindre de opsiges. Administrer eller opsig dem i indstillingerne for din Apple-konto.";
+"premium.terms" = "Servicevilkår";
+"premium.privacy.link" = "Privatlivspolitik";
+
+"premium.quickClean.detail" = "Vælg flere oprydningskategorier, og behold det anbefalede foto i hver gruppe af lignende fotos.";
+"storage.preview.title" = "Interaktiv forhåndsvisning · Eksempeldata";
+"storage.preview.detail" = "Udforsk mappekortet med eksempeldata. Lås Premium op for at vælge mapper og administrere dine filer.";
+"storage.preview.folder" = "Eksempelmappe";
+
+"premium.feature.all" = "Lås alle Premium-funktioner op";
+"premium.feature.required" = "Tilgængelig med Premium";
+"premium.feature.unlock" = "Lås op med Premium";
+"premium.feature.media" = "Ryd op i medier";
+"premium.feature.videoConversion" = "Videokomprimering";
+"premium.feature.storage" = "Ryd op i filer";
+"premium.feature.imageConversion" = "Billedkomprimering";
+"premium.feature.audioConversion" = "Lydkonvertering";
+"premium.feature.darkAppearance" = "Mørkt udseende";
+"premium.feature.customColors" = "Egne farver";
+"premium.feature.compression.title" = "Komprimer billeder og lyd";
+"premium.feature.compression.detail" = "Konverter billeder og lydfiler med justerbare indstillinger.";
+"premium.feature.appearance.title" = "Gør appen personlig";
+"premium.feature.appearance.detail" = "Lås mørkt udseende og egne app- og baggrundsfarver op.";
+"premium.continue.free" = "Fortsæt gratis";
+
 "Photos" = "Fotos";
 "Storage" = "Opbevaring";
 "Compress" = "Komprimer";

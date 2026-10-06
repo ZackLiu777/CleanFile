@@ -12,6 +12,7 @@
 
 import ImageFormatConversionKit
 import Combine
+import StoreKit
 import SwiftUI
 
 /// 协调详情页面对自定义 Tab Bar 的可见性，避免未激活 Tab 的导航栈影响当前页面。
@@ -123,9 +124,11 @@ private struct TabBarDragState {
 
 /// 定义 `ContentView` 的值语义数据与相关行为。
 struct ContentView: View {
+    @Environment(\.requestReview) private var requestReview
     @Environment(\.appTheme) private var theme
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var themeSettings: ThemeSettings
+    @ObservedObject private var accessStore: PremiumFeatureAccessStore
     @StateObject private var tabBarVisibility = TabBarVisibilityCoordinator()
     @StateObject private var mediaViewModel = PhotoLibraryViewModel()
     @StateObject private var fileViewModel = FileScannerViewModel()
@@ -146,7 +149,11 @@ struct ContentView: View {
     @State private var incomingDocumentURLs: [URL] = []
     @State private var documentImportTask: Task<Void, Never>?
 
-    init() {
+    init(accessStore: PremiumFeatureAccessStore) {
+        self.accessStore = accessStore
+        _fileViewModel = StateObject(wrappedValue: FileScannerViewModel(canUseStorage: {
+            accessStore.allows(.storage)
+        }))
         let storedTab = UserDefaults.standard.string(forKey: "selectedAppTab")
         _displayedTab = State(initialValue: AppTab(rawValue: storedTab ?? "") ?? .photos)
     }
@@ -160,6 +167,12 @@ struct ContentView: View {
             }
         }
         .environmentObject(tabBarVisibility)
+        .onChange(of: mediaViewModel.deletionState) { _, state in
+            // Only a confirmed PhotoKit deletion is a completed cleanup, not a swipe mark.
+            if case .success = state, scenePhase == .active {
+                requestReview()
+            }
+        }
         .task {
             showPendingShareBatchIfNeeded()
             // This view exists underneath AppOpeningView, so cold-launch media
@@ -282,7 +295,16 @@ struct ContentView: View {
         // Any failed or mixed-type files remain in the inbox for a later attempt.
     }
 
+    @ViewBuilder
     private var nativeTabView: some View {
+        if #available(iOS 26.0, *) {
+            nativeTabContent.tabBarMinimizeBehavior(.onScrollDown)
+        } else {
+            nativeTabContent
+        }
+    }
+
+    private var nativeTabContent: some View {
         TabView(selection: $selectedTab) {
             PhotosView(
                 viewModel: mediaViewModel,
@@ -294,10 +316,7 @@ struct ContentView: View {
                 }
                 .tag(AppTab.photos)
 
-            StorageView(
-                viewModel: fileViewModel,
-                isTabActive: selectedTab == .storage
-            )
+            storagePage(isActive: selectedTab == .storage)
                 .tabItem {
                     Label("Storage", systemImage: "externaldrive")
                         .accessibilityIdentifier("tab.storage")
@@ -324,7 +343,6 @@ struct ContentView: View {
                 }
                 .tag(AppTab.settings)
         }
-        .tabBarMinimizeBehavior(.onScrollDown)
         .tint(theme.accentPrimary)
         .toolbarBackground(.hidden, for: .tabBar)
         .sensoryFeedback(.selection, trigger: selectedTab)
@@ -382,10 +400,7 @@ struct ContentView: View {
                 isTabActive: displayedTab == .photos
             )
         case .storage:
-            StorageView(
-                viewModel: fileViewModel,
-                isTabActive: displayedTab == .storage
-            )
+            storagePage(isActive: displayedTab == .storage)
         case .conversion:
             ConversionHomeView(
                 theme: theme.conversionTheme,
@@ -404,6 +419,11 @@ struct ContentView: View {
         case .settings:
             SettingsView()
         }
+    }
+
+    @ViewBuilder
+    private func storagePage(isActive: Bool) -> some View {
+        StorageView(viewModel: fileViewModel, isTabActive: isActive)
     }
 
     private var tabBar: some View {

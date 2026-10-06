@@ -30,9 +30,11 @@ final class MediaQuickCleanViewModel: ObservableObject {
     @Published private(set) var selectedCategoryIDs = Set<Category.ID>()
 
     private unowned let photoLibrary: PhotoLibraryViewModel
+    private let canUseQuickClean: () -> Bool
 
-    init(photoLibrary: PhotoLibraryViewModel) {
+    init(photoLibrary: PhotoLibraryViewModel, canUseQuickClean: @escaping () -> Bool) {
         self.photoLibrary = photoLibrary
+        self.canUseQuickClean = canUseQuickClean
         refreshCategories()
     }
 
@@ -61,6 +63,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
     }
 
     func toggle(_ category: Category) {
+        guard canUseQuickClean() else { return }
         if selectedCategoryIDs.contains(category.id) {
             selectedCategoryIDs.remove(category.id)
         } else {
@@ -69,6 +72,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
     }
 
     func toggleAllCategories() {
+        guard canUseQuickClean() else { return }
         if allCategoriesSelected {
             selectedCategoryIDs.removeAll()
         } else {
@@ -76,14 +80,18 @@ final class MediaQuickCleanViewModel: ObservableObject {
         }
     }
 
-    func deleteSelection() async {
+    @discardableResult
+    func deleteSelection() async -> Bool {
+        // Recheck at execution: a trial can expire while this screen or its confirmation is open.
+        guard canUseQuickClean() else { return false }
         let identifiers = selectedAssetIDs
-        guard !identifiers.isEmpty else { return }
-        await photoLibrary.deleteAssets(withIDs: identifiers)
-        if case .success = photoLibrary.deletionState {
+        guard !identifiers.isEmpty else { return false }
+        let succeeded = await photoLibrary.deleteAssets(withIDs: identifiers)
+        if succeeded {
             selectedCategoryIDs.removeAll()
             refreshCategories()
         }
+        return succeeded
     }
 
     func refreshCategories() {

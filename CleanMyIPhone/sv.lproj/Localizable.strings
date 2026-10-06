@@ -1,3 +1,42 @@
+"premium.plan.annual" = "Årsabonnemang";
+"premium.plan.monthly" = "Månadsabonnemang";
+"premium.price.recurring" = "%@ per %@";
+"premium.offer.free" = "%@ gratis, därefter %@";
+"premium.price.unavailable" = "Pris saknas";
+"premium.pricing.loading" = "Läser in App Store-priser…";
+"premium.pricing.unavailable" = "Vissa priser är inte tillgängliga. Anslut till internet och försök igen. Du kan fortfarande läsa denna sida och fortsätta gratis.";
+"premium.purchase.continue" = "Fortsätt med Premium";
+"premium.purchase.pending" = "Köpet väntar på godkännande. Premium aktiveras efter Apples bekräftelse.";
+"premium.purchase.unverified" = "Köpet kunde inte verifieras. Ingen ny åtkomst har beviljats. Återställ köp eller försök igen.";
+"premium.restore" = "Återställ köp";
+"premium.restore.none" = "Inget aktivt Premium-köp hittades för detta App Store-konto.";
+"premium.restore.failed" = "Köp kunde inte återställas. Kontrollera anslutningen och ditt App Store-konto och försök igen.";
+"premium.active" = "Premium är aktivt";
+"premium.subscription.terms" = "Abonnemang förnyas automatiskt om de inte sägs upp. Hantera eller avsluta dem i inställningarna för ditt Apple-konto.";
+"premium.terms" = "Användarvillkor";
+"premium.privacy.link" = "Integritetspolicy";
+
+"premium.quickClean.detail" = "Välj flera rensningskategorier och behåll det rekommenderade fotot i varje grupp av liknande foton.";
+"storage.preview.title" = "Interaktiv förhandsvisning · Exempeldata";
+"storage.preview.detail" = "Utforska mappkartan med exempeldata. Lås upp Premium för att välja mappar och hantera dina filer.";
+"storage.preview.folder" = "Exempelmapp";
+
+"premium.feature.all" = "Lås upp alla Premium-funktioner";
+"premium.feature.required" = "Tillgängligt med Premium";
+"premium.feature.unlock" = "Lås upp med Premium";
+"premium.feature.media" = "Rensa media";
+"premium.feature.videoConversion" = "Videokomprimering";
+"premium.feature.storage" = "Rensa filer";
+"premium.feature.imageConversion" = "Bildkomprimering";
+"premium.feature.audioConversion" = "Ljudkonvertering";
+"premium.feature.darkAppearance" = "Mörkt utseende";
+"premium.feature.customColors" = "Egna färger";
+"premium.feature.compression.title" = "Komprimera bilder och ljud";
+"premium.feature.compression.detail" = "Konvertera bilder och ljudfiler med justerbara inställningar.";
+"premium.feature.appearance.title" = "Gör appen personlig";
+"premium.feature.appearance.detail" = "Lås upp mörkt utseende och egna app- och bakgrundsfärger.";
+"premium.continue.free" = "Fortsätt gratis";
+
 "Photos" = "Foton";
 "Storage" = "Förvaring";
 "Compress" = "Komprimera";

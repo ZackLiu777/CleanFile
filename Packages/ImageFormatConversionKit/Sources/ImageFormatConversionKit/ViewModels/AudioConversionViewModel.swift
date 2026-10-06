@@ -16,6 +16,7 @@ final class AudioConversionViewModel {
     private(set) var total = 0
     private(set) var itemProgress = 0.0
     private(set) var notice: String?
+    var isPremiumRequiredPresented = false
     private(set) var importProgress: ConversionImportProgress?
 
     var outputFormat: AudioOutputFormat = .mp3
@@ -183,9 +184,20 @@ final class AudioConversionViewModel {
     }
 
     /// 启动 `start` 对应流程，并初始化本轮任务需要的状态。
-    func start() {
+    func start(usagePolicy: ConversionUsagePolicy = .unrestricted) {
         guard canConvert else { return }
-        task = Task { [weak self] in await self?.run() }
+        let count = items.filter { item in
+            switch item.status {
+            case .ready, .failed, .cancelled: true
+            default: false
+            }
+        }.count
+        guard let permit = usagePolicy.reserve(.audio, count) else {
+            isPremiumRequiredPresented = true
+            return
+        }
+        isConverting = true
+        task = Task { await run(permit: permit) }
     }
 
     /// 取消 `cancel` 对应的进行中任务，并收敛到可继续操作的状态。
@@ -195,7 +207,8 @@ final class AudioConversionViewModel {
     }
 
     /// 封装 `run` 对应的局部行为，供当前类型在统一入口下复用。
-    private func run() async {
+    private func run(permit: ConversionUsagePermit) async {
+        defer { permit.finish() }
         isConverting = true
         completed = 0
         itemProgress = 0
@@ -227,10 +240,13 @@ final class AudioConversionViewModel {
                     await MainActor.run { self?.itemProgress = value }
                 }
                 items[index].status = .completed(url)
+                permit.recordSuccess()
             } catch let error as AudioConversionError {
                 items[index].status = error == .cancelled
                     ? .cancelled
                     : .failed(error.localizedDescription)
+            } catch is CancellationError {
+                items[index].status = .cancelled
             } catch {
                 items[index].status = .failed(error.localizedDescription)
             }
@@ -239,7 +255,7 @@ final class AudioConversionViewModel {
         }
         notice = Task.isCancelled
             ? L10n.string("notice.cancelled")
-            : L10n.format("audio.notice.completed", completed)
+            : L10n.format("audio.notice.completed", permit.successfulCount)
         isConverting = false
         task = nil
         persist()

@@ -15,6 +15,8 @@ struct AppearanceThemeView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var themeSettings: ThemeSettings
+    @EnvironmentObject private var accessStore: PremiumFeatureAccessStore
+    @State private var requiredFeature: PremiumFeature?
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
 
     /// 组合主题预览与三组低频全局设置，并沿用 App 的连续背景。
@@ -23,7 +25,7 @@ struct AppearanceThemeView: View {
             previewSection
             accentPaletteSection
             backgroundPaletteSection
-            if themeSettings.usesCustomBackground {
+            if themeSettings.isUsingCustomBackground && accessStore.allows(.customColors) {
                 customBackgroundEditorSection
             }
             glassCardSection
@@ -41,11 +43,12 @@ struct AppearanceThemeView: View {
         .appSoftScrollEdge()
         .navigationTitle("Appearance & Theme")
         .navigationBarTitleDisplayMode(.inline)
-        .sensoryFeedback(.selection, trigger: themeSettings.selectedAccentPaletteID)
-        .sensoryFeedback(.selection, trigger: themeSettings.selectedThemeID)
+        .sensoryFeedback(.selection, trigger: themeSettings.effectiveAccentPaletteID)
+        .sensoryFeedback(.selection, trigger: themeSettings.effectiveThemeID)
         .sensoryFeedback(.selection, trigger: themeSettings.customBackgroundStyle.kind)
         .sensoryFeedback(.selection, trigger: themeSettings.liquidGlassCardsEnabled)
         .sensoryFeedback(.selection, trigger: themeSettings.customTabBarEnabled)
+        .sheet(item: $requiredFeature) { PremiumSubscriptionView(requiredFeature: $0) }
         .onAppear {
             tabBarVisibility.setHidden(
                 true,
@@ -82,7 +85,8 @@ struct AppearanceThemeView: View {
                             ThemePaletteSwatch(
                                 title: paletteID.displayName,
                                 sample: .accent(accentColor(for: paletteID)),
-                                isSelected: themeSettings.selectedAccentPaletteID == paletteID
+                                isSelected: themeSettings.effectiveAccentPaletteID == paletteID,
+                                isLocked: paletteID == .custom && !accessStore.allows(.customColors)
                             ) {
                                 updateAccentPalette(paletteID)
                             }
@@ -94,13 +98,21 @@ struct AppearanceThemeView: View {
 
                 Divider()
 
-                ColorPicker(
-                    "Edit App Color",
-                    selection: customAccentBinding,
-                    supportsOpacity: false
-                )
-                .frame(minHeight: 50)
-                .accessibilityHint("Opens the system color picker and selects Custom.")
+                if accessStore.allows(.customColors) {
+                    ColorPicker("Edit App Color", selection: customAccentBinding, supportsOpacity: false)
+                        .frame(minHeight: 50)
+                        .accessibilityHint("Opens the system color picker and selects Custom.")
+                } else {
+                    Button { requiredFeature = .customColors } label: {
+                        HStack {
+                            Text("Edit App Color")
+                            Spacer()
+                            Image(systemName: "lock.fill")
+                        }
+                        .frame(minHeight: 50)
+                    }
+                    .accessibilityIdentifier("appearance.customColor.locked")
+                }
             }
         } header: {
             Text("App Color")
@@ -119,8 +131,9 @@ struct AppearanceThemeView: View {
                         ThemePaletteSwatch(
                             title: themeID.displayName,
                             sample: .background(themeID.theme),
-                            isSelected: !themeSettings.usesCustomBackground
-                                && themeSettings.selectedThemeID == themeID
+                            isSelected: !themeSettings.isUsingCustomBackground
+                                && themeSettings.effectiveThemeID == themeID,
+                            isLocked: themeID == .graphite && !accessStore.allows(.darkAppearance)
                         ) {
                             updateBackgroundTheme(themeID)
                         }
@@ -130,7 +143,8 @@ struct AppearanceThemeView: View {
                     ThemePaletteSwatch(
                         title: "Custom",
                         sample: .background(themeSettings.customBackgroundTheme),
-                        isSelected: themeSettings.usesCustomBackground
+                        isSelected: themeSettings.isUsingCustomBackground,
+                        isLocked: !accessStore.allows(.customColors)
                     ) {
                         selectCustomBackground()
                     }
@@ -297,7 +311,7 @@ struct AppearanceThemeView: View {
                 }
             } else {
                 VStack(spacing: 0) {
-                    Picker("Appearance", selection: $themeSettings.appearance) {
+                    Picker("Appearance", selection: appearanceBinding) {
                         ForEach(AppAppearance.allCases) { appearance in
                             Text(appearance.displayName)
                                 .tag(appearance)
@@ -402,9 +416,9 @@ struct AppearanceThemeView: View {
     private func accentColor(for paletteID: AppAccentPaletteID) -> Color {
         switch paletteID {
         case .automatic:
-            themeSettings.usesCustomBackground
+            themeSettings.isUsingCustomBackground
                 ? themeSettings.customBackgroundTheme.accentPrimary
-                : themeSettings.selectedThemeID.theme.accentPrimary
+                : themeSettings.effectiveThemeID.theme.accentPrimary
         case .custom:
             themeSettings.customAccentColor.color
         default:
@@ -414,6 +428,10 @@ struct AppearanceThemeView: View {
 
     /// 在减少动态效果开启时立即切换，否则仅做短促、可中断的颜色过渡。
     private func updateAccentPalette(_ paletteID: AppAccentPaletteID) {
+        guard paletteID != .custom || accessStore.allows(.customColors) else {
+            requiredFeature = .customColors
+            return
+        }
         withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.16)) {
             themeSettings.selectAccentPalette(paletteID)
         }
@@ -421,6 +439,10 @@ struct AppearanceThemeView: View {
 
     /// 更新完整背景主题，避免 List 卡片与全屏背景在颜色动画中产生帧差。
     private func updateBackgroundTheme(_ themeID: AppThemeID) {
+        guard themeID != .graphite || accessStore.allows(.darkAppearance) else {
+            requiredFeature = .darkAppearance
+            return
+        }
         var transaction = Transaction()
         transaction.disablesAnimations = true
         withTransaction(transaction) {
@@ -430,11 +452,29 @@ struct AppearanceThemeView: View {
 
     /// 重新选择用户上次编辑的背景颜色，并保留预设主题以便随时切回。
     private func selectCustomBackground() {
+        guard accessStore.allows(.customColors) else {
+            requiredFeature = .customColors
+            return
+        }
         var transaction = Transaction()
         transaction.disablesAnimations = true
         withTransaction(transaction) {
             themeSettings.selectCustomBackground()
         }
+    }
+
+    /// 免费用户保持浅色；未验证的权益不能开启新的深色设置。
+    private var appearanceBinding: Binding<AppAppearance> {
+        Binding(
+            get: { accessStore.allows(.darkAppearance) ? themeSettings.appearance : .light },
+            set: { appearance in
+                guard appearance == .light || accessStore.allows(.darkAppearance) else {
+                    requiredFeature = .darkAppearance
+                    return
+                }
+                themeSettings.appearance = appearance
+            }
+        )
     }
 
     /// 将系统 ColorPicker 的应用颜色变化写回可持久化的 sRGB 模型。
@@ -599,6 +639,7 @@ private struct ThemePaletteSwatch: View {
     let title: LocalizedStringKey
     let sample: ThemePaletteSample
     let isSelected: Bool
+    var isLocked = false
     let action: () -> Void
 
     /// 显示颜色样本与名称；颜色不可辨识时仍可通过文字和勾选理解状态。
@@ -653,8 +694,8 @@ private struct ThemePaletteSwatch: View {
                     }
             }
 
-            if isSelected {
-                Image(systemName: "checkmark")
+            if isSelected || isLocked {
+                Image(systemName: isLocked ? "lock.fill" : "checkmark")
                     .appTypeface(.caption2.bold(), size: 11, relativeTo: .caption2, weight: .bold)
                     .foregroundStyle(theme.textPrimary)
                     .frame(width: 19, height: 19)
@@ -702,5 +743,8 @@ private enum ThemePaletteSample {
         AppearanceThemeView()
     }
     .environmentObject(ThemeSettings(userDefaults: defaults))
+    .environmentObject(PremiumFeatureAccessStore(accessState: .entitled))
+    .environmentObject(TabBarVisibilityCoordinator())
+    .environmentObject(PremiumEntitlementStore())
 }
 #endif

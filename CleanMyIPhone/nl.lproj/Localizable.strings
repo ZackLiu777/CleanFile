@@ -1,3 +1,42 @@
+"premium.plan.annual" = "Jaarabonnement";
+"premium.plan.monthly" = "Maandabonnement";
+"premium.price.recurring" = "%@ per %@";
+"premium.offer.free" = "%@ gratis, daarna %@";
+"premium.price.unavailable" = "Prijs niet beschikbaar";
+"premium.pricing.loading" = "App Store-prijzen laden…";
+"premium.pricing.unavailable" = "Sommige prijzen zijn niet beschikbaar. Maak verbinding met internet en probeer opnieuw. Je kunt deze pagina bekijken en gratis doorgaan.";
+"premium.purchase.continue" = "Doorgaan met Premium";
+"premium.purchase.pending" = "Aankoop wacht op goedkeuring. Premium wordt actief na bevestiging door Apple.";
+"premium.purchase.unverified" = "De aankoop kon niet worden geverifieerd. Er is geen nieuwe toegang verleend. Herstel aankopen of probeer opnieuw.";
+"premium.restore" = "Aankopen herstellen";
+"premium.restore.none" = "Er is geen actieve Premium-aankoop gevonden voor dit App Store-account.";
+"premium.restore.failed" = "Aankopen konden niet worden hersteld. Controleer je verbinding en App Store-account en probeer opnieuw.";
+"premium.active" = "Premium is actief";
+"premium.subscription.terms" = "Abonnementen worden automatisch verlengd tenzij je opzegt. Beheer of annuleer ze in de instellingen van je Apple Account.";
+"premium.terms" = "Servicevoorwaarden";
+"premium.privacy.link" = "Privacybeleid";
+
+"premium.quickClean.detail" = "Selecteer meerdere opruimcategorieën en behoud de aanbevolen foto in elke groep vergelijkbare foto’s.";
+"storage.preview.title" = "Interactief voorbeeld · Voorbeeldgegevens";
+"storage.preview.detail" = "Verken de mappenkaart met voorbeeldgegevens. Ontgrendel Premium om mappen te kiezen en je bestanden te beheren.";
+"storage.preview.folder" = "Voorbeeldmap";
+
+"premium.feature.all" = "Ontgrendel alle Premium-functies";
+"premium.feature.required" = "Beschikbaar met Premium";
+"premium.feature.unlock" = "Ontgrendel met Premium";
+"premium.feature.media" = "Media opschonen";
+"premium.feature.videoConversion" = "Video’s comprimeren";
+"premium.feature.storage" = "Bestanden opschonen";
+"premium.feature.imageConversion" = "Afbeeldingen comprimeren";
+"premium.feature.audioConversion" = "Audio converteren";
+"premium.feature.darkAppearance" = "Donkere weergave";
+"premium.feature.customColors" = "Aangepaste kleuren";
+"premium.feature.compression.title" = "Comprimeer afbeeldingen en audio";
+"premium.feature.compression.detail" = "Converteer afbeeldingen en audiobestanden met instelbare opties.";
+"premium.feature.appearance.title" = "Maak het persoonlijk";
+"premium.feature.appearance.detail" = "Ontgrendel de donkere weergave en aangepaste app- en achtergrondkleuren.";
+"premium.continue.free" = "Gratis doorgaan";
+
 "Photos" = "Foto's";
 "Storage" = "Opslag";
 "Compress" = "Comprimeren";

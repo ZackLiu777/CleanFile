@@ -1,357 +1,360 @@
-import StoreKit
 import SwiftUI
 
 struct PremiumSubscriptionView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @EnvironmentObject private var entitlementStore: PremiumEntitlementStore
-    @State private var lifetimeProduct: Product?
-    @State private var isLoadingLifetimeProduct = false
-    @State private var isPurchasingLifetime = false
-    @State private var isStorefrontReady = false
-    @State private var isCheckingStorefront = true
-    @State private var storefrontFailureIsNetwork = true
+    @StateObject private var purchaseModel = PremiumPurchaseViewModel()
 
     let allowsDismiss: Bool
+    let requiredFeature: PremiumFeature?
 
-    init(allowsDismiss: Bool = true) {
+    init(allowsDismiss: Bool = true, requiredFeature: PremiumFeature? = nil) {
         self.allowsDismiss = allowsDismiss
+        self.requiredFeature = requiredFeature
     }
 
     var body: some View {
         NavigationStack {
-            Group {
-                if PremiumConfiguration.purchasesEnabled,
-                   let groupID = PremiumConfiguration.subscriptionGroupID {
-                    if isStorefrontReady {
-                        SubscriptionStoreView(groupID: groupID) {
-                            introduction
-                        }
-                        .subscriptionStoreControlStyle(.prominentPicker)
-                        .subscriptionStoreControlBackground(theme.cardSurface)
-                        .subscriptionStoreButtonLabel(.multiline)
-                        .subscriptionStorePolicyDestination(
-                            url: PremiumConfiguration.privacyPolicyURL,
-                            for: .privacyPolicy
-                        )
-                        .subscriptionStorePolicyDestination(
-                            url: PremiumConfiguration.termsOfServiceURL,
-                            for: .termsOfService
-                        )
-                        .subscriptionStorePolicyForegroundStyle(theme.textSecondary)
-                        .storeButton(.visible, for: .restorePurchases)
-                        .onInAppPurchaseCompletion { _, result in
-                            guard case .success(let purchaseResult) = result else {
-                                if case .failure(let error) = result {
-                                    entitlementStore.recordPurchaseError(error)
-                                }
-                                await entitlementStore.refresh()
-                                return
-                            }
-                            let didUnlock = await entitlementStore.handlePurchaseResult(purchaseResult)
-                            if didUnlock, allowsDismiss {
-                                dismiss()
-                            }
-                        }
-                        .containerBackground(for: .subscriptionStoreFullHeight) {
-                            AppBackground()
-                        }
-                    } else {
-                        offlineStorefront
+            ScrollView {
+                VStack(spacing: 24) {
+                    if let requiredFeature { featureNotice(requiredFeature) }
+                    introduction
+                    features
+                    if entitlementStore.accessState == .checking {
+                        verificationNotice
                     }
-                } else {
-                    ScrollView {
-                        VStack(spacing: 24) {
-                            introduction
-                            unavailablePlans
-                        }
-                        .padding(.bottom, 24)
-                    }
+                    plans
+                    if usesInlinePurchaseControls { purchaseControls }
+                    legalLinks
                 }
+                .padding(24)
+                .frame(maxWidth: 640)
+                .frame(maxWidth: .infinity)
             }
             .background(AppBackground())
             .foregroundStyle(theme.textPrimary)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if !usesInlinePurchaseControls { purchaseFooter }
+            }
             .navigationTitle("Filevra Premium")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if allowsDismiss {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("premium.close", systemImage: "xmark") { dismiss() }
-                            .labelStyle(.iconOnly)
-                            .accessibilityIdentifier("premium.close")
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { dismiss() } label: {
+                            Image(systemName: "xmark")
+                                .font(.body.weight(.semibold))
+                        }
+                        .frame(minWidth: 44, minHeight: 44)
+                        .tint(theme.accentPrimary)
+                        .accessibilityLabel(AppL10n.string("premium.close"))
+                        .accessibilityIdentifier("premium.close")
                     }
                 }
             }
         }
-        .task {
-            await loadStorefront()
-        }
+        .onAppear { purchaseModel.loadProducts() }
+        .onDisappear { purchaseModel.cancelProductLoading() }
         .onChange(of: entitlementStore.accessState) { _, state in
-            if state == .entitled, allowsDismiss {
-                dismiss()
-            }
+            if state == .entitled, allowsDismiss { dismiss() }
         }
         .presentationDetents([.large])
         .accessibilityIdentifier("premium.screen")
     }
 
-    private var offlineStorefront: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                introduction
-
-                if isCheckingStorefront {
-                    ProgressView()
-                        .controlSize(.large)
-                        .frame(maxWidth: .infinity, minHeight: 140)
-                        .accessibilityLabel("premium.entitlement.checking")
-                } else {
-                    VStack(spacing: 14) {
-                        Image(systemName: storefrontFailureIsNetwork ? "wifi.exclamationmark" : "info.circle")
-                            .font(.system(size: 34, weight: .medium))
-                            .foregroundStyle(theme.accentPrimary)
-                            .accessibilityHidden(true)
-                        Text(storefrontFailureIsNetwork ? "premium.connection.title" : "premium.plans.title")
-                            .appTypeface(.title3.bold(), size: 20, relativeTo: .title3, weight: .bold)
-                        Text(storefrontFailureIsNetwork ? "premium.connection.message" : "premium.plans.retryLater")
-                            .font(.subheadline)
-                            .foregroundStyle(theme.textSecondary)
-                            .multilineTextAlignment(.center)
-                        Button("premium.retry") {
-                            Task { await loadStorefront() }
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityIdentifier("premium.connection.retry")
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(24)
-                    .appContentCard()
-                    .padding(.horizontal, 24)
-                    .frame(maxWidth: 640)
-                }
-            }
-            .padding(.bottom, 24)
-        }
+    // Large text and short windows need a scrollable action area instead of a footer
+    // that can consume all the space available for plans and subscription terms.
+    private var usesInlinePurchaseControls: Bool {
+        dynamicTypeSize.isAccessibilitySize || verticalSizeClass == .compact
     }
 
-    private var introduction: some View {
-        VStack(spacing: 24) {
-            VStack(spacing: 12) {
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 40))
-                    .foregroundStyle(theme.accentPrimary)
-                    .accessibilityHidden(true)
-                Text("premium.title")
-                    .appTypeface(.largeTitle.bold(), size: 34, relativeTo: .largeTitle, weight: .bold)
-                    .multilineTextAlignment(.center)
-                    .accessibilityAddTraits(.isHeader)
-                Text("premium.subtitle")
-                    .foregroundStyle(theme.textSecondary)
-                    .multilineTextAlignment(.center)
-            }
-            VStack(alignment: .leading, spacing: 20) {
-                feature("premium.media.title", detail: "premium.media.detail", symbol: "photo.on.rectangle")
-                feature("premium.storage.title", detail: "premium.storage.detail", symbol: "externaldrive")
-                feature("premium.compression.title", detail: "premium.compression.detail", symbol: "arrow.down.right.and.arrow.up.left")
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(20)
-            .appContentCard()
+    private var isPurchaseDisabled: Bool {
+        purchaseModel.isBusy || entitlementStore.accessState != .notEntitled ||
+        purchaseModel.priceDescription(for: purchaseModel.selectedPlan) == nil
+    }
 
-            Label("premium.privacy", systemImage: "lock.shield")
-                .font(.footnote)
+    private func featureNotice(_ feature: PremiumFeature) -> some View {
+        Label(AppL10n.string(feature.titleKey), systemImage: "lock.fill")
+            .font(.headline)
+            .foregroundStyle(theme.accentPrimary)
+            .frame(maxWidth: .infinity)
+            .accessibilityIdentifier("premium.requiredFeature")
+    }
+
+    private var verificationNotice: some View {
+        VStack(spacing: 10) {
+            Text(AppL10n.string("premium.entitlement.checking"))
+                .appTypeface(.footnote, size: 14, relativeTo: .footnote)
                 .foregroundStyle(theme.textSecondary)
-
-            lifetimePurchaseCard
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            if entitlementStore.verificationUnavailable {
+                Button(AppL10n.string("premium.retry")) {
+                    Task { await entitlementStore.refresh() }
+                }
+                .frame(minHeight: 44)
+            }
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 24)
-        .frame(maxWidth: 640)
         .frame(maxWidth: .infinity)
     }
 
-    private var lifetimePurchaseCard: some View {
-        Group {
-            if let lifetimeProduct {
-                Button {
-                    Task { await purchaseLifetime(lifetimeProduct) }
-                } label: {
-                    lifetimeOptionLabel(price: lifetimeProduct.displayPrice)
-                }
-                .buttonStyle(.plain)
-                .disabled(isPurchasingLifetime)
-                .accessibilityIdentifier("premium.lifetime.purchase")
-            } else {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack(alignment: .firstTextBaseline) {
-                        lifetimeDescription
-                        Spacer(minLength: 12)
-                        Image(systemName: "infinity")
-                            .foregroundStyle(theme.accentPrimary)
-                            .accessibilityHidden(true)
-                    }
-
-                    if isLoadingLifetimeProduct {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .accessibilityLabel("premium.lifetime.loading")
-                    } else {
-                        Text("premium.lifetime.unavailable")
-                            .font(.footnote)
-                            .foregroundStyle(theme.textSecondary)
-                    }
-                }
-                .padding(20)
-                .appContentCard()
-            }
-        }
-        .accessibilityIdentifier("premium.lifetime.card")
-    }
-
-    private func lifetimeOptionLabel(price: String) -> some View {
-        HStack(alignment: .center, spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("premium.lifetime.title")
-                    .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
-
-                HStack(spacing: 6) {
-                    Text(price)
-                    Text("premium.lifetime.once")
-                        .foregroundStyle(theme.textSecondary)
-                }
-                .font(.subheadline)
-
-                Text("premium.lifetime.detail")
-                    .font(.footnote)
-                    .foregroundStyle(theme.textSecondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            if isPurchasingLifetime {
-                ProgressView()
-                    .controlSize(.large)
-            } else {
-                Image(systemName: "circle")
-                    .font(.system(size: 34, weight: .regular))
-                    .foregroundStyle(theme.textTertiary)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 18)
-        .frame(maxWidth: .infinity, minHeight: 112)
-        .background(theme.cardSurface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .stroke(theme.divider, lineWidth: 1)
-        }
-        .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-    }
-
-    private var lifetimeDescription: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("premium.lifetime.title")
-                .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
-            Text("premium.lifetime.detail")
-                .font(.subheadline)
+    private var introduction: some View {
+        VStack(spacing: 14) {
+            Image(systemName: "crown.fill")
+                .font(.largeTitle)
+                .foregroundStyle(theme.accentPrimary)
+                .accessibilityHidden(true)
+            Text(AppL10n.string("premium.title"))
+                .appTypeface(.title.bold(), size: 30, relativeTo: .title, weight: .bold)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
+            Text(AppL10n.string("premium.subtitle"))
+                .appTypeface(.body, size: 17, relativeTo: .body)
                 .foregroundStyle(theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(AppL10n.string("premium.feature.all"))
+                .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
+                .foregroundStyle(theme.accentPrimary)
+                .fixedSize(horizontal: false, vertical: true)
         }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+        .accessibilityIdentifier("premium.introduction")
     }
 
-    private func loadStorefront() async {
-        guard PremiumConfiguration.purchasesEnabled else { return }
-        isCheckingStorefront = true
-        isLoadingLifetimeProduct = true
-        defer {
-            isCheckingStorefront = false
-            isLoadingLifetimeProduct = false
+    private var features: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            feature(title: AppL10n.string("Quick Cleanup"), detail: AppL10n.string("premium.quickClean.detail"), symbol: "sparkles")
+            feature(title: AppL10n.string("premium.storage.title"), detail: AppL10n.string("premium.storage.detail"), symbol: "folder")
+            feature(title: AppL10n.string("premium.feature.compression.title"), detail: AppL10n.string("premium.feature.compression.detail"), symbol: "arrow.down.right.and.arrow.up.left")
+            feature(title: AppL10n.string("premium.feature.appearance.title"), detail: AppL10n.string("premium.feature.appearance.detail"), symbol: "paintpalette")
         }
-
-        if entitlementStore.startupConnectivity != .available {
-            // This request triggers the system cellular-data choice. A failure here
-            // can be stale for a moment after the user grants access, so StoreKit is
-            // the final authority for whether the purchase page can be shown.
-            _ = await entitlementStore.refreshStartupConnectivity()
-        }
-
-        do {
-            var products = try await Product.products(for: PremiumConfiguration.productIDs)
-            if !products.contains(where: {
-                PremiumConfiguration.subscriptionProductIDs.contains($0.id)
-            }) {
-                try await Task.sleep(for: .milliseconds(650))
-                products = try await Product.products(for: PremiumConfiguration.productIDs)
-            }
-            guard products.contains(where: {
-                PremiumConfiguration.subscriptionProductIDs.contains($0.id)
-            }) else {
-                storefrontFailureIsNetwork = false
-                isStorefrontReady = false
-                return
-            }
-            lifetimeProduct = products.first { $0.id == PremiumConfiguration.lifetimeProductID }
-            isStorefrontReady = true
-        } catch {
-            storefrontFailureIsNetwork = error is URLError
-            isStorefrontReady = false
-            entitlementStore.recordPurchaseError(error)
-        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .appContentCard(cornerRadius: 24)
+        .accessibilityIdentifier("premium.features")
     }
 
-    private func purchaseLifetime(_ product: Product) async {
-        guard !isPurchasingLifetime else { return }
-        isPurchasingLifetime = true
-        defer { isPurchasingLifetime = false }
-
-        do {
-            let result = try await product.purchase()
-            let didUnlock = await entitlementStore.handlePurchaseResult(result)
-            if didUnlock, allowsDismiss {
-                dismiss()
-            }
-        } catch StoreKitError.userCancelled {
-            return
-        } catch {
-            entitlementStore.recordPurchaseError(error)
-        }
-    }
-
-    private func feature(_ title: LocalizedStringKey, detail: LocalizedStringKey, symbol: String) -> some View {
+    private func feature(title: String, detail: String, symbol: String) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: symbol)
                 .font(.title2)
                 .foregroundStyle(theme.accentPrimary)
-                .frame(width: 30)
+                .frame(width: 32)
                 .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 7) {
                 Text(title)
-                    .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
+                    .appTypeface(.title3.bold(), size: 20, relativeTo: .title3, weight: .bold)
                 Text(detail)
-                    .font(.subheadline)
+                    .appTypeface(.subheadline, size: 15, relativeTo: .subheadline)
                     .foregroundStyle(theme.textSecondary)
+                    .lineSpacing(3)
             }
+            .fixedSize(horizontal: false, vertical: true)
         }
-        .accessibilityElement(children: .combine)
     }
 
-    private var unavailablePlans: some View {
+    private var plans: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("premium.plans.title")
-                .font(.headline)
+            Text(AppL10n.string("premium.plans.title"))
+                .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                 .accessibilityAddTraits(.isHeader)
-            Label("premium.plans.unavailable", systemImage: "info.circle")
-            Text("premium.plans.retryLater")
-                .foregroundStyle(theme.textSecondary)
-            Text("premium.trial.note")
-                .font(.footnote)
-                .foregroundStyle(theme.textSecondary)
+            ForEach(PremiumPlan.allCases) { plan in planCard(plan) }
+            catalogueStatus
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .appContentCard()
-        .padding(.horizontal, 24)
-        .frame(maxWidth: 640)
+    }
+
+    private func planCard(_ plan: PremiumPlan) -> some View {
+        let selected = purchaseModel.selectedPlan == plan
+        return Button { purchaseModel.selectedPlan = plan } label: {
+            HStack(alignment: .center, spacing: 16) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(plan.title)
+                        .appTypeface(.title3.bold(), size: 20, relativeTo: .title3, weight: .bold)
+                    Text(purchaseModel.priceDescription(for: plan) ?? AppL10n.string("premium.price.unavailable"))
+                        .appTypeface(.body.weight(.semibold), size: 17, relativeTo: .body, weight: .semibold)
+                        .foregroundStyle(theme.textPrimary)
+                    if let offer = purchaseModel.offerDescription(for: plan) {
+                        Text(offer)
+                            .appTypeface(.footnote, size: 14, relativeTo: .footnote)
+                            .foregroundStyle(theme.textSecondary)
+                    } else if plan == .lifetime {
+                        Text(AppL10n.string("premium.lifetime.detail"))
+                            .appTypeface(.footnote, size: 14, relativeTo: .footnote)
+                            .foregroundStyle(theme.textSecondary)
+                    }
+                }
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                    .font(.title2)
+                    .foregroundStyle(selected ? theme.accentPrimary : theme.textTertiary)
+                    .accessibilityHidden(true)
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, minHeight: 104, alignment: .leading)
+            .appContentCard(cornerRadius: 24)
+            .overlay {
+                RoundedRectangle(cornerRadius: 24)
+                    .strokeBorder(selected ? theme.accentPrimary : .clear, lineWidth: 2)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 24))
+        }
+        .buttonStyle(.plain)
+        .disabled(purchaseModel.isBusy)
+        .accessibilityAddTraits(selected ? [.isSelected] : [])
+        .accessibilityIdentifier("premium.plan." + plan.rawValue)
+    }
+
+    @ViewBuilder
+    private var catalogueStatus: some View {
+        if purchaseModel.catalogueState == .loading {
+            HStack(spacing: 10) {
+                ProgressView()
+                Text(AppL10n.string("premium.pricing.loading"))
+                    .appTypeface(.footnote, size: 14, relativeTo: .footnote)
+            }
+            .foregroundStyle(theme.textSecondary)
+        } else if PremiumPlan.allCases.contains(where: { purchaseModel.products[$0] == nil }) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(AppL10n.string("premium.pricing.unavailable"))
+                    .appTypeface(.footnote, size: 14, relativeTo: .footnote)
+                    .foregroundStyle(theme.textSecondary)
+                Button(AppL10n.string("premium.retry")) { purchaseModel.retryProducts() }
+                    .disabled(purchaseModel.isBusy)
+                    .accessibilityIdentifier("premium.connection.retry")
+            }
+        }
+    }
+
+    private var legalLinks: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 24) { policyLinks }
+            VStack(spacing: 4) { policyLinks }
+        }
+        .appTypeface(.footnote, size: 14, relativeTo: .footnote)
+        .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
-        .accessibilityIdentifier("premium.plans.unavailable")
+        .tint(theme.textSecondary)
+    }
+
+    @ViewBuilder
+    private var policyLinks: some View {
+        Link(AppL10n.string("premium.terms"), destination: PremiumConfiguration.termsOfServiceURL)
+            .frame(minHeight: 44)
+            .accessibilityIdentifier("premium.termsLink")
+        Link(AppL10n.string("premium.privacy.link"), destination: PremiumConfiguration.privacyPolicyURL)
+            .frame(minHeight: 44)
+            .accessibilityIdentifier("premium.privacyLink")
+    }
+
+    private var purchaseFooter: some View {
+        purchaseControls
+            .padding(.horizontal, 24)
+            .padding(.top, 16)
+            .padding(.bottom, 12)
+            .frame(maxWidth: 640)
+            .frame(maxWidth: .infinity)
+            .background { AppBackground().ignoresSafeArea(edges: .bottom) }
+    }
+
+    private var purchaseControls: some View {
+        VStack(spacing: 12) {
+            if entitlementStore.accessState == .entitled {
+                Label(AppL10n.string("premium.active"), systemImage: "checkmark.seal.fill")
+                    .appTypeface(.headline, size: 18, relativeTo: .headline, weight: .semibold)
+                    .foregroundStyle(theme.accentPrimary)
+                if allowsDismiss {
+                    Button(AppL10n.string("Done")) { dismiss() }
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .appGlassButtonStyle()
+                }
+            } else {
+                if let feedback = purchaseModel.feedback {
+                    Text(feedback)
+                        .appTypeface(.footnote, size: 14, relativeTo: .footnote)
+                        .foregroundStyle(theme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("premium.purchase.feedback")
+                }
+                purchaseButton
+                restoreButton
+                if allowsDismiss {
+                    Button { dismiss() } label: {
+                        Text(AppL10n.string("premium.continue.free"))
+                            .appTypeface(.subheadline.weight(.medium), size: 16, relativeTo: .subheadline, weight: .medium)
+                            .foregroundStyle(theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("premium.continueFree")
+                }
+            }
+        }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+    }
+
+    private var purchaseButton: some View {
+        Button {
+            Task {
+                if await purchaseModel.purchase(using: entitlementStore), allowsDismiss { dismiss() }
+            }
+        } label: {
+            VStack(spacing: 5) {
+                HStack(spacing: 10) {
+                    if purchaseModel.activity == .purchasing {
+                        ProgressView().tint(theme.textInverted)
+                    }
+                    Text(AppL10n.string("premium.purchase.continue"))
+                        .appTypeface(.headline, size: 18, relativeTo: .headline, weight: .semibold)
+                }
+                if let price = purchaseModel.priceDescription(for: purchaseModel.selectedPlan) {
+                    Text(purchaseModel.offerDescription(for: purchaseModel.selectedPlan) ?? price)
+                        .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
+                }
+            }
+            .foregroundStyle(theme.textInverted)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, minHeight: 56)
+            .background(theme.buttonPrimaryBackground, in: RoundedRectangle(cornerRadius: 28))
+            .contentShape(RoundedRectangle(cornerRadius: 28))
+            .opacity(isPurchaseDisabled ? 0.55 : 1)
+        }
+        .buttonStyle(.plain)
+        .disabled(isPurchaseDisabled)
+        .accessibilityIdentifier("premium.purchase")
+    }
+
+    private var restoreButton: some View {
+        Button {
+            Task {
+                if await purchaseModel.restore(using: entitlementStore), allowsDismiss { dismiss() }
+            }
+        } label: {
+            HStack(spacing: 10) {
+                if purchaseModel.activity == .restoring { ProgressView().tint(theme.accentPrimary) }
+                Text(AppL10n.string("premium.restore"))
+                    .appTypeface(.headline, size: 18, relativeTo: .headline, weight: .semibold)
+                    .foregroundStyle(theme.textPrimary)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, minHeight: 52)
+            .appContentCard(cornerRadius: 28)
+            .contentShape(RoundedRectangle(cornerRadius: 28))
+        }
+        .buttonStyle(.plain)
+        .disabled(purchaseModel.isBusy)
+        .accessibilityIdentifier("premium.restore")
     }
 }

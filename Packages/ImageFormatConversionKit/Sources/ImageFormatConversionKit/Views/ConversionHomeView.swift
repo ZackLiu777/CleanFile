@@ -32,6 +32,8 @@ public struct ConversionHomeView: View {
     @State private var handledShareRequestID: UUID?
     @Namespace private var navigationTransitionNamespace
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.conversionUsagePolicy) private var usagePolicy
+    @State private var lockedCategory: ConversionUsageCategory?
 
     public init(
         theme: ConversionTheme = .system,
@@ -73,7 +75,13 @@ public struct ConversionHomeView: View {
                             Array(ConversionHomeKind.allCases.enumerated()),
                             id: \.element
                         ) { index, kind in
-                            NavigationLink(value: kind) {
+                            Button {
+                                if usagePolicy.allows(kind.usageCategory) {
+                                    navigationPath.append(kind)
+                                } else {
+                                    lockedCategory = kind.usageCategory
+                                }
+                            } label: {
                                 ConversionHomeCard(
                                     kind: kind,
                                     recentRecord: recentRecords[kind]
@@ -152,20 +160,24 @@ public struct ConversionHomeView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: ConversionHomeKind.self) { kind in
-                ConversionToolDestination(
-                    kind: kind,
-                    imageViewModel: imageViewModel,
-                    videoViewModel: videoViewModel,
-                    audioViewModel: audioViewModel,
-                    imageImportSession: imageImportSession,
-                    videoImportSession: videoImportSession,
-                    audioImportSession: audioImportSession
-                )
-                .conversionNavigationTransition(
-                    sourceID: kind,
-                    in: navigationTransitionNamespace,
-                    enabled: animationsEnabled && !reduceMotion
-                )
+                if usagePolicy.allows(kind.usageCategory) {
+                    ConversionToolDestination(
+                        kind: kind,
+                        imageViewModel: imageViewModel,
+                        videoViewModel: videoViewModel,
+                        audioViewModel: audioViewModel,
+                        imageImportSession: imageImportSession,
+                        videoImportSession: videoImportSession,
+                        audioImportSession: audioImportSession
+                    )
+                    .conversionNavigationTransition(
+                        sourceID: kind,
+                        in: navigationTransitionNamespace,
+                        enabled: animationsEnabled && !reduceMotion
+                    )
+                } else {
+                    usagePolicy.upgradeContent(kind.usageCategory)
+                }
             }
             .onAppear {
                 onDetailVisibilityChanged(!navigationPath.isEmpty)
@@ -192,6 +204,12 @@ public struct ConversionHomeView: View {
             .onChange(of: shareImport?.id) { _, _ in
                 receiveSharedFilesIfNeeded()
             }
+        }
+        .sheet(item: $lockedCategory) { category in
+            usagePolicy.upgradeContent(category)
+        }
+        .onChange(of: usagePolicy.allows(.images)) { _, allowed in
+            if allowed { receiveSharedFilesIfNeeded() }
         }
         .sheet(isPresented: $isGuidePresented) {
             ConversionGuideView()
@@ -224,6 +242,11 @@ public struct ConversionHomeView: View {
     private func receiveSharedFilesIfNeeded() {
         guard isTabActive, let request = shareImport,
               handledShareRequestID != request.id else { return }
+        let category: ConversionUsageCategory = request.kind == .image ? .images : .video
+        guard usagePolicy.allows(category) else {
+            lockedCategory = category
+            return
+        }
         handledShareRequestID = request.id
         navigationPath = [request.kind == .image ? .image : .video]
         Task {
@@ -390,6 +413,14 @@ private enum ConversionHomeKind: String, CaseIterable, Identifiable, Hashable, S
 
     var id: Self {
         self
+    }
+
+    var usageCategory: ConversionUsageCategory {
+        switch self {
+        case .image: .images
+        case .video: .video
+        case .audio: .audio
+        }
     }
 
     var title: String {

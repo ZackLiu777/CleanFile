@@ -435,9 +435,9 @@ struct MediaSwipeReviewView: View {
         guard !ids.isEmpty else { return }
         deletionError = nil
         Task {
-            await photoLibrary.deleteAssets(withIDs: ids)
+            let succeeded = await photoLibrary.deleteAssets(withIDs: ids)
             switch photoLibrary.deletionState {
-            case let .success(count, _): deletedCount = count
+            case let .success(count, _) where succeeded: deletedCount = count
             case let .failure(error): deletionError = error.localizedDescription
             default: break // Cancellation leaves the review choices available.
             }

@@ -55,6 +55,7 @@ public final class ImageConversionViewModel {
         lastSourceURL: nil
     )
     public private(set) var notice: String?
+    public var isPremiumRequiredPresented = false
     private(set) var importProgress: ConversionImportProgress?
 
     public var outputFormat: ImageOutputFormat {
@@ -368,14 +369,16 @@ public final class ImageConversionViewModel {
     }
 
     /// 启动 `startConversion` 对应流程，并初始化本轮任务需要的状态。
-    public func startConversion() {
+    public func startConversion(usagePolicy: ConversionUsagePolicy = .unrestricted) {
         guard canStartConversion else { return }
-
-        conversionTask?.cancel()
-        conversionTask = Task { [weak self] in
-            guard let self else { return }
-            await runConversion()
+        let count = items.filter(Self.isConvertible).count
+        guard let permit = usagePolicy.reserve(.images, count) else {
+            isPremiumRequiredPresented = true
+            return
         }
+        // Lock synchronously, before the Task is scheduled, to prevent duplicate batches.
+        isConverting = true
+        conversionTask = Task { await runConversion(permit: permit) }
     }
 
     /// 取消 `cancelConversion` 对应的进行中任务，并收敛到可继续操作的状态。
@@ -389,7 +392,8 @@ public final class ImageConversionViewModel {
     }
 
     /// 封装 `runConversion` 对应的局部行为，供当前类型在统一入口下复用。
-    private func runConversion() async {
+    private func runConversion(permit: ConversionUsagePermit) async {
+        defer { permit.finish() }
         isConverting = true
         notice = nil
         resetProgress()
@@ -421,9 +425,10 @@ public final class ImageConversionViewModel {
             requests,
             maxConcurrentConversions: maxConcurrentConversions,
             progress: { [weak self] progress in
-                await self?.apply(progress: progress)
+                await self?.apply(progress: progress, permit: permit)
             }
         )
+        permit.recordSuccess(batchResult.successes.count - permit.successfulCount)
 
         let successfulOutputs = Dictionary(
             uniqueKeysWithValues: batchResult.successes.map {
@@ -467,7 +472,8 @@ public final class ImageConversionViewModel {
     }
 
     /// 更新 `apply` 对应的数据，使界面状态与底层结果保持一致。
-    private func apply(progress: ImageBatchProgress) {
+    private func apply(progress: ImageBatchProgress, permit: ConversionUsagePermit) {
+        permit.recordSuccess(progress.succeeded - permit.successfulCount)
         self.progress = progress
     }
 

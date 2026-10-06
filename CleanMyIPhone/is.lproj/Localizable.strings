@@ -1,3 +1,42 @@
+"premium.plan.annual" = "Ársáskrift";
+"premium.plan.monthly" = "Mánaðaráskrift";
+"premium.price.recurring" = "%@ á %@";
+"premium.offer.free" = "%@ ókeypis, síðan %@";
+"premium.price.unavailable" = "Verð ekki tiltækt";
+"premium.pricing.loading" = "Hleð inn App Store-verðum…";
+"premium.pricing.unavailable" = "Sum verð eru ekki tiltæk. Tengstu internetinu og reyndu aftur. Þú getur samt skoðað þessa síðu og haldið áfram ókeypis.";
+"premium.purchase.continue" = "Halda áfram með Premium";
+"premium.purchase.pending" = "Kaup bíða samþykkis. Premium verður virkjað þegar Apple staðfestir þau.";
+"premium.purchase.unverified" = "Ekki tókst að staðfesta kaupin. Enginn nýr aðgangur hefur verið veittur. Endurheimtu kaup eða reyndu aftur.";
+"premium.restore" = "Endurheimta kaup";
+"premium.restore.none" = "Engin virk Premium-kaup fundust fyrir þennan App Store-reikning.";
+"premium.restore.failed" = "Ekki tókst að endurheimta kaup. Athugaðu tenginguna og App Store-reikninginn og reyndu aftur.";
+"premium.active" = "Premium er virkt";
+"premium.subscription.terms" = "Áskriftir endurnýjast sjálfkrafa nema þeim sé sagt upp. Þú getur stjórnað þeim eða sagt þeim upp í stillingum Apple-reikningsins.";
+"premium.terms" = "Þjónustuskilmálar";
+"premium.privacy.link" = "Persónuverndarstefna";
+
+"premium.quickClean.detail" = "Veldu fleiri en einn hreinsiflokk og haltu ráðlagðri mynd í hverjum hópi svipaðra mynda.";
+"storage.preview.title" = "Gagnvirk forskoðun · Dæmigögn";
+"storage.preview.detail" = "Skoðaðu möppukortið með dæmigögnum. Opnaðu Premium til að velja möppur og stjórna skránum þínum.";
+"storage.preview.folder" = "Dæmimappa";
+
+"premium.feature.all" = "Opnaðu alla Premium-eiginleika";
+"premium.feature.required" = "Í boði með Premium";
+"premium.feature.unlock" = "Opna með Premium";
+"premium.feature.media" = "Hreinsun miðla";
+"premium.feature.videoConversion" = "Myndbandsþjöppun";
+"premium.feature.storage" = "Hreinsun skráa";
+"premium.feature.imageConversion" = "Myndþjöppun";
+"premium.feature.audioConversion" = "Hljóðumbreyting";
+"premium.feature.darkAppearance" = "Dökkt útlit";
+"premium.feature.customColors" = "Sérsniðnir litir";
+"premium.feature.compression.title" = "Þjappaðu myndum og hljóði";
+"premium.feature.compression.detail" = "Umbreyttu myndum og hljóðskrám með stillanlegum valkostum.";
+"premium.feature.appearance.title" = "Sérsníddu útlitið";
+"premium.feature.appearance.detail" = "Opnaðu dökkt útlit og sérsniðna app- og bakgrunnsliti.";
+"premium.continue.free" = "Halda áfram ókeypis";
+
 "Photos" = "Myndir";
 "Storage" = "Geymsla";
 "Compress" = "Compress";

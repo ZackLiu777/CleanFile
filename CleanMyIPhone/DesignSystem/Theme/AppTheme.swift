@@ -10,6 +10,10 @@ import UIKit
 import ImageFormatConversionKit
 
 extension View {
+    func appGlassButtonStyle() -> some View {
+        modifier(AppGlassButtonStyleModifier())
+    }
+
     func appTypeface(_ fallback: Font, size: CGFloat, relativeTo style: Font.TextStyle, weight: Font.Weight = .regular) -> some View {
         modifier(ConversionTypefaceModifier(fallback, size: size, relativeTo: style, weight: weight))
     }
@@ -43,11 +47,12 @@ enum AppAppearance: String, CaseIterable, Identifiable, Sendable {
 
 /// 定义 `AppThemeID` 使用的有限状态或选项集合。
 enum AppThemeID: String, CaseIterable, Identifiable, Sendable {
-    case system, cream, porcelain, sage, graphite
+    case filevra, system, cream, porcelain, sage, graphite
 
     var id: Self { self }
     var displayName: LocalizedStringKey {
         switch self {
+        case .filevra: "Filevra"
         case .system: "System Default"
         case .cream: "Cream"
         case .porcelain: "Porcelain"
@@ -57,6 +62,7 @@ enum AppThemeID: String, CaseIterable, Identifiable, Sendable {
     }
     var theme: Theme {
         switch self {
+        case .filevra: .filevra
         case .system: .system
         case .cream: .cream
         case .porcelain: .porcelain
@@ -586,6 +592,30 @@ struct Theme: Sendable {
         preferredColorScheme: .dark
     )
 
+    // Built-in default copied from the selected on-device palette, not a Premium custom preference.
+    static let filevra = Theme.custom(backgroundStyle: AppCustomBackgroundStyle(
+        kind: .linear,
+        stops: [
+            AppBackgroundColorStop(
+                id: UUID(uuidString: "253B8981-99C5-4A73-A1DD-8E81F1A7F119")!,
+                color: AppThemeColor(red: 0.696136474609375, green: 0.89813232421875, blue: 1),
+                location: 0.0924479141831398
+            ),
+            AppBackgroundColorStop(
+                id: UUID(uuidString: "EFA3C9AB-C483-4884-B9E5-18AB138E4588")!,
+                color: .white,
+                location: 1
+            )
+        ],
+        direction: .diagonalDown
+    ))
+        .applyingAccent(AppThemeColor(
+            red: 0.5215606689453125,
+            green: 0.5215606689453125,
+            blue: 0.5215606689453125
+        ).color)
+        .applyingLiquidGlassCards(true)
+
     static let cream = Theme(
         background: .solid(Color(red: 250 / 255, green: 246 / 255, blue: 233 / 255)),
         backgroundPrimary: Color(red: 250 / 255, green: 246 / 255, blue: 233 / 255),
@@ -894,12 +924,30 @@ final class ThemeSettings: ObservableObject {
         }
     }
 
+    @Published private(set) var premiumAppearanceAllowed = true
+
+    var effectiveThemeID: AppThemeID {
+        !premiumAppearanceAllowed && selectedThemeID == .graphite ? .cream : selectedThemeID
+    }
+    var effectiveAccentPaletteID: AppAccentPaletteID {
+        !premiumAppearanceAllowed && selectedAccentPaletteID == .custom ? .automatic : selectedAccentPaletteID
+    }
+    var isUsingCustomBackground: Bool { premiumAppearanceAllowed && usesCustomBackground }
+
+    func setPremiumAppearanceAllowed(_ allowed: Bool) {
+        guard premiumAppearanceAllowed != allowed else { return }
+        // Keep persisted preferences so restored purchases recover the user's original design.
+        premiumAppearanceAllowed = allowed
+    }
+
     var theme: Theme {
         baseTheme
             .applyingAccent(selectedAccentColor)
             .applyingLiquidGlassCards(liquidGlassCardsEnabled)
     }
-    var effectiveColorScheme: ColorScheme? { theme.preferredColorScheme ?? appearance.colorScheme }
+    var effectiveColorScheme: ColorScheme? {
+        premiumAppearanceAllowed ? (theme.preferredColorScheme ?? appearance.colorScheme) : .light
+    }
     var customBackgroundColor: AppThemeColor { customBackgroundStyle.primaryColor }
     var customBackgroundTheme: Theme { Theme.custom(backgroundStyle: customBackgroundStyle) }
     var accentPickerColor: Color {
@@ -924,10 +972,10 @@ final class ThemeSettings: ObservableObject {
     private static let mediaDateHeadersKey = "appMediaDateHeadersEnabled"
     private let userDefaults: UserDefaults
     private var baseTheme: Theme {
-        usesCustomBackground ? customBackgroundTheme : selectedThemeID.theme
+        isUsingCustomBackground ? customBackgroundTheme : effectiveThemeID.theme
     }
     private var selectedAccentColor: Color? {
-        switch selectedAccentPaletteID {
+        switch effectiveAccentPaletteID {
         case .automatic:
             nil
         case .custom:
@@ -971,7 +1019,7 @@ final class ThemeSettings: ObservableObject {
         customAccentColor = storedCustomAccentColor
         customBackgroundStyle = storedCustomBackgroundStyle
         usesCustomBackground = userDefaults.bool(forKey: Self.usesCustomBackgroundKey)
-        let storedLiquidGlassCards = userDefaults.bool(forKey: Self.liquidGlassCardsKey)
+        let storedLiquidGlassCards = userDefaults.object(forKey: Self.liquidGlassCardsKey) as? Bool ?? true
         liquidGlassCardsEnabled = storedLiquidGlassCards
         customTabBarEnabled = userDefaults.bool(forKey: Self.customTabBarKey)
         interfaceAnimationsEnabled = userDefaults.object(forKey: Self.interfaceAnimationsKey) as? Bool ?? true
@@ -995,28 +1043,33 @@ final class ThemeSettings: ObservableObject {
 
     /// 选择预设应用颜色；自定义颜色仍保留，以便用户稍后重新启用。
     func selectAccentPalette(_ paletteID: AppAccentPaletteID) {
+        guard premiumAppearanceAllowed || paletteID != .custom else { return }
         selectedAccentPaletteID = paletteID
     }
 
     /// 保存 ColorPicker 产生的任意应用颜色，并立即切换到自定义调色盘。
     func updateCustomAccentColor(_ color: Color) {
+        guard premiumAppearanceAllowed else { return }
         customAccentColor = AppThemeColor.resolved(from: color, fallback: customAccentColor)
         selectedAccentPaletteID = .custom
     }
 
     /// 选择完整背景预设，并关闭自定义背景，但不丢弃用户已经编辑的颜色。
     func selectBackgroundTheme(_ themeID: AppThemeID) {
+        guard premiumAppearanceAllowed || themeID != .graphite else { return }
         selectedThemeID = themeID
         usesCustomBackground = false
     }
 
     /// 重新启用上一次保存的自定义背景颜色。
     func selectCustomBackground() {
+        guard premiumAppearanceAllowed else { return }
         usesCustomBackground = true
     }
 
     /// 保存 ColorPicker 产生的任意背景色，并用它重新派生整套语义主题。
     func updateCustomBackgroundColor(_ color: Color) {
+        guard premiumAppearanceAllowed else { return }
         var style = customBackgroundStyle
         let fallback = style.stops.first?.color ?? .cream
         style.stops[0].color = AppThemeColor.resolved(from: color, fallback: fallback)
@@ -1026,11 +1079,13 @@ final class ThemeSettings: ObservableObject {
 
     /// Changes composition mode while preserving all previously edited colors where possible.
     func selectCustomBackgroundKind(_ kind: AppCustomBackgroundKind) {
+        guard premiumAppearanceAllowed else { return }
         customBackgroundStyle = customBackgroundStyle.prepared(for: kind)
         usesCustomBackground = true
     }
 
     func updateCustomBackgroundColor(_ color: Color, stopID: UUID) {
+        guard premiumAppearanceAllowed else { return }
         guard let index = customBackgroundStyle.stops.firstIndex(where: { $0.id == stopID }) else {
             return
         }
@@ -1044,6 +1099,7 @@ final class ThemeSettings: ObservableObject {
     }
 
     func updateCustomGradientLocation(_ location: Double, stopID: UUID) {
+        guard premiumAppearanceAllowed else { return }
         guard customBackgroundStyle.kind == .linear,
               let index = customBackgroundStyle.stops.firstIndex(where: { $0.id == stopID })
         else {
@@ -1063,6 +1119,7 @@ final class ThemeSettings: ObservableObject {
     }
 
     func updateCustomGradientDirection(_ direction: AppLinearGradientDirection) {
+        guard premiumAppearanceAllowed else { return }
         var style = customBackgroundStyle
         style.direction = direction
         customBackgroundStyle = style
@@ -1070,6 +1127,7 @@ final class ThemeSettings: ObservableObject {
     }
 
     func addCustomGradientColor() {
+        guard premiumAppearanceAllowed else { return }
         guard customBackgroundStyle.kind == .linear,
               customBackgroundStyle.stops.count < AppCustomBackgroundStyle.maximumColorCount
         else {
@@ -1093,6 +1151,7 @@ final class ThemeSettings: ObservableObject {
     }
 
     func removeCustomGradientColor(stopID: UUID) {
+        guard premiumAppearanceAllowed else { return }
         guard customBackgroundStyle.kind == .linear,
               customBackgroundStyle.stops.count > 2
         else {
@@ -1115,7 +1174,7 @@ final class ThemeSettings: ObservableObject {
         case "forest": return .sage
         case "graphiteGold", "roseNoir": return .graphite
         case "pureBlack": return .system
-        case nil: return .cream
+        case nil: return .filevra
         default: return .system
         }
     }
@@ -1197,18 +1256,26 @@ struct ThemeBackgroundLayer: View {
                 endPoint: endPoint
             )
         case let .meshGradient(colors):
-            MeshGradient(
-                width: 3,
-                height: 3,
-                points: [
-                    SIMD2<Float>(0, 0), SIMD2<Float>(0.5, 0), SIMD2<Float>(1, 0),
-                    SIMD2<Float>(0, 0.5), SIMD2<Float>(0.5, 0.5), SIMD2<Float>(1, 0.5),
-                    SIMD2<Float>(0, 1), SIMD2<Float>(0.5, 1), SIMD2<Float>(1, 1)
-                ],
-                colors: normalizedMeshColors(colors),
-                smoothsColors: true,
-                colorSpace: .perceptual
-            )
+            if #available(iOS 18.0, *) {
+                MeshGradient(
+                    width: 3,
+                    height: 3,
+                    points: [
+                        SIMD2<Float>(0, 0), SIMD2<Float>(0.5, 0), SIMD2<Float>(1, 0),
+                        SIMD2<Float>(0, 0.5), SIMD2<Float>(0.5, 0.5), SIMD2<Float>(1, 0.5),
+                        SIMD2<Float>(0, 1), SIMD2<Float>(0.5, 1), SIMD2<Float>(1, 1)
+                    ],
+                    colors: normalizedMeshColors(colors),
+                    smoothsColors: true,
+                    colorSpace: .perceptual
+                )
+            } else {
+                LinearGradient(
+                    colors: normalizedMeshColors(colors),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
         }
     }
 
@@ -1294,6 +1361,17 @@ private struct AppSoftScrollEdgeModifier: ViewModifier {
             content.scrollEdgeEffectStyle(.soft, for: .vertical)
         } else {
             content
+        }
+    }
+}
+
+private struct AppGlassButtonStyleModifier: ViewModifier {
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.buttonStyle(.glass)
+        } else {
+            content.buttonStyle(.bordered)
         }
     }
 }

@@ -1,3 +1,42 @@
+"premium.plan.annual" = "اشتراك سنوي";
+"premium.plan.monthly" = "اشتراك شهري";
+"premium.price.recurring" = "%@ لكل %@";
+"premium.offer.free" = "%@ مجانًا، ثم %@";
+"premium.price.unavailable" = "السعر غير متاح";
+"premium.pricing.loading" = "جارٍ تحميل أسعار App Store…";
+"premium.pricing.unavailable" = "بعض الأسعار غير متاحة. اتصل بالإنترنت وأعد المحاولة. لا يزال بإمكانك تصفح هذه الصفحة والمتابعة مجانًا.";
+"premium.purchase.continue" = "المتابعة مع Premium";
+"premium.purchase.pending" = "الشراء بانتظار الموافقة. سيتم تفعيل Premium بعد تأكيد Apple.";
+"premium.purchase.unverified" = "تعذّر التحقق من الشراء. لم يُمنح وصول جديد. استعد المشتريات أو أعد المحاولة.";
+"premium.restore" = "استعادة المشتريات";
+"premium.restore.none" = "لم يُعثر على شراء Premium نشط لحساب App Store هذا.";
+"premium.restore.failed" = "تعذّر استعادة المشتريات. تحقق من الاتصال وحساب App Store، ثم أعد المحاولة.";
+"premium.active" = "Premium مفعّل";
+"premium.subscription.terms" = "تتجدد الاشتراكات تلقائيًا ما لم تُلغَ. يمكنك إدارتها أو إلغاؤها من إعدادات حساب Apple.";
+"premium.terms" = "شروط الخدمة";
+"premium.privacy.link" = "سياسة الخصوصية";
+
+"premium.quickClean.detail" = "اختر فئات التنظيف معًا، مع الاحتفاظ بالصورة المقترحة في كل مجموعة صور متشابهة.";
+"storage.preview.title" = "معاينة تفاعلية · بيانات نموذجية";
+"storage.preview.detail" = "استكشف خريطة المجلدات باستخدام بيانات نموذجية. افتح Premium لاختيار المجلدات وإدارة ملفاتك.";
+"storage.preview.folder" = "مجلد نموذجي";
+
+"premium.feature.all" = "افتح جميع ميزات Premium";
+"premium.feature.required" = "متاح مع Premium";
+"premium.feature.unlock" = "افتح باستخدام Premium";
+"premium.feature.media" = "تنظيف الوسائط";
+"premium.feature.videoConversion" = "ضغط الفيديو";
+"premium.feature.storage" = "تنظيف الملفات";
+"premium.feature.imageConversion" = "ضغط الصور";
+"premium.feature.audioConversion" = "تحويل الصوت";
+"premium.feature.darkAppearance" = "المظهر الداكن";
+"premium.feature.customColors" = "ألوان مخصصة";
+"premium.feature.compression.title" = "ضغط الصور والصوت";
+"premium.feature.compression.detail" = "حوّل الصور وملفات الصوت بإعدادات قابلة للتعديل.";
+"premium.feature.appearance.title" = "خصّص المظهر";
+"premium.feature.appearance.detail" = "افتح المظهر الداكن وألوان التطبيق والخلفية المخصصة.";
+"premium.continue.free" = "المتابعة مجانًا";
+
 "Photos" = "الصور";
 "Storage" = "التخزين";
 "Compress" = "ضغط";

@@ -15,7 +15,15 @@ enum PremiumConfiguration {
     /// UI automation exercises app features rather than the App Store purchase sheet.
     static var bypassesEntitlementForUITesting: Bool {
 #if DEBUG
-        ProcessInfo.processInfo.arguments.contains { $0.hasPrefix("--ui-test") }
+        !usesFreeTierForUITesting && ProcessInfo.processInfo.arguments.contains { $0.hasPrefix("--ui-test") }
+#else
+        false
+#endif
+    }
+
+    static var usesFreeTierForUITesting: Bool {
+#if DEBUG
+        ProcessInfo.processInfo.arguments.contains("--ui-test-free-tier")
 #else
         false
 #endif

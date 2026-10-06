@@ -18,9 +18,11 @@ struct PhotosView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var themeSettings: ThemeSettings
+    @EnvironmentObject private var accessStore: PremiumFeatureAccessStore
     @ObservedObject var viewModel: PhotoLibraryViewModel
     let isTabActive: Bool
     @State private var animatedStorageFraction = 0.0
+    @State private var showsQuickCleanPremium = false
 
     var body: some View {
         NavigationStack {
@@ -66,12 +68,22 @@ struct PhotosView: View {
             }
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    NavigationLink {
-                        MediaQuickCleanView(photoLibrary: viewModel)
-                    } label: {
-                        Label("Quick Cleanup", systemImage: "trash")
+                    Group {
+                        if accessStore.allows(.quickClean) {
+                            NavigationLink {
+                                MediaQuickCleanView(photoLibrary: viewModel, accessStore: accessStore)
+                            } label: {
+                                Label("Quick Cleanup", systemImage: "trash")
+                            }
+                            .disabled(viewModel.assets.isEmpty || viewModel.isLoading)
+                        } else {
+                            Button {
+                                showsQuickCleanPremium = true
+                            } label: {
+                                Label("Quick Cleanup", systemImage: "trash")
+                            }
+                        }
                     }
-                    .disabled(viewModel.assets.isEmpty || viewModel.isLoading)
                     .accessibilityIdentifier("media.quickClean.open")
 
                     Menu {
@@ -97,6 +109,9 @@ struct PhotosView: View {
             }
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
+        }
+        .sheet(isPresented: $showsQuickCleanPremium) {
+            PremiumSubscriptionView(requiredFeature: .quickClean)
         }
         .onAppear {
             animateStorageBarIfNeeded()
@@ -878,7 +893,7 @@ private struct MediaCategoryDetailView: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
-                        .buttonStyle(.glass)
+                        .appGlassButtonStyle()
                         .foregroundStyle(theme.negativeRed)
                         .disabled(selectedIDs.isEmpty || viewModel.deletionState.isDeleting)
                     }
@@ -893,8 +908,8 @@ private struct MediaCategoryDetailView: View {
                 let ids = selectedIDs
                 let effectToken = deletionEffectController.capture(assetIDs: ids)
                 Task {
-                    await viewModel.deleteAssets(withIDs: ids)
-                    if case .success = viewModel.deletionState {
+                    let succeeded = await viewModel.deleteAssets(withIDs: ids)
+                    if succeeded {
                         await deletionEffectController.play(
                             effectToken,
                             animated: themeSettings.interfaceAnimationsEnabled && !reduceMotion
@@ -1019,7 +1034,7 @@ private struct MediaCategoryDetailView: View {
                 .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                 .foregroundStyle(theme.textSecondary)
 
-                Text("These items still use storage until permanently deleted in Photos.")
+                 Text("These items still use storage until permanently deleted in Photos.")
                     .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
                     .foregroundStyle(theme.textTertiary)
             }

@@ -16,6 +16,7 @@ public final class VideoConversionViewModel {
     public private(set) var total = 0
     public private(set) var currentProgress = 0.0
     public private(set) var notice: String?
+    public var isPremiumRequiredPresented = false
     private(set) var sizeEstimate: ConversionSizeEstimate?
     private(set) var isEstimatingSize = false
     private(set) var importProgress: ConversionImportProgress?
@@ -227,10 +228,20 @@ public final class VideoConversionViewModel {
     }
 
     /// 启动 `start` 对应流程，并初始化本轮任务需要的状态。
-    public func start() {
+    public func start(usagePolicy: ConversionUsagePolicy = .unrestricted) {
         guard canConvert else { return }
-        task?.cancel()
-        task = Task { [weak self] in await self?.run() }
+        let count = items.filter { item in
+            switch item.status {
+            case .ready, .failed, .cancelled: true
+            default: false
+            }
+        }.count
+        guard let permit = usagePolicy.reserve(.video, count) else {
+            isPremiumRequiredPresented = true
+            return
+        }
+        isConverting = true
+        task = Task { await run(permit: permit) }
     }
 
     /// 取消 `cancel` 对应的进行中任务，并收敛到可继续操作的状态。
@@ -240,7 +251,8 @@ public final class VideoConversionViewModel {
     }
 
     /// 封装 `run` 对应的局部行为，供当前类型在统一入口下复用。
-    private func run() async {
+    private func run(permit: ConversionUsagePermit) async {
+        defer { permit.finish() }
         isConverting = true
         notice = nil
         completed = 0
@@ -272,6 +284,7 @@ public final class VideoConversionViewModel {
                     await MainActor.run { self?.currentProgress = value }
                 }
                 items[index].status = .completed(result.outputURL)
+                permit.recordSuccess()
             } catch let error as VideoConversionError {
                 items[index].status = error == .cancelled
                     ? .cancelled
@@ -286,7 +299,7 @@ public final class VideoConversionViewModel {
         }
 
         let successes = items.reduce(into: 0) { count, item in
-            if case .completed = item.status { count += 1 }
+            if candidateIDs.contains(item.id), case .completed = item.status { count += 1 }
         }
         notice = Task.isCancelled
             ? L10n.string("notice.cancelled")

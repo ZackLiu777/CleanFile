@@ -9,6 +9,7 @@ struct MediaQuickCleanView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var themeSettings: ThemeSettings
+    @ObservedObject private var accessStore: PremiumFeatureAccessStore
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
     @ObservedObject private var photoLibrary: PhotoLibraryViewModel
     @StateObject private var viewModel: MediaQuickCleanViewModel
@@ -20,10 +21,15 @@ struct MediaQuickCleanView: View {
     @State private var dissolvingCategoryIDs = Set<MediaQuickCleanViewModel.Category.ID>()
     @State private var isAnimatingDeletion = false
     @State private var categoryScrollPosition: MediaQuickCleanViewModel.Category.ID?
+    @State private var showsPremium = false
 
-    init(photoLibrary: PhotoLibraryViewModel) {
+    init(photoLibrary: PhotoLibraryViewModel, accessStore: PremiumFeatureAccessStore) {
         self.photoLibrary = photoLibrary
-        let quickCleanViewModel = MediaQuickCleanViewModel(photoLibrary: photoLibrary)
+        self.accessStore = accessStore
+        let quickCleanViewModel = MediaQuickCleanViewModel(
+            photoLibrary: photoLibrary,
+            canUseQuickClean: { accessStore.allows(.quickClean) }
+        )
         _viewModel = StateObject(
             wrappedValue: quickCleanViewModel
         )
@@ -34,7 +40,9 @@ struct MediaQuickCleanView: View {
         ZStack {
             AppBackground()
 
-            if presentedCategories.isEmpty {
+            if !accessStore.allows(.quickClean) {
+                PremiumFeatureLockedView(feature: .quickClean)
+            } else if presentedCategories.isEmpty {
                 emptyContent
             } else {
                 categoryContent
@@ -43,30 +51,36 @@ struct MediaQuickCleanView: View {
         .navigationTitle("Quick Cleanup")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(viewModel.allCategoriesSelected ? "Deselect All" : "Select All") {
-                    viewModel.toggleAllCategories()
+            if accessStore.allows(.quickClean) {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(viewModel.allCategoriesSelected ? "Deselect All" : "Select All") {
+                        viewModel.toggleAllCategories()
+                    }
+                    .disabled(presentedCategories.isEmpty || photoLibrary.deletionState.isDeleting || isAnimatingDeletion)
+                    .accessibilityIdentifier("media.quickClean.selectAll")
                 }
-                .disabled(presentedCategories.isEmpty || photoLibrary.deletionState.isDeleting || isAnimatingDeletion)
-                .accessibilityIdentifier("media.quickClean.selectAll")
             }
         }
         .safeAreaInset(edge: .bottom) {
-            if !presentedCategories.isEmpty {
+            if accessStore.allows(.quickClean), !presentedCategories.isEmpty {
                 cleanupBar
             }
         }
         .alert("Delete selected media?", isPresented: $isDeleteConfirmationPresented) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
+                guard accessStore.allows(.quickClean) else {
+                    showsPremium = true
+                    return
+                }
                 Task {
                     let orderedIDs = presentedCategories
                         .map(\.id)
                         .filter { viewModel.selectedCategoryIDs.contains($0) }
                     pendingDeletionCategoryIDs = Set(orderedIDs)
                     isAnimatingDeletion = true
-                    await viewModel.deleteSelection()
-                    if case .success = photoLibrary.deletionState {
+                    let succeeded = await viewModel.deleteSelection()
+                    if succeeded {
                         // 等待系统 PhotoKit 确认界面完全退场，避免把系统遮罩截入卡片快照。
                         try? await Task.sleep(for: .milliseconds(120))
                         await animateDeletedCategories(in: orderedIDs)
@@ -124,6 +138,9 @@ struct MediaQuickCleanView: View {
             categoryFrames = frames
         }
         .sensoryFeedback(.selection, trigger: viewModel.selectedCategoryIDs)
+        .sheet(isPresented: $showsPremium) {
+            PremiumSubscriptionView(requiredFeature: .quickClean)
+        }
         .onAppear {
             tabBarVisibility.setHidden(
                 true,

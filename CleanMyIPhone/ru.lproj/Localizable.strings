@@ -1,3 +1,42 @@
+"premium.plan.annual" = "Годовая подписка";
+"premium.plan.monthly" = "Месячная подписка";
+"premium.price.recurring" = "%@ за %@";
+"premium.offer.free" = "%@ бесплатно, затем %@";
+"premium.price.unavailable" = "Цена недоступна";
+"premium.pricing.loading" = "Загрузка цен App Store…";
+"premium.pricing.unavailable" = "Некоторые цены недоступны. Подключитесь к интернету и повторите попытку. Вы можете просматривать эту страницу и продолжать бесплатно.";
+"premium.purchase.continue" = "Продолжить с Premium";
+"premium.purchase.pending" = "Покупка ожидает одобрения. Premium станет доступен после подтверждения Apple.";
+"premium.purchase.unverified" = "Не удалось проверить покупку. Новый доступ не предоставлен. Восстановите покупки или повторите попытку.";
+"premium.restore" = "Восстановить покупки";
+"premium.restore.none" = "Для этого аккаунта App Store не найдено активной покупки Premium.";
+"premium.restore.failed" = "Не удалось восстановить покупки. Проверьте подключение и аккаунт App Store, затем повторите попытку.";
+"premium.active" = "Premium активен";
+"premium.subscription.terms" = "Подписки продлеваются автоматически, если их не отменить. Управлять ими или отменить их можно в настройках Аккаунта Apple.";
+"premium.terms" = "Условия использования";
+"premium.privacy.link" = "Политика конфиденциальности";
+
+"premium.quickClean.detail" = "Выбирайте несколько категорий очистки, сохраняя рекомендованное фото в каждой группе похожих снимков.";
+"storage.preview.title" = "Интерактивный просмотр · Пример данных";
+"storage.preview.detail" = "Изучите карту папок на примере данных. Откройте Premium, чтобы выбирать папки и управлять своими файлами.";
+"storage.preview.folder" = "Пример папки";
+
+"premium.feature.all" = "Откройте все функции Premium";
+"premium.feature.required" = "Доступно с Premium";
+"premium.feature.unlock" = "Открыть с Premium";
+"premium.feature.media" = "Очистка медиа";
+"premium.feature.videoConversion" = "Сжатие видео";
+"premium.feature.storage" = "Очистка файлов";
+"premium.feature.imageConversion" = "Сжатие изображений";
+"premium.feature.audioConversion" = "Конвертация аудио";
+"premium.feature.darkAppearance" = "Тёмное оформление";
+"premium.feature.customColors" = "Свои цвета";
+"premium.feature.compression.title" = "Сжимайте изображения и аудио";
+"premium.feature.compression.detail" = "Конвертируйте изображения и аудиофайлы с настраиваемыми параметрами.";
+"premium.feature.appearance.title" = "Ваше оформление";
+"premium.feature.appearance.detail" = "Откройте тёмное оформление и свои цвета приложения и фона.";
+"premium.continue.free" = "Продолжить бесплатно";
+
 "Photos" = "Фотографии";
 "Storage" = "Хранение";
 "Compress" = "Сжать";

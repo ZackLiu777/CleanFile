@@ -178,14 +178,18 @@ private struct LegacyFileStateSnapshot: Codable {
 @MainActor
 @Suite("Theme persistence")
 struct ThemePersistenceTests {
-    @Test("Theme defaults to Cream when no value exists")
+    @Test("Theme defaults to Filevra gradient and glass when no value exists")
     func themeDefaultsToSystem() {
         let defaults = isolatedDefaults()
 
         let settings = ThemeSettings(userDefaults: defaults)
 
         #expect(settings.appearance == .system)
-        #expect(settings.selectedThemeID == .cream)
+        #expect(settings.selectedThemeID == .filevra)
+        #expect(settings.liquidGlassCardsEnabled)
+        settings.setPremiumAppearanceAllowed(false)
+        #expect(settings.effectiveThemeID == .filevra)
+        #expect(settings.theme.liquidGlassCardsEnabled)
         #expect(settings.selectedAccentPaletteID == .automatic)
         #expect(settings.effectiveColorScheme == .light)
         #expect(settings.interfaceAnimationsEnabled)

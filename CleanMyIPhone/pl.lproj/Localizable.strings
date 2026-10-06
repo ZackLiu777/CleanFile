@@ -1,3 +1,42 @@
+"premium.plan.annual" = "Subskrypcja roczna";
+"premium.plan.monthly" = "Subskrypcja miesięczna";
+"premium.price.recurring" = "%@ za %@";
+"premium.offer.free" = "%@ bezpłatnie, potem %@";
+"premium.price.unavailable" = "Cena niedostępna";
+"premium.pricing.loading" = "Ładowanie cen App Store…";
+"premium.pricing.unavailable" = "Niektóre ceny są niedostępne. Połącz się z internetem i spróbuj ponownie. Nadal możesz przeglądać tę stronę i korzystać bezpłatnie.";
+"premium.purchase.continue" = "Kontynuuj z Premium";
+"premium.purchase.pending" = "Zakup oczekuje na zatwierdzenie. Premium zostanie aktywowane po potwierdzeniu przez Apple.";
+"premium.purchase.unverified" = "Nie udało się zweryfikować zakupu. Nie przyznano nowego dostępu. Odtwórz zakupy lub spróbuj ponownie.";
+"premium.restore" = "Odtwórz zakupy";
+"premium.restore.none" = "Nie znaleziono aktywnego zakupu Premium dla tego konta App Store.";
+"premium.restore.failed" = "Nie udało się odtworzyć zakupów. Sprawdź połączenie i konto App Store, a następnie spróbuj ponownie.";
+"premium.active" = "Premium jest aktywne";
+"premium.subscription.terms" = "Subskrypcje odnawiają się automatycznie, chyba że je anulujesz. Możesz nimi zarządzać lub je anulować w ustawieniach konta Apple.";
+"premium.terms" = "Warunki korzystania";
+"premium.privacy.link" = "Polityka prywatności";
+
+"premium.quickClean.detail" = "Wybierz kilka kategorii czyszczenia i zachowaj polecane zdjęcie w każdej grupie podobnych zdjęć.";
+"storage.preview.title" = "Interaktywny podgląd · Przykładowe dane";
+"storage.preview.detail" = "Poznaj mapę folderów na przykładowych danych. Odblokuj Premium, aby wybierać foldery i zarządzać swoimi plikami.";
+"storage.preview.folder" = "Przykładowy folder";
+
+"premium.feature.all" = "Odblokuj wszystkie funkcje Premium";
+"premium.feature.required" = "Dostępne z Premium";
+"premium.feature.unlock" = "Odblokuj z Premium";
+"premium.feature.media" = "Porządkowanie multimediów";
+"premium.feature.videoConversion" = "Kompresja wideo";
+"premium.feature.storage" = "Porządkowanie plików";
+"premium.feature.imageConversion" = "Kompresja obrazów";
+"premium.feature.audioConversion" = "Konwersja audio";
+"premium.feature.darkAppearance" = "Ciemny wygląd";
+"premium.feature.customColors" = "Własne kolory";
+"premium.feature.compression.title" = "Kompresuj obrazy i audio";
+"premium.feature.compression.detail" = "Konwertuj obrazy i pliki audio z regulowanymi ustawieniami.";
+"premium.feature.appearance.title" = "Spersonalizuj wygląd";
+"premium.feature.appearance.detail" = "Odblokuj ciemny wygląd oraz własne kolory aplikacji i tła.";
+"premium.continue.free" = "Kontynuuj bezpłatnie";
+
 "Photos" = "Zdjęcia";
 "Storage" = "Pamięć";
 "Compress" = "Kompresja";

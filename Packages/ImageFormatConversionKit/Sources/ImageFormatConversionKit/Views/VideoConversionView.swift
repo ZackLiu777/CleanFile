@@ -4,12 +4,17 @@
 //
 
 import SwiftUI
+import StoreKit
 import PhotosUI
 import UniformTypeIdentifiers
 
 @MainActor
 /// 定义 `VideoConversionView` 的值语义数据与相关行为。
 struct VideoConversionView: View {
+    @Environment(\.requestReview) private var requestReview
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var completedBeforeBatch: Set<UUID> = []
+    @Environment(\.conversionUsagePolicy) private var usagePolicy
     @Environment(\.conversionTheme) private var theme
     @State private var viewModel: VideoConversionViewModel
     @State private var importSession: ConversionImportSession
@@ -41,6 +46,10 @@ struct VideoConversionView: View {
             .frame(maxWidth: .infinity)
         }
         .converterSoftScrollEdge()
+        .sheet(isPresented: Binding(
+            get: { viewModel.isPremiumRequiredPresented },
+            set: { viewModel.isPremiumRequiredPresented = $0 }
+        )) { usagePolicy.upgradeContent(.video) }
         .safeAreaInset(edge: .bottom) {
             if !shouldShowImportCard {
                 bottomActionBar
@@ -55,6 +64,18 @@ struct VideoConversionView: View {
             case let .success(urls):
                 Task { await importFiles(urls) }
             case let .failure(error): viewModel.reportImportFailure(error.localizedDescription)
+            }
+        }
+        .onChange(of: viewModel.isConverting) { _, converting in
+            let completedIDs = Set(viewModel.items.compactMap { item -> UUID? in
+                if case .completed = item.status { return item.id }
+                return nil
+            })
+            if converting {
+                completedBeforeBatch = completedIDs
+            } else if scenePhase == .active,
+                      !completedIDs.subtracting(completedBeforeBatch).isEmpty {
+                requestReview()
             }
         }
         .onChange(of: selectedVideoItems) { _, items in
@@ -110,6 +131,7 @@ struct VideoConversionView: View {
                     )
                 }
                 .buttonStyle(.bordered)
+                .accessibilityIdentifier("video.import.files")
 
                 PhotosPicker(
                     selection: $selectedVideoItems,
@@ -410,7 +432,7 @@ struct VideoConversionView: View {
                 / Double(max(viewModel.total, 1)),
             progressTitle: "\(viewModel.completed) / \(viewModel.total)",
             isEnabled: viewModel.canConvert,
-            onStart: viewModel.start,
+            onStart: { viewModel.start(usagePolicy: usagePolicy) },
             onCancel: viewModel.cancel
         )
     }

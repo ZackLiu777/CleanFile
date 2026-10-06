@@ -1,3 +1,42 @@
+"premium.plan.annual" = "Vuositilaus";
+"premium.plan.monthly" = "Kuukausitilaus";
+"premium.price.recurring" = "%@ / %@";
+"premium.offer.free" = "%@ ilmaiseksi, sitten %@";
+"premium.price.unavailable" = "Hinta ei saatavilla";
+"premium.pricing.loading" = "Ladataan App Storen hintoja…";
+"premium.pricing.unavailable" = "Osa hinnoista ei ole saatavilla. Yhdistä internetiin ja yritä uudelleen. Voit silti selata tätä sivua ja jatkaa maksutta.";
+"premium.purchase.continue" = "Jatka Premiumilla";
+"premium.purchase.pending" = "Osto odottaa hyväksyntää. Premium aktivoituu Applen vahvistuksen jälkeen.";
+"premium.purchase.unverified" = "Ostoa ei voitu vahvistaa. Uutta käyttöoikeutta ei ole myönnetty. Palauta ostot tai yritä uudelleen.";
+"premium.restore" = "Palauta ostot";
+"premium.restore.none" = "Tälle App Store -tilille ei löytynyt aktiivista Premium-ostoa.";
+"premium.restore.failed" = "Ostoja ei voitu palauttaa. Tarkista yhteys ja App Store -tili ja yritä uudelleen.";
+"premium.active" = "Premium on aktiivinen";
+"premium.subscription.terms" = "Tilaukset uusiutuvat automaattisesti, ellei niitä peruta. Voit hallita tai perua tilauksen Apple-tilisi asetuksissa.";
+"premium.terms" = "Käyttöehdot";
+"premium.privacy.link" = "Tietosuojakäytäntö";
+
+"premium.quickClean.detail" = "Valitse useita siivousluokkia ja säilytä suositeltu kuva jokaisesta samankaltaisten kuvien ryhmästä.";
+"storage.preview.title" = "Interaktiivinen esikatselu · Esimerkkitiedot";
+"storage.preview.detail" = "Tutustu kansiokarttaan esimerkkitiedoilla. Avaa Premium valitaksesi kansioita ja hallitaksesi tiedostojasi.";
+"storage.preview.folder" = "Esimerkkikansio";
+
+"premium.feature.all" = "Avaa kaikki Premium-ominaisuudet";
+"premium.feature.required" = "Saatavilla Premiumilla";
+"premium.feature.unlock" = "Avaa Premiumilla";
+"premium.feature.media" = "Median siivous";
+"premium.feature.videoConversion" = "Videon pakkaus";
+"premium.feature.storage" = "Tiedostojen siivous";
+"premium.feature.imageConversion" = "Kuvien pakkaus";
+"premium.feature.audioConversion" = "Äänen muunnos";
+"premium.feature.darkAppearance" = "Tumma ulkoasu";
+"premium.feature.customColors" = "Omat värit";
+"premium.feature.compression.title" = "Pakkaa kuvia ja ääntä";
+"premium.feature.compression.detail" = "Muunna kuvia ja äänitiedostoja säädettävillä asetuksilla.";
+"premium.feature.appearance.title" = "Tee sovelluksesta omasi";
+"premium.feature.appearance.detail" = "Avaa tumma ulkoasu sekä omat sovellus- ja taustavärit.";
+"premium.continue.free" = "Jatka maksutta";
+
 "Photos" = "Valokuvat";
 "Storage" = "Varastointi";
 "Compress" = "Pakkaa";

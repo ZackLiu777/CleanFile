@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import StoreKit
 import PhotosUI
 import UniformTypeIdentifiers
 #if os(iOS)
@@ -254,6 +255,10 @@ private struct FormatChipSection: View {
 @MainActor
 /// 定义 `ImageConversionContentView` 的值语义数据与相关行为。
 struct ImageConversionContentView: View {
+    @Environment(\.requestReview) private var requestReview
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var completedBeforeBatch: Set<UUID> = []
+    @Environment(\.conversionUsagePolicy) private var usagePolicy
     @State private var viewModel: ImageConversionViewModel
     @State private var importSession: ConversionImportSession
     @State private var isImporterPresented = false
@@ -291,6 +296,10 @@ struct ImageConversionContentView: View {
             .frame(maxWidth: .infinity)
         }
         .converterSoftScrollEdge()
+        .sheet(isPresented: Binding(
+            get: { viewModel.isPremiumRequiredPresented },
+            set: { viewModel.isPremiumRequiredPresented = $0 }
+        )) { usagePolicy.upgradeContent(.images) }
         .safeAreaInset(edge: .bottom) {
             if !shouldShowImportCard {
                 bottomActionBar
@@ -323,6 +332,18 @@ struct ImageConversionContentView: View {
             }
         } message: {
             Text(L10n.string("conversion.delete_all.message"))
+        }
+        .onChange(of: viewModel.isConverting) { _, converting in
+            let completedIDs = Set(viewModel.items.compactMap { item -> UUID? in
+                if case .completed = item.status { return item.id }
+                return nil
+            })
+            if converting {
+                completedBeforeBatch = completedIDs
+            } else if scenePhase == .active,
+                      !completedIDs.subtracting(completedBeforeBatch).isEmpty {
+                requestReview()
+            }
         }
         .onChange(of: selectedPhotoItems) { _, items in
             guard !items.isEmpty else { return }
@@ -530,7 +551,7 @@ struct ImageConversionContentView: View {
                 viewModel.progress.total
             ),
             isEnabled: viewModel.canStartConversion,
-            onStart: viewModel.startConversion,
+            onStart: { viewModel.startConversion(usagePolicy: usagePolicy) },
             onCancel: viewModel.cancelConversion
         )
     }

@@ -261,8 +261,8 @@ struct SettingsView: View {
 
     /// 在设置主页准确显示当前使用的是预设背景还是用户自定义背景。
     private var selectedBackgroundName: LocalizedStringKey {
-        themeSettings.usesCustomBackground
+        themeSettings.isUsingCustomBackground
             ? "Custom"
-            : themeSettings.selectedThemeID.displayName
+            : themeSettings.effectiveThemeID.displayName
     }
 }

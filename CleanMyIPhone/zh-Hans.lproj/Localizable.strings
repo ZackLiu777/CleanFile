@@ -1,3 +1,42 @@
+"premium.plan.annual" = "年度订阅";
+"premium.plan.monthly" = "月度订阅";
+"premium.price.recurring" = "%@ / %@";
+"premium.offer.free" = "免费 %@，之后 %@";
+"premium.price.unavailable" = "价格暂不可用";
+"premium.pricing.loading" = "正在加载 App Store 价格…";
+"premium.pricing.unavailable" = "部分价格暂不可用。联网后可重试；你仍可浏览此页并继续免费使用。";
+"premium.purchase.continue" = "继续开通 Premium";
+"premium.purchase.pending" = "购买正在等待批准，Apple 确认后将解锁 Premium。";
+"premium.purchase.unverified" = "无法验证此次购买，尚未授予新的权益。请恢复购买或重试。";
+"premium.restore" = "恢复购买";
+"premium.restore.none" = "此 App Store 账户未找到有效的 Premium 购买。";
+"premium.restore.failed" = "无法恢复购买。请检查网络和 App Store 账户后重试。";
+"premium.active" = "Premium 已生效";
+"premium.subscription.terms" = "订阅会自动续费，除非你取消。可在 Apple 账户设置中管理或取消。";
+"premium.terms" = "服务条款";
+"premium.privacy.link" = "隐私政策";
+
+"premium.quickClean.detail" = "一起选择清理类别，保留每组相似照片中推荐的一张。";
+"storage.preview.title" = "互动预览 · 示例数据";
+"storage.preview.detail" = "通过示例数据体验文件夹旭日图。解锁 Premium，即可选择文件夹并管理自己的文件。";
+"storage.preview.folder" = "示例文件夹";
+
+"premium.feature.all" = "解锁全部 Premium 功能";
+"premium.feature.required" = "此功能需要 Premium";
+"premium.feature.unlock" = "解锁 Premium";
+"premium.feature.media" = "媒体整理";
+"premium.feature.videoConversion" = "视频压缩";
+"premium.feature.storage" = "存储文件清理";
+"premium.feature.imageConversion" = "图片压缩";
+"premium.feature.audioConversion" = "音频转换";
+"premium.feature.darkAppearance" = "深色外观";
+"premium.feature.customColors" = "自定义颜色";
+"premium.feature.compression.title" = "压缩图片与音频";
+"premium.feature.compression.detail" = "调整设置，转换图片与音频文件。";
+"premium.feature.appearance.title" = "个性化外观";
+"premium.feature.appearance.detail" = "解锁深色外观、自定义应用颜色与背景。";
+"premium.continue.free" = "继续免费使用";
+
 "Photos" = "照片";
 "Import to Filevra" = "导入 Filevra";
 "Choose what to compress. Originals will remain in Photos." = "选择要压缩的内容。相册中的原件不会改变。";

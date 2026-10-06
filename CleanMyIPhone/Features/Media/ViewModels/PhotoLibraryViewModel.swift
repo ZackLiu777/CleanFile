@@ -530,14 +530,16 @@ final class PhotoLibraryViewModel: ObservableObject {
     }
 
     /// 执行 `deleteAssets` 移除流程，并同步更新受影响的业务状态。
-    func deleteAssets(withIDs assetIDs: Set<String>) async {
+    @discardableResult
+    func deleteAssets(withIDs assetIDs: Set<String>) async -> Bool {
+        guard !deletionState.isDeleting else { return false }
         guard !assetIDs.isEmpty else {
             deletionState = .failure(.noItemsSelected)
-            return
+            return false
         }
         guard authorizationStatus == .authorized || authorizationStatus == .limited else {
             deletionState = .failure(.photoAccessUnavailable)
-            return
+            return false
         }
 
         let fetchResult = PHAsset.fetchAssets(
@@ -547,7 +549,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         // PhotoKit 可能在确认前移除部分资源；禁止把剩余资源静默当作完整批次删除。
         guard fetchResult.count == assetIDs.count else {
             deletionState = .failure(.itemsUnavailable)
-            return
+            return false
         }
 
         let deletedIDs = Set((0..<fetchResult.count).map { fetchResult.object(at: $0).localIdentifier })
@@ -568,15 +570,17 @@ final class PhotoLibraryViewModel: ObservableObject {
                 deletedCount: deletedIDs.count,
                 estimatedBytes: estimatedBytes
             )
+            return true
         } catch {
             let photoError = error as NSError
             if photoError.domain == PHPhotosError.errorDomain,
                photoError.code == PHPhotosError.Code.userCancelled.rawValue {
                 // 取消系统确认不是失败；回到可操作状态并保留当前选择。
                 deletionState = .idle
-                return
+                return false
             }
             deletionState = .failure(.deletionFailed)
+            return false
         }
     }
 
@@ -710,8 +714,18 @@ final class PhotoLibraryViewModel: ObservableObject {
         return Double(max(asset.pixelWidth, 1)) * Double(max(asset.pixelHeight, 1))
     }
 
+    private static func contentTypeIdentifier(for asset: PHAsset) -> String {
+        if #available(iOS 26.0, *) {
+            return asset.contentType.identifier
+        }
+        // Resource metadata identifies the format without downloading the asset.
+        let resourceType: PHAssetResourceType = asset.mediaType == .video ? .video : .photo
+        return PHAssetResource.assetResources(for: asset)
+            .first(where: { $0.type == resourceType })?.uniformTypeIdentifier ?? "public.data"
+    }
+
     private static func calibrationKey(for asset: PHAsset) -> String {
-        let format = asset.contentType.identifier.lowercased()
+        let format = contentTypeIdentifier(for: asset).lowercased()
         if asset.mediaType == .video {
             let longestEdge = max(asset.pixelWidth, asset.pixelHeight)
             let resolution = longestEdge >= 3_840 ? "4k" : longestEdge >= 1_920 ? "1080" : "small"
@@ -927,7 +941,7 @@ final class PhotoLibraryViewModel: ObservableObject {
             return Int64(max(asset.duration, 1) * bitsPerSecond * frameRateMultiplier / 8)
         }
 
-        let format = asset.contentType.identifier.lowercased()
+        let format = contentTypeIdentifier(for: asset).lowercased()
         let bytesPerPixel: Double
         if format.contains("heic") || format.contains("heif") {
             bytesPerPixel = 0.22

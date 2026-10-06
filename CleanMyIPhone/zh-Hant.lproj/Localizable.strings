@@ -1,3 +1,42 @@
+"premium.plan.annual" = "年度訂閱";
+"premium.plan.monthly" = "月度訂閱";
+"premium.price.recurring" = "%@ / %@";
+"premium.offer.free" = "免費 %@，之後 %@";
+"premium.price.unavailable" = "價格暫不可用";
+"premium.pricing.loading" = "正在載入 App Store 價格…";
+"premium.pricing.unavailable" = "部分價格暫不可用。連線後可重試；你仍可瀏覽此頁並繼續免費使用。";
+"premium.purchase.continue" = "繼續開通 Premium";
+"premium.purchase.pending" = "購買正在等待批准，Apple 確認後將解鎖 Premium。";
+"premium.purchase.unverified" = "無法驗證此次購買，尚未授予新的權益。請回復購買或重試。";
+"premium.restore" = "回復購買";
+"premium.restore.none" = "此 App Store 帳號未找到有效的 Premium 購買。";
+"premium.restore.failed" = "無法回復購買。請檢查網路和 App Store 帳號後重試。";
+"premium.active" = "Premium 已生效";
+"premium.subscription.terms" = "訂閱會自動續訂，除非你取消。可在 Apple 帳號設定中管理或取消。";
+"premium.terms" = "服務條款";
+"premium.privacy.link" = "隱私權政策";
+
+"premium.quickClean.detail" = "一起選擇清理類別，保留每組相似照片中推薦的一張。";
+"storage.preview.title" = "互動預覽 · 範例資料";
+"storage.preview.detail" = "透過範例資料體驗資料夾旭日圖。解鎖 Premium，即可選擇資料夾並管理自己的檔案。";
+"storage.preview.folder" = "範例資料夾";
+
+"premium.feature.all" = "解鎖全部 Premium 功能";
+"premium.feature.required" = "此功能需要 Premium";
+"premium.feature.unlock" = "解鎖 Premium";
+"premium.feature.media" = "媒體整理";
+"premium.feature.videoConversion" = "影片壓縮";
+"premium.feature.storage" = "儲存檔案清理";
+"premium.feature.imageConversion" = "圖片壓縮";
+"premium.feature.audioConversion" = "音訊轉換";
+"premium.feature.darkAppearance" = "深色外觀";
+"premium.feature.customColors" = "自訂顏色";
+"premium.feature.compression.title" = "壓縮圖片與音訊";
+"premium.feature.compression.detail" = "調整設定，轉換圖片與音訊檔案。";
+"premium.feature.appearance.title" = "個人化外觀";
+"premium.feature.appearance.detail" = "解鎖深色外觀、自訂 App 顏色與背景。";
+"premium.continue.free" = "繼續免費使用";
+
 "Photos" = "照片";
 "Import to Filevra" = "匯入 Filevra";
 "Choose what to compress. Originals will remain in Photos." = "選擇要壓縮的內容。相簿中的原始檔不會改變。";

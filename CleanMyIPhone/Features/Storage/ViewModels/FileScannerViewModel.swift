@@ -154,6 +154,7 @@ final class FileScannerViewModel: ObservableObject {
     @Published private(set) var deletionState: FileDeletionState = .idle
     @Published private(set) var isRestoringStoredFiles = false
 
+    private let canUseStorage: () -> Bool
     private let scanner: MetadataFileScanner
     private var scanTask: Task<Void, Never>?
     private var restoreTask: Task<Void, Never>?
@@ -170,8 +171,9 @@ final class FileScannerViewModel: ObservableObject {
     private var restoredDashboardAvailable = false
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
-    init(scanner: MetadataFileScanner = MetadataFileScanner()) {
+    init(scanner: MetadataFileScanner = MetadataFileScanner(), canUseStorage: @escaping () -> Bool = { true }) {
         self.scanner = scanner
+        self.canUseStorage = canUseStorage
     }
 
     /// 释放 ViewModel 时取消尚未结束的扫描，避免后台任务继续持有无效页面状态。
@@ -194,6 +196,7 @@ final class FileScannerViewModel: ObservableObject {
     /// Decoding happens in the store actor and all O(n) reconstruction remains
     /// off MainActor; the UI receives one prepared result at the end.
     func loadIfNeeded() {
+        guard canUseStorage() else { return }
         guard !hasAttemptedRestore else { return }
         hasAttemptedRestore = true
         isRestoringStoredFiles = true
@@ -225,6 +228,7 @@ final class FileScannerViewModel: ObservableObject {
 
     /// 执行 `scan` 分析流程，在遵守文件访问边界的前提下生成结果。
     func scan(directory: URL) {
+        guard canUseStorage() else { return }
         retainSourceAccess(to: [directory])
         hasAttemptedRestore = true
         restoreTask?.cancel()
@@ -264,6 +268,7 @@ final class FileScannerViewModel: ObservableObject {
     /// folders. The original single-folder flow and its persisted snapshot are
     /// intentionally left unchanged.
     func scan(sources: [URL]) {
+        guard canUseStorage() else { return }
         let uniqueSources = sources.reduce(into: [URL]()) { result, source in
             let normalized = source.standardizedFileURL
             if !result.contains(where: { $0.standardizedFileURL == normalized }) {
@@ -347,6 +352,7 @@ final class FileScannerViewModel: ObservableObject {
 
     /// 执行 `deleteFiles` 移除流程，并同步更新受影响的业务状态。
     func deleteFiles(withURLs selectedURLs: Set<URL>) async {
+        guard canUseStorage() else { return }
         guard !selectedURLs.isEmpty else {
             deletionState = .failure(.noItemsSelected)
             return

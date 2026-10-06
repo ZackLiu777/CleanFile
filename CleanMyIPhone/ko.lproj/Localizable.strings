@@ -1,3 +1,42 @@
+"premium.plan.annual" = "연간 구독";
+"premium.plan.monthly" = "월간 구독";
+"premium.price.recurring" = "%@ / %@";
+"premium.offer.free" = "%@ 무료, 이후 %@";
+"premium.price.unavailable" = "가격을 불러올 수 없음";
+"premium.pricing.loading" = "App Store 가격 불러오는 중…";
+"premium.pricing.unavailable" = "일부 가격을 불러올 수 없습니다. 인터넷에 연결한 후 다시 시도하세요. 이 페이지를 살펴보고 무료로 계속 이용할 수 있습니다.";
+"premium.purchase.continue" = "Premium으로 계속";
+"premium.purchase.pending" = "구매 승인 대기 중입니다. Apple이 확인하면 Premium이 활성화됩니다.";
+"premium.purchase.unverified" = "구매를 확인할 수 없어 새로운 이용 권한이 부여되지 않았습니다. 구매를 복원하거나 다시 시도하세요.";
+"premium.restore" = "구매 복원";
+"premium.restore.none" = "이 App Store 계정에서 유효한 Premium 구매를 찾지 못했습니다.";
+"premium.restore.failed" = "구매를 복원할 수 없습니다. 인터넷 연결과 App Store 계정을 확인한 후 다시 시도하세요.";
+"premium.active" = "Premium 이용 중";
+"premium.subscription.terms" = "취소하지 않으면 구독이 자동 갱신됩니다. Apple 계정 설정에서 관리하거나 취소할 수 있습니다.";
+"premium.terms" = "이용 약관";
+"premium.privacy.link" = "개인정보 처리방침";
+
+"premium.quickClean.detail" = "정리할 카테고리를 함께 선택하고, 비슷한 사진 그룹마다 추천 사진을 보관하세요.";
+"storage.preview.title" = "대화형 미리보기 · 예시 데이터";
+"storage.preview.detail" = "예시 데이터로 폴더 맵을 살펴보세요. Premium을 활성화하면 폴더를 선택하고 내 파일을 관리할 수 있습니다.";
+"storage.preview.folder" = "예시 폴더";
+
+"premium.feature.all" = "모든 Premium 기능 이용";
+"premium.feature.required" = "Premium이 필요한 기능입니다";
+"premium.feature.unlock" = "Premium으로 잠금 해제";
+"premium.feature.media" = "미디어 정리";
+"premium.feature.videoConversion" = "동영상 압축";
+"premium.feature.storage" = "파일 정리";
+"premium.feature.imageConversion" = "이미지 압축";
+"premium.feature.audioConversion" = "오디오 변환";
+"premium.feature.darkAppearance" = "다크 모드";
+"premium.feature.customColors" = "사용자 지정 색상";
+"premium.feature.compression.title" = "이미지 및 오디오 압축";
+"premium.feature.compression.detail" = "설정을 조절하여 이미지와 오디오 파일을 변환하세요.";
+"premium.feature.appearance.title" = "나만의 디자인";
+"premium.feature.appearance.detail" = "다크 모드와 앱 및 배경의 사용자 지정 색상을 이용하세요.";
+"premium.continue.free" = "무료로 계속 사용";
+
 "Photos" = "사진";
 "Storage" = "저장 공간";
 "Compress" = "압축";

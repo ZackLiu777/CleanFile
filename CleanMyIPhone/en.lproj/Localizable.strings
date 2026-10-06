@@ -1,3 +1,42 @@
+"premium.plan.annual" = "Annual Subscription";
+"premium.plan.monthly" = "Monthly Subscription";
+"premium.price.recurring" = "%@ every %@";
+"premium.offer.free" = "%@ free, then %@";
+"premium.price.unavailable" = "Price unavailable";
+"premium.pricing.loading" = "Loading App Store prices…";
+"premium.pricing.unavailable" = "Some prices are unavailable. Connect to the internet and retry. You can still browse this page and continue free.";
+"premium.purchase.continue" = "Continue with Premium";
+"premium.purchase.pending" = "Purchase awaiting approval. Premium will unlock after Apple confirms it.";
+"premium.purchase.unverified" = "The purchase could not be verified. No new access has been granted. Please restore purchases or try again.";
+"premium.restore" = "Restore Purchases";
+"premium.restore.none" = "No active Premium purchase was found for this App Store account.";
+"premium.restore.failed" = "Purchases could not be restored. Check your connection and App Store account, then retry.";
+"premium.active" = "Premium is active";
+"premium.subscription.terms" = "Subscriptions renew automatically unless cancelled. Manage or cancel in your Apple Account settings.";
+"premium.terms" = "Terms of Service";
+"premium.privacy.link" = "Privacy Policy";
+
+"premium.quickClean.detail" = "Select cleanup categories together, keeping the recommended photo in each similar group.";
+"storage.preview.title" = "Interactive preview · Example data";
+"storage.preview.detail" = "Explore the folder map with example data. Unlock Premium to choose folders and manage your files.";
+"storage.preview.folder" = "Example Folder";
+
+"premium.feature.all" = "Unlock every Premium feature";
+"premium.feature.required" = "Available with Premium";
+"premium.feature.unlock" = "Unlock with Premium";
+"premium.feature.media" = "Media cleanup";
+"premium.feature.videoConversion" = "Video compression";
+"premium.feature.storage" = "File storage cleanup";
+"premium.feature.imageConversion" = "Image compression";
+"premium.feature.audioConversion" = "Audio conversion";
+"premium.feature.darkAppearance" = "Dark appearance";
+"premium.feature.customColors" = "Custom colors";
+"premium.feature.compression.title" = "Compress images and audio";
+"premium.feature.compression.detail" = "Convert images and audio with adjustable settings.";
+"premium.feature.appearance.title" = "Make it your own";
+"premium.feature.appearance.detail" = "Unlock dark appearance and custom app and background colors.";
+"premium.continue.free" = "Continue Free";
+
 "Photos" = "Photos";
 "Storage" = "Storage";
 "Compress" = "Compress";
