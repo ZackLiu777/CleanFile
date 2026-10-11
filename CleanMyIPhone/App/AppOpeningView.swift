@@ -21,8 +21,7 @@ struct AppOpeningView: View {
                 AppBackground()
                 TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !animates)) { context in
                     let elapsed = animates ? context.date.timeIntervalSince(startedAt) : 2
-                    FileFlowOpeningArtwork(time: min(elapsed, 2), size: artworkSize)
-                        .frame(width: artworkSize, height: artworkSize)
+                    RippleOpeningArtwork(time: min(elapsed, 2), size: artworkSize)
                 }
                 .accessibilityHidden(true)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -31,6 +30,18 @@ struct AppOpeningView: View {
         .accessibilityHidden(true)
     }
 }
+
+#if DEBUG
+#Preview("正式开屏 · 涟漪收束") {
+    AppOpeningView()
+        .environment(\.appTheme, Theme.filevra)
+}
+
+#Preview("正式开屏 · 静态") {
+    AppOpeningView(animationsEnabled: false)
+        .environment(\.appTheme, Theme.filevra)
+}
+#endif
 
 /// Keeps startup presentation separate from the application's navigation and business state.
 struct AppOpeningContainer<Content: View>: View {

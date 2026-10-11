@@ -28,7 +28,9 @@ struct AppearanceThemeView: View {
             if themeSettings.isUsingCustomBackground && accessStore.allows(.customColors) {
                 customBackgroundEditorSection
             }
-            glassCardSection
+            if #available(iOS 26.0, *) {
+                glassCardSection
+            }
             glassTabSection
             displayOptionsSection
             fontSection

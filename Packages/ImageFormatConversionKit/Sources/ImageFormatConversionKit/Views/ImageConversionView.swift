@@ -613,7 +613,7 @@ struct ConversionNeoBrutalistActionBar: View {
         // modifiers and decorative overlays are not stable XCUI elements.
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("conversion.actionBar")
-        .accessibilityValue(theme.liquidGlassCardsEnabled ? "liquidGlass" : "solid")
+        .accessibilityValue("solid")
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .modifier(ConversionActionBarSurfaceModifier())
@@ -651,8 +651,7 @@ struct ConversionNeoBrutalistActionBar: View {
         .buttonStyle(
             ConversionPhysicalActionButtonStyle(
                 faceColor: theme.accent,
-                edgeColor: theme.textPrimary,
-                usesLiquidGlass: theme.liquidGlassCardsEnabled
+                edgeColor: theme.textPrimary
             )
         )
         .accessibilityIdentifier("conversion.actionButton")
@@ -688,25 +687,7 @@ public struct ConversionActionBarUITestHarness: View {
 
 private struct ConversionActionBarSurfaceModifier: ViewModifier {
     @Environment(\.conversionTheme) private var theme
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
-    @ViewBuilder
     func body(content: Content) -> some View {
-#if os(iOS)
-        if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
-            content.glassEffect(
-                .regular.tint(theme.accent.opacity(0.08)),
-                in: .rect(cornerRadius: 12)
-            )
-        } else {
-            fallbackSurface(content)
-        }
-#else
-        fallbackSurface(content)
-#endif
-    }
-
-    private func fallbackSurface(_ content: Content) -> some View {
         content.background(
             theme.cardSurface,
             in: RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -719,7 +700,6 @@ private struct ConversionPhysicalActionButtonStyle: ButtonStyle {
 
     let faceColor: Color
     let edgeColor: Color
-    let usesLiquidGlass: Bool
 
     func makeBody(configuration: Configuration) -> some View {
         let isPressed = configuration.isPressed
@@ -727,8 +707,7 @@ private struct ConversionPhysicalActionButtonStyle: ButtonStyle {
         configuration.label
             .modifier(
                 ConversionPhysicalButtonFaceModifier(
-                    color: faceColor,
-                    usesLiquidGlass: usesLiquidGlass
+                    color: faceColor
                 )
             )
             .overlay {
@@ -752,28 +731,8 @@ private struct ConversionPhysicalActionButtonStyle: ButtonStyle {
 }
 
 private struct ConversionPhysicalButtonFaceModifier: ViewModifier {
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
     let color: Color
-    let usesLiquidGlass: Bool
-
-    @ViewBuilder
     func body(content: Content) -> some View {
-#if os(iOS)
-        if #available(iOS 26.0, *), usesLiquidGlass, !reduceTransparency {
-            content.glassEffect(
-                .regular.tint(color.opacity(0.34)),
-                in: .rect(cornerRadius: 8)
-            )
-        } else {
-            fallbackFace(content)
-        }
-#else
-        fallbackFace(content)
-#endif
-    }
-
-    private func fallbackFace(_ content: Content) -> some View {
         content.background(
             color,
             in: RoundedRectangle(cornerRadius: 8, style: .continuous)

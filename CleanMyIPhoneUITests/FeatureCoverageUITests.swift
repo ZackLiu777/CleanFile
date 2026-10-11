@@ -116,7 +116,7 @@ final class FeatureCoverageUITests: XCTestCase {
     }
 
     @MainActor
-    func testConversionActionBarReflectsLiquidGlassSetting() throws {
+    func testConversionActionBarStaysSolidWithLiquidGlassEnabled() throws {
         let app = launchEnglishApp(additionalArguments: [
             "--ui-testing-liquid-glass",
             "--ui-test-conversion-action-bar"
@@ -124,7 +124,7 @@ final class FeatureCoverageUITests: XCTestCase {
 
         let actionBar = app.descendants(matching: .any)["conversion.actionBar"]
         XCTAssertTrue(actionBar.waitForExistence(timeout: 5))
-        XCTAssertEqual(actionBar.value as? String, "liquidGlass")
+        XCTAssertEqual(actionBar.value as? String, "solid")
         XCTAssertTrue(app.buttons["conversion.actionButton"].exists)
     }
 

@@ -1415,3 +1415,53 @@ Push to main
 
 Codex 应严格遵守以上边界。
 
+---
+
+# 41. 设计工程与 Swift 补充原则
+
+本节参考 [emilkowalski/skills](https://github.com/emilkowalski/skills)，按本项目的 Swift / SwiftUI 与文件安全要求提炼。它是项目级补充准则，不代表安装上游 Skills，也不扩大任务授权范围。
+
+适用边界：只有任务涉及 UI、交互、动效或相关 Swift 实现时，才应用对应原则。既有 UI 修改边界、Native First、数据安全与测试规则继续有效。不得因本节自行重新设计页面、增加依赖、改变编译设置或运行本地测试。上游 Web 实现与数值不是本项目的强制实现标准；使用新语言特性前应确认当前工具链与部署目标支持。
+
+## 41.1 交互必须有明确目的
+
+参考：[emil-design-eng](https://github.com/emilkowalski/skills/blob/main/skills/emil-design-eng/SKILL.md)。
+
+* 添加动效前，先判断它是否帮助用户理解状态、空间关系或操作反馈；仅为装饰不构成充分理由。
+* 高频操作应优先即时响应，减少重复动效。不得为了播放动画而延迟操作结果或人为延长 Loading。
+* 进入与退出反馈应迅速开始；连续的位置变化应自然衔接。优先复用项目现有动效约定，不机械套用 CSS 曲线。
+* 只对必要状态或属性施加动画，避免将整个视图树的无关变化一起动画化。
+* 动效评审应说明触发条件、用户收益与频率；提出修改时说明当前表现、建议表现和原因。
+
+## 41.2 流畅性与可控性
+
+参考：[apple-design](https://github.com/emilkowalski/skills/blob/main/skills/apple-design/SKILL.md)。
+
+* 按压开始时提供视觉反馈；反馈不等于提前执行删除等业务操作，业务触发仍遵守原有操作与确认流程。
+* 拖动过程应连续跟随手势。交互动画应允许中断和反向操作，从当前显示状态平滑衔接，避免跳回旧起点。
+* 不应仅因转场尚未结束而屏蔽输入；确需阻止重复提交时，应由业务状态决定。
+* 优先使用系统控件和原生交互能力。弹簧与回弹应服务于手势和空间关系，不给所有元素统一添加弹跳。
+* 保持来源、目的地与返回路径清晰，让用户能理解当前状态并退出或取消。
+
+## 41.3 无障碍与真实数据适配
+
+参考：[apple-design](https://github.com/emilkowalski/skills/blob/main/skills/apple-design/SKILL.md) 与 [break-ui](https://github.com/emilkowalski/skills/blob/main/skills/break-ui/SKILL.md)。
+
+* 涉及 UI 修改时考虑 Dynamic Type、VoiceOver、减少动态效果、减少透明度及提高对比度；不能仅靠颜色或动画传达必要状态。
+* 减少动态效果时，使用静态状态或温和的淡入淡出保留必要反馈，避免大幅位移、视差与弹跳。
+* 布局应考虑真实的长文件名、中文及其他文字、Emoji、缺失元数据、零项、单项、大数量和较长的本地化文案。
+* 检查截断或换行是否保留关键识别信息，尤其避免隐藏文件类型、操作目标或失败原因。
+* 边界数据应通过现有数据入口或测试 Fixture 提供，不修改组件结构伪造问题，不使用用户私密文件作为演示数据。
+* 上述要求可通过代码审查和测试代码覆盖；实际本地测试执行仍须遵守第 17–22 节，不能以视觉验证为由绕过。
+
+## 41.4 Swift 数据建模与并发安全
+
+参考：[write-swift](https://github.com/emilkowalski/skills/blob/main/skills/write-swift/SKILL.md)。
+
+* 普通数据优先使用 `struct` / `enum`，不变数据优先使用 `let`；需要身份、共享状态或资源生命周期时再使用引用类型，并保持既有 MVVM 职责。
+* 互斥业务状态优先用带关联值的枚举表达，减少多个 Bool 与 Optional 形成无效组合。
+* 跨隔离域传递数据时，优先减少共享可变状态、使用安全的值类型或明确的 actor 隔离。不得用 `@unchecked Sendable` 或 `nonisolated(unsafe)` 单纯压制编译诊断。
+* `await` 前后不能假设状态不变。恢复后应检查任务是否仍有效、输入是否已变化，以及结果是否属于当前操作。
+* actor 隔离不等于跨 `await` 的事务，也不保证业务 FIFO 顺序；需要顺序或去重时应明确建模。
+* 优先使用结构化并发协调子任务；非结构化任务必须明确生命周期、取消与结果归属，并继续遵守有界并发规则。
+* 不照搬上游“先全部放在主线程”的建议：本项目的大规模文件 I/O、Hash 与编解码继续遵守第 4 节。不因引用上游建议默认改变 Actor Isolation、Swift 版本或 Package 配置。

@@ -484,7 +484,12 @@ struct Theme: Sendable {
     /// Applies the user's card-material preference independently of the selected color theme.
     func applyingLiquidGlassCards(_ isEnabled: Bool) -> Theme {
         var resolved = self
-        resolved.liquidGlassCardsEnabled = isEnabled
+        if #available(iOS 26.0, *) {
+            resolved.liquidGlassCardsEnabled = isEnabled
+        } else {
+            // Retain the saved preference for OS upgrades, but expose only supported rendering.
+            resolved.liquidGlassCardsEnabled = false
+        }
         return resolved
     }
 
@@ -994,7 +999,7 @@ final class ThemeSettings: ObservableObject {
         let storedAppearance = userDefaults.string(forKey: Self.appearanceKey)
             .flatMap(AppAppearance.init(rawValue:)) ?? .system
         let storedAccentPalette = userDefaults.string(forKey: Self.accentPaletteKey)
-            .flatMap(AppAccentPaletteID.init(rawValue:)) ?? .automatic
+            .flatMap(AppAccentPaletteID.init(rawValue:)) ?? .sky
         let storedCustomAccentColor = Self.restoreColor(
             forKey: Self.customAccentColorKey,
             from: userDefaults,

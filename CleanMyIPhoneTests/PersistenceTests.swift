@@ -190,11 +190,11 @@ struct ThemePersistenceTests {
         settings.setPremiumAppearanceAllowed(false)
         #expect(settings.effectiveThemeID == .filevra)
         #expect(settings.theme.liquidGlassCardsEnabled)
-        #expect(settings.selectedAccentPaletteID == .automatic)
+        #expect(settings.selectedAccentPaletteID == .sky)
         #expect(settings.effectiveColorScheme == .light)
         #expect(settings.interfaceAnimationsEnabled)
         #expect(settings.mediaDateHeadersEnabled)
-        #expect(defaults.string(forKey: "appAccentPalette") == "automatic")
+        #expect(defaults.string(forKey: "appAccentPalette") == "sky")
     }
 
     @Test("Display preferences persist and restore")
@@ -267,15 +267,15 @@ struct ThemePersistenceTests {
         #expect(defaults.string(forKey: "appAccentPalette") == "teal")
     }
 
-    @Test("Invalid accent palette is normalized to automatic")
+    @Test("Invalid accent palette is normalized to Sky")
     func invalidAccentPaletteIsNormalized() {
         let defaults = isolatedDefaults()
         defaults.set("unsupported", forKey: "appAccentPalette")
 
         let settings = ThemeSettings(userDefaults: defaults)
 
-        #expect(settings.selectedAccentPaletteID == .automatic)
-        #expect(defaults.string(forKey: "appAccentPalette") == "automatic")
+        #expect(settings.selectedAccentPaletteID == .sky)
+        #expect(defaults.string(forKey: "appAccentPalette") == "sky")
     }
 
     @Test("Changing accent palette persists immediately")
