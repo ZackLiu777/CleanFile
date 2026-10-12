@@ -7,11 +7,11 @@ import Foundation
 
 /// A deliberately bounded estimate: variable-rate codecs cannot promise an exact size
 /// before encoding, so callers present a range instead of false precision.
-struct ConversionSizeEstimate: Equatable, Sendable {
-    let originalBytes: Int64
-    let likelyBytes: Int64
-    let lowerBoundBytes: Int64
-    let upperBoundBytes: Int64
+public struct ConversionSizeEstimate: Equatable, Sendable {
+    public let originalBytes: Int64
+    public let likelyBytes: Int64
+    public let lowerBoundBytes: Int64
+    public let upperBoundBytes: Int64
 
     init(originalBytes: Int64, likelyBytes: Int64, lowerBoundBytes: Int64, upperBoundBytes: Int64) {
         self.originalBytes = max(originalBytes, 0)
@@ -20,7 +20,7 @@ struct ConversionSizeEstimate: Equatable, Sendable {
         self.upperBoundBytes = max(max(lowerBoundBytes, upperBoundBytes), 0)
     }
 
-    static func image(
+    public static func image(
         infos: [ImageAssetInfo],
         format: ImageOutputFormat,
         quality: Double,

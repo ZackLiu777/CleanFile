@@ -25,9 +25,9 @@
 "premium.feature.required" = "Доступно с Premium";
 "premium.feature.unlock" = "Открыть с Premium";
 "premium.feature.media" = "Очистка медиа";
-"premium.feature.videoConversion" = "Сжатие видео";
+"premium.feature.videoConversion" = "Конвертация видео";
 "premium.feature.storage" = "Очистка файлов";
-"premium.feature.imageConversion" = "Сжатие изображений";
+"premium.feature.imageConversion" = "Конвертация изображений";
 "premium.feature.audioConversion" = "Конвертация аудио";
 "premium.feature.darkAppearance" = "Тёмное оформление";
 "premium.feature.customColors" = "Свои цвета";
@@ -39,7 +39,7 @@
 
 "Photos" = "Фотографии";
 "Storage" = "Хранение";
-"Compress" = "Сжать";
+"Compress" = "Преобразовать";
 "storage.heading" = "Распределение хранилища";
 "Settings" = "Настройки";
 "Language" = "Язык";
@@ -99,7 +99,6 @@
 "Videos" = "Видео";
 "My Space" = "Мое пространство";
 "System & Apps" = "Система и приложения";
-"Includes iOS, system data, and other app data." = "Включает iOS, системные данные и другие данные приложений.";
 "Available" = "Доступно";
 "%lld%% used · %@ of %@" = "%lld%% использовано · %@ из %@";
 "Images" = "Изображения";
@@ -149,7 +148,6 @@
 "Read-only" = "Только чтение";
 "Screenshots" = "Скриншоты";
 "Live Photos" = "Живые фотографии";
-"Video Categories" = "Категории видео";
 "%lld items" = "%lld предметы";
 "No Items" = "Нет товаров";
 "No media matched this category." = "Ни одно СМИ не соответствовало этой категории.";
@@ -193,9 +191,7 @@
 "Press and hold to play" = "Нажмите и удерживайте, чтобы играть";
 "%lld selected" = "%lld выбрано";
 "Estimated %@" = "Расчетное %@";
-"Media Actions" = "Действия со СМИ";
 "Cleanup Recommendations" = "Рекомендации по очистке";
-"Media sizes are estimated without downloading original files." = "Размеры носителей оцениваются без загрузки оригинальных файлов.";
 "Explore the folder hierarchy" = "Изучите иерархию папок";
 "Tap a folder segment to drill down. Tap the center to go back." = "Коснитесь сегмента папки, чтобы перейти к более подробной информации. Коснитесь центра, чтобы вернуться назад.";
 "%lld files" = "%lld файлы";
@@ -303,10 +299,10 @@
 "Cloud files may be unavailable" = "Облачные файлы могут быть недоступны";
 "Common Questions" = "Общие вопросы";
 "Confirm your selection" = "Подтвердите свой выбор";
-"Compression workspace" = "Рабочая область сжатия";
-"Compress a file" = "Сжать файл";
+"Compression workspace" = "Рабочая область конвертации";
+"Compress a file" = "Преобразовать файл";
 "Compress images, videos, and audio without changing the original file." = "Сжимайте изображения, видео и аудио без изменения исходного файла.";
-"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Compress импортирует рабочую копию в приложение. При очистке рабочей области сжатия удаляются копии и выходные данные, управляемые приложением, поэтому сначала экспортируйте все, что хотите.";
+"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Compress импортирует рабочую копию в приложение. При очистке рабочей области конвертации удаляются копии и выходные данные, управляемые приложением, поэтому сначала экспортируйте все, что хотите.";
 "Compress keeps imported working copies and outputs inside app-managed storage. The original outside the app is not replaced. Clear the workspace only after exporting results you want to keep." = "Compress сохраняет импортированные рабочие копии и выходные данные в хранилище, управляемом приложением. Оригинал вне приложения не заменяется. Очищайте рабочую область только после экспорта результатов, которые хотите сохранить.";
 "Deleted content may remain in Recently Deleted, and iOS storage totals can take time to recalculate. Check the relevant Recently Deleted location, then recheck iPhone Storage later." = "Удаленный контент может оставаться в списке «Недавно удаленные», а пересчет общего объема хранилища iOS может занять некоторое время. Проверьте соответствующее местоположение «Недавно удаленное», а затем перепроверьте хранилище iPhone позже.";
 "Deleted items move to Recently Deleted and may continue using storage until permanently removed. If iCloud Photos is enabled, deletion also syncs to your other devices." = "Удаленные элементы перемещаются в раздел «Недавно удаленные» и могут продолжать использовать хранилище до тех пор, пока не будут удалены окончательно. Если функция «Фото iCloud» включена, удаление также синхронизируется с другими вашими устройствами.";
@@ -314,7 +310,7 @@
 "Deletion stays user controlled" = "Удаление остается под контролем пользователя";
 "Device storage is not iCloud storage" = "Хранилище устройства не является хранилищем iCloud.";
 "Do not install profiles, grant unknown computer access, or erase the iPhone for a promised one-tap cache cleanup. Back up important data before any system reset." = "Не устанавливайте профили, не предоставляйте неизвестным доступ к компьютеру и не стирайте iPhone для обещанной очистки кэша одним касанием. Создайте резервную копию важных данных перед любым сбросом системы.";
-"Does analysis or compression upload my files?" = "Загружает ли мои файлы анализ или сжатие?";
+"Does analysis or compression upload my files?" = "Загружает ли мои файлы анализ или конвертацию?";
 "Explore the results" = "Изучите результаты";
 "Files deleted from an authorized folder may not be recoverable. The app cannot promise that they will appear in Recently Deleted." = "Файлы, удаленные из авторизованной папки, невозможно восстановить. Приложение не может обещать, что они появятся в списке «Недавно удаленные».";
 "Find the largest category" = "Найдите самую большую категорию";
@@ -329,7 +325,7 @@
 "Help" = "Помощь";
 "How can we help?" = "Как мы можем помочь?";
 "Import your files" = "Импортируйте ваши файлы";
-"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "Импортированные копии и сжатые выходные данные занимают пространство внутри приложения. Очистите завершенную работу, когда она вам больше не нужна, после экспорта любого результата, который вы хотите сохранить.";
+"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "Импортированные копии и преобразованные выходные данные занимают пространство внутри приложения. Очистите завершенную работу, когда она вам больше не нужна, после экспорта любого результата, который вы хотите сохранить.";
 "In Files, confirm whether an item is under On My iPhone, iCloud Drive, or another provider. The same action can have different recovery and sync behavior in each location." = "В разделе «Файлы» убедитесь, что элемент находится в разделе «На моем iPhone», iCloud Drive или у другого поставщика. Одно и то же действие может иметь разное поведение при восстановлении и синхронизации в каждом месте.";
 "In iPhone Storage, Offload App removes the app but keeps its documents and data. Delete App removes the app and its local data, so verify sync or backup before choosing it." = "В хранилище iPhone приложение Offload удаляет приложение, но сохраняет его документы и данные. Удалить приложение удаляет приложение и его локальные данные, поэтому проверьте синхронизацию или резервное копирование, прежде чем выбирать его.";
 "Install the latest iOS update, restart the iPhone, review Safari data and offline downloads, then let iPhone Storage recalculate. If an unusually large total persists, contact Apple Support." = "Установите последнее обновление iOS, перезагрузите iPhone, просмотрите данные Safari и офлайн-загрузки, а затем дайте возможность пересчитать хранилище iPhone. Если необычно большая сумма сохраняется, обратитесь в службу поддержки Apple.";
@@ -343,12 +339,12 @@
 "Manage Apps & Downloads" = "Управление приложениями и загрузками";
 "Manage Files & iCloud Drive" = "Управление файлами и iCloud Drive";
 "Manage compression storage" = "Управление сжатым хранилищем";
-"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "Анализ мультимедиа, сканирование папок и сжатие выполняются на этом устройстве. Приложение не загружает ваши файлы для этих функций.";
-"Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "Медиа анализирует фотографии и видео, которые вы разрешаете через библиотеку фотографий. Хранилище анализирует только выбранную вами папку. Сжатие уменьшает размер копий, импортируемых в личное рабочее пространство приложения.";
+"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "Анализ мультимедиа, сканирование папок и конвертацию выполняются на этом устройстве. Приложение не загружает ваши файлы для этих функций.";
+"Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "Медиа анализирует фотографии и видео, которые вы разрешаете через библиотеку фотографий. Хранилище анализирует только выбранную вами папку. Конвертация уменьшает размер копий, импортируемых в личное рабочее пространство приложения.";
 "Media needs Photos access to display and analyze library items. You can choose Full Access, Limited Access, or no access, and change the choice later in System Settings." = "Медиа необходим доступ к фотографиям для отображения и анализа элементов библиотеки. Вы можете выбрать «Полный доступ», «Ограниченный доступ» или «Нет доступа», а позже изменить этот выбор в настройках системы.";
 "Meet the App" = "Знакомьтесь с приложением";
-"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "Нет. Он может анализировать авторизованные вами элементы фотографий, выбранную вами папку и собственную рабочую область сжатия. Другие приложения и защищенное системное хранилище остаются конфиденциальными.";
-"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "Нет. Анализ мультимедиа, анализ папок и сжатие выполняются на этом устройстве. Службы Apple или поставщики файлов могут синхронизировать собственный контент в соответствии с вашими существующими настройками.";
+"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "Нет. Он может анализировать авторизованные вами элементы фотографий, выбранную вами папку и собственную рабочую область конвертации. Другие приложения и защищенное системное хранилище остаются конфиденциальными.";
+"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "Нет. Анализ мультимедиа, анализ папок и конвертацию выполняются на этом устройстве. Службы Apple или поставщики файлов могут синхронизировать собственный контент в соответствии с вашими существующими настройками.";
 "Not necessarily. They are visually related candidates and can include different frames, edits, or resolutions. Always compare them before selecting one to remove." = "Не обязательно. Они являются визуально связанными кандидатами и могут включать в себя разные кадры, изменения или разрешения. Всегда сравнивайте их, прежде чем выбрать тот, который хотите удалить.";
 "Offload or delete" = "Выгрузить или удалить";
 "Only the items selected in the system permission sheet are available. Counts, groups, and recommendations cannot include the rest of the library." = "Доступны только элементы, выбранные в таблице разрешений системы. Подсчеты, группы и рекомендации не могут включать остальную часть библиотеки.";
@@ -370,7 +366,7 @@
 "Review before deleting" = "Проверьте перед удалением";
 "Review large videos, screenshots, and similar photos safely." = "Безопасно просматривайте большие видео, снимки экрана и подобные фотографии.";
 "Review long videos, 4K videos, screen recordings, and large screenshots first. Similar-photo groups can help you compare bursts or repeated shots, but you should choose the keeper yourself." = "Сначала просмотрите длинные видео, видео 4K, записи экрана и большие снимки экрана. Группы похожих фотографий могут помочь вам сравнить серии или повторяющиеся снимки, но выбирать хранителя вам следует самостоятельно.";
-"Review compression settings" = "Проверьте настройки сжатия";
+"Review compression settings" = "Проверьте настройки конвертации";
 "Review photos, similar items, screenshots, Live Photos, and videos." = "Просматривайте фотографии, похожие объекты, снимки экрана, живые фотографии и видео.";
 "Safari website data" = "Данные веб-сайта Safari";
 "Safe steps to try" = "Безопасные шаги, которые стоит попробовать";
@@ -382,7 +378,7 @@
 "Similar does not mean identical" = "Похожее не значит идентичное";
 "Similar-photo groups are review suggestions, not proof that files are exact duplicates. Keep the best shot before deleting anything." = "Группы похожих фотографий – это предложения для проверки, а не доказательства того, что файлы являются точными дубликатами. Прежде чем что-либо удалять, сохраните лучший снимок.";
 "Start analysis" = "Начать анализ";
-"Start compression" = "Начать сжатие";
+"Start compression" = "Начать конвертацию";
 "Start with high-impact items" = "Начните с эффективных предметов";
 "Start with iPhone Storage" = "Начните с хранилища iPhone";
 "Step %lld" = "Шаг %lld";
@@ -406,7 +402,7 @@
 "Understand optimized photos" = "Понимание оптимизированных фотографий";
 "Understand the three tools and what each one can access." = "Поймите три инструмента и то, к чему каждый из них может получить доступ.";
 "Use Apple's controls for attachments, history, and website data." = "Используйте элементы управления Apple для вложений, истории и данных веб-сайта.";
-"Use Compress" = "Используйте сжатие";
+"Use Compress" = "Используйте конвертацию";
 "Use Media" = "Используйте медиа";
 "Use Settings > Apps > Safari to clear history and website data. This can close tabs or sign you out of websites, so save anything important first." = "Используйте «Настройки» > «Приложения» > Safari, чтобы очистить историю и данные веб-сайта. Это может привести к закрытию вкладок или выходу из веб-сайтов, поэтому сначала сохраните все важное.";
 "Use Storage" = "Использовать хранилище";
@@ -431,7 +427,7 @@
 "Display Options" = "Параметры отображения";
 "Interface Animations" = "Анимация интерфейса";
 "Show Media Dates" = "Показать даты публикации";
-"Control dashboard animations, compression card animations, and date headings in media detail grids." = "Управляйте анимацией информационной панели, анимацией карт сжатия и заголовками дат в сетках сведений о мультимедиа.";
+"Control dashboard animations, compression card animations, and date headings in media detail grids." = "Управляйте анимацией информационной панели, анимацией карт конвертации и заголовками дат в сетках сведений о мультимедиа.";
 "Calculating size…" = "Расчет размера…";
 "Size unavailable" = "Размер недоступен";
 "Quick Cleanup" = "Быстрая очистка";
@@ -450,7 +446,7 @@
 "Selected" = "Выбрано";
 "Not selected" = "Не выбрано";
 "Selects or deselects every suggested item in this category." = "Выбирает или отменяет выбор каждого предлагаемого элемента в этой категории.";
-"%@ moved to Recently Deleted · ~%@" = "%@ перемещен в раздел «Недавно удаленные» · ~%@";
+"%@ moved to Recently Deleted · %@" = "%@ перемещен в раздел «Недавно удаленные» · %@";
 "Allow photo access, then wait for the library to load." = "Разрешите доступ к фотографиям и дождитесь загрузки библиотеки.";
 "Analyze the available library and let the app group useful cleanup candidates." = "Проанализируйте доступную библиотеку и позвольте приложению сгруппировать полезных кандидатов на очистку.";
 "Preview items at full size and compare similar photos carefully." = "Просматривайте объекты в полном размере и внимательно сравнивайте похожие фотографии.";
@@ -459,7 +455,7 @@
 "The app reads file metadata and reports inaccessible or unavailable cloud items separately." = "Приложение считывает метаданные файлов и отдельно сообщает о недоступных или недоступных облачных элементах.";
 "Use the folder map, categories, and detailed lists to find large files." = "Используйте карту папок, категории и подробные списки для поиска больших файлов.";
 "Confirm the file and location, then delete only content you no longer need." = "Подтвердите файл и местоположение, а затем удалите только тот контент, который вам больше не нужен.";
-"Open image, video, or audio compression. The audio tool can also extract a track from video." = "Открытое сжатие изображений, видео или аудио. Аудиоинструмент также может извлечь дорожку из видео.";
+"Open image, video, or audio compression. The audio tool can also extract a track from video." = "Открытое конвертацию изображений, видео или аудио. Аудиоинструмент также может извлечь дорожку из видео.";
 "Select supported items from Photos or Files and wait for the working copies to finish importing." = "Выберите поддерживаемые элементы в разделе «Фото» или «Файлы» и дождитесь завершения импорта рабочих копий.";
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "Выберите формат и настройте доступные параметры размера, качества, битрейта или метаданных.";
 "Keep the task open until each item completes or reports an error." = "Оставляйте задачу открытой до тех пор, пока каждый элемент не завершится или не сообщит об ошибке.";
@@ -493,7 +489,7 @@
 "intro.media.detail" = "Узнайте, сколько места занимают фото, видео и другие данные и сколько осталось свободным. Цифры приведены для примера.";
 "intro.files.title" = "Узнайте, что занимает место";
 "intro.files.detail" = "Просматривайте выбранные папки и быстро находите крупные файлы.";
-"intro.compress.title" = "Посмотрите, как работает сжатие";
+"intro.compress.title" = "Посмотрите, как работает конвертацию";
 "intro.compress.detail" = "Изучите варианты для изображений, видео и аудио с примером хода процесса. Здесь файлы не сжимаются.";
 "intro.appearance.title" = "Настройте под себя";
 "intro.appearance.detail" = "Выберите цвета и оформление по своему вкусу.";
@@ -502,12 +498,12 @@
 "intro.demo" = "Пример";
 "premium.continueTemporarily" = "Продолжить пока";
 "premium.title" = "Больше места для важного";
-"premium.subtitle" = "Мультимедиа, файлы и сжатие в одном месте.";
+"premium.subtitle" = "Мультимедиа, файлы и конвертацию в одном месте.";
 "premium.media.title" = "Организуйте свои медиа";
 "premium.media.detail" = "Просмотрите фотографии и видео и выберите, что удалить.";
 "premium.storage.title" = "Очистка файлов";
 "premium.storage.detail" = "Найдите ненужные файлы в авторизованных вами папках.";
-"premium.compression.title" = "Сжатие медиа";
+"premium.compression.title" = "Конвертация медиа";
 "premium.compression.detail" = "Уменьшите размеры изображений, видео и аудио файлов с помощью регулируемых настроек.";
 "premium.privacy" = "Обработка мультимедиа и файлов остается на этом устройстве.";
 "premium.plans.title" = "Выберите свой план";
@@ -560,3 +556,80 @@
 "Video preview" = "Предпросмотр видео";
 "Photo preview" = "Предпросмотр фото";
 "Cancel" = "Отмена";
+
+"Convert" = "Конвертация";
+
+"cleanup.space.title" = "Объём доступного для очистки места";
+
+
+"cleanup.action" = "Быстрая очистка";
+
+"cleanup.review.hint" = "Выбраны похожие фото. По одному фото в группе сохраняется. Добавляйте только ненужные снимки экрана и видео.";
+
+"cleanup.useSuggestions" = "Выбрать рекомендации";
+
+"cleanup.scan.title" = "Место для новых воспоминаний";
+
+"cleanup.scan.action" = "Найти место для освобождения";
+
+"cleanup.scan.hint" = "Проверьте похожие фото, большие видео и снимки экрана. Анализ ничего не удаляет.";
+
+"quick.compress.title" = "Сохраните важное, уменьшите размер";
+
+"quick.video" = "Сжать видео";
+
+"quick.image" = "Сжать фото";
+
+"quick.compress.hint" = "Выберите файлы. Мы подберём настройки.";
+
+"quick.action" = "Сжать";
+
+"quick.ready" = "Настройки готовы";
+
+"quick.video.detail" = "MP4 / HEVC · Исходное разрешение · Меньше битрейт.";
+
+"quick.image.detail" = "HEIC (иначе JPEG) · Качество 75% · Исходный размер · Удалить GPS.";
+
+"quick.originals" = "Создаёт новые копии и сохраняет оригиналы. Результат может быть больше; сравните перед заменой.";
+
+"premium.free.summary" = "Бесплатно: проверка и удаление медиа, сжатие и конвертация видео.";
+
+"premium.value.summary" = "Premium: очистка нескольких категорий, конвертация изображений и аудио, порядок в папках и настройка оформления.";
+
+"quick.free" = "Бесплатно";
+
+"Convert Images" = "Изображения";
+
+"Convert Videos" = "Видео";
+
+"Choose what to convert. Originals will remain in Photos." = "Конвертация";
+
+/* Media category batch compression */
+"compression.explanation" = "Может потребоваться загрузка оригиналов из iCloud.";
+"compression.empty" = "В этой категории нет медиа";
+"compression.saved" = "Оригинал сохранён · повторить замену";
+"compression.noReduction" = "Уже небольшой размер · копия не сохранена";
+"compression.cancelling" = "Отмена…";
+"compression.summary" = "Сохранено: %d · Ошибок: %d";
+"compression.action" = "Сжать и заменить: %d";
+"compression.error.live" = "Не удалось сохранить связь компонентов Live Photo. Оригинал не изменён.";
+"compression.error.image" = "Быстрое сжатие не поддерживает анимированные фото. Оригинал не изменён.";
+"compression.cardDetail" = "%d объектов · %@";
+
+"compression.replaced" = "Оригинал заменён";
+
+"compression.replacing" = "Замена оригиналов…";
+
+"compression.error.verify" = "Не удалось проверить сжатую копию. Оригинал не удалён.";
+
+"compression.error.replace" = "Сжатые копии сохранены. Оригиналы не удалены. Повторите попытку.";
+
+"compression.selection.savings" = "Ожидаемая экономия: %@";
+
+"compression.action.short" = "Сжать";
+
+"compression.confirm.title" = "Начать сжатие?";
+
+"compression.confirm.message" = "Сжать выбранные объекты (%d)? После сохранения и проверки уменьшенных копий оригиналы будут удалены из Фото.";
+
+"compression.confirm.action" = "Подтвердить";

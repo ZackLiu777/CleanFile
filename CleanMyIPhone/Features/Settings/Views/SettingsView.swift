@@ -14,6 +14,8 @@ import UIKit
 
 /// 定义 `SettingsView` 的值语义数据与相关行为。
 struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    var showsCloseButton = false
     @Environment(\.appTheme) private var theme
     @EnvironmentObject private var themeSettings: ThemeSettings
     @Environment(\.openURL) private var openURL
@@ -213,6 +215,14 @@ struct SettingsView: View {
             }
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if showsCloseButton {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Done") { dismiss() }
+                            .accessibilityIdentifier("settings.close")
+                    }
+                }
+            }
             .navigationDestination(isPresented: $showsHelp) {
                 HelpView()
             }

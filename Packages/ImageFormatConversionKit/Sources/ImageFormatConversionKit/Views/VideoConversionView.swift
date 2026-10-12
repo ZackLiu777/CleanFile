@@ -11,6 +11,7 @@ import UniformTypeIdentifiers
 @MainActor
 /// 定义 `VideoConversionView` 的值语义数据与相关行为。
 struct VideoConversionView: View {
+    let isQuickCompression: Bool
     @Environment(\.requestReview) private var requestReview
     @Environment(\.scenePhase) private var scenePhase
     @State private var completedBeforeBatch: Set<UUID> = []
@@ -26,8 +27,10 @@ struct VideoConversionView: View {
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(
         viewModel: VideoConversionViewModel = VideoConversionViewModel(),
-        importSession: ConversionImportSession = ConversionImportSession()
+        importSession: ConversionImportSession = ConversionImportSession(),
+        isQuickCompression: Bool = false
     ) {
+        self.isQuickCompression = isQuickCompression
         _viewModel = State(initialValue: viewModel)
         _importSession = State(initialValue: importSession)
     }
@@ -37,7 +40,12 @@ struct VideoConversionView: View {
             LazyVStack(spacing: 14) {
                 if shouldShowImportCard { importCard } else { selectedFilesCard }
                 if let notice = viewModel.notice { NoticeView(message: notice) }
-                settingsCard
+                if isQuickCompression {
+                    QuickCompressionSummary(kind: .video)
+                } else {
+                    settingsCard
+                        .accessibilityIdentifier("conversion.settings")
+                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -122,7 +130,7 @@ struct VideoConversionView: View {
     private var importCard: some View {
         VStack(spacing: 14) {
             Image(systemName: "film.stack").font(.system(size: 34)).foregroundStyle(.tint)
-            Text(L10n.string("video.import.title")).appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
+            Text(L10n.string(isQuickCompression ? "quick.video" : "video.import.title")).appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
             HStack(spacing: 10) {
                 Button { importerPresented = true } label: {
                     ConversionImportButtonLabel(
@@ -432,8 +440,15 @@ struct VideoConversionView: View {
                 / Double(max(viewModel.total, 1)),
             progressTitle: "\(viewModel.completed) / \(viewModel.total)",
             isEnabled: viewModel.canConvert,
-            onStart: { viewModel.start(usagePolicy: usagePolicy) },
-            onCancel: viewModel.cancel
+            onStart: {
+                if isQuickCompression {
+                    viewModel.startQuickCompression(usagePolicy: usagePolicy)
+                } else {
+                    viewModel.start(usagePolicy: usagePolicy)
+                }
+            },
+            onCancel: viewModel.cancel,
+            startTitle: isQuickCompression ? L10n.string("quick.action") : nil
         )
     }
 

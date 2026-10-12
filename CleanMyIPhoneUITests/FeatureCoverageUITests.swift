@@ -9,12 +9,9 @@ final class FeatureCoverageUITests: XCTestCase {
     func testMediaAndStorageExposeTheirPrimaryActions() throws {
         let app = launchEnglishApp()
 
-        let mediaTab = tab(in: app, id: "tab.media", label: "Media")
-        XCTAssertTrue(mediaTab.waitForExistence(timeout: 5))
-        mediaTab.tap()
         XCTAssertTrue(
-            mediaActionsButton(in: app).waitForExistence(timeout: 5),
-            "Missing Media Actions menu"
+            mediaSettingsButton(in: app).waitForExistence(timeout: 5),
+            "Missing direct Settings button"
         )
 
         tab(in: app, id: "tab.storage", label: "Storage").tap()
@@ -26,12 +23,12 @@ final class FeatureCoverageUITests: XCTestCase {
     @MainActor
     func testEveryConversionToolCanOpenAndReturnHome() throws {
         let app = launchEnglishApp()
-        tab(in: app, id: "tab.convert", label: "Compress").tap()
+        tab(in: app, id: "tab.convert", label: "Convert").tap()
 
         for (id, title) in [
-            ("conversion.home.image", "Compress Images"),
-            ("conversion.home.video", "Compress Video"),
-            ("conversion.home.audio", "Compress Audio")
+            ("conversion.home.image", "Convert Images"),
+            ("conversion.home.video", "Convert Videos"),
+            ("conversion.home.audio", "Convert Audio")
         ] {
             let tool = reveal(app.buttons[id], in: app)
             XCTAssertTrue(
@@ -58,12 +55,12 @@ final class FeatureCoverageUITests: XCTestCase {
     @MainActor
     func testConversionGuideCoversImagesVideoAndAudio() throws {
         let app = launchEnglishApp()
-        tab(in: app, id: "tab.convert", label: "Compress").tap()
+        tab(in: app, id: "tab.convert", label: "Convert").tap()
 
         let guide = app.buttons["conversion.guide.button"]
         XCTAssertTrue(guide.waitForExistence(timeout: 5))
         guide.tap()
-        XCTAssertTrue(app.navigationBars["Compression Guide"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Media Conversion Guide"].waitForExistence(timeout: 5))
         let guideContent = app.descendants(matching: .any)["conversion.guide.content"]
         XCTAssertTrue(guideContent.waitForExistence(timeout: 5))
 
@@ -88,7 +85,7 @@ final class FeatureCoverageUITests: XCTestCase {
 
         XCTAssertTrue(reveal(app.buttons["Done"], in: app).exists)
         app.buttons["Done"].tap()
-        XCTAssertFalse(app.navigationBars["Compression Guide"].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.navigationBars["Media Conversion Guide"].waitForExistence(timeout: 2))
     }
 
     @MainActor
@@ -258,18 +255,12 @@ final class FeatureCoverageUITests: XCTestCase {
 
     @MainActor
     private func tab(in app: XCUIApplication, id: String, label: String) -> XCUIElement {
-        let identified = app.buttons[id]
-        return identified.waitForExistence(timeout: 2)
-            ? identified
-            : app.tabBars.buttons[label]
+        appNavigationEntry(in: app, id: id, label: label)
     }
 
     @MainActor
-    private func mediaActionsButton(in app: XCUIApplication) -> XCUIElement {
-        let identified = app.descendants(matching: .any)["media.actions"]
-        return identified.waitForExistence(timeout: 2)
-            ? identified
-            : app.descendants(matching: .any)["Media Actions"]
+    private func mediaSettingsButton(in app: XCUIApplication) -> XCUIElement {
+        app.buttons["media.settings"]
     }
 
     @MainActor

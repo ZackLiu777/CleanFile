@@ -255,6 +255,7 @@ private struct FormatChipSection: View {
 @MainActor
 /// 定义 `ImageConversionContentView` 的值语义数据与相关行为。
 struct ImageConversionContentView: View {
+    let isQuickCompression: Bool
     @Environment(\.requestReview) private var requestReview
     @Environment(\.scenePhase) private var scenePhase
     @State private var completedBeforeBatch: Set<UUID> = []
@@ -268,8 +269,10 @@ struct ImageConversionContentView: View {
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     init(
         viewModel: ImageConversionViewModel = ImageConversionViewModel(),
-        importSession: ConversionImportSession = ConversionImportSession()
+        importSession: ConversionImportSession = ConversionImportSession(),
+        isQuickCompression: Bool = false
     ) {
+        self.isQuickCompression = isQuickCompression
         _viewModel = State(initialValue: viewModel)
         _importSession = State(initialValue: importSession)
     }
@@ -287,7 +290,12 @@ struct ImageConversionContentView: View {
                     NoticeView(message: notice)
                 }
 
-                ImageConversionSettingsCard(viewModel: viewModel)
+                if isQuickCompression {
+                    QuickCompressionSummary(kind: .images)
+                } else {
+                    ImageConversionSettingsCard(viewModel: viewModel)
+                        .accessibilityIdentifier("conversion.settings")
+                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -374,7 +382,7 @@ struct ImageConversionContentView: View {
                 .foregroundStyle(.tint)
 
             VStack(spacing: 4) {
-                Text(L10n.string("import.title"))
+                Text(L10n.string(isQuickCompression ? "quick.image" : "import.title"))
                     .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
             }
 
@@ -551,8 +559,15 @@ struct ImageConversionContentView: View {
                 viewModel.progress.total
             ),
             isEnabled: viewModel.canStartConversion,
-            onStart: { viewModel.startConversion(usagePolicy: usagePolicy) },
-            onCancel: viewModel.cancelConversion
+            onStart: {
+                if isQuickCompression {
+                    viewModel.startQuickCompression(usagePolicy: usagePolicy)
+                } else {
+                    viewModel.startConversion(usagePolicy: usagePolicy)
+                }
+            },
+            onCancel: viewModel.cancelConversion,
+            startTitle: isQuickCompression ? L10n.string("quick.action") : nil
         )
     }
 
@@ -569,6 +584,7 @@ struct ConversionNeoBrutalistActionBar: View {
     let isEnabled: Bool
     let onStart: () -> Void
     let onCancel: () -> Void
+    var startTitle: String? = nil
 
     var body: some View {
         HStack(spacing: 12) {
@@ -601,7 +617,7 @@ struct ConversionNeoBrutalistActionBar: View {
 
                 Spacer()
                 actionButton(
-                    title: L10n.string("action.convert"),
+                    title: startTitle ?? L10n.string("action.convert"),
                     systemImage: "arrow.triangle.2.circlepath",
                     action: onStart
                 )
@@ -635,24 +651,12 @@ struct ConversionNeoBrutalistActionBar: View {
         systemImage: String,
         action: @escaping () -> Void
     ) -> some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 14, weight: .black))
-                Text(title.uppercased())
-                    .font(.system(size: 14, weight: .black, design: .monospaced))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.72)
-            }
-            .foregroundStyle(theme.textPrimary)
-            .padding(.horizontal, 16)
-            .frame(height: 40)
-        }
-        .buttonStyle(
-            ConversionPhysicalActionButtonStyle(
-                faceColor: theme.accent,
-                edgeColor: theme.textPrimary
-            )
+        ConversionActionButton(
+            title: title,
+            systemImage: systemImage,
+            accentColor: theme.accent,
+            foregroundColor: theme.textPrimary,
+            action: action
         )
         .accessibilityIdentifier("conversion.actionButton")
     }
@@ -695,7 +699,7 @@ private struct ConversionActionBarSurfaceModifier: ViewModifier {
     }
 }
 
-private struct ConversionPhysicalActionButtonStyle: ButtonStyle {
+struct ConversionPhysicalActionButtonStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     let faceColor: Color

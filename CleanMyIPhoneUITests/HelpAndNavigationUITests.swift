@@ -6,10 +6,11 @@ final class HelpAndNavigationUITests: XCTestCase {
     }
 
     @MainActor
-    func testAllPrimaryTabsAreReachable() throws {
+    func testMediaHomeAndSecondaryDestinationsAreReachable() throws {
         let app = launchEnglishApp()
 
-        for tabID in ["tab.media", "tab.storage", "tab.convert", "tab.settings"] {
+        XCTAssertTrue(app.buttons["media.settings"].waitForExistence(timeout: 10))
+        for tabID in ["tab.storage", "tab.convert", "tab.settings"] {
             let tab = tabElement(in: app, identifier: tabID)
             XCTAssertTrue(tab.waitForExistence(timeout: 5), "Missing tab " + tabID)
             tab.tap()
@@ -34,7 +35,7 @@ final class HelpAndNavigationUITests: XCTestCase {
         let app = launchEnglishApp()
         openHelp(in: app)
 
-        for title in ["Meet the App", "Use Media", "Use Storage", "Use Compress", "Common Questions"] {
+        for title in ["Meet the App", "Use Media", "Use Storage", "Use Convert", "Common Questions"] {
             let entry = reveal(app.staticTexts[title], in: app)
             XCTAssertTrue(entry.exists, "Missing help entry " + title)
         }
@@ -124,19 +125,7 @@ final class HelpAndNavigationUITests: XCTestCase {
 
     @MainActor
     private func tabElement(in app: XCUIApplication, identifier: String) -> XCUIElement {
-        let identified = app.descendants(matching: .any)[identifier]
-        if identified.waitForExistence(timeout: 2) {
-            return identified
-        }
-
-        let label: String
-        switch identifier {
-        case "tab.media": label = "Media"
-        case "tab.storage": label = "Storage"
-        case "tab.convert": label = "Compress"
-        default: label = "Settings"
-        }
-        return app.tabBars.buttons[label]
+        appNavigationEntry(in: app, id: identifier, label: identifier == "tab.convert" ? "Convert" : "Media")
     }
 
     @MainActor

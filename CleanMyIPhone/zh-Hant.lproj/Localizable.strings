@@ -25,13 +25,13 @@
 "premium.feature.required" = "此功能需要 Premium";
 "premium.feature.unlock" = "解鎖 Premium";
 "premium.feature.media" = "媒體整理";
-"premium.feature.videoConversion" = "影片壓縮";
+"premium.feature.videoConversion" = "影片轉換";
 "premium.feature.storage" = "儲存檔案清理";
-"premium.feature.imageConversion" = "圖片壓縮";
+"premium.feature.imageConversion" = "圖片轉換";
 "premium.feature.audioConversion" = "音訊轉換";
 "premium.feature.darkAppearance" = "深色外觀";
 "premium.feature.customColors" = "自訂顏色";
-"premium.feature.compression.title" = "壓縮圖片與音訊";
+"premium.feature.compression.title" = "轉換圖片與音訊";
 "premium.feature.compression.detail" = "調整設定，轉換圖片與音訊檔案。";
 "premium.feature.appearance.title" = "個人化外觀";
 "premium.feature.appearance.detail" = "解鎖深色外觀、自訂 App 顏色與背景。";
@@ -39,12 +39,12 @@
 
 "Photos" = "照片";
 "Import to Filevra" = "匯入 Filevra";
-"Choose what to compress. Originals will remain in Photos." = "選擇要壓縮的內容。相簿中的原始檔不會改變。";
-"Compress Images" = "壓縮圖片";
-"Compress Videos" = "壓縮影片";
+"Choose what to compress. Originals will remain in Photos." = "選擇要轉換的內容。相簿中的原始檔不會改變。";
+"Compress Images" = "轉換圖片";
+"Compress Videos" = "轉換影片";
 "Later" = "稍後";
 "Storage" = "儲存空間";
-"Compress" = "壓縮";
+"Compress" = "轉換";
 "storage.heading" = "儲存分布";
 "Settings" = "設定";
 "Language" = "語言";
@@ -104,7 +104,6 @@
 "Videos" = "影片";
 "My Space" = "我的空間";
 "System & Apps" = "系統與 App";
-"Includes iOS, system data, and other app data." = "包含 iOS、系統資料和其他 App 資料";
 "Available" = "可用";
 "%lld%% used · %@ of %@" = "裝置儲存空間已使用 %lld%%（%@ / %@）";
 "Images" = "圖片";
@@ -154,7 +153,6 @@
 "Read-only" = "唯讀";
 "Screenshots" = "螢幕截圖";
 "Live Photos" = "Live Photos";
-"Video Categories" = "影片分類";
 "%lld items" = "%lld 個項目";
 "No Items" = "沒有項目";
 "No media matched this category." = "沒有符合此分類的媒體。";
@@ -198,9 +196,7 @@
 "Press and hold to play" = "按住以播放";
 "%lld selected" = "已選 %lld 項";
 "Estimated %@" = "預計 %@";
-"Media Actions" = "媒體操作";
 "Cleanup Recommendations" = "清理建議";
-"Media sizes are estimated without downloading original files." = "媒體大小為估算值，無需下載原始檔案。";
 "Explore the folder hierarchy" = "瀏覽資料夾階層";
 "Tap a folder segment to drill down. Tap the center to go back." = "點一下資料夾區段以深入查看，點一下中心即可返回。";
 "%lld files" = "%lld 個檔案";
@@ -308,18 +304,18 @@
 "Cloud files may be unavailable" = "雲端檔案可能無法使用";
 "Common Questions" = "常見問題";
 "Confirm your selection" = "確認您的選擇";
-"Compression workspace" = "壓縮工作區";
-"Compress a file" = "壓縮檔案";
-"Compress images, videos, and audio without changing the original file." = "壓縮圖片、影片與音訊，同時不變更原始檔案。";
-"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "壓縮會將工作副本匯入應用程式。清除壓縮工作區會刪除應用程式管理的副本和輸出，因此請先匯出要保留的所有內容。";
-"Compress keeps imported working copies and outputs inside app-managed storage. The original outside the app is not replaced. Clear the workspace only after exporting results you want to keep." = "壓縮會將匯入的工作副本和輸出保留在應用程式管理的儲存中。應用程式外的原始內容不會被替換。僅在匯出要保留的結果後才清除工作區。";
+"Compression workspace" = "轉換工作區";
+"Compress a file" = "轉換檔案";
+"Compress images, videos, and audio without changing the original file." = "轉換圖片、影片與音訊，同時不變更原始檔案。";
+"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "轉換會將工作副本匯入應用程式。清除轉換工作區會刪除應用程式管理的副本和輸出，因此請先匯出要保留的所有內容。";
+"Compress keeps imported working copies and outputs inside app-managed storage. The original outside the app is not replaced. Clear the workspace only after exporting results you want to keep." = "轉換會將匯入的工作副本和輸出保留在應用程式管理的儲存中。應用程式外的原始內容不會被替換。僅在匯出要保留的結果後才清除工作區。";
 "Deleted content may remain in Recently Deleted, and iOS storage totals can take time to recalculate. Check the relevant Recently Deleted location, then recheck iPhone Storage later." = "已​​刪除的內容可能會保留在「最近刪除」中，並且 iOS 儲存總量可能需要一些時間才能重新計算。檢查相關的「最近刪除」位置，然後稍後重新檢查 iPhone 儲存空間。";
 "Deleted items move to Recently Deleted and may continue using storage until permanently removed. If iCloud Photos is enabled, deletion also syncs to your other devices." = "已刪除的項目將移至“最近刪除”，並可能繼續使用儲存空間，直到永久刪除。如果啟用了 iCloud 照片，刪除也會同步到您的其他裝置。";
 "Deleting and reinstalling can remove local-only data and login state. Use it only when the app's data is synced or backed up and its own cleanup controls are not enough." = "刪除並重新安裝可刪除僅限本機的資料和登入狀態。僅當應用程式的資料已同步或備份且其自身的清理控制項不夠時才使用它。";
 "Deletion stays user controlled" = "刪除由使用者控制";
 "Device storage is not iCloud storage" = "裝置存儲不是 iCloud 存儲";
 "Do not install profiles, grant unknown computer access, or erase the iPhone for a promised one-tap cache cleanup. Back up important data before any system reset." = "請勿安裝設定檔、授予未知電腦存取權限或擦除 iPhone 以實現承諾的一鍵式快取清理。在任何系統重置之前備份重要資料。";
-"Does analysis or compression upload my files?" = "分析或壓縮會上傳我的檔案嗎？";
+"Does analysis or compression upload my files?" = "分析或轉換會上傳我的檔案嗎？";
 "Explore the results" = "探索結果";
 "Files deleted from an authorized folder may not be recoverable. The app cannot promise that they will appear in Recently Deleted." = "從授權資料夾中刪除的檔案可能無法復原。該應用程式不能保證它們會出現在「最近刪除」中。";
 "Find the largest category" = "找到最大的類別";
@@ -334,7 +330,7 @@
 "Help" = "協助";
 "How can we help?" = "需要什麼協助？";
 "Import your files" = "匯入您的文件";
-"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "匯入的副本和壓縮輸出會佔用應用程式內的空間。不再需要已完成的工作時，請先匯出要保留的結果，再將其清除。";
+"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "匯入的副本和轉換輸出會佔用應用程式內的空間。不再需要已完成的工作時，請先匯出要保留的結果，再將其清除。";
 "In Files, confirm whether an item is under On My iPhone, iCloud Drive, or another provider. The same action can have different recovery and sync behavior in each location." = "在「檔案」中，確認某個項目是否位於「我的 iPhone」、iCloud Drive 或其他提供者下。相同的操作在每個位置可能有不同的恢復和同步行為。";
 "In iPhone Storage, Offload App removes the app but keeps its documents and data. Delete App removes the app and its local data, so verify sync or backup before choosing it." = "在 iPhone 儲存中，卸載應用程式會刪除該應用程序，但保留其文件和資料。刪除應用程式會刪除應用程式及其本機數據，因此在選擇之前請先驗證同步或備份。";
 "Install the latest iOS update, restart the iPhone, review Safari data and offline downloads, then let iPhone Storage recalculate. If an unusually large total persists, contact Apple Support." = "安裝最新的 iOS 更新，重新啟動 iPhone，查看 Safari 資料和離線下載，然後讓 iPhone 儲存空間重新計算。如果總數仍然異常大，請聯絡 Apple 支援。";
@@ -347,13 +343,13 @@
 "Local by design" = "在地化設計";
 "Manage Apps & Downloads" = "管理 App 與下載項目";
 "Manage Files & iCloud Drive" = "管理檔案與 iCloud Drive";
-"Manage compression storage" = "管理壓縮儲存空間";
-"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "媒體分析、資料夾掃描和壓縮在此裝置上進行。應用程式不會為這些功能上傳你的檔案。";
-"Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "媒體會分析你在照片圖庫中授權的照片和影片。儲存只會分析你選擇的資料夾。壓縮會減小匯入 App 私有工作區的副本大小。";
+"Manage compression storage" = "管理轉換儲存空間";
+"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "媒體分析、資料夾掃描和轉換在此裝置上進行。應用程式不會為這些功能上傳你的檔案。";
+"Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "媒體會分析你在照片圖庫中授權的照片和影片。儲存只會分析你選擇的資料夾。轉換會減小匯入 App 私有工作區的副本大小。";
 "Media needs Photos access to display and analyze library items. You can choose Full Access, Limited Access, or no access, and change the choice later in System Settings." = "媒體需要存取照片來顯示和分析庫項目。您可以選擇完全訪問、有限訪問或無訪問，並稍後在系統設定中變更選擇。";
 "Meet the App" = "認識 App";
-"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "不。它可以分析您授權的照片項目、您選擇的資料夾以及它自己的壓縮工作區。其他應用程式和受保護的系統儲存保持私有。";
-"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "否。媒體分析、資料夾分析和壓縮在此裝置上執行。Apple 服務或檔案提供者可能會根據你現有的設定同步自己的內容。";
+"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "不。它可以分析您授權的照片項目、您選擇的資料夾以及它自己的轉換工作區。其他應用程式和受保護的系統儲存保持私有。";
+"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "否。媒體分析、資料夾分析和轉換在此裝置上執行。Apple 服務或檔案提供者可能會根據你現有的設定同步自己的內容。";
 "Not necessarily. They are visually related candidates and can include different frames, edits, or resolutions. Always compare them before selecting one to remove." = "不一定。它們是視覺相關的候選者，可以包含不同的框架、編輯或解析度。在選擇要刪除的一項之前，請務必對它們進行比較。";
 "Offload or delete" = "卸載或刪除";
 "Only the items selected in the system permission sheet are available. Counts, groups, and recommendations cannot include the rest of the library." = "僅系統權限表中所選的項目可用。計數、分組和推薦不能包括庫的其餘部分。";
@@ -375,7 +371,7 @@
 "Review before deleting" = "刪除前檢查";
 "Review large videos, screenshots, and similar photos safely." = "安全檢視大型影片、螢幕截圖與相似照片。";
 "Review long videos, 4K videos, screen recordings, and large screenshots first. Similar-photo groups can help you compare bursts or repeated shots, but you should choose the keeper yourself." = "先回顧長影片、4K影片、錄影、大截圖。相似照片組可以幫助您比較連拍或重複拍攝，但您應該自己選擇守門員。";
-"Review compression settings" = "檢查壓縮設定";
+"Review compression settings" = "檢查轉換設定";
 "Review photos, similar items, screenshots, Live Photos, and videos." = "檢視照片、相似項目、螢幕截圖、Live Photos 與影片。";
 "Safari website data" = "Safari 網站數據";
 "Safe steps to try" = "可以嘗試的安全步驟";
@@ -387,7 +383,7 @@
 "Similar does not mean identical" = "相似不代表相同";
 "Similar-photo groups are review suggestions, not proof that files are exact duplicates. Keep the best shot before deleting anything." = "相似照片組是審核建議，而不是證明文件完全重複的證據。在刪除任何內容之前保留最好的鏡頭。";
 "Start analysis" = "开始分析";
-"Start compression" = "開始壓縮";
+"Start compression" = "開始轉換";
 "Start with high-impact items" = "從高影響力的專案開始";
 "Start with iPhone Storage" = "從 iPhone 儲存空間開始";
 "Step %lld" = "步驟 %lld";
@@ -411,7 +407,7 @@
 "Understand optimized photos" = "了解優化照片";
 "Understand the three tools and what each one can access." = "瞭解三個工具及其存取範圍。";
 "Use Apple's controls for attachments, history, and website data." = "使用 Apple 的控制項管理附件、歷史記錄與網站資料。";
-"Use Compress" = "使用壓縮";
+"Use Compress" = "使用轉換";
 "Use Media" = "使用媒體";
 "Use Settings > Apps > Safari to clear history and website data. This can close tabs or sign you out of websites, so save anything important first." = "使用「設定」>「應用程式」>「Safari」來清除歷史記錄和網站資料。這可能會關閉選項卡或使您退出網站，因此請先儲存重要的內容。";
 "Use Storage" = "使用儲存空間";
@@ -436,7 +432,7 @@
 "Display Options" = "顯示選項";
 "Interface Animations" = "介面動畫";
 "Show Media Dates" = "顯示媒體日期";
-"Control dashboard animations, compression card animations, and date headings in media detail grids." = "控制媒體「我的空間」、儲存旭日圖、壓縮卡片動畫，以及媒體詳細網格中的日期標題。";
+"Control dashboard animations, compression card animations, and date headings in media detail grids." = "控制媒體「我的空間」、儲存旭日圖、轉換卡片動畫，以及媒體詳細網格中的日期標題。";
 "Calculating size…" = "正在計算大小…";
 "Size unavailable" = "大小無法取得";
 "Quick Cleanup" = "快速清理";
@@ -455,7 +451,7 @@
 "Selected" = "已選擇";
 "Not selected" = "未選擇";
 "Selects or deselects every suggested item in this category." = "選擇或取消選擇此分類中的所有建議項目。";
-"%@ moved to Recently Deleted · ~%@" = "%@ 已移至「最近刪除」 · 約 %@";
+"%@ moved to Recently Deleted · %@" = "%@ 已移至「最近刪除」 · %@";
 "Allow photo access, then wait for the library to load." = "允許取用照片，然後等待圖庫載入完成。";
 "Analyze the available library and let the app group useful cleanup candidates." = "分析可用圖庫，讓 App 整理出值得檢查的清理候選項目。";
 "Preview items at full size and compare similar photos carefully." = "以完整尺寸預覽項目，並仔細比較相似照片。";
@@ -464,11 +460,11 @@
 "The app reads file metadata and reports inaccessible or unavailable cloud items separately." = "App 會讀取檔案中繼資料，並分別報告無法存取或暫時無法使用的雲端項目。";
 "Use the folder map, categories, and detailed lists to find large files." = "使用資料夾地圖、類別和詳細列表尋找大型檔案。";
 "Confirm the file and location, then delete only content you no longer need." = "確認文件和位置，然後只刪除不再需要的內容。";
-"Open image, video, or audio compression. The audio tool can also extract a track from video." = "開啟圖片、影片或音訊壓縮。音訊工具也可以從影片中擷取音軌。";
+"Open image, video, or audio compression. The audio tool can also extract a track from video." = "開啟圖片、影片或音訊轉換。音訊工具也可以從影片中擷取音軌。";
 "Select supported items from Photos or Files and wait for the working copies to finish importing." = "從照片或文件中選擇支援的項目，然後等待工作副本完成匯入。";
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "選擇格式，並調整可用的尺寸、品質、位元率或中繼資料選項。";
 "Keep the task open until each item completes or reports an error." = "保持任務打開，直到每個項目完成或報告錯誤。";
-"Use the share action to save or send the compressed output before clearing the workspace." = "清除工作區前，使用分享操作儲存或傳送壓縮後的輸出。";
+"Use the share action to save or send the compressed output before clearing the workspace." = "清除工作區前，使用分享操作儲存或傳送轉換後的輸出。";
 "MP3 audio output" = "MP3 音訊輸出";
 "In Audio Compression, MP3 is the default widely compatible format. MP3 and AAC support 96, 128, 192, 256, and 320 kbps. M4A (ALAC) and CAF ALAC use lossless compression, while WAV, AIFF, and CAF PCM store uncompressed audio and are usually larger. Lossless conversion preserves the quality still present in the source, but cannot restore detail already removed from MP3 or AAC. Audio inputs include M4A/ALAC, AAC, MP3, FLAC, WAV, AIFF, and CAF. You can also choose MOV, MP4, or M4V videos from Files or Photos and extract their audio tracks." = "音訊壓縮預設使用相容性廣泛的 MP3。MP3 與 AAC 均支援 96、128、192、256 和 320 kbps。M4A（ALAC）與 CAF ALAC 使用無損壓縮；WAV、AIFF 與 CAF PCM 儲存未壓縮音訊，檔案通常更大。無損轉換只能保留來源中尚存的品質，無法恢復 MP3 或 AAC 已移除的細節。音訊輸入支援 M4A/ALAC、AAC、MP3、FLAC、WAV、AIFF 和 CAF；也可從「檔案」或「照片」選擇 MOV、MP4、M4V 影片並擷取音軌。";
 "Go to Settings > General > iPhone Storage and wait for the category chart to finish calculating." = "前往“設定”>“一般”>“iPhone 儲存體”，然後等待類別圖表完成計算。";
@@ -494,12 +490,12 @@
 "premium.entry.subtitle" = "了解功能與訂閱方案";
 "premium.close" = "關閉";
 "premium.title" = "為重要內容騰出空間";
-"premium.subtitle" = "媒體整理、檔案清理與壓縮，集中一處。";
+"premium.subtitle" = "媒體整理、檔案清理與轉換，集中一處。";
 "premium.media.title" = "整理媒體";
 "premium.media.detail" = "瀏覽照片與影片，自主選擇需要刪除的內容。";
 "premium.storage.title" = "清理檔案";
 "premium.storage.detail" = "在你授權的資料夾中尋找不再需要的檔案。";
-"premium.compression.title" = "壓縮媒體";
+"premium.compression.title" = "轉換媒體";
 "premium.compression.detail" = "調整設定，減少圖片、影片與音訊的檔案大小。";
 "premium.privacy" = "媒體與檔案處理均在本裝置完成。";
 "premium.plans.title" = "選擇訂閱方案";
@@ -526,8 +522,8 @@
 "intro.media.detail" = "查看照片、影片和其他內容佔用多少空間，以及還剩多少可用空間。畫面中的數據僅為示例。";
 "intro.files.title" = "看看空間用在哪裡";
 "intro.files.detail" = "瀏覽你選擇的資料夾，輕鬆找出佔空間的大型檔案。";
-"intro.compress.title" = "預覽媒體壓縮";
-"intro.compress.detail" = "了解圖片、影片與音訊的壓縮選項和進度動畫。此處不會壓縮實際檔案。";
+"intro.compress.title" = "預覽媒體轉換";
+"intro.compress.detail" = "了解圖片、影片與音訊的轉換選項和進度動畫。此處不會轉換實際檔案。";
 "intro.appearance.title" = "打造喜歡的外觀";
 "intro.appearance.detail" = "挑選適合自己的應用程式顏色和介面風格。";
 "intro.next" = "繼續";
@@ -563,3 +559,80 @@
 "Video preview" = "影片預覽";
 "Photo preview" = "照片預覽";
 "Cancel" = "取消";
+
+"Convert" = "轉換";
+
+"cleanup.space.title" = "可清理的空間大小為";
+
+
+"cleanup.action" = "一鍵清理";
+
+"cleanup.review.hint" = "已選取相似照片建議，每組保留一張。截圖和影片請僅在不再需要時加入。";
+
+"cleanup.useSuggestions" = "使用建議";
+
+"cleanup.scan.title" = "為回憶騰出空間";
+
+"cleanup.scan.action" = "尋找可清理空間";
+
+"cleanup.scan.hint" = "找出相似照片，檢查大型影片和截圖。分析不會刪除任何內容。";
+
+"quick.compress.title" = "保留精彩，縮小體積";
+
+"quick.video" = "壓縮影片";
+
+"quick.image" = "壓縮圖片";
+
+"quick.compress.hint" = "選好檔案，設定交給我們。";
+
+"quick.action" = "開始壓縮";
+
+"quick.ready" = "設定已選好";
+
+"quick.video.detail" = "MP4 / HEVC · 原始解析度 · 降低位元率。";
+
+"quick.image.detail" = "HEIC（無法使用時用 JPEG）· 75% 品質 · 原始尺寸 · 移除 GPS。";
+
+"quick.originals" = "建立新副本並保留原件。結果可能更大，請比較後再取代。";
+
+"premium.free.summary" = "免費：檢查和刪除媒體，壓縮及轉換影片。";
+
+"premium.value.summary" = "Premium：批次清理分類、轉換圖片和音訊、整理檔案夾、自訂外觀。";
+
+"quick.free" = "免費";
+
+"Convert Images" = "轉換圖片";
+
+"Convert Videos" = "轉換影片";
+
+"Choose what to convert. Originals will remain in Photos." = "選擇要轉換的內容。相簿中的原始檔不會改變。";
+
+/* Media category batch compression */
+"compression.explanation" = "iCloud 原件可能需要下載。";
+"compression.empty" = "此分類暫無媒體";
+"compression.saved" = "原件保留，可重試替換";
+"compression.noReduction" = "已足夠小 · 未儲存副本";
+"compression.cancelling" = "正在取消…";
+"compression.summary" = "已儲存 %d 項 · 失敗 %d 項";
+"compression.action" = "壓縮並替換 %d 項";
+"compression.error.live" = "無法保留原況照片的配對資訊，原件未更改。";
+"compression.error.image" = "快速壓縮暫不支援動畫照片，原件未更改。";
+"compression.cardDetail" = "%d 項 · %@";
+
+"compression.replaced" = "已替換原件";
+
+"compression.replacing" = "正在替換原件…";
+
+"compression.error.verify" = "無法驗證壓縮副本，原件未刪除。";
+
+"compression.error.replace" = "壓縮副本已儲存，原件未刪除。請重試。";
+
+"compression.selection.savings" = "預計節省空間：%@";
+
+"compression.action.short" = "壓縮";
+
+"compression.confirm.title" = "開始壓縮？";
+
+"compression.confirm.message" = "壓縮選取的 %d 個項目？較小的副本儲存並驗證成功後，將從相簿刪除對應原件。";
+
+"compression.confirm.action" = "確認";

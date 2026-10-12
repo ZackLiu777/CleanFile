@@ -1,28 +1,28 @@
-"converter.title" = "Mediakomprimering";
-"converter.heading" = "Komprimera media";
-"conversion.home.image.title" = "Komprimera bilder";
-"conversion.home.image.detail" = "Komprimera bilder med format- och storlekskontroller och ta bort privat metadata";
-"conversion.home.image.tagline" = "Komprimering · HEIC-format · Ta bort GPS";
-"conversion.home.video.title" = "Komprimera video";
-"conversion.home.video.detail" = "Komprimera video med codecs och utdataupplösning";
-"conversion.home.video.tagline" = "Komprimering · MP4 / MOV · Upplösning";
-"conversion.home.audio.title" = "Komprimera ljud";
-"conversion.home.audio.detail" = "Komprimera ljud eller extrahera ett spår från video";
-"conversion.home.audio.tagline" = "Komprimering · MP3 / AAC / WAV · Utdrag från video";
-"conversion.home.history.summary" = "%@ · Komprimerade %ld-filer";
+"converter.title" = "Konvertera";
+"converter.heading" = "Konvertera medier";
+"conversion.home.image.title" = "Konvertera bilder";
+"conversion.home.image.detail" = "JPG, PNG, HEIC med flera. Anpassa bildkvalitet och mått.";
+"conversion.home.image.tagline" = "JPG, PNG, HEIC med flera. Anpassa bildkvalitet och mått.";
+"conversion.home.video.title" = "Konvertera videor";
+"conversion.home.video.detail" = "MP4, MOV, M4V. Välj kodek, bithastighet och upplösning.";
+"conversion.home.video.tagline" = "MP4, MOV, M4V. Välj kodek, bithastighet och upplösning.";
+"conversion.home.audio.title" = "Konvertera ljud";
+"conversion.home.audio.detail" = "MP3, AAC, WAV med flera. Anpassa bithastighet eller extrahera ljud från video.";
+"conversion.home.audio.tagline" = "MP3, AAC, WAV med flera. Anpassa bithastighet eller extrahera ljud från video.";
+"conversion.home.history.summary" = "%@ · Konverterade %ld-filer";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "Utdata är %@ mindre";
 "conversion.home.history.larger" = "Utdata är %@ större";
 "conversion.home.history.unchanged" = "Utdatastorleken är oförändrad";
-"import.title" = "Komprimera bilder lokalt";
+"import.title" = "Konvertera bilder lokalt";
 "import.subtitle" = "Filer bearbetas på den här enheten och laddas aldrig upp.";
 "action.add_images" = "Lägg till bilder";
 "action.choose_images" = "Välj Bilder";
 "action.clear_completed" = "Rensa slutförd";
 "action.clear_all" = "Rensa alla";
-"action.convert" = "Starta komprimering";
+"action.convert" = "Konvertera";
 "action.cancel" = "Avbryt";
-"action.share" = "Dela komprimerad fil";
+"action.share" = "Dela konverterad fil";
 "action.remove" = "Ta bort bild";
 "empty.title" = "Inga bilder har valts";
 "empty.subtitle" = "Välj en eller flera stillbilder för att börja.";
@@ -36,9 +36,9 @@
 "settings.resize" = "Ändra storlek";
 "settings.transparent_background" = "Transparenta områden";
 "settings.output" = "Utdatamapp";
-"settings.output.images" = "Komprimerade bilder";
-"settings.output.videos" = "Komprimerade videor";
-"settings.output.audio" = "Komprimerat ljud";
+"settings.output.images" = "Konverterade bilder";
+"settings.output.videos" = "Konverterade videor";
+"settings.output.audio" = "Konverterat ljud";
 "metadata.preserve" = "Bevara";
 "metadata.remove_gps" = "Ta bort GPS";
 "metadata.remove_all" = "Ta bort alla";
@@ -49,16 +49,16 @@
 "color.white" = "Vit";
 "color.black" = "Svart";
 "status.inspecting" = "Inspekterar";
-"status.ready" = "Färdig att komprimera";
-"status.converting" = "Komprimerar";
+"status.ready" = "Färdig att konvertera";
+"status.converting" = "Konverterar";
 "status.completed" = "Kompressionen klar";
 "status.cancelled" = "Avbruten";
 "progress.summary" = "%ld av %ld klar";
 "notice.duplicates_ignored" = "Dubblettval ignorerades.";
 "notice.import_failed" = "Kunde inte importera bilder: %@";
-"notice.cancelled" = "Komprimeringen avbröts. Färdiga filer behölls.";
-"notice.completed" = "Komprimerade %ld-bilder.";
-"notice.completed_with_failures" = "Komprimerade %ld bilder; %ld misslyckades.";
+"notice.cancelled" = "Konverteringen avbröts. Färdiga filer behölls.";
+"notice.completed" = "Konverterade %ld-bilder.";
+"notice.completed_with_failures" = "Konverterade %ld bilder; %ld misslyckades.";
 "error.source_not_reachable" = "Källfilen är inte tillgänglig: %@";
 "error.cannot_open_source" = "Filen är inte en bild som stöds: %@";
 "error.unsupported_input" = "Detta bildformat stöds inte: %@";
@@ -73,11 +73,11 @@
 "error.cannot_create_destination" = "Utgången kunde inte skapas: %@";
 "error.cannot_finalize" = "Kodaren kunde inte skriva klart: %@";
 "error.destination_exists" = "En utdatafil finns redan: %@";
-"error.destination_busy" = "En annan komprimeringsuppgift är att skriva den här filen: %@";
+"error.destination_busy" = "En annan konverteringsuppgift är att skriva den här filen: %@";
 "error.cannot_reserve" = "Ett unikt utdatanamn kunde inte skapas för %@.";
-"error.commit_failed" = "Den komprimerade filen kunde inte committeras: %@";
-"error.cancelled" = "Komprimeringen avbröts.";
-"error.unexpected" = "Oväntat komprimeringsfel: %@";
+"error.commit_failed" = "Den konverterade filen kunde inte committeras: %@";
+"error.cancelled" = "Konverteringen avbröts.";
+"error.unexpected" = "Oväntat konverteringsfel: %@";
 "converter.mode" = "Medietyp";
 "converter.mode.image" = "Bilder";
 "converter.mode.video" = "Videor";
@@ -95,7 +95,7 @@
 "audio.source.video" = "Videokälla";
 "audio.error.video_no_audio" = "Den här videon innehåller inget ljudspår.";
 "audio.error.video_protected" = "Skyddat videoljud kan inte extraheras.";
-"audio.import.title" = "Komprimera ljud";
+"audio.import.title" = "Konvertera ljud";
 "audio.settings.quality" = "Kvalitet";
 "audio.format.mp3" = "MP3";
 "audio.format.aac" = "M4A (AAC-kodad)";
@@ -105,23 +105,23 @@
 "audio.format.aiff" = "AIFF (okomprimerad PCM)";
 "audio.format.caf_pcm" = "CAF (okomprimerad PCM)";
 "audio.format.caf_alac" = "CAF (Apple Lossless)";
-"conversion.delete_all.title" = "Ta bort alla komprimeringsfiler?";
-"conversion.delete_all.message" = "Detta tar bort appens importerade kopior och komprimerade utdata. Original i foton och filer raderas inte.";
+"conversion.delete_all.title" = "Ta bort alla konverteringsfiler?";
+"conversion.delete_all.message" = "Detta tar bort appens importerade kopior och konverterade utdata. Original i foton och filer raderas inte.";
 "conversion.delete.action" = "Ta bort filer";
 "conversion.delete.failed" = "Vissa apphanterade filer kunde inte raderas. De återstående objekten behölls i listan.";
 "audio.lossless" = "Förlustfri utgång behåller den tillgängliga ljudkvaliteten.";
 "audio.empty.title" = "Inget ljud";
-"audio.empty.subtitle" = "Välj ljudfiler att komprimera eller extrahera ljud från videor.";
-"audio.notice.completed" = "Komprimerade %ld ljudfiler.";
+"audio.empty.subtitle" = "Välj ljudfiler att konvertera eller extrahera ljud från videor.";
+"audio.notice.completed" = "Konverterade %ld ljudfiler.";
 "audio.error.source" = "Källljudet är inte tillgängligt.";
 "audio.error.unsupported" = "Det valda ljud- eller videoformatet stöds inte.";
 "audio.error.invalid" = "Filen innehåller inte läsbart ljud.";
 "audio.error.output" = "Ljudutgången kunde inte skapas: %@";
-"audio.error.convert" = "Ljudkomprimering misslyckades: %@";
-"audio.error.commit" = "Det komprimerade ljudet kunde inte sparas: %@";
+"audio.error.convert" = "Ljudkonvertering misslyckades: %@";
+"audio.error.commit" = "Det konverterade ljudet kunde inte sparas: %@";
 "video.action.add" = "Lägg till videor";
 "video.action.choose" = "Välj Videos";
-"video.import.title" = "Komprimera videor";
+"video.import.title" = "Konvertera videor";
 "video.import.subtitle" = "Filer bearbetas på den här enheten och laddas aldrig upp.";
 "quality.smaller" = "Mindre";
 "quality.balanced" = "Balanserad";
@@ -133,13 +133,13 @@
 "video.settings.bitrate" = "Bithastighet";
 "video.settings.resolution" = "Upplösning";
 "video.empty.title" = "Inga videor";
-"video.empty.subtitle" = "Välj en eller flera videor för att påbörja komprimeringen.";
-"video.notice.completed" = "Komprimerade %ld videor.";
+"video.empty.subtitle" = "Välj en eller flera videor för att påbörja konverteringen.";
+"video.notice.completed" = "Konverterade %ld videor.";
 "video.error.source" = "Källvideon är inte tillgänglig.";
 "video.error.unsupported" = "Den här enheten stöder inte de valda videoinställningarna.";
 "video.error.exporter" = "Videokompressorn kunde inte skapas.";
-"video.error.export" = "Videokomprimering misslyckades: %@";
-"video.error.commit" = "Den komprimerade videon kunde inte sparas: %@";
+"video.error.export" = "Videokonvertering misslyckades: %@";
+"video.error.commit" = "Den konverterade videon kunde inte sparas: %@";
 "action.choose_files" = "Välj bland filer";
 "format_picker.title" = "Utdataformat";
 "format_picker.done" = "Klart";
@@ -174,29 +174,29 @@
 "formats.video.title" = "Videoformat som stöds";
 "action.done" = "Klart";
 "import.progress.title" = "Importerar";
-"conversion.guide.button" = "Öppna Compression Guide";
-"conversion.guide.title" = "Kompressionsguide";
-"conversion.guide.hero.title" = "Komprimera media, spara utrymme";
-"conversion.guide.hero.detail" = "Komprimera bilder, video och ljud lokalt på den här enheten utan att ändra originalen.";
+"conversion.guide.button" = "Guide till mediekonvertering";
+"conversion.guide.title" = "Guide till mediekonvertering";
+"conversion.guide.hero.title" = "Vanliga format. Dina inställningar.";
+"conversion.guide.hero.detail" = "Konvertera vanliga format och anpassa kvalitet, bithastighet och mått.";
 "conversion.guide.steps.title" = "Snabbstart";
 "conversion.guide.step.choose.title" = "Välj en mediatyp";
-"conversion.guide.step.choose.detail" = "Importera bilder och video från foton eller filer. Ljudverktyget accepterar ljud eller video från filer.";
+"conversion.guide.step.choose.detail" = "Välj videor, bilder eller ljud. Importera från Filer eller välj bilder och videor från Bilder.";
 "conversion.guide.step.adjust.title" = "Justera kompressionen";
-"conversion.guide.step.adjust.detail" = "Välj ett format och justera kvalitet, upplösning, bithastighet eller metadata efter behov.";
-"conversion.guide.step.convert.title" = "Komprimera och dela";
-"conversion.guide.step.convert.detail" = "Följ komprimeringsförloppet, granska resultatet och dela det sedan var du behöver.";
-"conversion.guide.home.title" = "Börja med filen du vill krympa";
-"conversion.guide.home.detail" = "Varje verktyg står för sig själv, så du kan gå direkt till jobbet du behöver.";
-"conversion.guide.tools.title" = "Tre verktyg för mediakomprimering";
-"conversion.guide.image.detail" = "Komprimera bilder, justera utdataformatet och storleken och ta bort platsmetadata innan du delar.";
-"conversion.guide.video.detail" = "Komprimera video genom att välja en behållare, codec och upplösning. Det slutliga stödet beror på enheten och källan.";
-"conversion.guide.audio.detail" = "Komprimera ljudfiler – eller välj en video här för att extrahera och komprimera dess ljudspår.";
+"conversion.guide.step.adjust.detail" = "Konvertera vanliga format och anpassa kvalitet, bithastighet och mått.";
+"conversion.guide.step.convert.title" = "Konvertera och dela";
+"conversion.guide.step.convert.detail" = "Följ konverteringsförloppet, granska resultatet och dela det sedan var du behöver.";
+"conversion.guide.home.title" = "Konvertera medier";
+"conversion.guide.home.detail" = "Konvertera vanliga format och anpassa kvalitet, bithastighet och mått.";
+"conversion.guide.tools.title" = "Tre verktyg för mediakonvertering";
+"conversion.guide.image.detail" = "JPG, PNG, HEIC med flera. Anpassa bildkvalitet och mått.";
+"conversion.guide.video.detail" = "MP4, MOV, M4V. Välj kodek, bithastighet och upplösning.";
+"conversion.guide.audio.detail" = "MP3, AAC, WAV med flera. Anpassa bithastighet eller extrahera ljud från video.";
 "conversion.guide.controls.title" = "Forma kompressionen";
 "conversion.guide.format.detail" = "Välj ett format som balanserar kompatibilitet, kvalitet och filstorlek för hur filen kommer att användas.";
-"conversion.guide.quality.detail" = "Använd bildkvalitet, videocodec och upplösning eller AAC-bithastighet för att minska storleken. Förlustfria ljudformat bevarar kvaliteten men kanske inte minskar storleken.";
+"conversion.guide.quality.detail" = "Lägre kvalitet eller bithastighet minskar oftast filstorleken. Resultatet beror på innehållet; förlustfria format blir inte alltid mindre.";
 "conversion.guide.metadata.detail" = "Bevara all skrivbar metadata, ta bort endast GPS eller ta bort allt. GPS-borttagning är standard.";
 "conversion.guide.replace.title" = "Ersätt original";
-"conversion.guide.replace.detail" = "Efter komprimeringen trycker du på papperskorgen på startsidan och väljer bild- eller videosamlingar. Appen sparar först de komprimerade kopiorna i Bilder och därefter ber iOS dig bekräfta att motsvarande original tas bort. Endast slutförda objekt som importerats från Bilder stöds; fristående ljud och import från Filer stöds inte. Rensa alla tar bara bort arbetskopior och gör ersättning otillgänglig, men raderar aldrig original.";
+"conversion.guide.replace.detail" = "Efter konverteringen trycker du på papperskorgen på startsidan och väljer bild- eller videosamlingar. Appen sparar först de konverterade kopiorna i Bilder och därefter ber iOS dig bekräfta att motsvarande original tas bort. Endast slutförda objekt som importerats från Bilder stöds; fristående ljud och import från Filer stöds inte. Rensa alla tar bara bort arbetskopior och gör ersättning otillgänglig, men raderar aldrig original.";
 "conversion.guide.privacy.title" = "Dina original förblir dina";
 "conversion.guide.privacy.detail" = "Allt bearbetas på den här enheten. Rensa alla tar bara bort apphanterade kopior och utdata, aldrig dina original i foton eller filer.";
 "conversion.guide.learn_more" = "Utforska det här verktyget";
@@ -204,31 +204,31 @@
 "conversion.guide.detail.purpose.title" = "Vad det är till för";
 "conversion.guide.detail.workflow.title" = "Batch, framsteg och resultat";
 "conversion.guide.output.detail" = "Den apphanterade utdatamappen visas i verktyget men är inte valbar. Använd Dela för att flytta ett resultat någon annanstans.";
-"conversion.guide.image.purpose" = "Batch-komprimera statiska bilder efter format, kvalitet, längsta kant och metadata. En uppsättning alternativ gäller för den aktuella batchen utan att originalen ändras.";
+"conversion.guide.image.purpose" = "JPG, PNG, HEIC med flera. Anpassa bildkvalitet och mått.";
 "conversion.guide.image.imports.detail" = "Välj flera filer eller upp till 100 objekt från Foton. Format speglar den här enhetens kapacitet; RAW/DNG/ProRAW är endast import, och animerade bilder stöds inte.";
 "conversion.guide.image.workflow.detail" = "Följ inspektions- och kompressionstillstånd, eller avbryt medan arbetet pågår; färdiga resultat kvarstår. Jämför storlekar och dela från varje filkort innan du rensar listan.";
-"conversion.guide.image.quality.detail" = "JPG, HEIC, HEIF och WebP stöder 10 %–100 % kvalitet i steg om 5 %, med 85 % som standard. Lägre kvalitet skapar vanligtvis mindre filer med mer synlig förlust; andra format visar ingen kvalitetskontroll.";
+"conversion.guide.image.quality.detail" = "JPG, PNG, HEIC med flera. Anpassa bildkvalitet och mått. Lägre kvalitet eller bithastighet minskar oftast filstorleken. Resultatet beror på innehållet; förlustfria format blir inte alltid mindre.";
 "resize.square1024" = "1024 pixlar";
 "conversion.guide.image.resize.detail" = "Behåll de ursprungliga måtten, eller täck den längsta kanten till 4096, 2048 eller 1280 px för att minska storleken utan att förstora. Alternativet 1024 × 1024 passar hela bilden på en kvadratisk bakgrund utan att beskäras eller sträckas ut; små bilder förstoras.";
 "conversion.guide.image.transparency.detail" = "JPG och BMP kan inte lagra genomskinliga pixlar. När du använder något av formaten, fyll genomskinliga områden med vitt eller svart.";
-"conversion.guide.video.purpose" = "Batchkomprimera MOV-, MP4- eller M4V-video med behållare, codec och upplösning utan att skriva över originalen.";
+"conversion.guide.video.purpose" = "MP4, MOV, M4V. Välj kodek, bithastighet och upplösning.";
 "conversion.guide.video.imports.detail" = "Välj flera MOV-, MP4- eller M4V-filer eller välj upp till 50 videor från Foton.";
 "conversion.guide.video.workflow.detail" = "Videor bearbetas en efter en. Följ uppgiftstillstånd och slutfört antal, avbryt vid behov, jämför sedan inmatnings- och utdatastorlekar och dela varje resultat.";
 "conversion.guide.video.resolution.detail" = "En lägre upplösning minskar vanligtvis filstorleken. H.264 erbjuder Original, 4K, 1080p, 720p och 480p; HEVC erbjuder Original, 4K och 1080p; ProRes behåller den ursprungliga upplösningen.";
 "conversion.guide.video.compatibility.title" = "Kombinationer och enhetsstöd";
 "conversion.guide.video.compatibility.detail" = "Behållar- och upplösningsvalen minskar när du har valt en codec. Enheten och källvideon får fortfarande en sista kompatibilitetskontroll.";
 "conversion.guide.video.codec.h264.detail" = "Bredaste kompatibilitet: MP4, MOV eller M4V; Original, 4K, 1080p, 720p eller 480p.";
-"conversion.guide.video.codec.hevc.detail" = "Mer effektiv komprimering: MP4 eller MOV; Original, 4K eller 1080p. Äldre enheter och appar kan vara mindre kompatibla.";
-"conversion.guide.video.codec.prores422.detail" = "För högkvalitativ redigering: endast MOV, med originalupplösningen. Filer är vanligtvis stora och är inte avsedda för utrymmesbesparande komprimering.";
-"conversion.guide.video.codec.prores4444.detail" = "För högkvalitativ efterproduktion: endast MOV, med originalupplösning. Filer är vanligtvis mycket stora och är inte avsedda för utrymmesbesparande komprimering.";
-"conversion.guide.audio.purpose" = "Komprimera ljud eller skapa en separat komprimerad ljudfil från en video med ett användbart spår. Det ursprungliga ljudet och videon förblir oförändrade.";
+"conversion.guide.video.codec.hevc.detail" = "Mer effektiv konvertering: MP4 eller MOV; Original, 4K eller 1080p. Äldre enheter och appar kan vara mindre kompatibla.";
+"conversion.guide.video.codec.prores422.detail" = "För högkvalitativ redigering: endast MOV, med originalupplösningen. Filer är vanligtvis stora och är inte avsedda för utrymmesbesparande konvertering.";
+"conversion.guide.video.codec.prores4444.detail" = "För högkvalitativ efterproduktion: endast MOV, med originalupplösning. Filer är vanligtvis mycket stora och är inte avsedda för utrymmesbesparande konvertering.";
+"conversion.guide.audio.purpose" = "MP3, AAC, WAV med flera. Anpassa bithastighet eller extrahera ljud från video.";
 "conversion.guide.audio.imports.detail" = "Välj ljud eller video från filer, eller välj videor från Foton för att extrahera deras ljudspår. Ljudingångar: M4A (inklusive ALAC), AAC, MP3, FLAC, WAV, AIFF/AIF och CAF. Videoingångar: MOV, MP4 och M4V.";
 "conversion.guide.audio.workflow.detail" = "Följ källtyp, varaktighet, uppgiftstillstånd och slutfört antal, eller avbryt vid behov. Jämför in- och utdatastorlekar och dela det färdiga ljudet.";
 "conversion.guide.audio.quality.detail" = "MP3 och AAC erbjuder 96, 128, 192, 256 eller 320 kbps; standard är 192 kbps. ALAC, WAV, AIFF och PCM CAF är förlustfria och använder inte en bithastighetsinställning.";
 "conversion.guide.audio.m4a.title" = "M4A: container och codec";
-"conversion.guide.audio.m4a.detail" = "M4A är filbehållaren, inte komprimeringsmetoden. M4A (AAC) använder förlustkomprimering för mindre, delbara filer; M4A (Apple Lossless/ALAC) bevarar källans tillgängliga kvalitet men är vanligtvis större. Välj AAC för daglig lagring och delning, eller ALAC när du undviker ytterligare kvalitetsförlust är viktigare än storlek.";
+"conversion.guide.audio.m4a.detail" = "M4A är filbehållaren, inte konverteringsmetoden. M4A (AAC) använder förlustkonvertering för mindre, delbara filer; M4A (Apple Lossless/ALAC) bevarar källans tillgängliga kvalitet men är vanligtvis större. Välj AAC för daglig lagring och delning, eller ALAC när du undviker ytterligare kvalitetsförlust är viktigare än storlek.";
 "conversion.guide.audio.lossless.title" = "Förlustfria format";
-"conversion.guide.audio.lossless.detail" = "M4A (ALAC) och CAF ALAC använder förlustfri kompression; WAV, AIFF och CAF PCM lagrar okomprimerat ljud och är vanligtvis större. Dessa format bevarar den tillgängliga kvaliteten i källan och använder ingen bithastighetsinställning. Att konvertera MP3 eller AAC till förlustfri kan inte återställa detaljer som redan tagits bort genom förlustkomprimering.";
+"conversion.guide.audio.lossless.detail" = "M4A (ALAC) och CAF ALAC använder förlustfri kompression; WAV, AIFF och CAF PCM lagrar okonverterat ljud och är vanligtvis större. Dessa format bevarar den tillgängliga kvaliteten i källan och använder ingen bithastighetsinställning. Att konvertera MP3 eller AAC till förlustfri kan inte återställa detaljer som redan tagits bort genom förlustkonvertering.";
 "conversion.guide.audio.extract.title" = "Utdrag från video";
 "conversion.guide.audio.extract.detail" = "Välj MOV, MP4 eller M4V från Filer eller Foton för att läsa dess tillgängliga ljudspår och koda om det i det valda formatet. Videon ändras inte; skyddad video eller video utan ljud kan inte extraheras.";
 "settings.background" = "Bakgrund";
@@ -245,17 +245,59 @@
 "estimate.calculating" = "Uppskattar utdatastorlek...";
 "conversion.replace.button" = "Ersätt original";
 "conversion.replace.title" = "Ersätta originalmedier?";
-"conversion.replace.message" = "%d komprimerade objekt sparas i Bilder och därefter raderas originalen. Detta kan inte ångras.";
+"conversion.replace.message" = "%d konverterade objekt sparas i Bilder och därefter raderas originalen. Detta kan inte ångras.";
 "conversion.replace.action" = "Ersätt original";
 "conversion.replace.failed" = "Vissa original kunde inte ersättas och behölls för säkerhets skull.";
-"conversion.replace.unavailable" = "Det finns inga original som kan ersättas. Importera först från Bilder och slutför komprimeringen.";
+"conversion.replace.unavailable" = "Det finns inga original som kan ersättas. Importera först från Bilder och slutför konverteringen.";
 "conversion.replace.review.title" = "Ersätt original";
-"conversion.replace.review.summary" = "Komprimerade medier är klara";
-"conversion.replace.review.detail" = "Välj vilka original som ska ersättas. De komprimerade kopiorna sparas först.";
+"conversion.replace.review.summary" = "Konverterade medier är klara";
+"conversion.replace.review.detail" = "Välj vilka original som ska ersättas. De konverterade kopiorna sparas först.";
 "conversion.replace.select_all" = "Markera alla";
 "conversion.replace.deselect_all" = "Avmarkera alla";
 "conversion.replace.selected" = "%d markerade";
 "conversion.guide.audio_replace.title" = "Varför ljud inte kan ersätta originalet";
-"conversion.guide.audio_replace.detail" = "Ljudfiler kommer från Filer och iPhone tillåter inte att appen säkert tar bort originalen där åt dig. Det komprimerade ljudet sparas som en ny fil. Kontrollera det och radera sedan själv den gamla filen i Filer.";
+"conversion.guide.audio_replace.detail" = "Ljudfiler kommer från Filer och iPhone tillåter inte att appen säkert tar bort originalen där åt dig. Det konverterade ljudet sparas som en ny fil. Kontrollera det och radera sedan själv den gamla filen i Filer.";
 "video.settings.bitrate.help" = "100 % använder automatiska inställningar. Lägre värden minskar bithastigheten jämfört med originalet.";
 "video.error.hdr_bitrate" = "Använd 100 % (Auto) för HDR-video för att bevara färg och ljusstyrka.";
+
+"Convert" = "Konvertera";
+
+"cleanup.space.title" = "Utrymme att granska";
+
+"cleanup.space.hint" = "Uppskattning utan dubbelräkning. Granska före radering. Senast raderade kan fördröja frigörandet.";
+
+"cleanup.action" = "Snabbstädning";
+
+"cleanup.review.hint" = "Liknande bilder är förvalda. En bild per grupp behålls. Lägg bara till skärmbilder eller videor du inte behöver.";
+
+"cleanup.useSuggestions" = "Använd förslag";
+
+"cleanup.scan.title" = "Plats för fler minnen";
+
+"cleanup.scan.action" = "Hitta utrymme att frigöra";
+
+"cleanup.scan.hint" = "Granska liknande bilder, stora videor och skärmbilder. Analysen raderar inget.";
+
+"quick.compress.title" = "Behåll minnena, minska storleken";
+
+"quick.video" = "Komprimera videor";
+
+"quick.image" = "Komprimera bilder";
+
+"quick.compress.hint" = "Välj filer. Vi sköter inställningarna.";
+
+"quick.action" = "Komprimera";
+
+"quick.ready" = "Inställningarna är klara";
+
+"quick.video.detail" = "MP4 / HEVC · Ursprunglig upplösning · Lägre bithastighet.";
+
+"quick.image.detail" = "HEIC (annars JPEG) · 75 % kvalitet · Ursprunglig storlek · Ta bort GPS.";
+
+"quick.originals" = "Skapar nya kopior och behåller originalen. Resultatet kan bli större; jämför innan du ersätter.";
+
+"premium.free.summary" = "Gratis: granska och radera medier, konvertera och konvertera videor.";
+
+"premium.value.summary" = "Premium: städa flera kategorier, konvertera bilder och ljud, ordna mappar och anpassa utseendet.";
+
+"quick.free" = "Gratis";

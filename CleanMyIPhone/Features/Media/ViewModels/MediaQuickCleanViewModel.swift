@@ -71,6 +71,11 @@ final class MediaQuickCleanViewModel: ObservableObject {
         }
     }
 
+    func selectSuggestions() {
+        guard canUseQuickClean() else { return }
+        selectedCategoryIDs = categories.contains { $0.id == .similarPhotos } ? [.similarPhotos] : []
+    }
+
     func toggleAllCategories() {
         guard canUseQuickClean() else { return }
         if allCategoriesSelected {
@@ -101,11 +106,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
             return
         }
 
-        let similarDeletions = Set(
-            result.similarImageGroups.flatMap { group in
-                group.items.map(\.id).filter { $0 != group.suggestedKeeperID }
-            }
-        )
+        let similarDeletions = result.suggestedCleanupIDs
         let classifiedVideos = result.classifiedVideos
 
         categories = [
@@ -196,6 +197,8 @@ final class MediaQuickCleanViewModel: ObservableObject {
         systemImage: String,
         assetIDs: Set<String>
     ) -> Category? {
+        // A keeper can also be a screenshot or Live Photo. Protect it in every category.
+        let assetIDs = assetIDs.subtracting(analysisResult?.protectedKeeperIDs ?? [])
         guard !assetIDs.isEmpty else { return nil }
         return Category(id: id, title: title, systemImage: systemImage, assetIDs: assetIDs)
     }

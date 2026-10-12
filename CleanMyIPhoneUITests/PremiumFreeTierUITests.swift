@@ -6,12 +6,11 @@ final class PremiumFreeTierUITests: XCTestCase {
     }
 
     @MainActor
-    func testFreeUserCanReachAllTabsWithoutPurchasing() {
+    func testFreeUserCanReachPrimaryAndSecondaryNavigationWithoutPurchasing() {
         let app = launchFreeApp()
         for (id, label) in [
-            ("tab.media", "Media"),
             ("tab.storage", "Storage"),
-            ("tab.convert", "Compress"),
+            ("tab.convert", "Convert"),
             ("tab.settings", "Settings")
         ] {
             let element = tab(in: app, id: id, label: label)
@@ -186,7 +185,7 @@ final class PremiumFreeTierUITests: XCTestCase {
             app.buttons["premium.close"].tap()
             XCTAssertFalse(app.descendants(matching: .any)["storage.fileList"].exists)
         }
-        tab(in: app, id: "tab.media", label: "Media").tap()
+        returnToMedia(in: app)
         XCTAssertFalse(app.buttons["premium.close"].exists)
     }
 
@@ -212,6 +211,18 @@ final class PremiumFreeTierUITests: XCTestCase {
         chart.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         let restored = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", "Example Folder"), object: chart)
         XCTAssertEqual(XCTWaiter.wait(for: [restored], timeout: 5), .completed)
+
+        // Both map entry and exit access the coordinator inherited by the Storage sheet.
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["storage.close"].waitForExistence(timeout: 5))
+        app.buttons["storage.close"].tap()
+        XCTAssertTrue(app.buttons["media.storage"].waitForExistence(timeout: 5))
+        app.buttons["media.storage"].tap()
+        XCTAssertTrue(app.buttons["storage.close"].waitForExistence(timeout: 5))
+        for _ in 0..<5 where !expand.isHittable { app.swipeUp() }
+        XCTAssertTrue(expand.isHittable)
+        expand.tap()
+        XCTAssertTrue(chart.waitForExistence(timeout: 5))
     }
 
     @MainActor
@@ -225,16 +236,32 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["premium.requiredFeature"].exists)
         XCTAssertFalse(app.buttons["media.quickClean.delete"].exists)
         app.buttons["premium.close"].tap()
-        XCTAssertTrue(quickClean.waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["media.actions"].isEnabled)
-        tab(in: app, id: "tab.convert", label: "Compress").tap()
+        XCTAssertTrue(app.buttons["media.settings"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["media.settings"].isEnabled)
+        tab(in: app, id: "tab.convert", label: "Convert").tap()
         XCTAssertTrue(app.buttons["conversion.home.video"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testQuickVideoCompressionOpensCategoryWithoutPremiumOrPhotoPermission() {
+        let app = launchFreeApp()
+        let shortcut = app.buttons["media.compress.video"]
+        for _ in 0..<6 where !shortcut.isHittable { app.swipeUp() }
+        XCTAssertTrue(shortcut.waitForExistence(timeout: 5))
+        shortcut.tap()
+        XCTAssertTrue(app.navigationBars["Compress videos"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["media.compression.empty"].exists)
+        XCTAssertTrue(app.buttons["media.compression.start"].exists)
+        XCTAssertFalse(app.buttons["media.compression.start"].isEnabled)
+        XCTAssertFalse(app.buttons["premium.close"].exists)
+        XCTAssertFalse(app.buttons["video.import.files"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["conversion.settings"].exists)
     }
 
     @MainActor
     func testVideoIsFreeWhileImageAndAudioEntriesRequirePremium() {
         let app = launchFreeApp()
-        tab(in: app, id: "tab.convert", label: "Compress").tap()
+        tab(in: app, id: "tab.convert", label: "Convert").tap()
         for kind in ["image", "audio"] {
             let entry = app.buttons["conversion.home." + kind]
             for _ in 0..<5 where !entry.isHittable { app.swipeUp() }
@@ -293,8 +320,6 @@ final class PremiumFreeTierUITests: XCTestCase {
 
     @MainActor
     private func tab(in app: XCUIApplication, id: String, label: String) -> XCUIElement {
-        let identified = app.descendants(matching: .any)[id]
-        if identified.waitForExistence(timeout: 2) { return identified }
-        return app.tabBars.buttons[label]
+        appNavigationEntry(in: app, id: id, label: label)
     }
 }

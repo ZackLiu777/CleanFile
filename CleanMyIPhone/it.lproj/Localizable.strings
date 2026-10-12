@@ -25,13 +25,13 @@
 "premium.feature.required" = "Disponibile con Premium";
 "premium.feature.unlock" = "Sblocca con Premium";
 "premium.feature.media" = "Pulizia dei media";
-"premium.feature.videoConversion" = "Compressione video";
+"premium.feature.videoConversion" = "Conversione video";
 "premium.feature.storage" = "Pulizia dei file";
-"premium.feature.imageConversion" = "Compressione immagini";
+"premium.feature.imageConversion" = "Conversione immagini";
 "premium.feature.audioConversion" = "Conversione audio";
 "premium.feature.darkAppearance" = "Aspetto scuro";
 "premium.feature.customColors" = "Colori personalizzati";
-"premium.feature.compression.title" = "Comprimi immagini e audio";
+"premium.feature.compression.title" = "Converti immagini e audio";
 "premium.feature.compression.detail" = "Converti immagini e file audio con impostazioni regolabili.";
 "premium.feature.appearance.title" = "Personalizza l’aspetto";
 "premium.feature.appearance.detail" = "Sblocca l’aspetto scuro e i colori personalizzati di app e sfondo.";
@@ -39,7 +39,7 @@
 
 "Photos" = "Foto";
 "Storage" = "Stoccaggio";
-"Compress" = "Comprimi";
+"Compress" = "Converti";
 "storage.heading" = "Distribuzione dello spazio di archiviazione";
 "Settings" = "Impostazioni";
 "Language" = "Lingua";
@@ -99,7 +99,6 @@
 "Videos" = "Video";
 "My Space" = "Il mio spazio";
 "System & Apps" = "Sistema e app";
-"Includes iOS, system data, and other app data." = "Include iOS, dati di sistema e altri dati delle app.";
 "Available" = "Disponibile";
 "%lld%% used · %@ of %@" = "%lld%% utilizzato · %@ di %@";
 "Images" = "Immagini";
@@ -149,7 +148,6 @@
 "Read-only" = "Sola lettura";
 "Screenshots" = "Schermate";
 "Live Photos" = "Foto dal vivo";
-"Video Categories" = "Categorie video";
 "%lld items" = "Articoli %lld";
 "No Items" = "Nessun articolo";
 "No media matched this category." = "Nessun supporto corrisponde a questa categoria.";
@@ -193,9 +191,7 @@
 "Press and hold to play" = "Tieni premuto per riprodurre";
 "%lld selected" = "%lld selezionato";
 "Estimated %@" = "Stima %@";
-"Media Actions" = "Azioni multimediali";
 "Cleanup Recommendations" = "Raccomandazioni per la pulizia";
-"Media sizes are estimated without downloading original files." = "Le dimensioni dei media sono stimate senza scaricare i file originali.";
 "Explore the folder hierarchy" = "Esplora la gerarchia delle cartelle";
 "Tap a folder segment to drill down. Tap the center to go back." = "Tocca un segmento di cartella per approfondire. Tocca il centro per tornare indietro.";
 "%lld files" = "File %lld";
@@ -303,10 +299,10 @@
 "Cloud files may be unavailable" = "I file cloud potrebbero non essere disponibili";
 "Common Questions" = "Domande comuni";
 "Confirm your selection" = "Conferma la tua selezione";
-"Compression workspace" = "Area di lavoro di compressione";
+"Compression workspace" = "Area di lavoro di conversione";
 "Compress a file" = "Comprimere un file";
-"Compress images, videos, and audio without changing the original file." = "Comprimi immagini, video e audio senza modificare il file originale.";
-"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Compress importa una copia funzionante nell'app. La cancellazione dell'area di lavoro di compressione rimuove le copie e gli output gestiti dall'app, quindi esporta prima tutto ciò che desideri conservare.";
+"Compress images, videos, and audio without changing the original file." = "Converti immagini, video e audio senza modificare il file originale.";
+"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Compress importa una copia funzionante nell'app. La cancellazione dell'area di lavoro di conversione rimuove le copie e gli output gestiti dall'app, quindi esporta prima tutto ciò che desideri conservare.";
 "Compress keeps imported working copies and outputs inside app-managed storage. The original outside the app is not replaced. Clear the workspace only after exporting results you want to keep." = "Compress mantiene le copie di lavoro e gli output importati all'interno dello spazio di archiviazione gestito dall'app. L'originale fuori dall'app non viene sostituito. Svuota l'area di lavoro solo dopo aver esportato i risultati che desideri conservare.";
 "Deleted content may remain in Recently Deleted, and iOS storage totals can take time to recalculate. Check the relevant Recently Deleted location, then recheck iPhone Storage later." = "I contenuti eliminati potrebbero rimanere in Eliminati di recente e il ricalcolo dei totali dello spazio di archiviazione iOS potrebbe richiedere del tempo. Controlla la posizione eliminata di recente, quindi ricontrolla lo spazio di archiviazione dell'iPhone in un secondo momento.";
 "Deleted items move to Recently Deleted and may continue using storage until permanently removed. If iCloud Photos is enabled, deletion also syncs to your other devices." = "Gli elementi eliminati vengono spostati in Eliminati di recente e possono continuare a utilizzare lo spazio di archiviazione fino alla rimozione definitiva. Se Foto di iCloud è abilitato, l'eliminazione si sincronizza anche con gli altri dispositivi.";
@@ -314,7 +310,7 @@
 "Deletion stays user controlled" = "L'eliminazione rimane controllata dall'utente";
 "Device storage is not iCloud storage" = "L'archiviazione del dispositivo non è l'archiviazione di iCloud";
 "Do not install profiles, grant unknown computer access, or erase the iPhone for a promised one-tap cache cleanup. Back up important data before any system reset." = "Non installare profili, non concedere l'accesso a computer sconosciuti o cancellare l'iPhone per la pulizia della cache con un solo tocco promessa. Eseguire il backup dei dati importanti prima di qualsiasi ripristino del sistema.";
-"Does analysis or compression upload my files?" = "L'analisi o la compressione caricano i miei file?";
+"Does analysis or compression upload my files?" = "L'analisi o la conversione caricano i miei file?";
 "Explore the results" = "Esplora i risultati";
 "Files deleted from an authorized folder may not be recoverable. The app cannot promise that they will appear in Recently Deleted." = "I file eliminati da una cartella autorizzata potrebbero non essere recuperabili. L'app non può promettere che verranno visualizzati in Eliminati di recente.";
 "Find the largest category" = "Trova la categoria più grande";
@@ -329,7 +325,7 @@
 "Help" = "Aiuto";
 "How can we help?" = "Come possiamo aiutare?";
 "Import your files" = "Importa i tuoi file";
-"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "Le copie importate e gli output compressi utilizzano lo spazio all'interno dell'app. Cancella il lavoro completato quando non ti serve più, dopo aver esportato i risultati che desideri conservare.";
+"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "Le copie importate e gli output convertiti utilizzano lo spazio all'interno dell'app. Cancella il lavoro completato quando non ti serve più, dopo aver esportato i risultati che desideri conservare.";
 "In Files, confirm whether an item is under On My iPhone, iCloud Drive, or another provider. The same action can have different recovery and sync behavior in each location." = "In File, conferma se un elemento si trova in Sul mio iPhone, iCloud Drive o un altro provider. La stessa azione può avere un comportamento di ripristino e sincronizzazione diverso in ciascuna posizione.";
 "In iPhone Storage, Offload App removes the app but keeps its documents and data. Delete App removes the app and its local data, so verify sync or backup before choosing it." = "Nell'archivio iPhone, l'app Offload rimuove l'app ma ne conserva i documenti e i dati. Elimina app rimuove l'app e i relativi dati locali, quindi verifica la sincronizzazione o il backup prima di sceglierlo.";
 "Install the latest iOS update, restart the iPhone, review Safari data and offline downloads, then let iPhone Storage recalculate. If an unusually large total persists, contact Apple Support." = "Installa l'ultimo aggiornamento iOS, riavvia l'iPhone, esamina i dati di Safari e i download offline, quindi lascia che l'archiviazione di iPhone venga ricalcolata. Se il totale insolitamente elevato persiste, contatta il supporto Apple.";
@@ -342,13 +338,13 @@
 "Local by design" = "Locale secondo la progettazione";
 "Manage Apps & Downloads" = "Gestisci app e download";
 "Manage Files & iCloud Drive" = "Gestisci file e iCloud Drive";
-"Manage compression storage" = "Gestire l'archiviazione di compressione";
-"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "L'analisi multimediale, la scansione delle cartelle e la compressione vengono eseguite su questo dispositivo. L'app non carica i tuoi file per queste funzionalità.";
-"Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "I contenuti multimediali analizzano le foto e i video consentiti tramite la libreria Foto. L'archiviazione analizza solo una cartella scelta. Comprimi riduce la dimensione delle copie importate nell'area di lavoro privata dell'app.";
+"Manage compression storage" = "Gestire l'archiviazione di conversione";
+"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "L'analisi multimediale, la scansione delle cartelle e la conversione vengono eseguite su questo dispositivo. L'app non carica i tuoi file per queste funzionalità.";
+"Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "I contenuti multimediali analizzano le foto e i video consentiti tramite la libreria Foto. L'archiviazione analizza solo una cartella scelta. Converti riduce la dimensione delle copie importate nell'area di lavoro privata dell'app.";
 "Media needs Photos access to display and analyze library items. You can choose Full Access, Limited Access, or no access, and change the choice later in System Settings." = "I media necessitano dell'accesso a Foto per visualizzare e analizzare gli elementi della libreria. Puoi scegliere Accesso completo, Accesso limitato o Nessun accesso e modificare la scelta in un secondo momento in Impostazioni di sistema.";
 "Meet the App" = "Ti presentiamo l'App";
-"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "No. Può analizzare gli elementi Foto che autorizzi, la cartella che scegli e il proprio spazio di lavoro di compressione. Altre app e spazio di archiviazione di sistema protetto rimangono privati.";
-"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "No. L'analisi multimediale, l'analisi delle cartelle e la compressione vengono eseguite su questo dispositivo. I servizi Apple o i fornitori di file possono sincronizzare i propri contenuti in base alle impostazioni esistenti.";
+"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "No. Può analizzare gli elementi Foto che autorizzi, la cartella che scegli e il proprio spazio di lavoro di conversione. Altre app e spazio di archiviazione di sistema protetto rimangono privati.";
+"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "No. L'analisi multimediale, l'analisi delle cartelle e la conversione vengono eseguite su questo dispositivo. I servizi Apple o i fornitori di file possono sincronizzare i propri contenuti in base alle impostazioni esistenti.";
 "Not necessarily. They are visually related candidates and can include different frames, edits, or resolutions. Always compare them before selecting one to remove." = "Non necessariamente. Sono candidati visivamente correlati e possono includere diversi fotogrammi, modifiche o risoluzioni. Confrontali sempre prima di selezionarne uno da rimuovere.";
 "Offload or delete" = "Scarica o elimina";
 "Only the items selected in the system permission sheet are available. Counts, groups, and recommendations cannot include the rest of the library." = "Sono disponibili solo gli elementi selezionati nel foglio delle autorizzazioni del sistema. I conteggi, i gruppi e i consigli non possono includere il resto della libreria.";
@@ -370,7 +366,7 @@
 "Review before deleting" = "Rivedere prima di eliminare";
 "Review large videos, screenshots, and similar photos safely." = "Rivedi video di grandi dimensioni, screenshot e foto simili in tutta sicurezza.";
 "Review long videos, 4K videos, screen recordings, and large screenshots first. Similar-photo groups can help you compare bursts or repeated shots, but you should choose the keeper yourself." = "Esamina prima i video lunghi, i video 4K, le registrazioni dello schermo e gli screenshot di grandi dimensioni. I gruppi di foto simili possono aiutarti a confrontare raffiche o scatti ripetuti, ma dovresti scegliere tu stesso il custode.";
-"Review compression settings" = "Esaminare le impostazioni di compressione";
+"Review compression settings" = "Esaminare le impostazioni di conversione";
 "Review photos, similar items, screenshots, Live Photos, and videos." = "Rivedi foto, elementi simili, screenshot, foto in diretta e video.";
 "Safari website data" = "Dati del sito web Safari";
 "Safe steps to try" = "Passaggi sicuri da provare";
@@ -382,7 +378,7 @@
 "Similar does not mean identical" = "Simile non significa identico";
 "Similar-photo groups are review suggestions, not proof that files are exact duplicates. Keep the best shot before deleting anything." = "I gruppi di foto simili sono suggerimenti di revisione, non prova che i file siano duplicati esatti. Conserva lo scatto migliore prima di eliminare qualsiasi cosa.";
 "Start analysis" = "Avvia l'analisi";
-"Start compression" = "Inizia la compressione";
+"Start compression" = "Inizia la conversione";
 "Start with high-impact items" = "Inizia con articoli ad alto impatto";
 "Start with iPhone Storage" = "Inizia con lo spazio di archiviazione dell'iPhone";
 "Step %lld" = "Passo %lld";
@@ -406,7 +402,7 @@
 "Understand optimized photos" = "Comprendere le foto ottimizzate";
 "Understand the three tools and what each one can access." = "Comprendere i tre strumenti e a cosa può accedere ciascuno di essi.";
 "Use Apple's controls for attachments, history, and website data." = "Utilizza i controlli di Apple per allegati, cronologia e dati dei siti Web.";
-"Use Compress" = "Usa Comprimi";
+"Use Compress" = "Usa Converti";
 "Use Media" = "Usa i media";
 "Use Settings > Apps > Safari to clear history and website data. This can close tabs or sign you out of websites, so save anything important first." = "Utilizza Impostazioni > App > Safari per cancellare la cronologia e i dati dei siti web. Questo può chiudere le schede o farti uscire dai siti web, quindi salva prima tutto ciò che è importante.";
 "Use Storage" = "Usa spazio di archiviazione";
@@ -431,7 +427,7 @@
 "Display Options" = "Opzioni di visualizzazione";
 "Interface Animations" = "Animazioni dell'interfaccia";
 "Show Media Dates" = "Mostra date multimediali";
-"Control dashboard animations, compression card animations, and date headings in media detail grids." = "Controlla le animazioni del dashboard, le animazioni delle schede di compressione e le intestazioni delle date nelle griglie dei dettagli dei media.";
+"Control dashboard animations, compression card animations, and date headings in media detail grids." = "Controlla le animazioni del dashboard, le animazioni delle schede di conversione e le intestazioni delle date nelle griglie dei dettagli dei media.";
 "Calculating size…" = "Calcolo delle dimensioni…";
 "Size unavailable" = "Taglia non disponibile";
 "Quick Cleanup" = "Pulizia rapida";
@@ -450,7 +446,7 @@
 "Selected" = "Selezionato";
 "Not selected" = "Non selezionato";
 "Selects or deselects every suggested item in this category." = "Seleziona o deseleziona ogni elemento suggerito in questa categoria.";
-"%@ moved to Recently Deleted · ~%@" = "%@ spostato in Eliminati di recente · ~%@";
+"%@ moved to Recently Deleted · %@" = "%@ spostato in Eliminati di recente · %@";
 "Allow photo access, then wait for the library to load." = "Consenti l'accesso alle foto, quindi attendi il caricamento della libreria.";
 "Analyze the available library and let the app group useful cleanup candidates." = "Analizza la libreria disponibile e lascia che l'app raggruppi utili candidati alla pulizia.";
 "Preview items at full size and compare similar photos carefully." = "Visualizza l'anteprima degli elementi a grandezza naturale e confronta attentamente foto simili.";
@@ -459,11 +455,11 @@
 "The app reads file metadata and reports inaccessible or unavailable cloud items separately." = "L'app legge i metadati dei file e segnala separatamente gli elementi cloud inaccessibili o non disponibili.";
 "Use the folder map, categories, and detailed lists to find large files." = "Utilizza la mappa delle cartelle, le categorie e gli elenchi dettagliati per trovare file di grandi dimensioni.";
 "Confirm the file and location, then delete only content you no longer need." = "Conferma il file e la posizione, quindi elimina solo i contenuti che non ti servono più.";
-"Open image, video, or audio compression. The audio tool can also extract a track from video." = "Apri la compressione di immagini, video o audio. Lo strumento audio può anche estrarre una traccia dal video.";
+"Open image, video, or audio compression. The audio tool can also extract a track from video." = "Apri la conversione di immagini, video o audio. Lo strumento audio può anche estrarre una traccia dal video.";
 "Select supported items from Photos or Files and wait for the working copies to finish importing." = "Seleziona gli elementi supportati da Foto o File e attendi che l'importazione delle copie di lavoro venga completata.";
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "Scegli il formato e regola le opzioni disponibili relative a dimensioni, qualità, bitrate o metadati.";
 "Keep the task open until each item completes or reports an error." = "Mantieni l'attività aperta finché ogni elemento non viene completato o segnala un errore.";
-"Use the share action to save or send the compressed output before clearing the workspace." = "Utilizza l'azione di condivisione per salvare o inviare l'output compresso prima di cancellare lo spazio di lavoro.";
+"Use the share action to save or send the compressed output before clearing the workspace." = "Utilizza l'azione di condivisione per salvare o inviare l'output convertito prima di cancellare lo spazio di lavoro.";
 "MP3 audio output" = "Uscita audio MP3";
 "In Audio Compression, MP3 is the default widely compatible format. MP3 and AAC support 96, 128, 192, 256, and 320 kbps. M4A (ALAC) and CAF ALAC use lossless compression, while WAV, AIFF, and CAF PCM store uncompressed audio and are usually larger. Lossless conversion preserves the quality still present in the source, but cannot restore detail already removed from MP3 or AAC. Audio inputs include M4A/ALAC, AAC, MP3, FLAC, WAV, AIFF, and CAF. You can also choose MOV, MP4, or M4V videos from Files or Photos and extract their audio tracks." = "Nella compressione audio, MP3 è il formato ampiamente compatibile predefinito. MP3 e AAC supportano 96, 128, 192, 256 e 320 kbps. M4A (ALAC) e CAF ALAC utilizzano la compressione senza perdita di dati, mentre WAV, AIFF e CAF PCM memorizzano l'audio non compresso e sono generalmente più grandi. La conversione senza perdita preserva la qualità ancora presente nella sorgente, ma non può ripristinare i dettagli già rimossi da MP3 o AAC. Gli ingressi audio includono M4A/ALAC, AAC, MP3, FLAC, WAV, AIFF e CAF. Puoi anche scegliere video MOV, MP4 o M4V da File o Foto ed estrarne le tracce audio.";
 "Go to Settings > General > iPhone Storage and wait for the category chart to finish calculating." = "Vai su Impostazioni > Generali > Archiviazione iPhone e attendi che il grafico delle categorie termini il calcolo.";
@@ -493,8 +489,8 @@
 "intro.media.detail" = "Scopri quanto spazio occupano foto, video e altri contenuti e quanto ne resta. I dati sono esempi.";
 "intro.files.title" = "Scopri cosa occupa spazio";
 "intro.files.detail" = "Esplora le cartelle selezionate e individua subito i file più grandi.";
-"intro.compress.title" = "Anteprima della compressione";
-"intro.compress.detail" = "Esplora le opzioni per immagini, video e audio con un’animazione di avanzamento. Qui non viene compresso alcun file.";
+"intro.compress.title" = "Anteprima della conversione";
+"intro.compress.detail" = "Esplora le opzioni per immagini, video e audio con un’animazione di avanzamento. Qui non viene convertito alcun file.";
 "intro.appearance.title" = "Personalizza l’app";
 "intro.appearance.detail" = "Scegli i colori e l’aspetto che preferisci.";
 "intro.next" = "Continua";
@@ -502,7 +498,7 @@
 "intro.demo" = "Esempio";
 "premium.continueTemporarily" = "Continua per ora";
 "premium.title" = "Più spazio per ciò che conta";
-"premium.subtitle" = "Supporti, file e compressione in un unico posto.";
+"premium.subtitle" = "Supporti, file e conversione in un unico posto.";
 "premium.media.title" = "Organizza i tuoi contenuti multimediali";
 "premium.media.detail" = "Rivedi foto e video e scegli cosa rimuovere.";
 "premium.storage.title" = "Pulisci i file";
@@ -560,3 +556,80 @@
 "Video preview" = "Anteprima video";
 "Photo preview" = "Anteprima foto";
 "Cancel" = "Annulla";
+
+"Convert" = "Converti";
+
+"cleanup.space.title" = "Spazio che puoi pulire";
+
+
+"cleanup.action" = "Pulizia rapida";
+
+"cleanup.review.hint" = "Le foto simili sono preselezionate. Una foto per gruppo viene conservata. Aggiungi screenshot o video solo se non servono più.";
+
+"cleanup.useSuggestions" = "Usa i suggerimenti";
+
+"cleanup.scan.title" = "Spazio per nuovi ricordi";
+
+"cleanup.scan.action" = "Trova spazio da liberare";
+
+"cleanup.scan.hint" = "Esamina foto simili, video grandi e screenshot. L’analisi non elimina nulla.";
+
+"quick.compress.title" = "Conserva i ricordi, riduci il peso";
+
+"quick.video" = "Comprimi video";
+
+"quick.image" = "Comprimi foto";
+
+"quick.compress.hint" = "Scegli i file. Alle impostazioni pensiamo noi.";
+
+"quick.action" = "Comprimi";
+
+"quick.ready" = "Impostazioni pronte";
+
+"quick.video.detail" = "MP4 / HEVC · Risoluzione originale · Bitrate ridotto.";
+
+"quick.image.detail" = "HEIC (altrimenti JPEG) · Qualità 75% · Dimensioni originali · Rimuovi GPS.";
+
+"quick.originals" = "Crea nuove copie e conserva gli originali. Il risultato può essere più grande: confrontalo prima di sostituire.";
+
+"premium.free.summary" = "Gratis: esamina ed elimina contenuti, comprimi e converti video.";
+
+"premium.value.summary" = "Premium: pulisci più categorie, converti immagini e audio, organizza cartelle e personalizza l’aspetto.";
+
+"quick.free" = "Gratis";
+
+"Convert Images" = "Immagini";
+
+"Convert Videos" = "Video";
+
+"Choose what to convert. Originals will remain in Photos." = "Converti";
+
+/* Media category batch compression */
+"compression.explanation" = "Potrebbe essere necessario scaricare gli originali da iCloud.";
+"compression.empty" = "Nessun contenuto in questa categoria";
+"compression.saved" = "Originale conservato · riprova";
+"compression.noReduction" = "Già piccolo · nessuna copia salvata";
+"compression.cancelling" = "Annullamento…";
+"compression.summary" = "%d salvati · %d non riusciti";
+"compression.action" = "Comprimi e sostituisci %d elementi";
+"compression.error.live" = "Impossibile mantenere l’abbinamento della Live Photo. L’originale è invariato.";
+"compression.error.image" = "La compressione rapida non supporta le foto animate. L’originale è invariato.";
+"compression.cardDetail" = "%d elementi · %@";
+
+"compression.replaced" = "Originale sostituito";
+
+"compression.replacing" = "Sostituzione degli originali…";
+
+"compression.error.verify" = "Impossibile verificare la copia compressa. L’originale non è stato eliminato.";
+
+"compression.error.replace" = "Le copie compresse sono salvate. Gli originali non sono stati eliminati. Riprova.";
+
+"compression.selection.savings" = "Risparmio stimato: %@";
+
+"compression.action.short" = "Comprimi";
+
+"compression.confirm.title" = "Avviare la compressione?";
+
+"compression.confirm.message" = "Comprimere %d elementi selezionati? Dopo aver salvato e verificato le copie più piccole, gli originali verranno eliminati da Foto.";
+
+"compression.confirm.action" = "Conferma";

@@ -25,9 +25,9 @@
 "premium.feature.required" = "Beschikbaar met Premium";
 "premium.feature.unlock" = "Ontgrendel met Premium";
 "premium.feature.media" = "Media opschonen";
-"premium.feature.videoConversion" = "Video’s comprimeren";
+"premium.feature.videoConversion" = "Video’s converteren";
 "premium.feature.storage" = "Bestanden opschonen";
-"premium.feature.imageConversion" = "Afbeeldingen comprimeren";
+"premium.feature.imageConversion" = "Afbeeldingen converteren";
 "premium.feature.audioConversion" = "Audio converteren";
 "premium.feature.darkAppearance" = "Donkere weergave";
 "premium.feature.customColors" = "Aangepaste kleuren";
@@ -39,7 +39,7 @@
 
 "Photos" = "Foto's";
 "Storage" = "Opslag";
-"Compress" = "Comprimeren";
+"Compress" = "Converteren";
 "storage.heading" = "Opslagdistributie";
 "Settings" = "Instellingen";
 "Language" = "Taal";
@@ -99,7 +99,6 @@
 "Videos" = "Video's";
 "My Space" = "Mijn ruimte";
 "System & Apps" = "Systeem & Apps";
-"Includes iOS, system data, and other app data." = "Inclusief iOS-, systeemgegevens en andere app-gegevens.";
 "Available" = "Beschikbaar";
 "%lld%% used · %@ of %@" = "%lld%% gebruikt · %@ van %@";
 "Images" = "Afbeeldingen";
@@ -149,7 +148,6 @@
 "Read-only" = "Alleen-lezen";
 "Screenshots" = "Schermafbeeldingen";
 "Live Photos" = "Live-foto's";
-"Video Categories" = "Videocategorieën";
 "%lld items" = "%lld artikelen";
 "No Items" = "Geen artikelen";
 "No media matched this category." = "Er zijn geen media gevonden die aan deze categorie voldoen.";
@@ -193,9 +191,7 @@
 "Press and hold to play" = "Houd ingedrukt om af te spelen";
 "%lld selected" = "%lld geselecteerd";
 "Estimated %@" = "Geschat %@";
-"Media Actions" = "Media-acties";
 "Cleanup Recommendations" = "Aanbevelingen voor opruimen";
-"Media sizes are estimated without downloading original files." = "Mediagroottes worden geschat zonder originele bestanden te downloaden.";
 "Explore the folder hierarchy" = "Verken de mappenhiërarchie";
 "Tap a folder segment to drill down. Tap the center to go back." = "Tik op een mapsegment om verder te gaan. Tik op het midden om terug te gaan.";
 "%lld files" = "%lld-bestanden";
@@ -303,10 +299,10 @@
 "Cloud files may be unavailable" = "Cloudbestanden zijn mogelijk niet beschikbaar";
 "Common Questions" = "Veelgestelde vragen";
 "Confirm your selection" = "Bevestig uw selectie";
-"Compression workspace" = "Compressie werkruimte";
-"Compress a file" = "Een bestand comprimeren";
+"Compression workspace" = "Conversie werkruimte";
+"Compress a file" = "Een bestand converteren";
 "Compress images, videos, and audio without changing the original file." = "Comprimeer afbeeldingen, video's en audio zonder het originele bestand te wijzigen.";
-"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Compress importeert een werkkopie in de app. Als u de compressiewerkruimte opruimt, worden door de app beheerde kopieën en uitvoer verwijderd, dus exporteer eerst alles wat u wilt bewaren.";
+"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Compress importeert een werkkopie in de app. Als u de conversiewerkruimte opruimt, worden door de app beheerde kopieën en uitvoer verwijderd, dus exporteer eerst alles wat u wilt bewaren.";
 "Compress keeps imported working copies and outputs inside app-managed storage. The original outside the app is not replaced. Clear the workspace only after exporting results you want to keep." = "Compress bewaart geïmporteerde werkkopieën en uitvoer in door de app beheerde opslag. Het origineel buiten de app wordt niet vervangen. Maak de werkruimte pas leeg nadat u de resultaten heeft geëxporteerd die u wilt behouden.";
 "Deleted content may remain in Recently Deleted, and iOS storage totals can take time to recalculate. Check the relevant Recently Deleted location, then recheck iPhone Storage later." = "Verwijderde inhoud kan in Recent verwijderd blijven staan en het kan enige tijd duren voordat de iOS-opslagtotalen opnieuw zijn berekend. Controleer de relevante onlangs verwijderde locatie en controleer de iPhone-opslag later opnieuw.";
 "Deleted items move to Recently Deleted and may continue using storage until permanently removed. If iCloud Photos is enabled, deletion also syncs to your other devices." = "Verwijderde items worden verplaatst naar Recent verwijderd en kunnen opslag blijven gebruiken totdat ze definitief worden verwijderd. Als iCloud-foto's is ingeschakeld, wordt het verwijderen ook gesynchroniseerd met uw andere apparaten.";
@@ -314,7 +310,7 @@
 "Deletion stays user controlled" = "Verwijdering blijft onder controle van de gebruiker";
 "Device storage is not iCloud storage" = "Apparaatopslag is geen iCloud-opslag";
 "Do not install profiles, grant unknown computer access, or erase the iPhone for a promised one-tap cache cleanup. Back up important data before any system reset." = "Installeer geen profielen, verleen geen onbekende computertoegang of wis de iPhone voor een beloofde cache-opschoning met één tik. Maak een back-up van belangrijke gegevens voordat u het systeem opnieuw instelt.";
-"Does analysis or compression upload my files?" = "Uploadt analyse of compressie mijn bestanden?";
+"Does analysis or compression upload my files?" = "Uploadt analyse of conversie mijn bestanden?";
 "Explore the results" = "Ontdek de resultaten";
 "Files deleted from an authorized folder may not be recoverable. The app cannot promise that they will appear in Recently Deleted." = "Bestanden die uit een geautoriseerde map zijn verwijderd, kunnen mogelijk niet worden hersteld. De app kan niet beloven dat ze in Recent verwijderd zullen verschijnen.";
 "Find the largest category" = "Zoek de grootste categorie";
@@ -329,7 +325,7 @@
 "Help" = "Hulp";
 "How can we help?" = "Hoe kunnen wij helpen?";
 "Import your files" = "Importeer uw bestanden";
-"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "Geïmporteerde kopieën en gecomprimeerde uitvoer gebruiken ruimte in de app. Wis voltooid werk wanneer u het niet langer nodig heeft, na het exporteren van elk resultaat dat u wilt behouden.";
+"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "Geïmporteerde kopieën en geconverteerde uitvoer gebruiken ruimte in de app. Wis voltooid werk wanneer u het niet langer nodig heeft, na het exporteren van elk resultaat dat u wilt behouden.";
 "In Files, confirm whether an item is under On My iPhone, iCloud Drive, or another provider. The same action can have different recovery and sync behavior in each location." = "Controleer in Bestanden of een item onder Op mijn iPhone, iCloud Drive of een andere provider staat. Dezelfde actie kan op elke locatie een ander herstel- en synchronisatiegedrag hebben.";
 "In iPhone Storage, Offload App removes the app but keeps its documents and data. Delete App removes the app and its local data, so verify sync or backup before choosing it." = "In iPhone-opslag verwijdert Offload App de app, maar behoudt de documenten en gegevens. App verwijderen verwijdert de app en de lokale gegevens, dus verifieer de synchronisatie of back-up voordat u deze kiest.";
 "Install the latest iOS update, restart the iPhone, review Safari data and offline downloads, then let iPhone Storage recalculate. If an unusually large total persists, contact Apple Support." = "Installeer de nieuwste iOS-update, start de iPhone opnieuw op, bekijk Safari-gegevens en offline downloads en laat iPhone Storage opnieuw berekenen. Neem contact op met Apple Support als het totaal ongewoon hoog blijft.";
@@ -342,13 +338,13 @@
 "Local by design" = "Lokaal van opzet";
 "Manage Apps & Downloads" = "Beheer apps en downloads";
 "Manage Files & iCloud Drive" = "Beheer bestanden en iCloud Drive";
-"Manage compression storage" = "Beheer compressieopslag";
-"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "Media-analyse, mappenscannen en compressie gebeuren op dit apparaat. De app uploadt uw bestanden niet voor deze functies.";
+"Manage compression storage" = "Beheer conversieopslag";
+"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "Media-analyse, mappenscannen en conversie gebeuren op dit apparaat. De app uploadt uw bestanden niet voor deze functies.";
 "Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "Media analyseert foto's en video's die u toestaat via de Fotobibliotheek. Opslag analyseert alleen een map die u kiest. Compress verkleint de grootte van kopieën die in de privéwerkruimte van de app worden geïmporteerd.";
 "Media needs Photos access to display and analyze library items. You can choose Full Access, Limited Access, or no access, and change the choice later in System Settings." = "Media hebben toegang tot Foto's nodig om bibliotheekitems weer te geven en te analyseren. U kunt Volledige toegang, Beperkte toegang of geen toegang kiezen en de keuze later wijzigen in Systeeminstellingen.";
 "Meet the App" = "Maak kennis met de app";
-"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "Nee. Het kan de Foto's-items analyseren die u autoriseert, de map die u kiest en zijn eigen compressiewerkruimte. Andere apps en beschermde systeemopslag blijven privé.";
-"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "Nee. Media-analyse, mapanalyse en compressie worden op dit apparaat uitgevoerd. Apple-services of bestandsproviders kunnen hun eigen inhoud synchroniseren volgens uw bestaande instellingen.";
+"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "Nee. Het kan de Foto's-items analyseren die u autoriseert, de map die u kiest en zijn eigen conversiewerkruimte. Andere apps en beschermde systeemopslag blijven privé.";
+"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "Nee. Media-analyse, mapanalyse en conversie worden op dit apparaat uitgevoerd. Apple-services of bestandsproviders kunnen hun eigen inhoud synchroniseren volgens uw bestaande instellingen.";
 "Not necessarily. They are visually related candidates and can include different frames, edits, or resolutions. Always compare them before selecting one to remove." = "Niet noodzakelijkerwijs. Het zijn visueel gerelateerde kandidaten en kunnen verschillende frames, bewerkingen of resoluties bevatten. Vergelijk ze altijd voordat u er een selecteert om te verwijderen.";
 "Offload or delete" = "Offloaden of verwijderen";
 "Only the items selected in the system permission sheet are available. Counts, groups, and recommendations cannot include the rest of the library." = "Alleen de items die zijn geselecteerd op het systeemmachtigingsblad zijn beschikbaar. Tellingen, groepen en aanbevelingen kunnen niet de rest van de bibliotheek omvatten.";
@@ -370,7 +366,7 @@
 "Review before deleting" = "Controleer voordat u verwijdert";
 "Review large videos, screenshots, and similar photos safely." = "Bekijk grote video's, schermafbeeldingen en soortgelijke foto's veilig.";
 "Review long videos, 4K videos, screen recordings, and large screenshots first. Similar-photo groups can help you compare bursts or repeated shots, but you should choose the keeper yourself." = "Bekijk eerst lange video's, 4K-video's, schermopnamen en grote screenshots. Groepen met vergelijkbare foto's kunnen u helpen bij het vergelijken van bursts of herhaalde opnamen, maar u moet zelf de keeper kiezen.";
-"Review compression settings" = "Controleer de compressie-instellingen";
+"Review compression settings" = "Controleer de conversie-instellingen";
 "Review photos, similar items, screenshots, Live Photos, and videos." = "Bekijk foto's, soortgelijke items, schermafbeeldingen, Live Photos en video's.";
 "Safari website data" = "Gegevens van Safari-website";
 "Safe steps to try" = "Veilige stappen om te proberen";
@@ -382,7 +378,7 @@
 "Similar does not mean identical" = "Gelijkaardig betekent niet identiek";
 "Similar-photo groups are review suggestions, not proof that files are exact duplicates. Keep the best shot before deleting anything." = "Groepen met soortgelijke foto's zijn recensie-suggesties en geen bewijs dat bestanden exacte duplicaten zijn. Bewaar de beste opname voordat u iets verwijdert.";
 "Start analysis" = "Analyse starten";
-"Start compression" = "Compressie starten";
+"Start compression" = "Conversie starten";
 "Start with high-impact items" = "Begin met items met een hoge impact";
 "Start with iPhone Storage" = "Begin met iPhone-opslag";
 "Step %lld" = "Stap %lld";
@@ -406,7 +402,7 @@
 "Understand optimized photos" = "Begrijp geoptimaliseerde foto's";
 "Understand the three tools and what each one can access." = "Begrijp de drie tools en waartoe ze allemaal toegang hebben.";
 "Use Apple's controls for attachments, history, and website data." = "Gebruik de Apple-bedieningselementen voor bijlagen, geschiedenis en websitegegevens.";
-"Use Compress" = "Gebruik Comprimeren";
+"Use Compress" = "Gebruik Converteren";
 "Use Media" = "Gebruik media";
 "Use Settings > Apps > Safari to clear history and website data. This can close tabs or sign you out of websites, so save anything important first." = "Gebruik Instellingen > Apps > Safari om de geschiedenis en websitegegevens te wissen. Hiermee kunt u tabbladen sluiten of u afmelden bij websites, dus sla eerst alle belangrijke zaken op.";
 "Use Storage" = "Gebruik opslag";
@@ -431,7 +427,7 @@
 "Display Options" = "Weergaveopties";
 "Interface Animations" = "Interface-animaties";
 "Show Media Dates" = "Mediadata weergeven";
-"Control dashboard animations, compression card animations, and date headings in media detail grids." = "Beheer dashboardanimaties, compressiekaartanimaties en datumkoppen in mediadetailrasters.";
+"Control dashboard animations, compression card animations, and date headings in media detail grids." = "Beheer dashboardanimaties, conversiekaartanimaties en datumkoppen in mediadetailrasters.";
 "Calculating size…" = "Grootte berekenen…";
 "Size unavailable" = "Maat niet beschikbaar";
 "Quick Cleanup" = "Snelle opruiming";
@@ -450,7 +446,7 @@
 "Selected" = "Geselecteerd";
 "Not selected" = "Niet geselecteerd";
 "Selects or deselects every suggested item in this category." = "Selecteert of deselecteert elk voorgesteld item in deze categorie.";
-"%@ moved to Recently Deleted · ~%@" = "%@ verplaatst naar Recent verwijderd · ~%@";
+"%@ moved to Recently Deleted · %@" = "%@ verplaatst naar Recent verwijderd · %@";
 "Allow photo access, then wait for the library to load." = "Sta fototoegang toe en wacht vervolgens tot de bibliotheek is geladen.";
 "Analyze the available library and let the app group useful cleanup candidates." = "Analyseer de beschikbare bibliotheek en laat de app nuttige opruimkandidaten groeperen.";
 "Preview items at full size and compare similar photos carefully." = "Bekijk items op volledige grootte en vergelijk zorgvuldig vergelijkbare foto's.";
@@ -459,11 +455,11 @@
 "The app reads file metadata and reports inaccessible or unavailable cloud items separately." = "De app leest bestandsmetagegevens en rapporteert ontoegankelijke of niet-beschikbare clouditems afzonderlijk.";
 "Use the folder map, categories, and detailed lists to find large files." = "Gebruik het mappenoverzicht, de categorieën en gedetailleerde lijsten om grote bestanden te vinden.";
 "Confirm the file and location, then delete only content you no longer need." = "Bevestig het bestand en de locatie en verwijder vervolgens alleen de inhoud die u niet langer nodig heeft.";
-"Open image, video, or audio compression. The audio tool can also extract a track from video." = "Open beeld-, video- of audiocompressie. De audiotool kan ook een track uit video extraheren.";
+"Open image, video, or audio compression. The audio tool can also extract a track from video." = "Open beeld-, video- of audioconversie. De audiotool kan ook een track uit video extraheren.";
 "Select supported items from Photos or Files and wait for the working copies to finish importing." = "Selecteer ondersteunde items uit Foto's of Bestanden en wacht tot de werkkopieën klaar zijn met importeren.";
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "Kies het formaat en pas de beschikbare opties voor grootte, kwaliteit, bitrate of metadata aan.";
 "Keep the task open until each item completes or reports an error." = "Houd de taak open totdat elk item is voltooid of een fout rapporteert.";
-"Use the share action to save or send the compressed output before clearing the workspace." = "Gebruik de deelactie om de gecomprimeerde uitvoer op te slaan of te verzenden voordat u de werkruimte leegmaakt.";
+"Use the share action to save or send the compressed output before clearing the workspace." = "Gebruik de deelactie om de geconverteerde uitvoer op te slaan of te verzenden voordat u de werkruimte leegmaakt.";
 "MP3 audio output" = "MP3-audio-uitvoer";
 "In Audio Compression, MP3 is the default widely compatible format. MP3 and AAC support 96, 128, 192, 256, and 320 kbps. M4A (ALAC) and CAF ALAC use lossless compression, while WAV, AIFF, and CAF PCM store uncompressed audio and are usually larger. Lossless conversion preserves the quality still present in the source, but cannot restore detail already removed from MP3 or AAC. Audio inputs include M4A/ALAC, AAC, MP3, FLAC, WAV, AIFF, and CAF. You can also choose MOV, MP4, or M4V videos from Files or Photos and extract their audio tracks." = "Bij audiocompressie is MP3 het standaard, breed compatibele formaat. MP3 en AAC ondersteunen 96, 128, 192, 256 en 320 kbps. M4A (ALAC) en CAF ALAC gebruiken compressie zonder verlies, terwijl WAV, AIFF en CAF PCM ongecomprimeerde audio opslaan en meestal groter zijn. Conversie zonder verlies behoudt de kwaliteit die nog steeds aanwezig is in de bron, maar kan geen details herstellen die al uit MP3 of AAC zijn verwijderd. Audio-ingangen omvatten M4A/ALAC, AAC, MP3, FLAC, WAV, AIFF en CAF. Je kunt ook MOV-, MP4- of M4V-video's kiezen uit Bestanden of Foto's en de audiotracks ervan extraheren.";
 "Go to Settings > General > iPhone Storage and wait for the category chart to finish calculating." = "Ga naar Instellingen > Algemeen > iPhone-opslag en wacht tot het categoriediagram klaar is met berekenen.";
@@ -493,8 +489,8 @@
 "intro.media.detail" = "Zie hoeveel ruimte foto's, video's en andere inhoud gebruiken en hoeveel er vrij is. De cijfers zijn voorbeelden.";
 "intro.files.title" = "Zie wat ruimte inneemt";
 "intro.files.detail" = "Blader door geselecteerde mappen en ontdek grote bestanden in één oogopslag.";
-"intro.compress.title" = "Bekijk mediacompressie";
-"intro.compress.detail" = "Verken opties voor afbeeldingen, video's en audio met een voorbeeld van de voortgang. Er worden hier geen bestanden gecomprimeerd.";
+"intro.compress.title" = "Bekijk mediaconversie";
+"intro.compress.detail" = "Verken opties voor afbeeldingen, video's en audio met een voorbeeld van de voortgang. Er worden hier geen bestanden geconverteerd.";
 "intro.appearance.title" = "Maak de app persoonlijk";
 "intro.appearance.detail" = "Kies kleuren en een uiterlijk die bij je passen.";
 "intro.next" = "Doorgaan";
@@ -502,12 +498,12 @@
 "intro.demo" = "Voorbeeld";
 "premium.continueTemporarily" = "Voorlopig doorgaan";
 "premium.title" = "Meer ruimte voor wat ertoe doet";
-"premium.subtitle" = "Media, bestanden en compressie op één plek.";
+"premium.subtitle" = "Media, bestanden en conversie op één plek.";
 "premium.media.title" = "Organiseer uw media";
 "premium.media.detail" = "Bekijk foto's en video's en kies wat u wilt verwijderen.";
 "premium.storage.title" = "Bestanden opruimen";
 "premium.storage.detail" = "Vind onnodige bestanden in mappen die u autoriseert.";
-"premium.compression.title" = "Media comprimeren";
+"premium.compression.title" = "Media converteren";
 "premium.compression.detail" = "Verklein de grootte van afbeeldings-, video- en audiobestanden met aanpasbare instellingen.";
 "premium.privacy" = "Media- en bestandsverwerking blijft op dit apparaat.";
 "premium.plans.title" = "Kies uw abonnement";
@@ -560,3 +556,80 @@
 "Video preview" = "Videovoorbeeld";
 "Photo preview" = "Fotovoorbeeld";
 "Cancel" = "Annuleren";
+
+"Convert" = "Converteren";
+
+"cleanup.space.title" = "Ruimte die je kunt opruimen";
+
+
+"cleanup.action" = "Snel opruimen";
+
+"cleanup.review.hint" = "Vergelijkbare foto's zijn geselecteerd. Eén foto per groep blijft behouden. Voeg alleen onnodige schermafbeeldingen of video's toe.";
+
+"cleanup.useSuggestions" = "Suggesties gebruiken";
+
+"cleanup.scan.title" = "Ruimte voor meer";
+
+"cleanup.scan.action" = "Vrij te maken ruimte zoeken";
+
+"cleanup.scan.hint" = "Bekijk vergelijkbare foto's, grote video's en schermafbeeldingen. De analyse verwijdert niets.";
+
+"quick.compress.title" = "Bewaren, maar kleiner";
+
+"quick.video" = "Video's comprimeren";
+
+"quick.image" = "Foto's comprimeren";
+
+"quick.compress.hint" = "Kies bestanden. Wij regelen de instellingen.";
+
+"quick.action" = "Comprimeren";
+
+"quick.ready" = "Instellingen staan klaar";
+
+"quick.video.detail" = "MP4 / HEVC · Oorspronkelijke resolutie · Lagere bitsnelheid.";
+
+"quick.image.detail" = "HEIC (anders JPEG) · 75% kwaliteit · Oorspronkelijke afmetingen · GPS verwijderen.";
+
+"quick.originals" = "Maakt nieuwe kopieën en bewaart originelen. Het resultaat kan groter zijn; vergelijk vóór vervangen.";
+
+"premium.free.summary" = "Gratis: media bekijken en verwijderen, video's comprimeren en converteren.";
+
+"premium.value.summary" = "Premium: categorieën samen opruimen, afbeeldingen en audio converteren, mappen ordenen en het uiterlijk aanpassen.";
+
+"quick.free" = "Gratis";
+
+"Convert Images" = "Afbeeldingen";
+
+"Convert Videos" = "Video’s";
+
+"Choose what to convert. Originals will remain in Photos." = "Converteren";
+
+/* Media category batch compression */
+"compression.explanation" = "iCloud-originelen moeten mogelijk worden gedownload.";
+"compression.empty" = "Geen media in deze categorie";
+"compression.saved" = "Origineel behouden · opnieuw proberen";
+"compression.noReduction" = "Al klein · geen kopie bewaard";
+"compression.cancelling" = "Annuleren…";
+"compression.summary" = "%d bewaard · %d mislukt";
+"compression.action" = "%d onderdelen comprimeren en vervangen";
+"compression.error.live" = "De Live Photo-koppeling kon niet behouden worden. Het origineel is ongewijzigd.";
+"compression.error.image" = "Snel comprimeren ondersteunt geen geanimeerde foto’s. Het origineel is ongewijzigd.";
+"compression.cardDetail" = "%d onderdelen · %@";
+
+"compression.replaced" = "Origineel vervangen";
+
+"compression.replacing" = "Originelen vervangen…";
+
+"compression.error.verify" = "De gecomprimeerde kopie kon niet worden gecontroleerd. Het origineel is niet verwijderd.";
+
+"compression.error.replace" = "Gecomprimeerde kopieën zijn bewaard. Originelen zijn niet verwijderd. Probeer opnieuw.";
+
+"compression.selection.savings" = "Geschatte besparing: %@";
+
+"compression.action.short" = "Comprimeren";
+
+"compression.confirm.title" = "Compressie starten?";
+
+"compression.confirm.message" = "%d geselecteerde onderdelen comprimeren? Nadat kleinere kopieën zijn opgeslagen en gecontroleerd, worden de originelen uit Foto’s verwijderd.";
+
+"compression.confirm.action" = "Bevestigen";

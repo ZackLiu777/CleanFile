@@ -96,6 +96,22 @@ final class VideoBitrateEncoder: @unchecked Sendable {
             audioInput = input
         }
 
+        // Live Photo pairing depends on both the movie metadata and its timed track.
+        var metadataPipes: [SamplePipe] = []
+        if request.preservesTimedMetadata {
+            guard request.container == .mov else { throw VideoConversionError.unsupportedSettings }
+            writer.metadata = try await asset.load(.metadata)
+            for track in try await asset.loadTracks(withMediaType: .metadata) {
+                let output = AVAssetReaderTrackOutput(track: track, outputSettings: nil)
+                let formats = try await track.load(.formatDescriptions)
+                let input = AVAssetWriterInput(mediaType: .metadata, outputSettings: nil, sourceFormatHint: formats.first)
+                guard reader.canAdd(output), writer.canAdd(input) else { throw VideoConversionError.unsupportedSettings }
+                reader.add(output)
+                writer.add(input)
+                metadataPipes.append(SamplePipe(output: output, input: input, reader: reader, writer: writer))
+            }
+        }
+
         try Task.checkCancellation()
         lock.withLock {
             self.reader = reader
@@ -116,13 +132,17 @@ final class VideoBitrateEncoder: @unchecked Sendable {
         let duration = (try await asset.load(.duration)).seconds
         let videoPipe = SamplePipe(output: videoOutput, input: videoInput, reader: reader, writer: writer)
         do {
-            async let video: Void = videoPipe.append(duration: duration, progress: progress)
-            if let audioOutput, let audioInput {
-                let audioPipe = SamplePipe(output: audioOutput, input: audioInput, reader: reader, writer: writer)
-                async let audio: Void = audioPipe.append(duration: duration, progress: nil)
-                _ = try await (video, audio)
-            } else {
-                try await video
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                group.addTask { try await videoPipe.append(duration: duration, progress: progress) }
+                if let audioOutput, let audioInput {
+                    let pipe = SamplePipe(output: audioOutput, input: audioInput, reader: reader, writer: writer)
+                    group.addTask { try await pipe.append(duration: duration, progress: nil) }
+                }
+                for pipe in metadataPipes {
+                    group.addTask { try await pipe.append(duration: duration, progress: nil) }
+                }
+                // Fail promptly so a blocked sibling pipe is cancelled as well.
+                while let _ = try await group.next() { }
             }
             guard reader.status == .completed else {
                 throw reader.error ?? VideoConversionError.exportFailed("Unable to read source media")
@@ -191,7 +211,7 @@ private final class SamplePipe: @unchecked Sendable {
     func append(duration: Double, progress: (@Sendable (Double) async -> Void)?) async throws {
         while true {
             try Task.checkCancellation()
-            guard reader.status == .reading, writer.status == .writing else {
+            guard reader.status == .reading || reader.status == .completed, writer.status == .writing else {
                 throw VideoConversionError.cancelled
             }
             guard input.isReadyForMoreMediaData else {

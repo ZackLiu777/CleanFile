@@ -21,8 +21,12 @@ struct PhotosView: View {
     @EnvironmentObject private var accessStore: PremiumFeatureAccessStore
     @ObservedObject var viewModel: PhotoLibraryViewModel
     let isTabActive: Bool
+    var onOpenStorage: () -> Void = {}
+    var onOpenSettings: () -> Void = {}
+    var onOpenConversion: () -> Void = {}
     @State private var animatedStorageFraction = 0.0
     @State private var showsQuickCleanPremium = false
+    @State private var showsQuickClean = false
 
     var body: some View {
         NavigationStack {
@@ -67,45 +71,31 @@ struct PhotosView: View {
                 }
             }
             .toolbar {
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Group {
-                        if accessStore.allows(.quickClean) {
-                            NavigationLink {
-                                MediaQuickCleanView(photoLibrary: viewModel, accessStore: accessStore)
-                            } label: {
-                                Label("Quick Cleanup", systemImage: "trash")
-                            }
-                            .disabled(viewModel.assets.isEmpty || viewModel.isLoading)
-                        } else {
-                            Button {
-                                showsQuickCleanPremium = true
-                            } label: {
-                                Label("Quick Cleanup", systemImage: "trash")
-                            }
-                        }
+                if !showsDashboardHeader {
+                    ToolbarItem(placement: .topBarTrailing) { conversionButton }
+                }
+                ToolbarItemGroup(placement: .topBarLeading) {
+                    Button {
+                        if accessStore.allows(.quickClean) { showsQuickClean = true }
+                        else { showsQuickCleanPremium = true }
+                    } label: {
+                        Label("Quick Cleanup", systemImage: "sparkles")
                     }
                     .accessibilityIdentifier("media.quickClean.open")
-
-                    Menu {
-                        if viewModel.analysisState.isAnalyzing {
-                            Button("Cancel Analysis", systemImage: "xmark.circle", role: .cancel) {
-                                viewModel.cancelAnalysis()
-                            }
-                        } else {
-                            Button("Analyze", systemImage: "sparkle.magnifyingglass") {
-                                viewModel.startAnalysis()
-                            }
-                            .disabled(viewModel.assets.isEmpty || viewModel.isLoading)
-                        }
-
-                        Button("Refresh", systemImage: "arrow.clockwise") {
-                            viewModel.refresh()
-                        }
-                    } label: {
-                        Label("Media Actions", systemImage: "ellipsis")
+                    Button(action: onOpenStorage) {
+                        Label("Storage", systemImage: "externaldrive")
                     }
-                    .accessibilityIdentifier("media.actions")
+                    .accessibilityIdentifier("media.storage")
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: onOpenSettings) {
+                        Label("Settings", systemImage: "gearshape")
+                    }
+                    .accessibilityIdentifier("media.settings")
+                }
+            }
+            .navigationDestination(isPresented: $showsQuickClean) {
+                MediaQuickCleanView(photoLibrary: viewModel, accessStore: accessStore)
             }
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
@@ -136,11 +126,17 @@ struct PhotosView: View {
         if viewModel.isLoading {
             mediaDashboard
         } else if viewModel.assets.isEmpty {
-            ContentUnavailableView(
-                "No Media",
-                systemImage: "photo.on.rectangle",
-                description: Text("No photos or videos are available in your library.")
-            )
+            ScrollView {
+                VStack(spacing: 24) {
+                    ContentUnavailableView(
+                        "No Media",
+                        systemImage: "photo.on.rectangle",
+                        description: Text("No photos or videos are available in your library.")
+                    )
+                    quickCompressionCards
+                }
+                .padding(16)
+            }
         } else {
             mediaDashboard
         }
@@ -168,20 +164,56 @@ struct PhotosView: View {
         .padding(.horizontal)
     }
 
+    private var showsDashboardHeader: Bool {
+        (viewModel.authorizationStatus == .authorized || viewModel.authorizationStatus == .limited)
+            && (viewModel.isLoading || !viewModel.assets.isEmpty)
+    }
+
+    private var mediaTitle: some View {
+        Text("My Space")
+            .appTypeface(.largeTitle.bold(), size: 34, relativeTo: .largeTitle, weight: .bold)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var conversionButton: some View {
+        Button(action: onOpenConversion) {
+            Label("Convert", systemImage: "arrow.triangle.2.circlepath")
+                .font(.subheadline.weight(.semibold))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .foregroundStyle(theme.textPrimary)
+                .background(theme.accentPrimary.opacity(0.18), in: Capsule())
+                .overlay { Capsule().strokeBorder(theme.accentPrimary.opacity(0.35), lineWidth: 1) }
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("media.convert")
+    }
+
     private var mediaDashboard: some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 24) {
-                Text("My Space")
-                    .appTypeface(.largeTitle.bold(), size: 34, relativeTo: .largeTitle, weight: .bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .padding(.bottom, -16)
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) {
+                        mediaTitle.fixedSize(horizontal: true, vertical: false)
+                        Spacer(minLength: 8)
+                        conversionButton.fixedSize(horizontal: true, vertical: false)
+                    }
+                    VStack(alignment: .leading, spacing: 8) {
+                        mediaTitle
+                        conversionButton
+                    }
+                }
+                .padding(12)
+                .padding(.bottom, -16)
 
                 storageOverview
                 analysisContent
+                quickCompressionCards
             }
             .padding(.horizontal, 4)
-            .padding(.top, -24)
+            .padding(.top, 4)
             .padding(.bottom, 24)
             .frame(maxWidth: 900)
             .frame(maxWidth: .infinity)
@@ -194,16 +226,16 @@ struct PhotosView: View {
         switch viewModel.analysisState {
         case .idle:
             VStack(alignment: .leading, spacing: 14) {
-                Label("Smart Media Analysis", systemImage: "sparkles")
+                Label("cleanup.scan.title", systemImage: "sparkles")
                     .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
                 Text(viewModel.isLoading
                      ? LocalizedStringKey("Loading media…")
-                     : LocalizedStringKey("Find visually similar photos and organize videos, screenshots, and Live Photos."))
+                     : LocalizedStringKey("cleanup.scan.hint"))
                     .foregroundStyle(.secondary)
                 Button {
                     viewModel.startAnalysis()
                 } label: {
-                    Label("Find Similar Photos and Videos", systemImage: "sparkle.magnifyingglass")
+                    Label("cleanup.scan.action", systemImage: "sparkle.magnifyingglass")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
@@ -264,14 +296,74 @@ struct PhotosView: View {
 
     @ViewBuilder
     private var storageOverview: some View {
-        if let storage = viewModel.storageSnapshot {
-            MediaStorageOverview(
-                storage: storage,
-                photoBytes: viewModel.estimatedPhotoLibraryBytes,
-                videoBytes: viewModel.estimatedVideoLibraryBytes,
-                animatedUsedFraction: animatedStorageFraction,
-                animationsEnabled: themeSettings.interfaceAnimationsEnabled && !reduceMotion
-            )
+        VStack(alignment: .leading, spacing: 16) {
+            if let result = cleanupResult {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("cleanup.space.title")
+                        .font(.subheadline)
+                        .foregroundStyle(theme.textSecondary)
+                    Text(sizeText(result.cleanupReviewIDs))
+                        .appTypeface(.largeTitle.bold(), size: 34, relativeTo: .largeTitle, weight: .bold)
+                        .contentTransition(.numericText())
+                        .accessibilityIdentifier("media.cleanup.estimate")
+                }
+            }
+
+            if let storage = viewModel.storageSnapshot {
+                MediaStorageOverview(
+                    storage: storage,
+                    photoBytes: viewModel.estimatedPhotoLibraryBytes,
+                    videoBytes: viewModel.estimatedVideoLibraryBytes,
+                    animatedUsedFraction: animatedStorageFraction,
+                    animationsEnabled: themeSettings.interfaceAnimationsEnabled && !reduceMotion
+                )
+            }
+
+        }
+        .padding(12)
+        .appContentCard(cornerRadius: 22)
+    }
+
+    private var cleanupResult: MediaClassificationResult? {
+        switch viewModel.analysisState {
+        case .success(let result), .partialFailure(let result): result
+        default: nil
+        }
+    }
+
+    private func sizeText(_ ids: Set<String>) -> String {
+        ByteCountFormatter.string(fromByteCount: viewModel.estimatedByteCount(for: ids), countStyle: .file)
+    }
+
+    private var quickCompressionCards: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("quick.compress.title")
+                .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
+                .padding(.horizontal, 12)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 10)], spacing: 10) {
+                ForEach([MediaCompressionCategory.video, .image]) { category in
+                    let assets = category.assets(in: viewModel)
+                    NavigationLink {
+                        MediaCompressionView(category: category, library: viewModel)
+                    } label: {
+                        MediaCategoryCard(
+                            title: NSLocalizedString(category.titleKey, comment: ""),
+                            detail: String(format: NSLocalizedString("compression.cardDetail", comment: ""), assets.count,
+                                           sizeText(Set(assets.map(\.localIdentifier)))),
+                            representativeAssetID: assets.first?.localIdentifier,
+                            systemImage: category.symbol, viewModel: viewModel
+                        )
+                        .overlay(alignment: .topTrailing) {
+                            if category != .video && !accessStore.allows(.imageConversion) {
+                                Text("Premium").font(.caption.weight(.semibold)).foregroundStyle(.white)
+                                    .padding(8).background(.black.opacity(0.5), in: Capsule()).padding(10)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("media.compress." + category.rawValue)
+                }
+            }
         }
     }
 
@@ -310,16 +402,23 @@ struct PhotosView: View {
         buttonTitle: LocalizedStringKey?,
         action: @escaping () -> Void
     ) -> some View {
-        ContentUnavailableView {
-            Label(title, systemImage: "photo.on.rectangle")
-        } description: {
-            Text(message)
-        } actions: {
-            if let buttonTitle {
-                Button(buttonTitle, action: action)
-                    .buttonStyle(.borderedProminent)
-                    .tint(theme.accentPrimary)
+        ScrollView {
+            VStack(spacing: 24) {
+                ContentUnavailableView {
+                    Label(title, systemImage: "photo.on.rectangle")
+                } description: {
+                    Text(message)
+                } actions: {
+                    if let buttonTitle {
+                        Button(buttonTitle, action: action)
+                            .buttonStyle(.borderedProminent)
+                            .tint(theme.accentPrimary)
+                    }
+                }
+                // File imports do not require access to the Photos library.
+                quickCompressionCards
             }
+            .padding(16)
         }
     }
 }
@@ -351,11 +450,6 @@ private struct MediaDashboardResultsView: View {
                 }
             }
 
-            Text("Media sizes are estimated without downloading original files.")
-                .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
-                .foregroundStyle(.secondary)
-
-            videoCategoryGrid
 
             if isPartial {
                 Label(
@@ -426,50 +520,20 @@ private struct MediaDashboardResultsView: View {
         ]
     }
 
-    private var videoCategories: [MediaCategorySummary] {
-        VideoCategory.allCases.compactMap { category in
-            let ids = result.classifiedVideos
-                .filter { $0.categories.contains(category) }
-                .map(\.id)
-            guard !ids.isEmpty else { return nil }
-            return MediaCategorySummary(
-                title: category.displayName,
-                assetIDs: ids,
-                systemImage: videoCategorySymbol(category)
-            )
-        }
-    }
-
-    @ViewBuilder
-    private var videoCategoryGrid: some View {
-        if !videoCategories.isEmpty {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Video Categories")
-                    .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
-
-                LazyVGrid(columns: columns, spacing: 10) {
-                    ForEach(videoCategories) { category in
-                        categoryLink(category)
-                    }
-                }
-            }
-        }
-    }
-
     /// 解析 `categoryLink` 对应的业务语义，并返回稳定的分类或映射结果。
     private func categoryLink(_ category: MediaCategorySummary) -> some View {
         NavigationLink {
             MediaCategoryDetailView(
                 title: category.title,
                 assetIDs: category.assetIDs,
-                protectedAssetIDs: category.protectedAssetIDs,
+                protectedAssetIDs: result.protectedKeeperIDs,
                 suggestedDeletionIDs: category.suggestedDeletionIDs,
                 viewModel: viewModel
             )
         } label: {
             MediaCategoryCard(
                 title: category.title,
-                detail: categoryDetail(category.assetIDs),
+                detail: categoryDetail(category.assetIDs.filter { !result.protectedKeeperIDs.contains($0) }),
                 representativeAssetID: category.assetIDs.first,
                 systemImage: category.systemImage,
                 viewModel: viewModel
@@ -495,16 +559,6 @@ private struct MediaDashboardResultsView: View {
         return ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
     }
 
-    /// 封装 `videoCategorySymbol` 对应的局部行为，供当前类型在统一入口下复用。
-    private func videoCategorySymbol(_ category: VideoCategory) -> String {
-        switch category {
-        case .longDuration: "clock"
-        case .fourK: "4k.tv"
-        case .screenRecording: "record.circle"
-        case .slowMotion: "slowmo"
-        case .timeLapse: "timelapse"
-        }
-    }
 
 }
 
@@ -601,16 +655,10 @@ struct MediaStorageOverview: View {
                 }
             }
 
-            Text("Includes iOS, system data, and other app data.")
-                .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
-                .foregroundStyle(theme.textTertiary)
-
             Text(storageSummary)
                 .appTypeface(.system(.subheadline, design: .rounded).weight(.medium), size: 15, relativeTo: .subheadline, weight: .medium)
                 .foregroundStyle(theme.textPrimary)
         }
-        .padding(14)
-        .appContentCard(cornerRadius: 18)
         .accessibilityElement(children: .combine)
     }
 
@@ -736,7 +784,7 @@ private struct MediaCategoryCard: View {
                         .foregroundStyle(.white.opacity(0.82))
                         .lineLimit(1)
                 }
-                .padding(14)
+                .padding(12)
             }
             .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))

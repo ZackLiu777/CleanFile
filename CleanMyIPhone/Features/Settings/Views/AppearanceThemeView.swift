@@ -31,7 +31,6 @@ struct AppearanceThemeView: View {
             if #available(iOS 26.0, *) {
                 glassCardSection
             }
-            glassTabSection
             displayOptionsSection
             fontSection
             appearanceSection
@@ -49,7 +48,6 @@ struct AppearanceThemeView: View {
         .sensoryFeedback(.selection, trigger: themeSettings.effectiveThemeID)
         .sensoryFeedback(.selection, trigger: themeSettings.customBackgroundStyle.kind)
         .sensoryFeedback(.selection, trigger: themeSettings.liquidGlassCardsEnabled)
-        .sensoryFeedback(.selection, trigger: themeSettings.customTabBarEnabled)
         .sheet(item: $requiredFeature) { PremiumSubscriptionView(requiredFeature: $0) }
         .onAppear {
             tabBarVisibility.setHidden(
@@ -355,23 +353,6 @@ struct AppearanceThemeView: View {
             Text("Cards")
         } footer: {
             Text("Use system glass surfaces for content cards throughout the app.")
-        }
-        .appListCard()
-    }
-
-    /// Controls the primary navigation style independently from content cards.
-    private var glassTabSection: some View {
-        Section {
-            Toggle(
-                "Custom Tab Bar",
-                isOn: $themeSettings.customTabBarEnabled
-            )
-            .accessibilityIdentifier("appearance.customTabBar")
-            .accessibilityValue(themeSettings.customTabBarEnabled ? "1" : "0")
-        } header: {
-            Text("Tab Bar")
-        } footer: {
-            Text("Turn on to use the app's custom tab bar instead of the system tab bar.")
         }
         .appListCard()
     }

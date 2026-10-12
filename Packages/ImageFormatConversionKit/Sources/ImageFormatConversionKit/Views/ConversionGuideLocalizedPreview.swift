@@ -8,7 +8,7 @@ struct ConversionGuideLocalizedPreview: View {
     let imageName: String
 
     private var selectedTool: String? {
-        for tool in ["image", "video", "audio"] where imageName.hasSuffix(tool) {
+        for tool in ["video", "image", "audio"] where imageName.hasSuffix(tool) {
             return tool
         }
         return nil
@@ -17,9 +17,9 @@ struct ConversionGuideLocalizedPreview: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(selectedTool.map(toolTitle) ?? L10n.string("conversion.guide.title"))
+                Text(selectedTool.map(toolTitle) ?? L10n.string("converter.heading"))
                     .appTypeface(.title3.bold(), size: 20, relativeTo: .title3, weight: .bold)
-                    .lineLimit(1)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Spacer()
 
@@ -33,7 +33,7 @@ struct ConversionGuideLocalizedPreview: View {
             if let selectedTool {
                 toolPreview(selectedTool)
             } else {
-                ForEach(["image", "video", "audio"], id: \.self) { tool in
+                ForEach(["video", "image", "audio"], id: \.self) { tool in
                     previewRow(
                         symbol: toolSymbol(tool),
                         title: toolTitle(tool),
@@ -66,7 +66,7 @@ struct ConversionGuideLocalizedPreview: View {
     }
 
     private func previewRow(symbol: String, title: String, detail: String) -> some View {
-        HStack(alignment: .center, spacing: 11) {
+        HStack(alignment: .top, spacing: 11) {
             Image(systemName: symbol)
                 .appTypeface(.system(size: 16, weight: .semibold), size: 16, relativeTo: .body, weight: .semibold)
                 .foregroundStyle(theme.accent)
@@ -76,11 +76,11 @@ struct ConversionGuideLocalizedPreview: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
-                    .lineLimit(1)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(detail)
                     .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                     .foregroundStyle(theme.textSecondary)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -88,7 +88,7 @@ struct ConversionGuideLocalizedPreview: View {
     private func previewTag(_ title: String) -> some View {
         Text(title)
             .appTypeface(.caption2.weight(.semibold), size: 11, relativeTo: .caption2, weight: .semibold)
-            .lineLimit(1)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 9)
             .padding(.vertical, 6)
             .background(theme.accent.opacity(0.10), in: Capsule())

@@ -228,7 +228,11 @@ public final class VideoConversionViewModel {
     }
 
     /// 启动 `start` 对应流程，并初始化本轮任务需要的状态。
-    public func start(usagePolicy: ConversionUsagePolicy = .unrestricted) {
+    public func startQuickCompression(usagePolicy: ConversionUsagePolicy = .unrestricted) {
+        start(usagePolicy: usagePolicy, usingQuickPreset: true)
+    }
+
+    public func start(usagePolicy: ConversionUsagePolicy = .unrestricted, usingQuickPreset: Bool = false) {
         guard canConvert else { return }
         let count = items.filter { item in
             switch item.status {
@@ -241,7 +245,7 @@ public final class VideoConversionViewModel {
             return
         }
         isConverting = true
-        task = Task { await run(permit: permit) }
+        task = Task { await run(permit: permit, usingQuickPreset: usingQuickPreset) }
     }
 
     /// 取消 `cancel` 对应的进行中任务，并收敛到可继续操作的状态。
@@ -251,7 +255,7 @@ public final class VideoConversionViewModel {
     }
 
     /// 封装 `run` 对应的局部行为，供当前类型在统一入口下复用。
-    private func run(permit: ConversionUsagePermit) async {
+    private func run(permit: ConversionUsagePermit, usingQuickPreset: Bool) async {
         defer { permit.finish() }
         isConverting = true
         notice = nil
@@ -274,10 +278,10 @@ public final class VideoConversionViewModel {
             let request = VideoConversionRequest(
                 sourceURL: items[index].sourceURL,
                 destinationDirectory: outputDirectory,
-                container: container,
-                codec: codec,
-                resolution: resolution,
-                bitRateFraction: effectiveBitRateFraction
+                container: usingQuickPreset ? .mp4 : container,
+                codec: usingQuickPreset ? .hevc : codec,
+                resolution: usingQuickPreset ? .original : resolution,
+                bitRateFraction: usingQuickPreset ? 0.5 : effectiveBitRateFraction
             )
             do {
                 let result = try await engine.convert(request) { [weak self] value in

@@ -25,13 +25,13 @@
 "premium.feature.required" = "Saatavilla Premiumilla";
 "premium.feature.unlock" = "Avaa Premiumilla";
 "premium.feature.media" = "Median siivous";
-"premium.feature.videoConversion" = "Videon pakkaus";
+"premium.feature.videoConversion" = "Videon muunnos";
 "premium.feature.storage" = "Tiedostojen siivous";
-"premium.feature.imageConversion" = "Kuvien pakkaus";
+"premium.feature.imageConversion" = "Kuvien muunnos";
 "premium.feature.audioConversion" = "Äänen muunnos";
 "premium.feature.darkAppearance" = "Tumma ulkoasu";
 "premium.feature.customColors" = "Omat värit";
-"premium.feature.compression.title" = "Pakkaa kuvia ja ääntä";
+"premium.feature.compression.title" = "Muunna kuvia ja ääntä";
 "premium.feature.compression.detail" = "Muunna kuvia ja äänitiedostoja säädettävillä asetuksilla.";
 "premium.feature.appearance.title" = "Tee sovelluksesta omasi";
 "premium.feature.appearance.detail" = "Avaa tumma ulkoasu sekä omat sovellus- ja taustavärit.";
@@ -39,7 +39,7 @@
 
 "Photos" = "Valokuvat";
 "Storage" = "Varastointi";
-"Compress" = "Pakkaa";
+"Compress" = "Muunna";
 "storage.heading" = "Varastoinnin jakelu";
 "Settings" = "Asetukset";
 "Language" = "Kieli";
@@ -99,7 +99,6 @@
 "Videos" = "Videot";
 "My Space" = "Minun Spaceni";
 "System & Apps" = "Järjestelmä ja sovellukset";
-"Includes iOS, system data, and other app data." = "Sisältää iOS-, järjestelmätiedot ja muut sovellustiedot.";
 "Available" = "Saatavilla";
 "%lld%% used · %@ of %@" = "%lld%% käytetty · %@ / %@";
 "Images" = "Kuvat";
@@ -149,7 +148,6 @@
 "Read-only" = "Vain luku";
 "Screenshots" = "Kuvakaappauksia";
 "Live Photos" = "Live-kuvat";
-"Video Categories" = "Videoluokat";
 "%lld items" = "%lld tuotteet";
 "No Items" = "Ei kohteita";
 "No media matched this category." = "Yksikään media ei vastannut tätä luokkaa.";
@@ -193,9 +191,7 @@
 "Press and hold to play" = "Paina ja pidä painettuna pelataksesi";
 "%lld selected" = "%lld valittu";
 "Estimated %@" = "Arvioitu %@";
-"Media Actions" = "Mediatoiminnot";
 "Cleanup Recommendations" = "Puhdistussuositukset";
-"Media sizes are estimated without downloading original files." = "Median koot on arvioitu lataamatta alkuperäisiä tiedostoja.";
 "Explore the folder hierarchy" = "Tutustu kansiohierarkiaan";
 "Tap a folder segment to drill down. Tap the center to go back." = "Napauta kansion segmenttiä porataksesi tietoja. Palaa takaisin napauttamalla keskustaa.";
 "%lld files" = "%lld tiedostot";
@@ -303,18 +299,18 @@
 "Cloud files may be unavailable" = "Pilvitiedostot eivät ehkä ole käytettävissä";
 "Common Questions" = "Yleisiä kysymyksiä";
 "Confirm your selection" = "Vahvista valintasi";
-"Compression workspace" = "Pakkaustyötila";
-"Compress a file" = "Pakkaa tiedosto";
-"Compress images, videos, and audio without changing the original file." = "Pakkaa kuvat, videot ja ääni muuttamatta alkuperäistä tiedostoa.";
-"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Pakkaaminen tuo työkopion sovellukseen. Pakkaustyötilan tyhjentäminen poistaa sovellusten hallinnoimat kopiot ja tulosteet, joten vie ensin kaikki, jonka haluat säilyttää.";
-"Compress keeps imported working copies and outputs inside app-managed storage. The original outside the app is not replaced. Clear the workspace only after exporting results you want to keep." = "Pakkaaminen pitää tuodut työkopiot ja tulosteet sovellusten hallinnoimassa tallennustilassa. Alkuperäistä sovelluksen ulkopuolella ei korvata. Tyhjennä työtila vasta, kun olet vienyt tulokset, jotka haluat säilyttää.";
+"Compression workspace" = "Muunnostyötila";
+"Compress a file" = "Muunna tiedosto";
+"Compress images, videos, and audio without changing the original file." = "Muunna kuvat, videot ja ääni muuttamatta alkuperäistä tiedostoa.";
+"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Muunnaminen tuo työkopion sovellukseen. Muunnostyötilan tyhjentäminen poistaa sovellusten hallinnoimat kopiot ja tulosteet, joten vie ensin kaikki, jonka haluat säilyttää.";
+"Compress keeps imported working copies and outputs inside app-managed storage. The original outside the app is not replaced. Clear the workspace only after exporting results you want to keep." = "Muunnaminen pitää tuodut työkopiot ja tulosteet sovellusten hallinnoimassa tallennustilassa. Alkuperäistä sovelluksen ulkopuolella ei korvata. Tyhjennä työtila vasta, kun olet vienyt tulokset, jotka haluat säilyttää.";
 "Deleted content may remain in Recently Deleted, and iOS storage totals can take time to recalculate. Check the relevant Recently Deleted location, then recheck iPhone Storage later." = "Poistettu sisältö saattaa jäädä Äskettäin poistettuihin, ja iOS-tallennustilamäärän uudelleen laskeminen voi kestää hetken. Tarkista asianmukainen Äskettäin poistettu sijainti ja tarkista sitten iPhonen tallennustila uudelleen myöhemmin.";
 "Deleted items move to Recently Deleted and may continue using storage until permanently removed. If iCloud Photos is enabled, deletion also syncs to your other devices." = "Poistetut kohteet siirtyvät Äskettäin poistettuihin ja voivat jatkaa tallennustilan käyttöä, kunnes ne poistetaan pysyvästi. Jos iCloud Photos on käytössä, poisto synkronoidaan myös muiden laitteidesi kanssa.";
 "Deleting and reinstalling can remove local-only data and login state. Use it only when the app's data is synced or backed up and its own cleanup controls are not enough." = "Poistaminen ja uudelleenasentaminen voi poistaa vain paikalliset tiedot ja kirjautumistilan. Käytä sitä vain, kun sovelluksen tiedot on synkronoitu tai varmuuskopioitu ja sen omat puhdistustoiminnot eivät riitä.";
 "Deletion stays user controlled" = "Poistaminen pysyy käyttäjän hallinnassa";
 "Device storage is not iCloud storage" = "Laitteen tallennustila ei ole iCloud-tallennustila";
 "Do not install profiles, grant unknown computer access, or erase the iPhone for a promised one-tap cache cleanup. Back up important data before any system reset." = "Älä asenna profiileja, myönnä tuntemattomille tietokoneille pääsyä tai tyhjennä iPhonea luvattuun välimuistin puhdistamiseen yhdellä napautuksella. Varmuuskopioi tärkeät tiedot ennen järjestelmän nollausta.";
-"Does analysis or compression upload my files?" = "Lähettääkö analyysi tai pakkaus tiedostoni?";
+"Does analysis or compression upload my files?" = "Lähettääkö analyysi tai muunnos tiedostoni?";
 "Explore the results" = "Tutustu tuloksiin";
 "Files deleted from an authorized folder may not be recoverable. The app cannot promise that they will appear in Recently Deleted." = "Valtuutetusta kansiosta poistettuja tiedostoja ei ehkä voi palauttaa. Sovellus ei voi luvata, että ne näkyvät Äskettäin poistetut.";
 "Find the largest category" = "Etsi suurin luokka";
@@ -342,13 +338,13 @@
 "Local by design" = "Suunniteltu paikallinen";
 "Manage Apps & Downloads" = "Hallinnoi sovelluksia ja latauksia";
 "Manage Files & iCloud Drive" = "Hallitse tiedostoja ja iCloud Drivea";
-"Manage compression storage" = "Hallitse pakkausmuistia";
-"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "Media-analyysi, kansion skannaus ja pakkaus tapahtuu tällä laitteella. Sovellus ei lataa tiedostojasi näitä ominaisuuksia varten.";
-"Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "Media analysoi valokuvat ja videot, jotka sallit Kuvat-kirjaston kautta. Tallennustila analysoi vain valitsemasi kansion. Pakkaaminen pienentää sovelluksen yksityiseen työtilaan tuotujen kopioiden kokoa.";
+"Manage compression storage" = "Hallitse muunnosmuistia";
+"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "Media-analyysi, kansion skannaus ja muunnos tapahtuu tällä laitteella. Sovellus ei lataa tiedostojasi näitä ominaisuuksia varten.";
+"Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "Media analysoi valokuvat ja videot, jotka sallit Kuvat-kirjaston kautta. Tallennustila analysoi vain valitsemasi kansion. Muunnaminen pienentää sovelluksen yksityiseen työtilaan tuotujen kopioiden kokoa.";
 "Media needs Photos access to display and analyze library items. You can choose Full Access, Limited Access, or no access, and change the choice later in System Settings." = "Media tarvitsee Photos-käyttöoikeuden kirjaston kohteiden näyttämiseen ja analysoimiseen. Voit valita Täysi käyttöoikeus, Rajoitettu käyttöoikeus tai Ei käyttöoikeutta ja muuttaa valintaa myöhemmin Järjestelmäasetuksissa.";
 "Meet the App" = "Tutustu sovellukseen";
-"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "Ei. Se voi analysoida valtuutettuja Photos-kohteita, valitsemaasi kansiota ja omaa pakkaustyötilaa. Muut sovellukset ja suojattu järjestelmän tallennustila pysyvät yksityisinä.";
-"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "Ei. Media-analyysi, kansioanalyysi ja pakkaus suoritetaan tällä laitteella. Apple-palvelut tai tiedostojen tarjoajat voivat synkronoida oman sisältönsä olemassa olevien asetustesi mukaisesti.";
+"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "Ei. Se voi analysoida valtuutettuja Photos-kohteita, valitsemaasi kansiota ja omaa muunnostyötilaa. Muut sovellukset ja suojattu järjestelmän tallennustila pysyvät yksityisinä.";
+"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "Ei. Media-analyysi, kansioanalyysi ja muunnos suoritetaan tällä laitteella. Apple-palvelut tai tiedostojen tarjoajat voivat synkronoida oman sisältönsä olemassa olevien asetustesi mukaisesti.";
 "Not necessarily. They are visually related candidates and can include different frames, edits, or resolutions. Always compare them before selecting one to remove." = "Ei välttämättä. Ne ovat visuaalisesti toisiinsa liittyviä ehdokkaita ja voivat sisältää erilaisia ​​kehyksiä, muokkauksia tai resoluutioita. Vertaa niitä aina ennen kuin valitset poistettavan.";
 "Offload or delete" = "Lataa tai poista";
 "Only the items selected in the system permission sheet are available. Counts, groups, and recommendations cannot include the rest of the library." = "Vain järjestelmän käyttöoikeuslomakkeessa valitut kohteet ovat käytettävissä. Luvut, ryhmät ja suositukset eivät voi sisältää muuta kirjastoa.";
@@ -370,7 +366,7 @@
 "Review before deleting" = "Tarkista ennen poistamista";
 "Review large videos, screenshots, and similar photos safely." = "Tarkista suuret videot, kuvakaappaukset ja vastaavat valokuvat turvallisesti.";
 "Review long videos, 4K videos, screen recordings, and large screenshots first. Similar-photo groups can help you compare bursts or repeated shots, but you should choose the keeper yourself." = "Tarkista ensin pitkät videot, 4K-videot, näyttötallenteet ja suuret kuvakaappaukset. Samankaltaiset valokuvaryhmät voivat auttaa vertailemaan sarjakuvia tai toistuvia otoksia, mutta sinun tulee valita pitäjä itse.";
-"Review compression settings" = "Tarkista pakkausasetukset";
+"Review compression settings" = "Tarkista muunnosasetukset";
 "Review photos, similar items, screenshots, Live Photos, and videos." = "Tarkastele valokuvia, vastaavia kohteita, kuvakaappauksia, Live Photos -kuvia ja videoita.";
 "Safari website data" = "Safari-verkkosivuston tiedot";
 "Safe steps to try" = "Turvallisia vaiheita kokeilla";
@@ -382,7 +378,7 @@
 "Similar does not mean identical" = "Samanlainen ei tarkoita identtistä";
 "Similar-photo groups are review suggestions, not proof that files are exact duplicates. Keep the best shot before deleting anything." = "Samankaltaiset valokuvaryhmät ovat tarkistusehdotuksia, eivät todisteita siitä, että tiedostot ovat täsmällisiä kaksoiskappaleita. Pidä paras kuva ennen kuin poistat mitään.";
 "Start analysis" = "Aloita analyysi";
-"Start compression" = "Aloita pakkaus";
+"Start compression" = "Aloita muunnos";
 "Start with high-impact items" = "Aloita vaikuttavista esineistä";
 "Start with iPhone Storage" = "Aloita iPhone-tallennustilasta";
 "Step %lld" = "Vaihe %lld";
@@ -406,7 +402,7 @@
 "Understand optimized photos" = "Opi optimoidut valokuvat";
 "Understand the three tools and what each one can access." = "Ymmärrä kolme työkalua ja mitä kukin voi käyttää.";
 "Use Apple's controls for attachments, history, and website data." = "Käytä Applen säätimiä liitteisiin, historiaan ja verkkosivustotietoihin.";
-"Use Compress" = "Käytä Pakkaa";
+"Use Compress" = "Käytä Muunna";
 "Use Media" = "Käytä mediaa";
 "Use Settings > Apps > Safari to clear history and website data. This can close tabs or sign you out of websites, so save anything important first." = "Tyhjennä historia ja verkkosivustotiedot valitsemalla Asetukset > Sovellukset > Safari. Tämä voi sulkea välilehtiä tai kirjata sinut ulos verkkosivustoilta, joten tallenna ensin kaikki tärkeät asiat.";
 "Use Storage" = "Käytä tallennustilaa";
@@ -431,7 +427,7 @@
 "Display Options" = "Näyttöasetukset";
 "Interface Animations" = "Käyttöliittymäanimaatiot";
 "Show Media Dates" = "Näytä mediapäivämäärät";
-"Control dashboard animations, compression card animations, and date headings in media detail grids." = "Hallitse kojelautaanimaatioita, pakkauskorttien animaatioita ja päivämääräotsikoita median yksityiskohdissa.";
+"Control dashboard animations, compression card animations, and date headings in media detail grids." = "Hallitse kojelautaanimaatioita, muunnoskorttien animaatioita ja päivämääräotsikoita median yksityiskohdissa.";
 "Calculating size…" = "Lasketaan kokoa…";
 "Size unavailable" = "Koko ei saatavilla";
 "Quick Cleanup" = "Pikasiivous";
@@ -450,7 +446,7 @@
 "Selected" = "Valittu";
 "Not selected" = "Ei valittu";
 "Selects or deselects every suggested item in this category." = "Valitsee jokaisen ehdotetun kohteen tässä luokassa tai poistaa valinnan.";
-"%@ moved to Recently Deleted · ~%@" = "%@ siirretty kohtaan Äskettäin poistettu · ~%@";
+"%@ moved to Recently Deleted · %@" = "%@ siirretty kohtaan Äskettäin poistettu · %@";
 "Allow photo access, then wait for the library to load." = "Salli kuvien käyttö ja odota sitten, että kirjasto latautuu.";
 "Analyze the available library and let the app group useful cleanup candidates." = "Analysoi käytettävissä oleva kirjasto ja anna sovelluksen ryhmitellä hyödyllisiä puhdistusehdokkaita.";
 "Preview items at full size and compare similar photos carefully." = "Esikatsele kohteita täysikokoisina ja vertaa samanlaisia kuvia huolellisesti.";
@@ -459,7 +455,7 @@
 "The app reads file metadata and reports inaccessible or unavailable cloud items separately." = "Sovellus lukee tiedostojen metatiedot ja raportoi pilvikohteista, joihin ei ole pääsyä tai jotka eivät ole käytettävissä, erikseen.";
 "Use the folder map, categories, and detailed lists to find large files." = "Käytä kansiokarttaa, luokkia ja yksityiskohtaisia luetteloita löytääksesi suuria tiedostoja.";
 "Confirm the file and location, then delete only content you no longer need." = "Vahvista tiedosto ja sijainti ja poista sitten vain sisältö, jota et enää tarvitse.";
-"Open image, video, or audio compression. The audio tool can also extract a track from video." = "Avaa kuvan, videon tai äänen pakkaus. Äänityökalu voi myös poimia kappaleen videosta.";
+"Open image, video, or audio compression. The audio tool can also extract a track from video." = "Avaa kuvan, videon tai äänen muunnos. Äänityökalu voi myös poimia kappaleen videosta.";
 "Select supported items from Photos or Files and wait for the working copies to finish importing." = "Valitse tuetut kohteet Valokuvat- tai Tiedostot-kansiosta ja odota, että työkopiot on tuotu loppuun.";
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "Valitse muoto ja säädä käytettävissä olevia koko-, laatu-, bittinopeus- tai metatietoasetuksia.";
 "Keep the task open until each item completes or reports an error." = "Pidä tehtävä auki, kunnes jokainen kohde on valmis tai ilmoittaa virheestä.";
@@ -493,8 +489,8 @@
 "intro.media.detail" = "Katso, paljonko kuvat, videot ja muu sisältö vievät tilaa ja paljonko tilaa on jäljellä. Luvut ovat esimerkkejä.";
 "intro.files.title" = "Näe, mikä vie tilaa";
 "intro.files.detail" = "Selaa valittuja kansioita ja löydä suuret tiedostot helposti.";
-"intro.compress.title" = "Esikatsele median pakkausta";
-"intro.compress.detail" = "Tutustu kuvien, videoiden ja äänen pakkausvaihtoehtoihin sekä esimerkkiedistymiseen. Tässä ei pakata tiedostoja.";
+"intro.compress.title" = "Esikatsele median muunnosta";
+"intro.compress.detail" = "Tutustu kuvien, videoiden ja äänen muunnosvaihtoehtoihin sekä esimerkkiedistymiseen. Tässä ei pakata tiedostoja.";
 "intro.appearance.title" = "Tee sovelluksesta omasi";
 "intro.appearance.detail" = "Valitse itsellesi sopivat värit ja ulkoasu.";
 "intro.next" = "Jatka";
@@ -502,12 +498,12 @@
 "intro.demo" = "Esimerkki";
 "premium.continueTemporarily" = "Jatka toistaiseksi";
 "premium.title" = "Enemmän tilaa tärkeille";
-"premium.subtitle" = "Media, tiedostot ja pakkaus yhdessä paikassa.";
+"premium.subtitle" = "Media, tiedostot ja muunnos yhdessä paikassa.";
 "premium.media.title" = "Järjestä mediasi";
 "premium.media.detail" = "Tarkista valokuvat ja videot ja valitse poistettavat kohteet.";
 "premium.storage.title" = "Puhdista tiedostot";
 "premium.storage.detail" = "Etsi tarpeettomia tiedostoja hyväksymistäsi kansioista.";
-"premium.compression.title" = "Pakkaa media";
+"premium.compression.title" = "Muunna media";
 "premium.compression.detail" = "Pienennä kuva-, video- ja äänitiedostojen kokoa säädettävillä asetuksilla.";
 "premium.privacy" = "Median ja tiedostojen käsittely jää tähän laitteeseen.";
 "premium.plans.title" = "Valitse suunnitelmasi";
@@ -560,3 +556,80 @@
 "Video preview" = "Videon esikatselu";
 "Photo preview" = "Kuvan esikatselu";
 "Cancel" = "Peruuta";
+
+"Convert" = "Muunna";
+
+"cleanup.space.title" = "Siivottavan tilan määrä";
+
+
+"cleanup.action" = "Pikasiivous";
+
+"cleanup.review.hint" = "Samankaltaisten kuvien ehdotukset on valittu. Yksi kuva ryhmää kohti säilyy. Lisää vain tarpeettomat näyttökuvat tai videot.";
+
+"cleanup.useSuggestions" = "Käytä ehdotuksia";
+
+"cleanup.scan.title" = "Tilaa uusille muistoille";
+
+"cleanup.scan.action" = "Etsi vapautettavaa tilaa";
+
+"cleanup.scan.hint" = "Tarkista samankaltaiset kuvat, suuret videot ja näyttökuvat. Analyysi ei poista mitään.";
+
+"quick.compress.title" = "Säilytä muistot, pienennä kokoa";
+
+"quick.video" = "Pakkaa videot";
+
+"quick.image" = "Pakkaa kuvat";
+
+"quick.compress.hint" = "Valitse tiedostot. Me hoidamme asetukset.";
+
+"quick.action" = "Pakkaa";
+
+"quick.ready" = "Asetukset ovat valmiit";
+
+"quick.video.detail" = "MP4 / HEVC · Alkuperäinen tarkkuus · Pienempi bittinopeus.";
+
+"quick.image.detail" = "HEIC (muuten JPEG) · 75 % laatu · Alkuperäinen koko · Poista GPS.";
+
+"quick.originals" = "Luo uudet kopiot ja säilyttää alkuperäiset. Tulos voi olla suurempi; vertaa ennen korvaamista.";
+
+"premium.free.summary" = "Ilmaiseksi: tarkista ja poista mediaa, pakkaa ja muunna videoita.";
+
+"premium.value.summary" = "Premium: siivoa useita luokkia, muunna kuvia ja ääntä, järjestä kansioita ja mukauta ulkoasua.";
+
+"quick.free" = "Ilmainen";
+
+"Convert Images" = "Kuvat";
+
+"Convert Videos" = "Videot";
+
+"Choose what to convert. Originals will remain in Photos." = "Muunna";
+
+/* Media category batch compression */
+"compression.explanation" = "iCloud-alkuperäiset on ehkä ladattava.";
+"compression.empty" = "Tässä luokassa ei ole mediaa";
+"compression.saved" = "Alkuperäinen säilytetty · yritä uudelleen";
+"compression.noReduction" = "Jo pieni · kopiota ei tallennettu";
+"compression.cancelling" = "Perutaan…";
+"compression.summary" = "%d tallennettu · %d epäonnistui";
+"compression.action" = "Pakkaa ja korvaa %d kohdetta";
+"compression.error.live" = "Live Photo -paria ei voitu säilyttää. Alkuperäinen on ennallaan.";
+"compression.error.image" = "Pikapakkaus ei tue animoituja kuvia. Alkuperäinen on ennallaan.";
+"compression.cardDetail" = "%d kohdetta · %@";
+
+"compression.replaced" = "Alkuperäinen korvattu";
+
+"compression.replacing" = "Korvataan alkuperäisiä…";
+
+"compression.error.verify" = "Pakattua kopiota ei voitu vahvistaa. Alkuperäistä ei poistettu.";
+
+"compression.error.replace" = "Pakatut kopiot tallennettiin. Alkuperäisiä ei poistettu. Yritä uudelleen.";
+
+"compression.selection.savings" = "Arvioitu säästö: %@";
+
+"compression.action.short" = "Pakkaa";
+
+"compression.confirm.title" = "Aloitetaanko pakkaus?";
+
+"compression.confirm.message" = "Pakataanko %d valittua kohdetta? Kun pienemmät kopiot on tallennettu ja tarkistettu, alkuperäiset poistetaan Kuvat-apista.";
+
+"compression.confirm.action" = "Vahvista";

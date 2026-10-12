@@ -1,26 +1,26 @@
-"converter.title" = "ضغط الوسائط";
-"converter.heading" = "ضغط الوسائط";
-"conversion.home.image.title" = "ضغط الصور";
-"conversion.home.image.detail" = "ضغط الصور باستخدام عناصر التحكم في التنسيق والحجم وإزالة البيانات الوصفية الخاصة";
-"conversion.home.image.tagline" = "الضغط · تنسيقات HEIC · إزالة GPS";
-"conversion.home.video.title" = "ضغط الفيديو";
-"conversion.home.video.detail" = "ضغط الفيديو باستخدام برامج الترميز ودقة الإخراج";
-"conversion.home.video.tagline" = "الضغط · MP4 / MOV · الدقة";
-"conversion.home.audio.title" = "ضغط الصوت";
-"conversion.home.audio.detail" = "ضغط الصوت أو استخراج مسار من الفيديو";
-"conversion.home.audio.tagline" = "الضغط · MP3 / AAC / WAV · استخراج من الفيديو";
-"conversion.home.history.summary" = "%@ · ملفات %ld المضغوطة";
+"converter.title" = "تحويل";
+"converter.heading" = "تحويل الوسائط";
+"conversion.home.image.title" = "تحويل الصور";
+"conversion.home.image.detail" = "JPG وPNG وHEIC وغيرها. اضبط جودة الصور وأبعادها.";
+"conversion.home.image.tagline" = "JPG وPNG وHEIC وغيرها. اضبط جودة الصور وأبعادها.";
+"conversion.home.video.title" = "تحويل الفيديو";
+"conversion.home.video.detail" = "MP4 وMOV وM4V. اختر الترميز ومعدل البت والدقة.";
+"conversion.home.video.tagline" = "MP4 وMOV وM4V. اختر الترميز ومعدل البت والدقة.";
+"conversion.home.audio.title" = "تحويل الصوت";
+"conversion.home.audio.detail" = "MP3 وAAC وWAV وغيرها. اضبط معدل البت أو استخرج الصوت من الفيديو.";
+"conversion.home.audio.tagline" = "MP3 وAAC وWAV وغيرها. اضبط معدل البت أو استخرج الصوت من الفيديو.";
+"conversion.home.history.summary" = "%@ · ملفات %ld المحوّلة";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "الإخراج أصغر %@";
 "conversion.home.history.larger" = "الإخراج أكبر %@";
 "conversion.home.history.unchanged" = "حجم الإخراج لم يتغير";
-"import.title" = "ضغط الصور محليًا";
+"import.title" = "تحويل الصور محليًا";
 "import.subtitle" = "تتم معالجة الملفات على هذا الجهاز ولا يتم تحميلها مطلقًا.";
 "action.add_images" = "إضافة صور";
 "action.choose_images" = "اختيار الصور";
 "action.clear_completed" = "اكتملت عملية التنظيف";
 "action.clear_all" = "مسح الكل";
-"action.convert" = "ابدأ الضغط";
+"action.convert" = "تحويل";
 "action.cancel" = "إلغاء";
 "action.share" = "مشاركة الملف المضغوط";
 "action.remove" = "إزالة الصورة";
@@ -29,15 +29,15 @@
 "files.title" = "صور %ld";
 "files.videos.title" = "مقاطع فيديو %ld";
 "files.audio.title" = "ملفات الصوت %ld";
-"settings.title" = "إعدادات الضغط";
+"settings.title" = "إعدادات التحويل";
 "settings.format" = "التنسيق";
 "settings.quality" = "الجودة";
 "settings.metadata" = "البيانات الوصفية";
 "settings.resize" = "تغيير الحجم";
 "settings.transparent_background" = "المناطق الشفافة";
 "settings.output" = "الإخراج المجلد";
-"settings.output.images" = "الصور المضغوطة";
-"settings.output.videos" = "مقاطع الفيديو المضغوطة";
+"settings.output.images" = "الصور المحوّلة";
+"settings.output.videos" = "مقاطع الفيديو المحوّلة";
 "settings.output.audio" = "الصوت المضغوط";
 "metadata.preserve" = "الحفاظ على";
 "metadata.remove_gps" = "إزالة GPS";
@@ -49,16 +49,16 @@
 "color.white" = "أبيض";
 "color.black" = "أسود";
 "status.inspecting" = "جارٍ الفحص";
-"status.ready" = "جاهز للضغط";
-"status.converting" = "الضغط";
-"status.completed" = "اكتمل الضغط";
+"status.ready" = "جاهز للتحويل";
+"status.converting" = "التحويل";
+"status.completed" = "اكتمل التحويل";
 "status.cancelled" = "الملغاة";
 "progress.summary" = "اكتمل %ld من %ld";
 "notice.duplicates_ignored" = "تم تحديد التحديدات المكررة تم التجاهل.";
 "notice.import_failed" = "تعذر استيراد الصور: %@";
-"notice.cancelled" = "تم إلغاء الضغط. تم الاحتفاظ بالملفات المكتملة.";
-"notice.completed" = "صور %ld المضغوطة.";
-"notice.completed_with_failures" = "صور %ld المضغوطة؛ فشل %ld.";
+"notice.cancelled" = "تم إلغاء التحويل. تم الاحتفاظ بالملفات المكتملة.";
+"notice.completed" = "صور %ld المحوّلة.";
+"notice.completed_with_failures" = "صور %ld المحوّلة؛ فشل %ld.";
 "error.source_not_reachable" = "الملف المصدر غير متاح: %@";
 "error.cannot_open_source" = "الملف ليس صورة مدعومة: %@";
 "error.unsupported_input" = "تنسيق الصورة هذا غير مدعوم: %@";
@@ -73,11 +73,11 @@
 "error.cannot_create_destination" = "تعذر إنشاء الإخراج: %@";
 "error.cannot_finalize" = "تعذر على برنامج التشفير إنهاء الكتابة: %@";
 "error.destination_exists" = "يوجد ملف إخراج بالفعل: %@";
-"error.destination_busy" = "هناك مهمة ضغط أخرى وهي كتابة هذا الملف: %@";
+"error.destination_busy" = "هناك مهمة تحويل أخرى وهي كتابة هذا الملف: %@";
 "error.cannot_reserve" = "تعذر إنشاء اسم إخراج فريد لـ %@.";
 "error.commit_failed" = "لا يمكن الالتزام بالملف المضغوط: %@";
-"error.cancelled" = "تم إلغاء الضغط.";
-"error.unexpected" = "خطأ ضغط غير متوقع: %@";
+"error.cancelled" = "تم إلغاء التحويل.";
+"error.unexpected" = "خطأ تحويل غير متوقع: %@";
 "converter.mode" = "نوع الوسائط";
 "converter.mode.image" = "الصور";
 "converter.mode.video" = "مقاطع الفيديو";
@@ -95,7 +95,7 @@
 "audio.source.video" = "مصدر الفيديو";
 "audio.error.video_no_audio" = "لا يحتوي هذا الفيديو على مسار صوتي.";
 "audio.error.video_protected" = "لا يمكن استخراج صوت الفيديو المحمي.";
-"audio.import.title" = "ضغط الصوت";
+"audio.import.title" = "تحويل الصوت";
 "audio.settings.quality" = "الجودة";
 "audio.format.mp3" = "MP3";
 "audio.format.aac" = "M4A (ترميز AAC)";
@@ -105,23 +105,23 @@
 "audio.format.aiff" = "AIFF (PCM غير مضغوط)";
 "audio.format.caf_pcm" = "CAF (غير مضغوط) PCM)";
 "audio.format.caf_alac" = "CAF (Apple Lossless)";
-"conversion.delete_all.title" = "هل تريد حذف جميع ملفات الضغط؟";
-"conversion.delete_all.message" = "يؤدي هذا إلى إزالة النسخ المستوردة والمخرجات المضغوطة من التطبيق. لا يتم حذف النسخ الأصلية في الصور والملفات.";
+"conversion.delete_all.title" = "هل تريد حذف جميع ملفات التحويل؟";
+"conversion.delete_all.message" = "يؤدي هذا إلى إزالة النسخ المستوردة والمخرجات المحوّلة من التطبيق. لا يتم حذف النسخ الأصلية في الصور والملفات.";
 "conversion.delete.action" = "حذف الملفات";
 "conversion.delete.failed" = "تعذر حذف بعض الملفات التي يديرها التطبيق. تم الاحتفاظ بالعناصر المتبقية في القائمة.";
 "audio.lossless" = "يحافظ الإخراج غير المفقود على جودة الصوت المتاحة.";
 "audio.empty.title" = "لا يوجد صوت";
-"audio.empty.subtitle" = "اختر ملفات صوتية لضغطها أو استخراج الصوت منها. مقاطع الفيديو.";
-"audio.notice.completed" = "ملفات الصوت %ld المضغوطة.";
+"audio.empty.subtitle" = "اختر ملفات صوتية لتحويلها أو استخراج الصوت منها. مقاطع الفيديو.";
+"audio.notice.completed" = "ملفات الصوت %ld المحوّلة.";
 "audio.error.source" = "الصوت المصدر غير متاح.";
 "audio.error.unsupported" = "تنسيق الصوت أو الفيديو المحدد غير مدعوم.";
 "audio.error.invalid" = "لا يحتوي الملف على قابل للقراءة audio.";
 "audio.error.output" = "تعذر إنشاء إخراج الصوت: %@";
-"audio.error.convert" = "فشل ضغط الصوت: %@";
+"audio.error.convert" = "فشل تحويل الصوت: %@";
 "audio.error.commit" = "تعذر حفظ الصوت المضغوط: %@";
 "video.action.add" = "إضافة مقاطع فيديو";
 "video.action.choose" = "اختر مقاطع الفيديو";
-"video.import.title" = "ضغط مقاطع الفيديو";
+"video.import.title" = "تحويل مقاطع الفيديو";
 "video.import.subtitle" = "تتم معالجة الملفات على هذا الجهاز ولا يتم تحميلها مطلقًا.";
 "quality.smaller" = "أصغر";
 "quality.balanced" = "متوازن";
@@ -133,12 +133,12 @@
 "video.settings.bitrate" = "معدل البت";
 "video.settings.resolution" = "الدقة";
 "video.empty.title" = "لا توجد مقاطع فيديو";
-"video.empty.subtitle" = "اختر مقطع فيديو واحدًا أو أكثر لبدء الضغط.";
-"video.notice.completed" = "مقاطع فيديو %ld المضغوطة.";
+"video.empty.subtitle" = "اختر مقطع فيديو واحدًا أو أكثر لبدء التحويل.";
+"video.notice.completed" = "مقاطع فيديو %ld المحوّلة.";
 "video.error.source" = "الفيديو المصدر غير متاح.";
 "video.error.unsupported" = "لا يدعم هذا الجهاز إعدادات الفيديو المحددة.";
 "video.error.exporter" = "تعذر إنشاء ضاغط الفيديو.";
-"video.error.export" = "فشل ضغط الفيديو: %@";
+"video.error.export" = "فشل تحويل الفيديو: %@";
 "video.error.commit" = "تعذر حفظ الفيديو المضغوط: %@";
 "action.choose_files" = "اختر من الملفات";
 "format_picker.title" = "تنسيق الإخراج";
@@ -174,29 +174,29 @@
 "formats.video.title" = "تنسيقات الفيديو المدعومة";
 "action.done" = "تم";
 "import.progress.title" = "استيراد";
-"conversion.guide.button" = "افتح دليل الضغط";
-"conversion.guide.title" = "دليل الضغط";
-"conversion.guide.hero.title" = "ضغط الوسائط وتوفير المساحة";
-"conversion.guide.hero.detail" = "يمكنك ضغط الصور ومقاطع الفيديو والصوت محليًا على هذا الجهاز دون تغيير النسخ الأصلية.";
+"conversion.guide.button" = "دليل تحويل الوسائط";
+"conversion.guide.title" = "دليل تحويل الوسائط";
+"conversion.guide.hero.title" = "تنسيقات شائعة. إعداداتك الخاصة.";
+"conversion.guide.hero.detail" = "حوّل التنسيقات الشائعة وخصص الجودة ومعدل البت والأبعاد.";
 "conversion.guide.steps.title" = "البدء السريع";
 "conversion.guide.step.choose.title" = "اختر نوع الوسائط";
-"conversion.guide.step.choose.detail" = "استيراد الصور ومقاطع الفيديو من الصور أو الملفات. تقبل أداة الصوت الصوت أو الفيديو من الملفات.";
-"conversion.guide.step.adjust.title" = "ضبط الضغط";
-"conversion.guide.step.adjust.detail" = "اختر تنسيق وضبط الجودة أو الدقة أو معدل البت أو البيانات الوصفية حسب الحاجة.";
-"conversion.guide.step.convert.title" = "ضغط ومشاركة";
-"conversion.guide.step.convert.detail" = "تابع تقدم الضغط، وراجع النتيجة، ثم شاركها أينما تريد الحاجة.";
-"conversion.guide.home.title" = "ابدأ بالملف الذي تريد تقليصه";
-"conversion.guide.home.detail" = "تقف كل أداة بمفردها، لذا يمكنك الانتقال مباشرة إلى المهمة التي تحتاجها.";
-"conversion.guide.tools.title" = "ثلاث أدوات لضغط الوسائط";
-"conversion.guide.image.detail" = "ضغط الصور وضبط تنسيق الإخراج وحجمه وإزالة البيانات الوصفية للموقع قبل المشاركة.";
-"conversion.guide.video.detail" = "ضغط الفيديو عن طريق اختيار الحاوية وبرنامج الترميز والدقة. يعتمد الدعم النهائي على الجهاز والمصدر.";
-"conversion.guide.audio.detail" = "ضغط الملفات الصوتية - أو حدد مقطع فيديو هنا لاستخراج مساره الصوتي وضغطه.";
-"conversion.guide.controls.title" = "تشكيل الضغط";
+"conversion.guide.step.choose.detail" = "اختر فيديو أو صورًا أو صوتًا. استورد من الملفات أو اختر الصور والفيديو من تطبيق الصور.";
+"conversion.guide.step.adjust.title" = "ضبط التحويل";
+"conversion.guide.step.adjust.detail" = "حوّل التنسيقات الشائعة وخصص الجودة ومعدل البت والأبعاد.";
+"conversion.guide.step.convert.title" = "تحويل ومشاركة";
+"conversion.guide.step.convert.detail" = "تابع تقدم التحويل، وراجع النتيجة، ثم شاركها أينما تريد الحاجة.";
+"conversion.guide.home.title" = "تحويل الوسائط";
+"conversion.guide.home.detail" = "حوّل التنسيقات الشائعة وخصص الجودة ومعدل البت والأبعاد.";
+"conversion.guide.tools.title" = "ثلاث أدوات لتحويل الوسائط";
+"conversion.guide.image.detail" = "JPG وPNG وHEIC وغيرها. اضبط جودة الصور وأبعادها.";
+"conversion.guide.video.detail" = "MP4 وMOV وM4V. اختر الترميز ومعدل البت والدقة.";
+"conversion.guide.audio.detail" = "MP3 وAAC وWAV وغيرها. اضبط معدل البت أو استخرج الصوت من الفيديو.";
+"conversion.guide.controls.title" = "تشكيل التحويل";
 "conversion.guide.format.detail" = "اختر تنسيقًا يوازن بين التوافق والجودة وحجم الملف لكيفية استخدام الملف.";
-"conversion.guide.quality.detail" = "استخدم جودة الصورة، وبرنامج ترميز الفيديو ودقته، أو معدل بت AAC لتقليل الحجم. تحافظ تنسيقات الصوت التي لا يمكن فقدانها على الجودة ولكنها قد لا تقلل الحجم.";
+"conversion.guide.quality.detail" = "خفض الجودة أو معدل البت يقلل الحجم عادةً. تعتمد النتيجة على المحتوى؛ قد لا تصغر التنسيقات غير الفاقدة.";
 "conversion.guide.metadata.detail" = "الحفاظ على جميع البيانات الوصفية القابلة للكتابة، أو إزالة نظام تحديد المواقع العالمي (GPS) فقط، أو إزالة كل شيء. تعد إزالة نظام تحديد المواقع العالمي (GPS) هي الإجراء الافتراضي.";
 "conversion.guide.replace.title" = "استبدال الملفات الأصلية";
-"conversion.guide.replace.detail" = "بعد الضغط، اضغط على سلة المهملات في الشاشة الرئيسية وحدد مجموعات الصور أو الفيديو. يحفظ التطبيق النسخ المضغوطة في الصور أولاً، ثم يطلب iOS تأكيد حذف الملفات الأصلية المطابقة. تتوفر الميزة فقط للعناصر المكتملة المستوردة من الصور؛ ولا تدعم الصوت المستقل أو الواردات من الملفات. يمسح «مسح الكل» نسخ العمل فقط ويعطل الاستبدال، لكنه لا يحذف الملفات الأصلية.";
+"conversion.guide.replace.detail" = "بعد التحويل، اتحويل على سلة المهملات في الشاشة الرئيسية وحدد مجموعات الصور أو الفيديو. يحفظ التطبيق النسخ المحوّلة في الصور أولاً، ثم يطلب iOS تأكيد حذف الملفات الأصلية المطابقة. تتوفر الميزة فقط للعناصر المكتملة المستوردة من الصور؛ ولا تدعم الصوت المستقل أو الواردات من الملفات. يمسح «مسح الكل» نسخ العمل فقط ويعطل الاستبدال، لكنه لا يحذف الملفات الأصلية.";
 "conversion.guide.privacy.title" = "تظل النسخ الأصلية ملكك";
 "conversion.guide.privacy.detail" = "تتم معالجة كل شيء على هذا الجهاز. يؤدي مسح الكل إلى إزالة النسخ والمخرجات التي يديرها التطبيق فقط، وليس النسخ الأصلية في الصور أو الملفات.";
 "conversion.guide.learn_more" = "استكشاف هذه الأداة";
@@ -204,31 +204,31 @@
 "conversion.guide.detail.purpose.title" = "ما الغرض منه";
 "conversion.guide.detail.workflow.title" = "الدفعة والتقدم والنتائج";
 "conversion.guide.output.detail" = "يظهر مجلد الإخراج الذي يديره التطبيق في الأداة ولكنه غير قابل للتحديد. استخدم \"مشاركة\" لنقل نتيجة إلى مكان آخر.";
-"conversion.guide.image.purpose" = "ضغط الصور الثابتة دفعة واحدة حسب التنسيق والجودة والحافة الأطول والبيانات الوصفية. تنطبق مجموعة واحدة من الخيارات على الدفعة الحالية دون تغيير النسخ الأصلية.";
+"conversion.guide.image.purpose" = "JPG وPNG وHEIC وغيرها. اضبط جودة الصور وأبعادها.";
 "conversion.guide.image.imports.detail" = "حدد ملفات متعددة، أو ما يصل إلى 100 عنصر من الصور. تعكس التنسيقات إمكانيات هذا الجهاز؛ يتم استيراد ملفات RAW/DNG/ProRAW فقط، ولا يتم دعم الصور المتحركة.";
-"conversion.guide.image.workflow.detail" = "اتبع حالات الفحص والضغط، أو قم بالإلغاء أثناء تقدم العمل؛ تبقى النتائج المكتملة. قارن الأحجام وشارك من كل بطاقة ملف قبل مسح القائمة.";
-"conversion.guide.image.quality.detail" = "تدعم JPG وHEIC وHEIF وWebP جودة تتراوح من 10% إلى 100% في 5% steps، مع 85% as كإعداد افتراضي. عادةً ما تؤدي الجودة المنخفضة إلى إنشاء ملفات أصغر حجمًا مع فقدان أكثر وضوحًا؛ لا تعرض التنسيقات الأخرى مراقبة الجودة.";
+"conversion.guide.image.workflow.detail" = "اتبع حالات الفحص والتحويل، أو قم بالإلغاء أثناء تقدم العمل؛ تبقى النتائج المكتملة. قارن الأحجام وشارك من كل بطاقة ملف قبل مسح القائمة.";
+"conversion.guide.image.quality.detail" = "JPG وPNG وHEIC وغيرها. اضبط جودة الصور وأبعادها. خفض الجودة أو معدل البت يقلل الحجم عادةً. تعتمد النتيجة على المحتوى؛ قد لا تصغر التنسيقات غير الفاقدة.";
 "resize.square1024" = "1024px";
 "conversion.guide.image.resize.detail" = "احتفظ بالأبعاد الأصلية، أو حدد الحافة الأطول عند 4096، أو 2048، أو 1280 بكسل لتقليل الحجم دون تكبير. يناسب خيار 1024 × 1024 الصورة بأكملها على خلفية مربعة بدون اقتصاص أو تمديد؛ يتم تكبير الصور الصغيرة.";
 "conversion.guide.image.transparency.detail" = "لا يمكن لـ JPG وBMP تخزين وحدات البكسل الشفافة. عند استخدام أي من التنسيقين، املأ المناطق الشفافة باللون الأبيض أو الأسود.";
-"conversion.guide.video.purpose" = "ضغط دفعي لفيديو MOV أو MP4 أو M4V حسب الحاوية وبرنامج الترميز والدقة دون الكتابة فوق النسخ الأصلية.";
+"conversion.guide.video.purpose" = "MP4 وMOV وM4V. اختر الترميز ومعدل البت والدقة.";
 "conversion.guide.video.imports.detail" = "حدد ملفات MOV، أو MP4، أو M4V متعددة، أو اختر ما يصل إلى 50 مقطع فيديو من الصور.";
 "conversion.guide.video.workflow.detail" = "تتم معالجة مقاطع الفيديو واحدًا تلو الآخر. اتبع حالات المهام والعدد المكتمل، وقم بالإلغاء عند الحاجة، ثم قارن أحجام الإدخال والإخراج وشارك كل نتيجة.";
 "conversion.guide.video.resolution.detail" = "عادةً ما يؤدي خفض الدقة إلى تقليل حجم الملف. يقدم H.264 دقة أصلية و4K و1080p و720p و480p؛ تقدم HEVC دقة أصلية و4K و1080p؛ يحتفظ ProRes بالدقة الأصلية.";
 "conversion.guide.video.compatibility.title" = "المجموعات ودعم الأجهزة";
 "conversion.guide.video.compatibility.detail" = "تضيق خيارات الحاوية والدقة بعد تحديد برنامج ترميز. لا يزال الجهاز والفيديو المصدر يخضعان لفحص التوافق النهائي.";
 "conversion.guide.video.codec.h264.detail" = "التوافق الأوسع: MP4، MOV، أو M4V؛ أصلي، بدقة 4K أو 1080p أو 720p أو 480p.";
-"conversion.guide.video.codec.hevc.detail" = "ضغط أكثر كفاءة: MP4 أو MOV؛ أصلي، 4K، أو 1080p. قد تكون الأجهزة والتطبيقات القديمة أقل توافقًا.";
-"conversion.guide.video.codec.prores422.detail" = "للتحرير عالي الجودة: MOV فقط، بالدقة الأصلية. عادةً ما تكون الملفات كبيرة الحجم وليس المقصود منها الضغط لتوفير المساحة.";
-"conversion.guide.video.codec.prores4444.detail" = "للحصول على مرحلة ما بعد الإنتاج عالية الجودة: MOV فقط، بالدقة الأصلية. عادةً ما تكون الملفات كبيرة جدًا وليس المقصود منها الضغط لتوفير المساحة.";
-"conversion.guide.audio.purpose" = "ضغط الصوت أو إنشاء ملف صوتي مضغوط منفصل من فيديو بمسار قابل للاستخدام. يظل الصوت والفيديو الأصليان دون تغيير.";
+"conversion.guide.video.codec.hevc.detail" = "تحويل أكثر كفاءة: MP4 أو MOV؛ أصلي، 4K، أو 1080p. قد تكون الأجهزة والتطبيقات القديمة أقل توافقًا.";
+"conversion.guide.video.codec.prores422.detail" = "للتحرير عالي الجودة: MOV فقط، بالدقة الأصلية. عادةً ما تكون الملفات كبيرة الحجم وليس المقصود منها التحويل لتوفير المساحة.";
+"conversion.guide.video.codec.prores4444.detail" = "للحصول على مرحلة ما بعد الإنتاج عالية الجودة: MOV فقط، بالدقة الأصلية. عادةً ما تكون الملفات كبيرة جدًا وليس المقصود منها التحويل لتوفير المساحة.";
+"conversion.guide.audio.purpose" = "MP3 وAAC وWAV وغيرها. اضبط معدل البت أو استخرج الصوت من الفيديو.";
 "conversion.guide.audio.imports.detail" = "حدد صوتًا أو فيديو من \"الملفات\"، أو حدد مقاطع فيديو من \"الصور\" لاستخراج المسارات الصوتية الخاصة بها. مدخلات الصوت: M4A (بما في ذلك ALAC)، وAAC، وMP3، وFLAC، وWAV، وAIFF/AIF، وCAF. مدخلات الفيديو: MOV، وMP4، وM4V.";
 "conversion.guide.audio.workflow.detail" = "اتبع نوع المصدر والمدة وحالة المهمة والعدد المكتمل أو قم بالإلغاء عند الحاجة. قارن بين أحجام الإدخال والإخراج وشارك الصوت النهائي.";
 "conversion.guide.audio.quality.detail" = "تقدم ملفات MP3 وAAC 96، و128، 192 أو 256 أو 320 كيلوبت في الثانية؛ الافتراضي هو 192 كيلوبت في الثانية. ALAC وWAV وAIFF وPCM CAF غير قابلة للفقدان ولا تستخدم إعداد معدل البت.";
 "conversion.guide.audio.m4a.title" = "M4A: الحاوية والترميز";
-"conversion.guide.audio.m4a.detail" = "M4A هي حاوية الملفات، وليست طريقة الضغط. يستخدم M4A (AAC) الضغط مع فقدان البيانات للملفات الأصغر القابلة للمشاركة؛ يحافظ M4A (Apple Lossless/ALAC) على جودة المصدر المتاحة ولكنه عادة ما يكون أكبر. اختر AAC للتخزين والمشاركة اليومي، أو ALAC عند تجنب فقدان المزيد من الجودة، وهو أمر أكثر أهمية من الحجم.";
+"conversion.guide.audio.m4a.detail" = "M4A هي حاوية الملفات، وليست طريقة التحويل. يستخدم M4A (AAC) التحويل مع فقدان البيانات للملفات الأصغر القابلة للمشاركة؛ يحافظ M4A (Apple Lossless/ALAC) على جودة المصدر المتاحة ولكنه عادة ما يكون أكبر. اختر AAC للتخزين والمشاركة اليومي، أو ALAC عند تجنب فقدان المزيد من الجودة، وهو أمر أكثر أهمية من الحجم.";
 "conversion.guide.audio.lossless.title" = "التنسيقات غير المفقودة";
-"conversion.guide.audio.lossless.detail" = "يستخدم M4A (ALAC) وCAF ALAC ضغطًا بدون فقدان البيانات؛ تقوم ملفات WAV وAIFF وCAF PCM بتخزين الصوت غير المضغوط وعادة ما تكون أكبر حجمًا. تحافظ هذه التنسيقات على الجودة المتوفرة في المصدر ولا تستخدم إعداد معدل البت. لا يمكن لتحويل MP3 أو AAC إلى ملفات بدون فقدان البيانات استعادة التفاصيل التي تمت إزالتها بالفعل عن طريق الضغط مع فقدان البيانات.";
+"conversion.guide.audio.lossless.detail" = "يستخدم M4A (ALAC) وCAF ALAC تحويلًا بدون فقدان البيانات؛ تقوم ملفات WAV وAIFF وCAF PCM بتخزين الصوت غير المضغوط وعادة ما تكون أكبر حجمًا. تحافظ هذه التنسيقات على الجودة المتوفرة في المصدر ولا تستخدم إعداد معدل البت. لا يمكن لتحويل MP3 أو AAC إلى ملفات بدون فقدان البيانات استعادة التفاصيل التي تمت إزالتها بالفعل عن طريق التحويل مع فقدان البيانات.";
 "conversion.guide.audio.extract.title" = "مقتطف من الفيديو";
 "conversion.guide.audio.extract.detail" = "اختر MOV أو MP4 أو M4V من الملفات أو الصور لقراءة المسار الصوتي المتوفر وإعادة تشفيره بالتنسيق المحدد. لم يتم تغيير الفيديو. لا يمكن استخراج الفيديو المحمي أو الفيديو بدون صوت.";
 "settings.background" = "الخلفية";
@@ -245,13 +245,13 @@
 "estimate.calculating" = "جارٍ تقدير حجم الإخراج…";
 "conversion.replace.button" = "استبدال الملفات الأصلية";
 "conversion.replace.title" = "استبدال الوسائط الأصلية؟";
-"conversion.replace.message" = "سيتم حفظ %d من العناصر المضغوطة في الصور، ثم حذف النسخ الأصلية. لا يمكن التراجع عن ذلك.";
+"conversion.replace.message" = "سيتم حفظ %d من العناصر المحوّلة في الصور، ثم حذف النسخ الأصلية. لا يمكن التراجع عن ذلك.";
 "conversion.replace.action" = "استبدال الملفات الأصلية";
 "conversion.replace.failed" = "تعذر استبدال بعض الملفات الأصلية، فتم الاحتفاظ بها للأمان.";
-"conversion.replace.unavailable" = "لا توجد ملفات أصلية قابلة للاستبدال. استورد من الصور وأكمل الضغط أولاً.";
+"conversion.replace.unavailable" = "لا توجد ملفات أصلية قابلة للاستبدال. استورد من الصور وأكمل التحويل أولاً.";
 "conversion.replace.review.title" = "استبدال الملفات الأصلية";
-"conversion.replace.review.summary" = "الوسائط المضغوطة جاهزة";
-"conversion.replace.review.detail" = "اختر الملفات الأصلية المراد استبدالها. تُحفظ النسخ المضغوطة أولاً.";
+"conversion.replace.review.summary" = "الوسائط المحوّلة جاهزة";
+"conversion.replace.review.detail" = "اختر الملفات الأصلية المراد استبدالها. تُحفظ النسخ المحوّلة أولاً.";
 "conversion.replace.select_all" = "تحديد الكل";
 "conversion.replace.deselect_all" = "إلغاء تحديد الكل";
 "conversion.replace.selected" = "تم تحديد %d";
@@ -259,3 +259,45 @@
 "conversion.guide.audio_replace.detail" = "تأتي ملفات الصوت من تطبيق «الملفات»، ولا يسمح iPhone للتطبيق بحذف الملفات الأصلية هناك نيابةً عنك بأمان. يُحفظ الصوت المضغوط كملف جديد. بعد التأكد منه، احذف الملف القديم بنفسك من «الملفات».";
 "video.settings.bitrate.help" = "يستخدم 100% الإعدادات التلقائية. تقلّل القيم الأقل معدل البت مقارنة بالأصل.";
 "video.error.hdr_bitrate" = "للحفاظ على ألوان وسطوع فيديو HDR، استخدم 100% (تلقائي).";
+
+"Convert" = "تحويل";
+
+"cleanup.space.title" = "مساحة للمراجعة";
+
+"cleanup.space.hint" = "تقدير دون تكرار العد. راجع قبل الحذف. قد يؤخر «المحذوفة مؤخرًا» تحرير المساحة.";
+
+"cleanup.action" = "تنظيف سريع";
+
+"cleanup.review.hint" = "تم اختيار الصور المتشابهة المقترحة مع الاحتفاظ بصورة من كل مجموعة. أضف لقطات الشاشة والفيديو فقط إن لم تعد تحتاجها.";
+
+"cleanup.useSuggestions" = "استخدام الاقتراحات";
+
+"cleanup.scan.title" = "مساحة لذكريات أكثر";
+
+"cleanup.scan.action" = "البحث عن مساحة لتحريرها";
+
+"cleanup.scan.hint" = "راجع الصور المتشابهة والفيديوهات الكبيرة ولقطات الشاشة. التحليل لا يحذف شيئًا.";
+
+"quick.compress.title" = "احتفظ بالذكريات وقلّل الحجم";
+
+"quick.video" = "ضغط الفيديو";
+
+"quick.image" = "ضغط الصور";
+
+"quick.compress.hint" = "اختر الملفات وسنتولى الإعدادات.";
+
+"quick.action" = "ضغط";
+
+"quick.ready" = "الإعدادات جاهزة";
+
+"quick.video.detail" = "MP4 / HEVC · الدقة الأصلية · معدل بت أقل.";
+
+"quick.image.detail" = "HEIC (أو JPEG) · جودة 75% · الأبعاد الأصلية · إزالة GPS.";
+
+"quick.originals" = "ينشئ نسخًا جديدة ويحفظ الأصول. قد تكون النتيجة أكبر؛ قارن قبل الاستبدال.";
+
+"premium.free.summary" = "مجانًا: مراجعة الوسائط وحذفها وتحويل الفيديو وتحويله.";
+
+"premium.value.summary" = "Premium: تنظيف فئات معًا وتحويل الصور والصوت وتنظيم المجلدات وتخصيص المظهر.";
+
+"quick.free" = "مجاني";

@@ -32,31 +32,30 @@ final class CleanMyIPhoneUITests: XCTestCase {
         ]
         app.launch()
 
-        for (index, tab) in [
-            ("tab.media", "Media"),
-            ("tab.storage", "Storage"),
-            ("tab.convert", "Compress"),
-            ("tab.settings", "Settings")
-        ].enumerated() {
-            let (identifier, label) = tab
-            // SwiftUI may expose the same tab as Button or Any depending on
-            // whether the custom or native Liquid Glass tab bar is active.
-            let identifiedTab = app.descendants(matching: .any)[identifier]
-            let nativeTab = app.tabBars.buttons[label]
-            let identifiedTimeout: TimeInterval = index == 0 ? 10 : 5
-
-            let identifiedTabExists = identifiedTab.waitForExistence(
-                timeout: identifiedTimeout
-            )
-            let nativeTabExists = identifiedTabExists
-                ? false
-                : nativeTab.waitForExistence(timeout: 5)
-
-            XCTAssertTrue(
-                identifiedTabExists || nativeTabExists,
-                "Missing primary tab \(label) (identifier: \(identifier)) after app launch"
-            )
+        XCTAssertTrue(app.buttons["media.convert"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.tabBars.firstMatch.exists)
+        for id in ["tab.media", "tab.convert", "tab.storage", "tab.settings"] {
+            XCTAssertFalse(app.descendants(matching: .any)[id].exists)
         }
+        XCTAssertTrue(app.buttons["media.quickClean.open"].exists)
+        app.buttons["media.convert"].tap()
+        XCTAssertTrue(app.buttons["conversion.home.video"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Convert Media"].exists)
+        XCTAssertTrue(app.buttons["conversion.home.video"].label.contains("Convert Videos"))
+        XCTAssertTrue(app.buttons["conversion.close"].exists)
+        app.buttons["conversion.close"].tap()
+        XCTAssertTrue(app.buttons["media.convert"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["media.storage"].exists)
+        XCTAssertLessThan(app.buttons["media.quickClean.open"].frame.midX, app.buttons["media.storage"].frame.midX)
+        XCTAssertLessThan(app.buttons["media.storage"].frame.midX, app.frame.midX)
+        XCTAssertGreaterThan(app.buttons["media.settings"].frame.midX, app.frame.midX)
+        XCTAssertTrue(app.buttons["media.settings"].exists)
+        XCTAssertFalse(app.buttons["media.actions"].exists)
+        XCTAssertFalse(app.buttons["media.delete"].exists)
+        XCTAssertFalse(app.buttons["Analyze"].exists)
+        XCTAssertFalse(app.buttons["Refresh"].exists)
+        app.buttons["media.settings"].tap()
+        XCTAssertTrue(app.buttons["settings.close"].waitForExistence(timeout: 5))
     }
 
     @MainActor

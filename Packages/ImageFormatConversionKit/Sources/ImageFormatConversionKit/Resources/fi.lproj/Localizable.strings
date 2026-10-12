@@ -1,35 +1,35 @@
-"converter.title" = "Median pakkaus";
-"converter.heading" = "Pakkaa media";
-"conversion.home.image.title" = "Pakkaa kuvat";
-"conversion.home.image.detail" = "Pakkaa kuvat muoto- ja kokosäätimillä ja poista yksityiset metatiedot";
-"conversion.home.image.tagline" = "Pakkaus · HEIC-muodot · Poista GPS";
-"conversion.home.video.title" = "Pakkaa video";
-"conversion.home.video.detail" = "Pakkaa video koodekeilla ja lähtöresoluutiolla";
-"conversion.home.video.tagline" = "Pakkaus · MP4 / MOV · Tarkkuus";
-"conversion.home.audio.title" = "Pakkaa ääni";
-"conversion.home.audio.detail" = "Pakkaa ääni tai pura raita videosta";
-"conversion.home.audio.tagline" = "Pakkaus · MP3 / AAC / WAV · Ote videosta";
+"converter.title" = "Muunna";
+"converter.heading" = "Muunna mediaa";
+"conversion.home.image.title" = "Muunna kuvia";
+"conversion.home.image.detail" = "JPG, PNG, HEIC ja muut. Säädä kuvan laatua ja mittoja.";
+"conversion.home.image.tagline" = "JPG, PNG, HEIC ja muut. Säädä kuvan laatua ja mittoja.";
+"conversion.home.video.title" = "Muunna videoita";
+"conversion.home.video.detail" = "MP4, MOV, M4V. Valitse koodekki, bittinopeus ja tarkkuus.";
+"conversion.home.video.tagline" = "MP4, MOV, M4V. Valitse koodekki, bittinopeus ja tarkkuus.";
+"conversion.home.audio.title" = "Muunna ääntä";
+"conversion.home.audio.detail" = "MP3, AAC, WAV ja muut. Säädä bittinopeutta tai poimi ääni videosta.";
+"conversion.home.audio.tagline" = "MP3, AAC, WAV ja muut. Säädä bittinopeutta tai poimi ääni videosta.";
 "conversion.home.history.summary" = "%@ · Pakatut %ld tiedostot";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "Lähtö on %@ pienempi";
 "conversion.home.history.larger" = "Lähtö on %@ suurempi";
 "conversion.home.history.unchanged" = "Lähtökoko on ennallaan";
-"import.title" = "Pakkaa kuvat paikallisesti";
+"import.title" = "Muunna kuvat paikallisesti";
 "import.subtitle" = "Tiedostot käsitellään tällä laitteella, eikä niitä koskaan ladata.";
 "action.add_images" = "Lisää kuvia";
 "action.choose_images" = "Valitse Kuvat";
 "action.clear_completed" = "Tyhjennä valmis";
 "action.clear_all" = "Tyhjennä kaikki";
-"action.convert" = "Aloita pakkaus";
+"action.convert" = "Muunna";
 "action.cancel" = "Peruuta";
-"action.share" = "Jaa pakattu tiedosto";
+"action.share" = "Jaa muunnettu tiedosto";
 "action.remove" = "Poista kuva";
 "empty.title" = "Kuvia ei ole valittu";
 "empty.subtitle" = "Aloita valitsemalla yksi tai useampi still-kuva.";
 "files.title" = "%ld Kuvia";
 "files.videos.title" = "%ld Videot";
 "files.audio.title" = "%ld Äänitiedostot";
-"settings.title" = "Pakkausasetukset";
+"settings.title" = "Muunnosasetukset";
 "settings.format" = "Muoto";
 "settings.quality" = "Laatu";
 "settings.metadata" = "Metatiedot";
@@ -50,13 +50,13 @@
 "color.black" = "Musta";
 "status.inspecting" = "Tarkastus";
 "status.ready" = "Valmis puristamaan";
-"status.converting" = "Pakkaaminen";
-"status.completed" = "Pakkaus valmis";
+"status.converting" = "Muunnaminen";
+"status.completed" = "Muunnos valmis";
 "status.cancelled" = "Peruutettu";
 "progress.summary" = "%ld / %ld valmis";
 "notice.duplicates_ignored" = "Päällekkäiset valinnat ohitettiin.";
 "notice.import_failed" = "Kuvia ei voitu tuoda: %@";
-"notice.cancelled" = "Pakkaus peruttu. Valmiit tiedostot säilytettiin.";
+"notice.cancelled" = "Muunnos peruttu. Valmiit tiedostot säilytettiin.";
 "notice.completed" = "Pakatut %ld kuvat.";
 "notice.completed_with_failures" = "Pakatut %ld kuvat; %ld epäonnistui.";
 "error.source_not_reachable" = "Lähdetiedosto ei ole saatavilla: %@";
@@ -73,11 +73,11 @@
 "error.cannot_create_destination" = "Lähtöä ei voitu luoda: %@";
 "error.cannot_finalize" = "Enkooderi ei voinut kirjoittaa loppuun: %@";
 "error.destination_exists" = "Tulostiedosto on jo olemassa: %@";
-"error.destination_busy" = "Toinen pakkaustehtävä on tämän tiedoston kirjoittaminen: %@";
+"error.destination_busy" = "Toinen muunnostehtävä on tämän tiedoston kirjoittaminen: %@";
 "error.cannot_reserve" = "Yksilöllistä tulosnimeä ei voitu luoda kohteelle %@.";
 "error.commit_failed" = "Pakattua tiedostoa ei voitu sitoa: %@";
 "error.cancelled" = "Kompressio peruutettiin.";
-"error.unexpected" = "Odottamaton pakkausvirhe: %@";
+"error.unexpected" = "Odottamaton muunnosvirhe: %@";
 "converter.mode" = "Mediatyyppi";
 "converter.mode.image" = "Kuvat";
 "converter.mode.video" = "Videot";
@@ -95,7 +95,7 @@
 "audio.source.video" = "Videon lähde";
 "audio.error.video_no_audio" = "Tämä video ei sisällä ääniraitaa.";
 "audio.error.video_protected" = "Suojattua videoääntä ei voi purkaa.";
-"audio.import.title" = "Pakkaa ääni";
+"audio.import.title" = "Muunna ääni";
 "audio.settings.quality" = "Laatu";
 "audio.format.mp3" = "MP3";
 "audio.format.aac" = "M4A (AAC-koodattu)";
@@ -105,7 +105,7 @@
 "audio.format.aiff" = "AIFF (pakkaamaton PCM)";
 "audio.format.caf_pcm" = "CAF (pakkaamaton PCM)";
 "audio.format.caf_alac" = "CAF (Apple Lossless)";
-"conversion.delete_all.title" = "Poistetaanko kaikki pakkaustiedostot?";
+"conversion.delete_all.title" = "Poistetaanko kaikki muunnostiedostot?";
 "conversion.delete_all.message" = "Tämä poistaa sovelluksen tuodut kopiot ja pakatut tulosteet. Kuvissa ja tiedostoissa olevia alkuperäisiä ei poisteta.";
 "conversion.delete.action" = "Poista tiedostot";
 "conversion.delete.failed" = "Joitakin sovellusten hallinnoimia tiedostoja ei voitu poistaa. Loput kohteet säilytettiin luettelossa.";
@@ -117,11 +117,11 @@
 "audio.error.unsupported" = "Valittua ääni- tai videomuotoa ei tueta.";
 "audio.error.invalid" = "Tiedosto ei sisällä luettavaa ääntä.";
 "audio.error.output" = "Äänilähtöä ei voitu luoda: %@";
-"audio.error.convert" = "Äänen pakkaus epäonnistui: %@";
+"audio.error.convert" = "Äänen muunnos epäonnistui: %@";
 "audio.error.commit" = "Pakattua ääntä ei voitu tallentaa: %@";
 "video.action.add" = "Lisää videoita";
 "video.action.choose" = "Valitse Videot";
-"video.import.title" = "Pakkaa videot";
+"video.import.title" = "Muunna videot";
 "video.import.subtitle" = "Tiedostot käsitellään tällä laitteella, eikä niitä koskaan ladata.";
 "quality.smaller" = "Pienempi";
 "quality.balanced" = "Tasapainoinen";
@@ -133,12 +133,12 @@
 "video.settings.bitrate" = "Bittinopeus";
 "video.settings.resolution" = "Resoluutio";
 "video.empty.title" = "Ei videoita";
-"video.empty.subtitle" = "Aloita pakkaus valitsemalla yksi tai useampi video.";
+"video.empty.subtitle" = "Aloita muunnos valitsemalla yksi tai useampi video.";
 "video.notice.completed" = "Pakatut %ld-videot.";
 "video.error.source" = "Lähdevideo ei ole saatavilla.";
 "video.error.unsupported" = "Tämä laite ei tue valittuja videoasetuksia.";
 "video.error.exporter" = "Videokompressoria ei voitu luoda.";
-"video.error.export" = "Videon pakkaus epäonnistui: %@";
+"video.error.export" = "Videon muunnos epäonnistui: %@";
 "video.error.commit" = "Pakattua videota ei voitu tallentaa: %@";
 "action.choose_files" = "Valitse Tiedostot";
 "format_picker.title" = "Tulostusmuoto";
@@ -174,29 +174,29 @@
 "formats.video.title" = "Tuetut videomuodot";
 "action.done" = "Valmis";
 "import.progress.title" = "Tuodaan";
-"conversion.guide.button" = "Avaa pakkausopas";
-"conversion.guide.title" = "Pakkausopas";
-"conversion.guide.hero.title" = "Pakkaa mediaa, säästä tilaa";
-"conversion.guide.hero.detail" = "Pakkaa kuvat, videot ja ääni paikallisesti tällä laitteella muuttamatta alkuperäisiä.";
+"conversion.guide.button" = "Median muuntamisen opas";
+"conversion.guide.title" = "Median muuntamisen opas";
+"conversion.guide.hero.title" = "Yleiset muodot. Omat asetuksesi.";
+"conversion.guide.hero.detail" = "Muunna yleisiä muotoja ja säädä laatua, bittinopeutta ja mittoja.";
 "conversion.guide.steps.title" = "Pika-aloitus";
 "conversion.guide.step.choose.title" = "Valitse mediatyyppi";
-"conversion.guide.step.choose.detail" = "Tuo kuvia ja videoita valokuvista tai tiedostoista. Äänityökalu hyväksyy äänen tai videon tiedostoista.";
-"conversion.guide.step.adjust.title" = "Säädä pakkausta";
-"conversion.guide.step.adjust.detail" = "Valitse muoto ja säädä laatua, resoluutiota, bittinopeutta tai metatietoja tarpeen mukaan.";
-"conversion.guide.step.convert.title" = "Pakkaa ja jaa";
+"conversion.guide.step.choose.detail" = "Valitse videoita, kuvia tai ääntä. Tuo Tiedostoista tai valitse kuvia ja videoita Kuvista.";
+"conversion.guide.step.adjust.title" = "Säädä muunnosta";
+"conversion.guide.step.adjust.detail" = "Muunna yleisiä muotoja ja säädä laatua, bittinopeutta ja mittoja.";
+"conversion.guide.step.convert.title" = "Muunna ja jaa";
 "conversion.guide.step.convert.detail" = "Seuraa pakkauksen edistymistä, tarkista tulos ja jaa se missä tahansa.";
-"conversion.guide.home.title" = "Aloita tiedostosta, jota haluat pienentää";
-"conversion.guide.home.detail" = "Jokainen työkalu seisoo yksinään, joten voit siirtyä suoraan tarvitsemaasi työhön.";
-"conversion.guide.tools.title" = "Kolme median pakkaustyökalua";
-"conversion.guide.image.detail" = "Pakkaa kuvat, säädä tulostusmuotoa ja kokoa ja poista sijainnin metatiedot ennen jakamista.";
-"conversion.guide.video.detail" = "Pakkaa video valitsemalla säilön, koodekin ja resoluution. Lopullinen tuki riippuu laitteesta ja lähteestä.";
-"conversion.guide.audio.detail" = "Pakkaa äänitiedostot – tai valitse video tästä poimiaksesi ja pakkaaksesi sen ääniraidan.";
+"conversion.guide.home.title" = "Muunna mediaa";
+"conversion.guide.home.detail" = "Muunna yleisiä muotoja ja säädä laatua, bittinopeutta ja mittoja.";
+"conversion.guide.tools.title" = "Kolme median muunnostyökalua";
+"conversion.guide.image.detail" = "JPG, PNG, HEIC ja muut. Säädä kuvan laatua ja mittoja.";
+"conversion.guide.video.detail" = "MP4, MOV, M4V. Valitse koodekki, bittinopeus ja tarkkuus.";
+"conversion.guide.audio.detail" = "MP3, AAC, WAV ja muut. Säädä bittinopeutta tai poimi ääni videosta.";
 "conversion.guide.controls.title" = "Muotoile puristus";
 "conversion.guide.format.detail" = "Valitse muoto, jossa yhteensopivuus, laatu ja tiedostokoko ovat tasapainossa tiedoston käytön suhteen.";
-"conversion.guide.quality.detail" = "Käytä kuvanlaatua, videon koodekkia ja resoluutiota tai AAC-bittinopeutta pienentääksesi kokoa. Häviöttömät äänimuodot säilyttävät laadun, mutta eivät välttämättä pienennä kokoa.";
+"conversion.guide.quality.detail" = "Pienempi laatu tai bittinopeus yleensä pienentää tiedostoa. Tulos riippuu sisällöstä; häviöttömät muodot eivät aina pienene.";
 "conversion.guide.metadata.detail" = "Säilytä kaikki kirjoitettavat metatiedot, poista vain GPS tai poista kaikki. GPS-poisto on oletusarvo.";
 "conversion.guide.replace.title" = "Korvaa alkuperäiset";
-"conversion.guide.replace.detail" = "Pakkaamisen jälkeen napauta aloitusnäkymän roskakoria ja valitse kuva- tai videokokoelmat. Appi tallentaa ensin pakatut kopiot Kuviin, minkä jälkeen iOS pyytää vahvistamaan vastaavien alkuperäisten poistamisen. Vain Kuvista tuodut valmiit kohteet ovat käytettävissä; erillistä ääntä ja Tiedostoista tuotuja kohteita ei tueta. Tyhjennä kaikki poistaa vain työkopiot ja estää korvaamisen, mutta ei poista alkuperäisiä.";
+"conversion.guide.replace.detail" = "Muunnamisen jälkeen napauta aloitusnäkymän roskakoria ja valitse kuva- tai videokokoelmat. Appi tallentaa ensin pakatut kopiot Kuviin, minkä jälkeen iOS pyytää vahvistamaan vastaavien alkuperäisten poistamisen. Vain Kuvista tuodut valmiit kohteet ovat käytettävissä; erillistä ääntä ja Tiedostoista tuotuja kohteita ei tueta. Tyhjennä kaikki poistaa vain työkopiot ja estää korvaamisen, mutta ei poista alkuperäisiä.";
 "conversion.guide.privacy.title" = "Alkuperäiset jäävät sinun";
 "conversion.guide.privacy.detail" = "Kaikki käsitellään tällä laitteella. Tyhjennä kaikki poistaa vain sovelluksen hallinnoimat kopiot ja tulosteet, ei koskaan alkuperäisiä kuviasi tai tiedostoistasi.";
 "conversion.guide.learn_more" = "Tutustu tähän työkaluun";
@@ -204,31 +204,31 @@
 "conversion.guide.detail.purpose.title" = "Mitä varten se on";
 "conversion.guide.detail.workflow.title" = "Erä, edistyminen ja tulokset";
 "conversion.guide.output.detail" = "Sovelluksen hallinnoima tulostekansio näkyy työkalussa, mutta sitä ei voi valita. Käytä Jaa siirtääksesi tuloksen muualle.";
-"conversion.guide.image.purpose" = "Eräpakkaa staattiset kuvat muodon, laadun, pisimmän reunan ja metatietojen mukaan. Yksi vaihtoehdoista koskee nykyistä erää alkuperäisiä muuttamatta.";
+"conversion.guide.image.purpose" = "JPG, PNG, HEIC ja muut. Säädä kuvan laatua ja mittoja.";
 "conversion.guide.image.imports.detail" = "Valitse useita tiedostoja tai enintään 100 kohdetta Kuvista. Muodot kuvastavat tämän laitteen ominaisuuksia; RAW/DNG/ProRAW ovat vain tuontia, eikä animoituja kuvia tueta.";
-"conversion.guide.image.workflow.detail" = "Seuraa tarkastus- ja pakkaustiloja tai peruuta työn ollessa käynnissä; valmiit tulokset säilyvät. Vertaa kokoja ja jaa jokaisesta tiedostokortista ennen luettelon tyhjentämistä.";
-"conversion.guide.image.quality.detail" = "JPG, HEIC, HEIF ja WebP tukevat 10–100 %:n laatua 5 %:n askelin, oletuksena 85 %. Huonompi laatu luo yleensä pienempiä tiedostoja, joissa häviö on näkyvämpää; muut muodot eivät näytä laadunvalvontaa.";
+"conversion.guide.image.workflow.detail" = "Seuraa tarkastus- ja muunnostiloja tai peruuta työn ollessa käynnissä; valmiit tulokset säilyvät. Vertaa kokoja ja jaa jokaisesta tiedostokortista ennen luettelon tyhjentämistä.";
+"conversion.guide.image.quality.detail" = "JPG, PNG, HEIC ja muut. Säädä kuvan laatua ja mittoja. Pienempi laatu tai bittinopeus yleensä pienentää tiedostoa. Tulos riippuu sisällöstä; häviöttömät muodot eivät aina pienene.";
 "resize.square1024" = "1024 pikseliä";
 "conversion.guide.image.resize.detail" = "Säilytä alkuperäiset mitat tai rajaa pisin reuna 4096, 2048 tai 1280 pikseliin pienentääksesi kokoa ilman suurennusta. 1024 × 1024 -vaihtoehto sopii koko kuvan neliömäiselle taustalle ilman rajausta tai venyttämistä; pienet kuvat suurennetaan.";
 "conversion.guide.image.transparency.detail" = "JPG ja BMP eivät voi tallentaa läpinäkyviä pikseleitä. Kun käytät jompaakumpaa muotoa, täytä läpinäkyvät alueet valkoisella tai mustalla.";
-"conversion.guide.video.purpose" = "Eräpakkaa MOV-, MP4- tai M4V-video säilön, koodekin ja resoluution mukaan ilman alkuperäisten päällekirjoittamista.";
+"conversion.guide.video.purpose" = "MP4, MOV, M4V. Valitse koodekki, bittinopeus ja tarkkuus.";
 "conversion.guide.video.imports.detail" = "Valitse useita MOV-, MP4- tai M4V-tiedostoja tai valitse jopa 50 videota Kuvista.";
 "conversion.guide.video.workflow.detail" = "Videot käsitellään yksitellen. Seuraa tehtävän tiloja ja suoritettuja laskelmia, peruuta tarvittaessa, vertaa sitten tulo- ja tuloskokoja ja jaa jokainen tulos.";
 "conversion.guide.video.resolution.detail" = "Tarkkuuden pienentäminen yleensä pienentää tiedostokokoa. H.264 tarjoaa Original, 4K, 1080p, 720p ja 480p; HEVC tarjoaa Original, 4K ja 1080p; ProRes säilyttää alkuperäisen resoluution.";
 "conversion.guide.video.compatibility.title" = "Yhdistelmät ja laitetuki";
 "conversion.guide.video.compatibility.detail" = "Säilön ja resoluution valinnat kapenevat, kun olet valinnut koodekin. Laite ja lähdevideo saavat silti viimeisen yhteensopivuustarkistuksen.";
 "conversion.guide.video.codec.h264.detail" = "Laajin yhteensopivuus: MP4, MOV tai M4V; Alkuperäinen, 4K, 1080p, 720p tai 480p.";
-"conversion.guide.video.codec.hevc.detail" = "Tehokkaampi pakkaus: MP4 tai MOV; Alkuperäinen, 4K tai 1080p. Vanhemmat laitteet ja sovellukset voivat olla vähemmän yhteensopivia.";
-"conversion.guide.video.codec.prores422.detail" = "Korkealaatuiseen editointiin: vain MOV, alkuperäisellä resoluutiolla. Tiedostot ovat yleensä suuria, eikä niitä ole tarkoitettu tilaa säästävään pakkaamiseen.";
-"conversion.guide.video.codec.prores4444.detail" = "Korkealaatuiseen jälkituotantoon: vain MOV, alkuperäisellä resoluutiolla. Tiedostot ovat yleensä erittäin suuria, eikä niitä ole tarkoitettu tilaa säästävään pakkaamiseen.";
-"conversion.guide.audio.purpose" = "Pakkaa ääni tai luo videosta erillinen pakattu äänitiedosto, jossa on käyttökelpoinen raita. Alkuperäinen ääni ja video säilyvät ennallaan.";
+"conversion.guide.video.codec.hevc.detail" = "Tehokkaampi muunnos: MP4 tai MOV; Alkuperäinen, 4K tai 1080p. Vanhemmat laitteet ja sovellukset voivat olla vähemmän yhteensopivia.";
+"conversion.guide.video.codec.prores422.detail" = "Korkealaatuiseen editointiin: vain MOV, alkuperäisellä resoluutiolla. Tiedostot ovat yleensä suuria, eikä niitä ole tarkoitettu tilaa säästävään muunnamiseen.";
+"conversion.guide.video.codec.prores4444.detail" = "Korkealaatuiseen jälkituotantoon: vain MOV, alkuperäisellä resoluutiolla. Tiedostot ovat yleensä erittäin suuria, eikä niitä ole tarkoitettu tilaa säästävään muunnamiseen.";
+"conversion.guide.audio.purpose" = "MP3, AAC, WAV ja muut. Säädä bittinopeutta tai poimi ääni videosta.";
 "conversion.guide.audio.imports.detail" = "Valitse ääni tai video tiedostoista tai valitse videoita Valokuvista poimiaksesi ääniraidat. Äänitulot: M4A (mukaan lukien ALAC), AAC, MP3, FLAC, WAV, AIFF/AIF ja CAF. Videotulot: MOV, MP4 ja M4V.";
 "conversion.guide.audio.workflow.detail" = "Seuraa lähteen tyyppiä, kestoa, tehtävän tilaa ja valmistuneiden lukumäärää tai peruuta tarvittaessa. Vertaa tulo- ja lähtökokoja ja jaa valmis ääni.";
 "conversion.guide.audio.quality.detail" = "MP3 ja AAC tarjoavat 96, 128, 192, 256 tai 320 kbps; oletusnopeus on 192 kbps. ALAC, WAV, AIFF ja PCM CAF ovat häviöttömiä eivätkä käytä bittinopeusasetusta.";
 "conversion.guide.audio.m4a.title" = "M4A: kontti ja koodekki";
-"conversion.guide.audio.m4a.detail" = "M4A on tiedostosäiliö, ei pakkausmenetelmä. M4A (AAC) käyttää häviöllistä pakkausta pienemmille, jaettaville tiedostoille; M4A (Apple Lossless/ALAC) säilyttää lähteen saatavilla olevan laadun, mutta on yleensä suurempi. Valitse AAC päivittäiseen säilytykseen ja jakamiseen tai ALAC, kun vältät lisälaadun heikkenemisen.";
+"conversion.guide.audio.m4a.detail" = "M4A on tiedostosäiliö, ei muunnosmenetelmä. M4A (AAC) käyttää häviöllistä muunnosta pienemmille, jaettaville tiedostoille; M4A (Apple Lossless/ALAC) säilyttää lähteen saatavilla olevan laadun, mutta on yleensä suurempi. Valitse AAC päivittäiseen säilytykseen ja jakamiseen tai ALAC, kun vältät lisälaadun heikkenemisen.";
 "conversion.guide.audio.lossless.title" = "Häviöttömät formaatit";
-"conversion.guide.audio.lossless.detail" = "M4A (ALAC) ja CAF ALAC käyttävät häviötöntä pakkausta; WAV, AIFF ja CAF PCM tallentavat pakkaamatonta ääntä ja ovat yleensä suurempia. Nämä muodot säilyttävät lähteessä saatavilla olevan laadun eivätkä käytä bittinopeusasetusta. MP3:n tai AAC:n muuntaminen häviöttömäksi ei voi palauttaa häviöisellä pakkauksella jo poistettuja yksityiskohtia.";
+"conversion.guide.audio.lossless.detail" = "M4A (ALAC) ja CAF ALAC käyttävät häviötöntä muunnosta; WAV, AIFF ja CAF PCM tallentavat muunnamatonta ääntä ja ovat yleensä suurempia. Nämä muodot säilyttävät lähteessä saatavilla olevan laadun eivätkä käytä bittinopeusasetusta. MP3:n tai AAC:n muuntaminen häviöttömäksi ei voi palauttaa häviöisellä pakkauksella jo poistettuja yksityiskohtia.";
 "conversion.guide.audio.extract.title" = "Ote videosta";
 "conversion.guide.audio.extract.detail" = "Valitse MOV, MP4 tai M4V tiedostoista tai kuvista lukeaksesi sen käytettävissä olevan ääniraidan ja koodataksesi sen uudelleen valittuun muotoon. Videota ei ole muutettu; suojattua videota tai videota ilman ääntä ei voi purkaa.";
 "settings.background" = "Tausta";
@@ -245,10 +245,10 @@
 "estimate.calculating" = "Arvioitu tulostuskoko…";
 "conversion.replace.button" = "Korvaa alkuperäiset";
 "conversion.replace.title" = "Korvataanko alkuperäinen media?";
-"conversion.replace.message" = "%d pakattua kohdetta tallennetaan Kuviin ja alkuperäiset poistetaan. Toimintoa ei voi kumota.";
+"conversion.replace.message" = "%d muunnettua kohdetta tallennetaan Kuviin ja alkuperäiset poistetaan. Toimintoa ei voi kumota.";
 "conversion.replace.action" = "Korvaa alkuperäiset";
 "conversion.replace.failed" = "Joitakin alkuperäisiä ei voitu korvata, joten ne säilytettiin turvallisuuden vuoksi.";
-"conversion.replace.unavailable" = "Korvattavia alkuperäisiä ei ole. Tuo ensin Kuvista ja viimeistele pakkaus.";
+"conversion.replace.unavailable" = "Korvattavia alkuperäisiä ei ole. Tuo ensin Kuvista ja viimeistele muunnos.";
 "conversion.replace.review.title" = "Korvaa alkuperäiset";
 "conversion.replace.review.summary" = "Pakatut mediat ovat valmiit";
 "conversion.replace.review.detail" = "Valitse korvattavat alkuperäiset. Pakatut kopiot tallennetaan ensin.";
@@ -259,3 +259,45 @@
 "conversion.guide.audio_replace.detail" = "Äänitiedostot tulevat Tiedostot-apista, eikä iPhone anna sovelluksen poistaa siellä olevia alkuperäisiä turvallisesti puolestasi. Pakattu ääni tallennetaan uutena tiedostona. Tarkista se ja poista sitten vanha tiedosto itse Tiedostot-apissa.";
 "video.settings.bitrate.help" = "100 % käyttää automaattista asetusta. Pienemmät arvot vähentävät bittinopeutta alkuperäisestä.";
 "video.error.hdr_bitrate" = "Säilytä HDR-videon värit ja kirkkaus valitsemalla 100 % (Auto).";
+
+"Convert" = "Muunna";
+
+"cleanup.space.title" = "Tarkistettavaa tilaa";
+
+"cleanup.space.hint" = "Arvio ilman kaksoislaskentaa. Tarkista ennen poistoa. Äskettäin poistetut voivat viivästyttää tilan vapautumista.";
+
+"cleanup.action" = "Pikasiivous";
+
+"cleanup.review.hint" = "Samankaltaisten kuvien ehdotukset on valittu. Yksi kuva ryhmää kohti säilyy. Lisää vain tarpeettomat näyttökuvat tai videot.";
+
+"cleanup.useSuggestions" = "Käytä ehdotuksia";
+
+"cleanup.scan.title" = "Tilaa uusille muistoille";
+
+"cleanup.scan.action" = "Etsi vapautettavaa tilaa";
+
+"cleanup.scan.hint" = "Tarkista samankaltaiset kuvat, suuret videot ja näyttökuvat. Analyysi ei poista mitään.";
+
+"quick.compress.title" = "Säilytä muistot, pienennä kokoa";
+
+"quick.video" = "Pakkaa videot";
+
+"quick.image" = "Pakkaa kuvat";
+
+"quick.compress.hint" = "Valitse tiedostot. Me hoidamme asetukset.";
+
+"quick.action" = "Pakkaa";
+
+"quick.ready" = "Asetukset ovat valmiit";
+
+"quick.video.detail" = "MP4 / HEVC · Alkuperäinen tarkkuus · Pienempi bittinopeus.";
+
+"quick.image.detail" = "HEIC (muuten JPEG) · 75 % laatu · Alkuperäinen koko · Poista GPS.";
+
+"quick.originals" = "Luo uudet kopiot ja säilyttää alkuperäiset. Tulos voi olla suurempi; vertaa ennen korvaamista.";
+
+"premium.free.summary" = "Ilmaiseksi: tarkista ja poista mediaa, muunna ja muunna videoita.";
+
+"premium.value.summary" = "Premium: siivoa useita luokkia, muunna kuvia ja ääntä, järjestä kansioita ja mukauta ulkoasua.";
+
+"quick.free" = "Ilmainen";

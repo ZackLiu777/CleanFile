@@ -1,44 +1,44 @@
-"converter.title" = "Media þjöppun";
-"converter.heading" = "Compress Media";
-"conversion.home.image.title" = "Compress Images";
-"conversion.home.image.detail" = "Compress images with format and size controls, and remove private metadata";
-"conversion.home.image.tagline" = "Compression · HEIC formats · Remove GPS";
-"conversion.home.video.title" = "Compress Video";
-"conversion.home.video.detail" = "Compress video with codecs and output resolution";
-"conversion.home.video.tagline" = "Þjöppun · MP4 / MOV · Upplausn";
-"conversion.home.audio.title" = "Compress Audio";
-"conversion.home.audio.detail" = "Compress audio or extract a track from video";
-"conversion.home.audio.tagline" = "Þjöppun · MP3 / AAC / WAV · Útdráttur úr myndbandi";
-"conversion.home.history.summary" = "%@ · Þjappaðar %ld skrár";
+"converter.title" = "Umbreyta";
+"converter.heading" = "Umbreyta miðlum";
+"conversion.home.image.title" = "Umbreyta myndum";
+"conversion.home.image.detail" = "JPG, PNG, HEIC og fleiri. Stilltu myndgæði og stærð.";
+"conversion.home.image.tagline" = "JPG, PNG, HEIC og fleiri. Stilltu myndgæði og stærð.";
+"conversion.home.video.title" = "Umbreyta myndskeiðum";
+"conversion.home.video.detail" = "MP4, MOV, M4V. Veldu kóðun, bitahraða og upplausn.";
+"conversion.home.video.tagline" = "MP4, MOV, M4V. Veldu kóðun, bitahraða og upplausn.";
+"conversion.home.audio.title" = "Umbreyta hljóði";
+"conversion.home.audio.detail" = "MP3, AAC, WAV og fleiri. Stilltu bitahraða eða dragðu hljóð úr myndskeiði.";
+"conversion.home.audio.tagline" = "MP3, AAC, WAV og fleiri. Stilltu bitahraða eða dragðu hljóð úr myndskeiði.";
+"conversion.home.history.summary" = "%@ · Umbreytaðar %ld skrár";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "Framleiðsla er %@ minni";
 "conversion.home.history.larger" = "Framleiðsla er %@ stærri";
 "conversion.home.history.unchanged" = "Úttaksstærð er óbreytt";
-"import.title" = "Compress images locally";
+"import.title" = "Convert images locally";
 "import.subtitle" = "Skrár eru unnar á þessu tæki og þeim er aldrei hlaðið upp.";
 "action.add_images" = "Bæta við myndum";
 "action.choose_images" = "Veldu Myndir";
 "action.clear_completed" = "Hreinsa Lokið";
 "action.clear_all" = "Hreinsa allt";
-"action.convert" = "Byrjaðu þjöppun";
+"action.convert" = "Umbreyta";
 "action.cancel" = "Hætta við";
-"action.share" = "Deildu þjappaðri skrá";
+"action.share" = "Deildu umbreyttri skrá";
 "action.remove" = "Fjarlægðu mynd";
 "empty.title" = "Engar myndir valdar";
 "empty.subtitle" = "Veldu eina eða fleiri kyrrmyndir til að byrja.";
 "files.title" = "%ld Myndir";
 "files.videos.title" = "%ld Myndbönd";
 "files.audio.title" = "%ld Hljóðskrár";
-"settings.title" = "Compression Settings";
+"settings.title" = "Conversion Settings";
 "settings.format" = "Snið";
 "settings.quality" = "Gæði";
 "settings.metadata" = "Lýsigögn";
 "settings.resize" = "Breyta stærð";
 "settings.transparent_background" = "Gagnsæ svæði";
 "settings.output" = "Úttaksmappa";
-"settings.output.images" = "Compressed Images";
-"settings.output.videos" = "Compressed Videos";
-"settings.output.audio" = "Compressed Audio";
+"settings.output.images" = "Converted Images";
+"settings.output.videos" = "Converted Videos";
+"settings.output.audio" = "Converted Audio";
 "metadata.preserve" = "Varðveita";
 "metadata.remove_gps" = "Fjarlægðu GPS";
 "metadata.remove_all" = "Fjarlægja allt";
@@ -49,16 +49,16 @@
 "color.white" = "Hvítur";
 "color.black" = "Svartur";
 "status.inspecting" = "Skoðun";
-"status.ready" = "Tilbúið til að þjappa saman";
-"status.converting" = "Þjöppun";
-"status.completed" = "Þjöppun lokið";
+"status.ready" = "Tilbúið til að umbreyta saman";
+"status.converting" = "Umbreyting";
+"status.completed" = "Umbreyting lokið";
 "status.cancelled" = "Hætt við";
 "progress.summary" = "%ld af %ld lokið";
 "notice.duplicates_ignored" = "Tvítekið val var hunsað.";
 "notice.import_failed" = "Gat ekki flutt inn myndir: %@";
-"notice.cancelled" = "Hætt við þjöppun. Completed files were kept.";
-"notice.completed" = "Compressed %ld images.";
-"notice.completed_with_failures" = "Compressed %ld images; %ld failed.";
+"notice.cancelled" = "Hætt við umbreyting. Completed files were kept.";
+"notice.completed" = "Converted %ld images.";
+"notice.completed_with_failures" = "Converted %ld images; %ld failed.";
 "error.source_not_reachable" = "Frumskráin er ekki tiltæk: %@";
 "error.cannot_open_source" = "Skráin er ekki studd mynd: %@";
 "error.unsupported_input" = "Þetta myndsnið er ekki stutt: %@";
@@ -73,11 +73,11 @@
 "error.cannot_create_destination" = "Ekki var hægt að búa til úttakið: %@";
 "error.cannot_finalize" = "Kóðarinn gat ekki klárað að skrifa: %@";
 "error.destination_exists" = "Úttaksskrá er þegar til: %@";
-"error.destination_busy" = "Annað þjöppunarverkefni er að skrifa þessa skrá: %@";
+"error.destination_busy" = "Annað umbreytingarverkefni er að skrifa þessa skrá: %@";
 "error.cannot_reserve" = "Ekki var hægt að búa til einstakt úttaksheiti fyrir %@.";
 "error.commit_failed" = "Ekki var hægt að nota þjöppuðu skrána: %@";
-"error.cancelled" = "Compression was cancelled.";
-"error.unexpected" = "Óvænt samþjöppunarvilla: %@";
+"error.cancelled" = "Conversion was cancelled.";
+"error.unexpected" = "Óvænt samumbreytingarvilla: %@";
 "converter.mode" = "Tegund fjölmiðla";
 "converter.mode.image" = "Myndir";
 "converter.mode.video" = "Myndbönd";
@@ -95,7 +95,7 @@
 "audio.source.video" = "Myndbandsuppspretta";
 "audio.error.video_no_audio" = "Þetta myndband inniheldur ekki hljóðrás.";
 "audio.error.video_protected" = "Ekki er hægt að draga varið myndhljóð út.";
-"audio.import.title" = "Compress Audio";
+"audio.import.title" = "Convert Audio";
 "audio.settings.quality" = "Gæði";
 "audio.format.mp3" = "MP3";
 "audio.format.aac" = "M4A (AAC kóðuð)";
@@ -105,23 +105,23 @@
 "audio.format.aiff" = "AIFF (óþjappað PCM)";
 "audio.format.caf_pcm" = "CAF (óþjappað PCM)";
 "audio.format.caf_alac" = "CAF (Apple Lossless)";
-"conversion.delete_all.title" = "Eyða öllum þjöppunarskrám?";
-"conversion.delete_all.message" = "Þetta fjarlægir innflutt eintök og þjappað úttak appsins. Frumritum í myndum og skrám er ekki eytt.";
+"conversion.delete_all.title" = "Eyða öllum umbreytingarskrám?";
+"conversion.delete_all.message" = "Þetta fjarlægir innflutt eintök og umbreytt úttak appsins. Frumritum í myndum og skrám er ekki eytt.";
 "conversion.delete.action" = "Eyða skrám";
 "conversion.delete.failed" = "Ekki var hægt að eyða sumum forritastýrðum skrám. Eftirstöðvarnar voru geymdar á listanum.";
 "audio.lossless" = "Taplaus framleiðsla heldur tiltækum hljóðgæðum.";
 "audio.empty.title" = "Ekkert hljóð";
-"audio.empty.subtitle" = "Veldu hljóðskrár til að þjappa eða dragðu út hljóð úr myndböndum.";
-"audio.notice.completed" = "Compressed %ld audio files.";
+"audio.empty.subtitle" = "Veldu hljóðskrár til að umbreyta eða dragðu út hljóð úr myndböndum.";
+"audio.notice.completed" = "Converted %ld audio files.";
 "audio.error.source" = "Upprunahljóðið er ekki tiltækt.";
 "audio.error.unsupported" = "Valið hljóð- eða myndsnið er ekki stutt.";
 "audio.error.invalid" = "Skráin inniheldur ekki læsilegt hljóð.";
 "audio.error.output" = "Ekki var hægt að búa til hljóðúttakið: %@";
-"audio.error.convert" = "Hljóðþjöppun mistókst: %@";
-"audio.error.commit" = "Ekki var hægt að vista þjappað hljóð: %@";
+"audio.error.convert" = "Hljóðumbreyting mistókst: %@";
+"audio.error.commit" = "Ekki var hægt að vista umbreytt hljóð: %@";
 "video.action.add" = "Bæta við myndböndum";
 "video.action.choose" = "Veldu myndbönd";
-"video.import.title" = "Compress Videos";
+"video.import.title" = "Convert Videos";
 "video.import.subtitle" = "Skrár eru unnar á þessu tæki og þeim er aldrei hlaðið upp.";
 "quality.smaller" = "Minni";
 "quality.balanced" = "Jafnvægi";
@@ -133,13 +133,13 @@
 "video.settings.bitrate" = "Bitahraði";
 "video.settings.resolution" = "Upplausn";
 "video.empty.title" = "Engin myndbönd";
-"video.empty.subtitle" = "Veldu eitt eða fleiri myndbönd til að hefja þjöppun.";
-"video.notice.completed" = "Compressed %ld videos.";
+"video.empty.subtitle" = "Veldu eitt eða fleiri myndbönd til að hefja umbreyting.";
+"video.notice.completed" = "Converted %ld videos.";
 "video.error.source" = "Upprunamyndbandið er ekki tiltækt.";
 "video.error.unsupported" = "Þetta tæki styður ekki valdar myndbandsstillingar.";
 "video.error.exporter" = "Ekki var hægt að búa til myndþjöppu.";
-"video.error.export" = "Video compression failed: %@";
-"video.error.commit" = "Ekki tókst að vista þjappað myndband: %@";
+"video.error.export" = "Video convertion failed: %@";
+"video.error.commit" = "Ekki tókst að vista umbreytt myndband: %@";
 "action.choose_files" = "Veldu úr skrám";
 "format_picker.title" = "Úttakssnið";
 "format_picker.done" = "Búið";
@@ -174,29 +174,29 @@
 "formats.video.title" = "Stuðningur myndbandssnið";
 "action.done" = "Búið";
 "import.progress.title" = "Innflutningur";
-"conversion.guide.button" = "Opnaðu þjöppunarleiðbeiningar";
-"conversion.guide.title" = "Þjöppunarleiðbeiningar";
-"conversion.guide.hero.title" = "Compress media, save space";
-"conversion.guide.hero.detail" = "Þjappaðu myndum, myndböndum og hljóði á staðnum á þessu tæki án þess að breyta upprunalegum myndum.";
+"conversion.guide.button" = "Leiðarvísir fyrir umbreytingu miðla";
+"conversion.guide.title" = "Leiðarvísir fyrir umbreytingu miðla";
+"conversion.guide.hero.title" = "Algeng snið. Þínar stillingar.";
+"conversion.guide.hero.detail" = "Umbreyttu algengum sniðum og stilltu gæði, bitahraða og stærð.";
 "conversion.guide.steps.title" = "Fljótleg byrjun";
 "conversion.guide.step.choose.title" = "Veldu miðlunartegund";
-"conversion.guide.step.choose.detail" = "Flytja inn myndir og myndskeið úr myndum eða skrám. Hljóðtólið tekur við hljóði eða myndskeiði frá skrám.";
-"conversion.guide.step.adjust.title" = "Stilltu þjöppun";
-"conversion.guide.step.adjust.detail" = "Veldu snið og stilltu gæði, upplausn, bitahraða eða lýsigögn eftir þörfum.";
-"conversion.guide.step.convert.title" = "Compress and share";
-"conversion.guide.step.convert.detail" = "Fylgstu með framvindu þjöppunar, skoðaðu niðurstöðuna og deildu henni síðan hvar sem þú þarft.";
-"conversion.guide.home.title" = "Byrjaðu á skránni sem þú vilt minnka";
-"conversion.guide.home.detail" = "Hvert verkfæri stendur fyrir sínu, svo þú getur farið beint í það verk sem þú þarft.";
-"conversion.guide.tools.title" = "Þrjú fjölmiðlaþjöppunartæki";
-"conversion.guide.image.detail" = "Compress images, adjust the output format and size, and remove location metadata before sharing.";
-"conversion.guide.video.detail" = "Þjappaðu myndbandi með því að velja ílát, merkjamál og upplausn. Final support depends on the device and source.";
-"conversion.guide.audio.detail" = "Compress audio files—or select a video here to extract and compress its audio track.";
-"conversion.guide.controls.title" = "Mótaðu þjöppunina";
+"conversion.guide.step.choose.detail" = "Veldu myndskeið, myndir eða hljóð. Flyttu inn úr Skrám eða veldu myndir og myndskeið úr Myndum.";
+"conversion.guide.step.adjust.title" = "Stilltu umbreyting";
+"conversion.guide.step.adjust.detail" = "Umbreyttu algengum sniðum og stilltu gæði, bitahraða og stærð.";
+"conversion.guide.step.convert.title" = "Convert and share";
+"conversion.guide.step.convert.detail" = "Fylgstu með framvindu umbreytingar, skoðaðu niðurstöðuna og deildu henni síðan hvar sem þú þarft.";
+"conversion.guide.home.title" = "Umbreyta miðlum";
+"conversion.guide.home.detail" = "Umbreyttu algengum sniðum og stilltu gæði, bitahraða og stærð.";
+"conversion.guide.tools.title" = "Þrjú fjölmiðlaumbreytingartæki";
+"conversion.guide.image.detail" = "JPG, PNG, HEIC og fleiri. Stilltu myndgæði og stærð.";
+"conversion.guide.video.detail" = "MP4, MOV, M4V. Veldu kóðun, bitahraða og upplausn.";
+"conversion.guide.audio.detail" = "MP3, AAC, WAV og fleiri. Stilltu bitahraða eða dragðu hljóð úr myndskeiði.";
+"conversion.guide.controls.title" = "Mótaðu umbreytingina";
 "conversion.guide.format.detail" = "Veldu snið sem kemur jafnvægi á eindrægni, gæði og skráarstærð fyrir hvernig skráin verður notuð.";
-"conversion.guide.quality.detail" = "Notaðu myndgæði, myndkóða og upplausn, eða AAC bitahraða til að minnka stærðina. Taplaus hljóðsnið varðveita gæði en gæti ekki minnkað stærðina.";
+"conversion.guide.quality.detail" = "Minni gæði eða bitahraði minnka yfirleitt skrána. Niðurstaðan fer eftir innihaldi; taplaus snið verða ekki alltaf minni.";
 "conversion.guide.metadata.detail" = "Geymdu öll skrifanleg lýsigögn, fjarlægðu aðeins GPS eða fjarlægðu allt. GPS fjarlæging er sjálfgefið.";
 "conversion.guide.replace.title" = "Skipta út frumritum";
-"conversion.guide.replace.detail" = "Eftir þjöppun skaltu ýta á ruslafötuna á heimaskjánum og velja mynda- eða myndbandasöfn. Forritið vistar fyrst þjöppuð afrit í Myndir og síðan biður iOS um staðfestingu á eyðingu samsvarandi frumrita. Aðeins lokin atriði sem flutt voru inn úr Myndum eru studd; sjálfstætt hljóð og innflutningur úr Skrám eru ekki studd. Hreinsa allt fjarlægir aðeins vinnuafrit og gerir útskiptingu óvirka, en eyðir aldrei frumritum.";
+"conversion.guide.replace.detail" = "Eftir umbreyting skaltu ýta á ruslafötuna á heimaskjánum og velja mynda- eða myndbandasöfn. Forritið vistar fyrst þjöppuð afrit í Myndir og síðan biður iOS um staðfestingu á eyðingu samsvarandi frumrita. Aðeins lokin atriði sem flutt voru inn úr Myndum eru studd; sjálfstætt hljóð og innflutningur úr Skrám eru ekki studd. Hreinsa allt fjarlægir aðeins vinnuafrit og gerir útskiptingu óvirka, en eyðir aldrei frumritum.";
 "conversion.guide.privacy.title" = "Your originals stay yours";
 "conversion.guide.privacy.detail" = "Allt er unnið á þessu tæki. Hreinsa allt fjarlægir aðeins forritstýrð afrit og úttak, aldrei frumritin þín í myndum eða skrám.";
 "conversion.guide.learn_more" = "Skoðaðu þetta tól";
@@ -204,31 +204,31 @@
 "conversion.guide.detail.purpose.title" = "Til hvers það er";
 "conversion.guide.detail.workflow.title" = "Hópur, framfarir og árangur";
 "conversion.guide.output.detail" = "Úttaksmappa sem er stjórnað af forritum er sýnd í tólinu en er ekki hægt að velja. Notaðu Share til að færa niðurstöðu eitthvert annað.";
-"conversion.guide.image.purpose" = "Hópþjappaðu kyrrstæðum myndum eftir sniði, gæðum, lengstu brún og lýsigögnum. Eitt sett af valkostum á við um núverandi lotu án þess að breyta frumritunum.";
+"conversion.guide.image.purpose" = "JPG, PNG, HEIC og fleiri. Stilltu myndgæði og stærð.";
 "conversion.guide.image.imports.detail" = "Veldu margar skrár, eða allt að 100 atriði úr myndum. Snið endurspegla getu þessa tækis; RAW/DNG/ProRAW eru eingöngu til innflutnings og hreyfimyndir eru ekki studdar.";
-"conversion.guide.image.workflow.detail" = "Fylgdu skoðunar- og þjöppunarstöðu, eða hættu við á meðan vinna er í gangi; kláruð úrslit standa eftir. Berðu saman stærðir og deildu af hverju skráarspjaldi áður en þú hreinsar listann.";
-"conversion.guide.image.quality.detail" = "JPG, HEIC, HEIF og WebP styðja 10%–100% gæði í 5% skrefum, með 85% sem sjálfgefið. Minni gæði skapa venjulega smærri skrár með meira sýnilegt tap; önnur snið sýna ekki gæðaeftirlit.";
+"conversion.guide.image.workflow.detail" = "Fylgdu skoðunar- og umbreytingarstöðu, eða hættu við á meðan vinna er í gangi; kláruð úrslit standa eftir. Berðu saman stærðir og deildu af hverju skráarspjaldi áður en þú hreinsar listann.";
+"conversion.guide.image.quality.detail" = "JPG, PNG, HEIC og fleiri. Stilltu myndgæði og stærð. Minni gæði eða bitahraði minnka yfirleitt skrána. Niðurstaðan fer eftir innihaldi; taplaus snið verða ekki alltaf minni.";
 "resize.square1024" = "1024px";
 "conversion.guide.image.resize.detail" = "Haltu upprunalegu málunum eða settu yfir lengstu brúnina í 4096, 2048 eða 1280 px til að minnka stærðina án þess að stækka. 1024 × 1024 valkosturinn passar alla myndina á ferkantaðan bakgrunn án þess að skera eða teygja; litlar myndir eru stækkaðar.";
 "conversion.guide.image.transparency.detail" = "JPG og BMP geta ekki geymt gagnsæja pixla. Þegar annað hvort snið er notað skaltu fylla gegnsæ svæði með hvítu eða svörtu.";
-"conversion.guide.video.purpose" = "Hópþjappaðu MOV, MP4 eða M4V myndskeið eftir íláti, merkjamáli og upplausn án þess að skrifa yfir frumritin.";
+"conversion.guide.video.purpose" = "MP4, MOV, M4V. Veldu kóðun, bitahraða og upplausn.";
 "conversion.guide.video.imports.detail" = "Veldu margar MOV, MP4 eða M4V skrár, eða veldu allt að 50 myndbönd úr myndum.";
 "conversion.guide.video.workflow.detail" = "Videos are processed one by one. Fylgdu verkefnastöðu og talningu lokið, hættu við þegar þörf krefur, berðu síðan saman inntaks- og úttakstærðir og deildu hverri niðurstöðu.";
 "conversion.guide.video.resolution.detail" = "Að lækka upplausn dregur venjulega úr skráarstærð. H.264 býður upp á Original, 4K, 1080p, 720p og 480p; HEVC býður upp á Original, 4K og 1080p; ProRes heldur upprunalegu upplausninni.";
 "conversion.guide.video.compatibility.title" = "Samsetningar og stuðningur við tæki";
 "conversion.guide.video.compatibility.detail" = "Gáma- og upplausnarval minnkar eftir að þú hefur valið merkjamál. Tækið og upprunamyndbandið fá samt lokaathugun á samhæfi.";
 "conversion.guide.video.codec.h264.detail" = "Víðtækasta samhæfni: MP4, MOV eða M4V; Upprunalegt, 4K, 1080p, 720p eða 480p.";
-"conversion.guide.video.codec.hevc.detail" = "Skilvirkari þjöppun: MP4 eða MOV; Upprunalegt, 4K eða 1080p. Eldri tæki og öpp gætu verið minna samhæf.";
-"conversion.guide.video.codec.prores422.detail" = "Fyrir hágæða klippingu: MOV eingöngu, í upprunalegri upplausn. Skrár eru venjulega stórar og eru ekki ætlaðar til plásssparandi þjöppunar.";
-"conversion.guide.video.codec.prores4444.detail" = "Fyrir hágæða eftirvinnslu: Aðeins MOV, í upprunalegri upplausn. Skrár eru yfirleitt mjög stórar og eru ekki ætlaðar til plásssparandi þjöppunar.";
-"conversion.guide.audio.purpose" = "Compress audio or create a separate compressed audio file from a video with a usable track. The original audio and video remain unchanged.";
+"conversion.guide.video.codec.hevc.detail" = "Skilvirkari umbreyting: MP4 eða MOV; Upprunalegt, 4K eða 1080p. Eldri tæki og öpp gætu verið minna samhæf.";
+"conversion.guide.video.codec.prores422.detail" = "Fyrir hágæða klippingu: MOV eingöngu, í upprunalegri upplausn. Skrár eru venjulega stórar og eru ekki ætlaðar til plásssparandi umbreytingar.";
+"conversion.guide.video.codec.prores4444.detail" = "Fyrir hágæða eftirvinnslu: Aðeins MOV, í upprunalegri upplausn. Skrár eru yfirleitt mjög stórar og eru ekki ætlaðar til plásssparandi umbreytingar.";
+"conversion.guide.audio.purpose" = "MP3, AAC, WAV og fleiri. Stilltu bitahraða eða dragðu hljóð úr myndskeiði.";
 "conversion.guide.audio.imports.detail" = "Veldu hljóð eða myndskeið úr skrám, eða veldu myndbönd úr myndum til að draga út hljóðrásir þeirra. Hljóðinntak: M4A (þar á meðal ALAC), AAC, MP3, FLAC, WAV, AIFF/AIF og CAF. Vídeóinntak: MOV, MP4 og M4V.";
 "conversion.guide.audio.workflow.detail" = "Fylgdu upprunategund, tímalengd, verkefnastöðu og talningu lokið, eða hættu við þegar þörf krefur. Berðu saman inntaks- og úttakstærðir og deildu fullbúnu hljóði.";
 "conversion.guide.audio.quality.detail" = "MP3 og AAC bjóða upp á 96, 128, 192, 256 eða 320 kbps; sjálfgefið er 192 kbps. ALAC, WAV, AIFF og PCM CAF eru taplaus og nota ekki bitahraða stillingu.";
 "conversion.guide.audio.m4a.title" = "M4A: gámur og merkjamál";
-"conversion.guide.audio.m4a.detail" = "M4A er skráarílátið, ekki þjöppunaraðferðin. M4A (AAC) notar tapaða þjöppun fyrir smærri skrár sem hægt er að deila; M4A (Apple Lossless/ALAC) varðveitir tiltæk gæði upprunans en er venjulega stærri. Veldu AAC fyrir daglega geymslu og samnýtingu, eða ALAC þegar þú forðast frekara gæðatap skiptir meira máli en stærð.";
+"conversion.guide.audio.m4a.detail" = "M4A er skráarílátið, ekki umbreytingaraðferðin. M4A (AAC) notar tapaða umbreyting fyrir smærri skrár sem hægt er að deila; M4A (Apple Lossless/ALAC) varðveitir tiltæk gæði upprunans en er venjulega stærri. Veldu AAC fyrir daglega geymslu og samnýtingu, eða ALAC þegar þú forðast frekara gæðatap skiptir meira máli en stærð.";
 "conversion.guide.audio.lossless.title" = "Taplaus snið";
-"conversion.guide.audio.lossless.detail" = "M4A (ALAC) og CAF ALAC nota taplausa þjöppun; WAV, AIFF og CAF PCM geyma óþjappað hljóð og eru venjulega stærri. Þessi snið varðveita gæðin sem eru tiltæk í upprunanum og nota ekki bitahraðastillingu. Að breyta MP3 eða AAC í tapslaust getur ekki endurheimt smáatriði sem þegar hafa verið fjarlægð með tapsþjöppun.";
+"conversion.guide.audio.lossless.detail" = "M4A (ALAC) og CAF ALAC nota taplausa umbreyting; WAV, AIFF og CAF PCM geyma óumbreytt hljóð og eru venjulega stærri. Þessi snið varðveita gæðin sem eru tiltæk í upprunanum og nota ekki bitahraðastillingu. Að breyta MP3 eða AAC í tapslaust getur ekki endurheimt smáatriði sem þegar hafa verið fjarlægð með tapsumbreyting.";
 "conversion.guide.audio.extract.title" = "Útdráttur úr myndbandi";
 "conversion.guide.audio.extract.detail" = "Veldu MOV, MP4 eða M4V úr skrám eða myndum til að lesa tiltækt hljóðlag þess og umrita það aftur á völdu sniði. Myndbandinu er ekki breytt; Ekki er hægt að draga varið myndband eða myndband án hljóðs út.";
 "settings.background" = "Bakgrunnur";
@@ -248,7 +248,7 @@
 "conversion.replace.message" = "%d þjöppuð atriði verða vistuð í Myndir og frumritunum síðan eytt. Ekki er hægt að afturkalla þetta.";
 "conversion.replace.action" = "Skipta út frumritum";
 "conversion.replace.failed" = "Ekki tókst að skipta út sumum frumritum og þau voru varðveitt til öryggis.";
-"conversion.replace.unavailable" = "Engin frumrit eru tiltæk til útskiptingar. Flyttu fyrst inn úr Myndum og ljúktu þjöppun.";
+"conversion.replace.unavailable" = "Engin frumrit eru tiltæk til útskiptingar. Flyttu fyrst inn úr Myndum og ljúktu umbreyting.";
 "conversion.replace.review.title" = "Skipta út frumritum";
 "conversion.replace.review.summary" = "Þjöppuð gögn eru tilbúin";
 "conversion.replace.review.detail" = "Veldu frumritin sem á að skipta út. Þjöppuðu afritin eru vistuð fyrst.";
@@ -256,6 +256,48 @@
 "conversion.replace.deselect_all" = "Afvelja allt";
 "conversion.replace.selected" = "%d valin";
 "conversion.guide.audio_replace.title" = "Af hverju hljóð getur ekki komið í stað frumritsins";
-"conversion.guide.audio_replace.detail" = "Hljóðskrár koma úr Skrám og iPhone leyfir forritinu ekki að eyða frumritunum þar á öruggan hátt fyrir þig. Þjappað hljóð er vistað sem ný skrá. Athugaðu hana og eyddu síðan gömlu skránni sjálf/ur í Skrám.";
+"conversion.guide.audio_replace.detail" = "Hljóðskrár koma úr Skrám og iPhone leyfir forritinu ekki að eyða frumritunum þar á öruggan hátt fyrir þig. Umbreytað hljóð er vistað sem ný skrá. Athugaðu hana og eyddu síðan gömlu skránni sjálf/ur í Skrám.";
 "video.settings.bitrate.help" = "100% notar sjálfvirkar stillingar. Lægri gildi lækka bitahraða miðað við upprunalegt myndskeið.";
 "video.error.hdr_bitrate" = "Notaðu 100% (Sjálfvirkt) fyrir HDR-myndskeið til að varðveita liti og birtu.";
+
+"Convert" = "Umbreyta";
+
+"cleanup.space.title" = "Pláss til yfirferðar";
+
+"cleanup.space.hint" = "Áætlað án tvítalningar. Farðu yfir áður en þú eyðir. Nýlega eytt getur tafið losun pláss.";
+
+"cleanup.action" = "Fljótleg tiltekt";
+
+"cleanup.review.hint" = "Tillögur að svipuðum myndum eru valdar. Ein mynd úr hverjum hópi er varðveitt. Bættu aðeins við skjámyndum eða myndskeiðum sem þú þarft ekki.";
+
+"cleanup.useSuggestions" = "Nota tillögur";
+
+"cleanup.scan.title" = "Pláss fyrir fleiri minningar";
+
+"cleanup.scan.action" = "Finna pláss til að losa";
+
+"cleanup.scan.hint" = "Skoðaðu svipaðar myndir, stór myndskeið og skjámyndir. Greiningin eyðir engu.";
+
+"quick.compress.title" = "Geymdu minningarnar, minnkaðu stærðina";
+
+"quick.video" = "Þjappa myndskeiðum";
+
+"quick.image" = "Þjappa myndum";
+
+"quick.compress.hint" = "Veldu skrár. Við sjáum um stillingarnar.";
+
+"quick.action" = "Þjappa";
+
+"quick.ready" = "Stillingarnar eru tilbúnar";
+
+"quick.video.detail" = "MP4 / HEVC · Upprunaleg upplausn · Minni bitahraði.";
+
+"quick.image.detail" = "HEIC (annars JPEG) · 75% gæði · Upprunaleg stærð · Fjarlægja GPS.";
+
+"quick.originals" = "Býr til ný afrit og varðveitir frumrit. Útkoman getur verið stærri; berðu saman áður en skipt er út.";
+
+"premium.free.summary" = "Ókeypis: skoða og eyða miðlum, umbreyta og umbreyta myndskeiðum.";
+
+"premium.value.summary" = "Premium: hreinsa flokka saman, umbreyta myndum og hljóði, skipuleggja möppur og sérsníða útlit.";
+
+"quick.free" = "Ókeypis";

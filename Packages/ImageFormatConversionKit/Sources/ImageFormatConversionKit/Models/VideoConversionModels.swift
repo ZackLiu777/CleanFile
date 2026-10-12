@@ -80,6 +80,8 @@ public struct VideoConversionRequest: Sendable {
     /// Nil keeps the existing system export preset. A value below 1 requests
     /// a fraction of the source video's bit rate through the explicit encoder.
     public let bitRateFraction: Double?
+    /// Preserve global and timed metadata when compressing a paired Live Photo movie.
+    public let preservesTimedMetadata: Bool
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
     public init(
@@ -88,7 +90,8 @@ public struct VideoConversionRequest: Sendable {
         container: VideoOutputContainer,
         codec: VideoCodec,
         resolution: VideoResolutionPreset,
-        bitRateFraction: Double? = nil
+        bitRateFraction: Double? = nil,
+        preservesTimedMetadata: Bool = false
     ) {
         self.sourceURL = sourceURL
         self.destinationDirectory = destinationDirectory
@@ -96,6 +99,7 @@ public struct VideoConversionRequest: Sendable {
         self.codec = codec
         self.resolution = resolution
         self.bitRateFraction = bitRateFraction
+        self.preservesTimedMetadata = preservesTimedMetadata
     }
 }
 

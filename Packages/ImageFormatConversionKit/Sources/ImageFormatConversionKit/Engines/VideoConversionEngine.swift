@@ -84,6 +84,7 @@ public actor VideoConversionEngine {
                 guard let exporter = AVAssetExportSession(asset: asset, presetName: preset) else {
                     throw VideoConversionError.cannotCreateExporter
                 }
+                if request.preservesTimedMetadata { exporter.metadata = try await asset.load(.metadata) }
                 let exporterCancellation = ExporterCancellation(exporter)
                 activeExporters[operationID] = exporter
                 defer { activeExporters[operationID] = nil }
@@ -98,6 +99,9 @@ public actor VideoConversionEngine {
         } catch is CancellationError {
             ConversionPerformance.end("Conversion Video Export", id: exportID)
             throw VideoConversionError.cancelled
+        } catch VideoConversionError.hdrBitrateUnsupported {
+            ConversionPerformance.end("Conversion Video Export", id: exportID)
+            throw VideoConversionError.hdrBitrateUnsupported
         } catch {
             ConversionPerformance.end("Conversion Video Export", id: exportID)
             if Task.isCancelled { throw VideoConversionError.cancelled }

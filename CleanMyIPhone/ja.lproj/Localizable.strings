@@ -25,13 +25,13 @@
 "premium.feature.required" = "この機能にはPremiumが必要です";
 "premium.feature.unlock" = "Premiumでロック解除";
 "premium.feature.media" = "メディア整理";
-"premium.feature.videoConversion" = "動画圧縮";
+"premium.feature.videoConversion" = "動画変換";
 "premium.feature.storage" = "ファイル整理";
-"premium.feature.imageConversion" = "画像圧縮";
+"premium.feature.imageConversion" = "画像変換";
 "premium.feature.audioConversion" = "音声変換";
 "premium.feature.darkAppearance" = "ダークモード";
 "premium.feature.customColors" = "カスタムカラー";
-"premium.feature.compression.title" = "画像と音声を圧縮";
+"premium.feature.compression.title" = "画像と音声を変換";
 "premium.feature.compression.detail" = "設定を調整して画像と音声ファイルを変換。";
 "premium.feature.appearance.title" = "自分らしい外観に";
 "premium.feature.appearance.detail" = "ダークモードとアプリ・背景のカスタムカラーを利用。";
@@ -39,7 +39,7 @@
 
 "Photos" = "写真";
 "Storage" = "ストレージ";
-"Compress" = "圧縮";
+"Compress" = "変換";
 "storage.heading" = "ストレージの内訳";
 "Settings" = "設定";
 "Language" = "言語";
@@ -99,7 +99,6 @@
 "Videos" = "ビデオ";
 "My Space" = "マイスペース";
 "System & Apps" = "システムとApp";
-"Includes iOS, system data, and other app data." = "iOS、システムデータ、他のAppのデータを含みます。";
 "Available" = "空き容量";
 "%lld%% used · %@ of %@" = "%lld%% 使用済み · %@ / %@";
 "Images" = "画像";
@@ -149,7 +148,6 @@
 "Read-only" = "読み取り専用";
 "Screenshots" = "スクリーンショット";
 "Live Photos" = "Live Photos";
-"Video Categories" = "ビデオ分類";
 "%lld items" = "%lld 項目";
 "No Items" = "項目がありません";
 "No media matched this category." = "この分類に該当するメディアはありません。";
@@ -193,9 +191,7 @@
 "Press and hold to play" = "長押しして再生";
 "%lld selected" = "%lld項目を選択";
 "Estimated %@" = "推定 %@";
-"Media Actions" = "メディア操作";
 "Cleanup Recommendations" = "クリーンアップの提案";
-"Media sizes are estimated without downloading original files." = "メディアサイズは元のファイルをダウンロードせずに推定されます。";
 "Explore the folder hierarchy" = "フォルダ階層を表示";
 "Tap a folder segment to drill down. Tap the center to go back." = "フォルダの区画をタップして詳細を表示し、中央をタップして戻ります。";
 "%lld files" = "%lld 個のファイル";
@@ -303,10 +299,10 @@
 "Cloud files may be unavailable" = "クラウド ファイルが利用できない可能性があります";
 "Common Questions" = "よくある質問";
 "Confirm your selection" = "選択を確認してください";
-"Compression workspace" = "圧縮ワークスペース";
-"Compress a file" = "ファイルを圧縮";
-"Compress images, videos, and audio without changing the original file." = "元のファイルを変更せずに画像、ビデオ、音声を圧縮できます。";
-"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Compress は作業用コピーをアプリに読み込みます。圧縮ワークスペースを消去すると、アプリで管理しているコピーと出力が削除されるため、残したいものは先に書き出してください。";
+"Compression workspace" = "変換ワークスペース";
+"Compress a file" = "ファイルを変換";
+"Compress images, videos, and audio without changing the original file." = "元のファイルを変更せずに画像、ビデオ、音声を変換できます。";
+"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Compress は作業用コピーをアプリに読み込みます。変換ワークスペースを消去すると、アプリで管理しているコピーと出力が削除されるため、残したいものは先に書き出してください。";
 "Compress keeps imported working copies and outputs inside app-managed storage. The original outside the app is not replaced. Clear the workspace only after exporting results you want to keep." = "Compress は読み込んだ作業用コピーと出力をアプリ管理のストレージ内に保持します。アプリ外のオリジナルは置き換えられません。残したい結果を書き出してからワークスペースを消去してください。";
 "Deleted content may remain in Recently Deleted, and iOS storage totals can take time to recalculate. Check the relevant Recently Deleted location, then recheck iPhone Storage later." = "削除されたコンテンツが「最近削除した項目」に残る場合があり、iOS ストレージの合計の再計算に時間がかかる場合があります。関連する最近削除した場所を確認し、後で iPhone ストレージを再確認します。";
 "Deleted items move to Recently Deleted and may continue using storage until permanently removed. If iCloud Photos is enabled, deletion also syncs to your other devices." = "削除されたアイテムは「最近削除した項目」に移動され、完全に削除されるまでストレージを使用し続ける可能性があります。 iCloud 写真が有効になっている場合、削除は他のデバイスにも同期されます。";
@@ -314,7 +310,7 @@
 "Deletion stays user controlled" = "削除はユーザー制御のままです";
 "Device storage is not iCloud storage" = "デバイスのストレージは iCloud ストレージではありません";
 "Do not install profiles, grant unknown computer access, or erase the iPhone for a promised one-tap cache cleanup. Back up important data before any system reset." = "プロファイルをインストールしたり、不明なコンピュータへのアクセスを許可したり、約束されたワンタップ キャッシュ クリーンアップのために iPhone を消去したりしないでください。システムをリセットする前に、重要なデータをバックアップしてください。";
-"Does analysis or compression upload my files?" = "分析または圧縮によってファイルがアップロードされますか?";
+"Does analysis or compression upload my files?" = "分析または変換によってファイルがアップロードされますか?";
 "Explore the results" = "結果を調べる";
 "Files deleted from an authorized folder may not be recoverable. The app cannot promise that they will appear in Recently Deleted." = "許可されたフォルダーから削除されたファイルは復元できない場合があります。アプリは、最近削除した項目にそれらが表示されることを保証できません。";
 "Find the largest category" = "最大のカテゴリを検索";
@@ -329,7 +325,7 @@
 "Help" = "ヘルプ";
 "How can we help?" = "お困りですか？";
 "Import your files" = "ファイルをインポートする";
-"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "インポートしたコピーと圧縮済みの出力はアプリ内の容量を使用します。残したい結果を書き出してから、不要になった完了済みの作業を消去してください。";
+"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "インポートしたコピーと変換済みの出力はアプリ内の容量を使用します。残したい結果を書き出してから、不要になった完了済みの作業を消去してください。";
 "In Files, confirm whether an item is under On My iPhone, iCloud Drive, or another provider. The same action can have different recovery and sync behavior in each location." = "「ファイル」で、項目が「iPhone 上」、「iCloud Drive」、または別のプロバイダーの下にあるかどうかを確認します。同じアクションでも、場所ごとに異なる回復動作と同期動作を行うことができます。";
 "In iPhone Storage, Offload App removes the app but keeps its documents and data. Delete App removes the app and its local data, so verify sync or backup before choosing it." = "iPhone ストレージでは、オフロード アプリはアプリを削除しますが、そのドキュメントとデータは保持します。アプリを削除するとアプリとそのローカル データが削除されるため、選択する前に同期またはバックアップを確認してください。";
 "Install the latest iOS update, restart the iPhone, review Safari data and offline downloads, then let iPhone Storage recalculate. If an unusually large total persists, contact Apple Support." = "最新の iOS アップデートをインストールし、iPhone を再起動し、Safari データとオフライン ダウンロードを確認してから、iPhone ストレージを再計算します。異常に大きな合計が続く場合は、Apple サポートにお問い合わせください。";
@@ -342,13 +338,13 @@
 "Local by design" = "ローカル仕様";
 "Manage Apps & Downloads" = "アプリとダウンロードを管理";
 "Manage Files & iCloud Drive" = "ファイルとiCloud Driveを管理";
-"Manage compression storage" = "圧縮ストレージを管理";
-"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "メディア分析、フォルダーのスキャン、圧縮はこのデバイス上で行われます。アプリはこれらの機能のためにファイルをアップロードしません。";
+"Manage compression storage" = "変換ストレージを管理";
+"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "メディア分析、フォルダーのスキャン、変換はこのデバイス上で行われます。アプリはこれらの機能のためにファイルをアップロードしません。";
 "Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "「メディア」は写真ライブラリで許可した写真とビデオを分析します。「ストレージ」は選択したフォルダーだけを分析します。「Compress」はアプリのプライベートワークスペースに読み込んだコピーのサイズを小さくします。";
 "Media needs Photos access to display and analyze library items. You can choose Full Access, Limited Access, or no access, and change the choice later in System Settings." = "メディアがライブラリ アイテムを表示および分析するには、写真へのアクセスが必要です。フル アクセス、制限付きアクセス、またはアクセスなしを選択でき、後でシステム設定で選択を変更できます。";
 "Meet the App" = "アプリについて";
-"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "いいえ。承認した写真アイテム、選択したフォルダー、および独自の圧縮ワークスペースを分析できます。他のアプリと保護されたシステムストレージは非公開のままです。";
-"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "いいえ。メディア分析、フォルダー分析、圧縮はこのデバイス上で実行されます。Apple のサービスやファイルプロバイダーは、既存の設定に従って独自のコンテンツを同期する場合があります。";
+"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "いいえ。承認した写真アイテム、選択したフォルダー、および独自の変換ワークスペースを分析できます。他のアプリと保護されたシステムストレージは非公開のままです。";
+"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "いいえ。メディア分析、フォルダー分析、変換はこのデバイス上で実行されます。Apple のサービスやファイルプロバイダーは、既存の設定に従って独自のコンテンツを同期する場合があります。";
 "Not necessarily. They are visually related candidates and can include different frames, edits, or resolutions. Always compare them before selecting one to remove." = "必ずしもそうとは限りません。これらは視覚的に関連する候補であり、異なるフレーム、編集、または解像度を含めることができます。削除するものを選択する前に、必ず比較してください。";
 "Offload or delete" = "オフロードまたは削除";
 "Only the items selected in the system permission sheet are available. Counts, groups, and recommendations cannot include the rest of the library." = "システム権限シートで選択した項目のみ使用可能です。カウント、グループ、および推奨事項には、ライブラリの残りの部分を含めることはできません。";
@@ -370,7 +366,7 @@
 "Review before deleting" = "削除する前に確認してください";
 "Review large videos, screenshots, and similar photos safely." = "大きなビデオ、スクリーンショット、類似写真を安全に確認できます。";
 "Review long videos, 4K videos, screen recordings, and large screenshots first. Similar-photo groups can help you compare bursts or repeated shots, but you should choose the keeper yourself." = "最初に、長いビデオ、4K ビデオ、画面録画、大きなスクリーンショットを確認してください。類似した写真のグループは、バースト写真や繰り返し撮影した写真を比較するのに役立ちますが、キーパーは自分で選択する必要があります。";
-"Review compression settings" = "圧縮設定を確認する";
+"Review compression settings" = "変換設定を確認する";
 "Review photos, similar items, screenshots, Live Photos, and videos." = "写真、類似項目、スクリーンショット、Live Photos、ビデオを確認できます。";
 "Safari website data" = "Safari ウェブサイト データ";
 "Safe steps to try" = "試してみる安全な手順";
@@ -382,7 +378,7 @@
 "Similar does not mean identical" = "似ているということは同じという意味ではありません";
 "Similar-photo groups are review suggestions, not proof that files are exact duplicates. Keep the best shot before deleting anything." = "類似写真グループはレビューの提案であり、ファイルが完全に重複していることを証明するものではありません。何かを削除する前に、ベストショットを保存してください。";
 "Start analysis" = "分析開始";
-"Start compression" = "圧縮を開始";
+"Start compression" = "変換を開始";
 "Start with high-impact items" = "インパクトのあるアイテムから始めましょう";
 "Start with iPhone Storage" = "まずiPhoneストレージを確認";
 "Step %lld" = "ステップ %lld";
@@ -406,7 +402,7 @@
 "Understand optimized photos" = "最適化された写真を理解する";
 "Understand the three tools and what each one can access." = "3つのツールとそれぞれのアクセス範囲を確認できます。";
 "Use Apple's controls for attachments, history, and website data." = "添付ファイル、履歴、WebサイトデータはAppleの設定で管理します。";
-"Use Compress" = "圧縮を使う";
+"Use Compress" = "変換を使う";
 "Use Media" = "メディアを使う";
 "Use Settings > Apps > Safari to clear history and website data. This can close tabs or sign you out of websites, so save anything important first." = "履歴と Web サイトのデータを消去するには、[設定] > [アプリ] > [Safari] を使用します。これにより、タブが閉じたり、Web サイトからサインアウトしたりする可能性があるため、最初に重要なものを保存してください。";
 "Use Storage" = "ストレージを使う";
@@ -431,7 +427,7 @@
 "Display Options" = "表示オプション";
 "Interface Animations" = "インターフェイスアニメーション";
 "Show Media Dates" = "メディアの日付を表示";
-"Control dashboard animations, compression card animations, and date headings in media detail grids." = "ダッシュボード、圧縮カードのアニメーションとメディア詳細グリッドの日付見出しを制御します。";
+"Control dashboard animations, compression card animations, and date headings in media detail grids." = "ダッシュボード、変換カードのアニメーションとメディア詳細グリッドの日付見出しを制御します。";
 "Calculating size…" = "サイズを計算中…";
 "Size unavailable" = "サイズを取得できません";
 "Quick Cleanup" = "クイッククリーンアップ";
@@ -450,7 +446,7 @@
 "Selected" = "選択済み";
 "Not selected" = "未選択";
 "Selects or deselects every suggested item in this category." = "このカテゴリの候補をすべて選択または選択解除します。";
-"%@ moved to Recently Deleted · ~%@" = "%@を「最近削除した項目」に移動 · 約%@";
+"%@ moved to Recently Deleted · %@" = "%@を「最近削除した項目」に移動 · 約%@";
 "Allow photo access, then wait for the library to load." = "写真へのアクセスを許可し、ライブラリがロードされるまで待ちます。";
 "Analyze the available library and let the app group useful cleanup candidates." = "利用可能なライブラリを分析し、アプリに有用なクリーンアップ候補をグループ化させます。";
 "Preview items at full size and compare similar photos carefully." = "アイテムをフルサイズでプレビューし、類似した写真を注意深く比較してください。";
@@ -459,11 +455,11 @@
 "The app reads file metadata and reports inaccessible or unavailable cloud items separately." = "アプリはファイルのメタデータを読み取り、アクセスできないまたは利用できないクラウド アイテムを個別に報告します。";
 "Use the folder map, categories, and detailed lists to find large files." = "フォルダー マップ、カテゴリ、詳細リストを使用して、大きなファイルを検索します。";
 "Confirm the file and location, then delete only content you no longer need." = "ファイルと場所を確認し、不要なコンテンツのみを削除してください。";
-"Open image, video, or audio compression. The audio tool can also extract a track from video." = "画像、ビデオ、オーディオの圧縮を開きます。オーディオツールではビデオから音声トラックを抽出することもできます。";
+"Open image, video, or audio compression. The audio tool can also extract a track from video." = "画像、ビデオ、オーディオの変換を開きます。オーディオツールではビデオから音声トラックを抽出することもできます。";
 "Select supported items from Photos or Files and wait for the working copies to finish importing." = "[写真] または [ファイル] からサポートされているアイテムを選択し、作業コピーのインポートが完了するまで待ちます。";
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "形式を選び、利用可能なサイズ、品質、ビットレート、メタデータのオプションを調整します。";
 "Keep the task open until each item completes or reports an error." = "各アイテムが完了するかエラーが報告されるまで、タスクを開いたままにしてください。";
-"Use the share action to save or send the compressed output before clearing the workspace." = "ワークスペースを消去する前に、共有アクションで圧縮済みの出力を保存または送信します。";
+"Use the share action to save or send the compressed output before clearing the workspace." = "ワークスペースを消去する前に、共有アクションで変換済みの出力を保存または送信します。";
 "MP3 audio output" = "MP3オーディオ出力";
 "In Audio Compression, MP3 is the default widely compatible format. MP3 and AAC support 96, 128, 192, 256, and 320 kbps. M4A (ALAC) and CAF ALAC use lossless compression, while WAV, AIFF, and CAF PCM store uncompressed audio and are usually larger. Lossless conversion preserves the quality still present in the source, but cannot restore detail already removed from MP3 or AAC. Audio inputs include M4A/ALAC, AAC, MP3, FLAC, WAV, AIFF, and CAF. You can also choose MOV, MP4, or M4V videos from Files or Photos and extract their audio tracks." = "オーディオ圧縮では互換性の高いMP3がデフォルトです。MP3とAACは96〜320 kbpsに対応します。M4A（ALAC）とCAF ALACはロスレス圧縮、WAV、AIFF、CAF PCMは非圧縮音声で通常は大きくなります。ロスレス変換は元に残る音質を保ちますが、MP3やAACですでに失われた情報は復元できません。M4A/ALAC、AAC、MP3、FLAC、WAV、AIFF、CAFを読み込め、ファイルまたは写真のMOV、MP4、M4Vから音声も抽出できます。";
 "Go to Settings > General > iPhone Storage and wait for the category chart to finish calculating." = "[設定] > [一般] > [iPhone ストレージ] に移動し、カテゴリ グラフの計算が完了するまで待ちます。";
@@ -489,12 +485,12 @@
 "premium.entry.subtitle" = "機能とサブスクリプションプランを見る";
 "premium.close" = "閉じる";
 "premium.title" = "大切なもののために空き容量を";
-"premium.subtitle" = "メディア整理、ファイル整理、圧縮をひとつに。";
+"premium.subtitle" = "メディア整理、ファイル整理、変換をひとつに。";
 "premium.media.title" = "メディアを整理";
 "premium.media.detail" = "写真やビデオを確認し、削除するものを選べます。";
 "premium.storage.title" = "ファイルを整理";
 "premium.storage.detail" = "アクセスを許可したフォルダで不要なファイルを探せます。";
-"premium.compression.title" = "メディアを圧縮";
+"premium.compression.title" = "メディアを変換";
 "premium.compression.detail" = "設定を調整して画像、ビデオ、音声のファイルサイズを減らせます。";
 "premium.privacy" = "メディアとファイルの処理はこのデバイス内で行われます。";
 "premium.plans.title" = "プランを選択";
@@ -521,8 +517,8 @@
 "intro.media.detail" = "写真、動画、その他のデータが使う容量と空き容量を確認できます。表示される数値はサンプルです。";
 "intro.files.title" = "容量の使い道を確認";
 "intro.files.detail" = "選択したフォルダを調べ、大きなファイルをひと目で見つけられます。";
-"intro.compress.title" = "メディア圧縮をプレビュー";
-"intro.compress.detail" = "画像、動画、音声の圧縮オプションと進行状況のアニメーションを紹介します。ここではファイルを圧縮しません。";
+"intro.compress.title" = "メディア変換をプレビュー";
+"intro.compress.detail" = "画像、動画、音声の変換オプションと進行状況のアニメーションを紹介します。ここではファイルを変換しません。";
 "intro.appearance.title" = "自分好みの外観に";
 "intro.appearance.detail" = "好きな色と表示スタイルを選べます。";
 "intro.next" = "続ける";
@@ -558,3 +554,80 @@
 "Video preview" = "動画プレビュー";
 "Photo preview" = "写真プレビュー";
 "Cancel" = "キャンセル";
+
+"Convert" = "変換";
+
+"cleanup.space.title" = "クリーンアップできる容量";
+
+
+"cleanup.action" = "ワンタップ整理";
+
+"cleanup.review.hint" = "類似写真の候補を選択済みです。各グループの1枚を残します。不要な場合のみスクリーンショットや動画を追加してください。";
+
+"cleanup.useSuggestions" = "候補を選択";
+
+"cleanup.scan.title" = "思い出のための空き容量";
+
+"cleanup.scan.action" = "整理できる容量を探す";
+
+"cleanup.scan.hint" = "類似写真や大きな動画、スクリーンショットを確認します。分析中は削除しません。";
+
+"quick.compress.title" = "思い出はそのまま、サイズを小さく";
+
+"quick.video" = "動画を圧縮";
+
+"quick.image" = "写真を圧縮";
+
+"quick.compress.hint" = "ファイルを選ぶだけ。設定はおまかせ。";
+
+"quick.action" = "圧縮";
+
+"quick.ready" = "設定はおまかせ";
+
+"quick.video.detail" = "MP4 / HEVC・元の解像度・ビットレートを低減。";
+
+"quick.image.detail" = "HEIC（非対応時はJPEG）・品質75%・元のサイズ・GPSを削除。";
+
+"quick.originals" = "新しいコピーを作成し、元のファイルを保持します。大きくなる場合もあるため、置き換える前に比較してください。";
+
+"premium.free.summary" = "無料：メディアの確認と削除、動画の圧縮と変換。";
+
+"premium.value.summary" = "Premium：カテゴリの一括整理、画像と音声の変換、フォルダの整理、外観のカスタマイズ。";
+
+"quick.free" = "無料";
+
+"Convert Images" = "画像";
+
+"Convert Videos" = "動画";
+
+"Choose what to convert. Originals will remain in Photos." = "変換";
+
+/* Media category batch compression */
+"compression.explanation" = "iCloudからオリジナルをダウンロードする必要がある場合があります。";
+"compression.empty" = "このカテゴリにメディアはありません";
+"compression.saved" = "オリジナル保持 · 置き換えを再試行";
+"compression.noReduction" = "十分に小さいため保存しませんでした";
+"compression.cancelling" = "キャンセル中…";
+"compression.summary" = "%d件保存 · %d件失敗";
+"compression.action" = "%d件を圧縮して置き換え";
+"compression.error.live" = "Live Photoのペア情報を保持できませんでした。オリジナルは変更されていません。";
+"compression.error.image" = "クイック圧縮はアニメーション画像に対応していません。オリジナルは変更されていません。";
+"compression.cardDetail" = "%d項目 · %@";
+
+"compression.replaced" = "オリジナルを置き換え済み";
+
+"compression.replacing" = "オリジナルを置き換え中…";
+
+"compression.error.verify" = "圧縮コピーを検証できませんでした。オリジナルは削除していません。";
+
+"compression.error.replace" = "圧縮コピーは保存済みです。オリジナルは削除していません。再試行してください。";
+
+"compression.selection.savings" = "削減できる容量の目安：%@";
+
+"compression.action.short" = "圧縮";
+
+"compression.confirm.title" = "圧縮を開始しますか？";
+
+"compression.confirm.message" = "選択した%d項目を圧縮しますか？小さいコピーの保存と検証が完了すると、対応するオリジナルが写真から削除されます。";
+
+"compression.confirm.action" = "確認";

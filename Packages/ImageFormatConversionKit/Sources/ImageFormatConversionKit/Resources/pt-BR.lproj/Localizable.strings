@@ -1,15 +1,15 @@
-"converter.title" = "Compressão de mídia";
-"converter.heading" = "Comprimir mídia";
-"conversion.home.image.title" = "Comprimir imagens";
-"conversion.home.image.detail" = "Comprima imagens, ajuste o formato e o tamanho e remova metadados privados";
-"conversion.home.image.tagline" = "Compressão · formatos HEIC · remover GPS";
-"conversion.home.video.title" = "Comprimir vídeos";
-"conversion.home.video.detail" = "Comprima vídeos escolhendo codec e resolução";
-"conversion.home.video.tagline" = "Compressão · MP4 / MOV · resolução";
-"conversion.home.audio.title" = "Comprimir áudio";
-"conversion.home.audio.detail" = "Comprima áudio ou extraia a faixa de um vídeo";
-"conversion.home.audio.tagline" = "Compressão · MP3 / AAC / WAV · extrair de vídeo";
-"conversion.home.history.summary" = "%@ · %ld arquivos comprimidos";
+"converter.title" = "Converter";
+"converter.heading" = "Converter mídia";
+"conversion.home.image.title" = "Converter imagens";
+"conversion.home.image.detail" = "JPG, PNG, HEIC e mais. Ajuste qualidade e dimensões.";
+"conversion.home.image.tagline" = "JPG, PNG, HEIC e mais. Ajuste qualidade e dimensões.";
+"conversion.home.video.title" = "Converter vídeos";
+"conversion.home.video.detail" = "MP4, MOV, M4V. Escolha codec, taxa de bits e resolução.";
+"conversion.home.video.tagline" = "MP4, MOV, M4V. Escolha codec, taxa de bits e resolução.";
+"conversion.home.audio.title" = "Converter áudio";
+"conversion.home.audio.detail" = "MP3, AAC, WAV e mais. Ajuste a taxa de bits ou extraia áudio de vídeos.";
+"conversion.home.audio.tagline" = "MP3, AAC, WAV e mais. Ajuste a taxa de bits ou extraia áudio de vídeos.";
+"conversion.home.history.summary" = "%@ · %ld arquivos convertidos";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "O arquivo ficou %@ menor";
 "conversion.home.history.larger" = "O arquivo ficou %@ maior";
@@ -20,25 +20,25 @@
 "action.choose_images" = "Escolher imagens";
 "action.clear_completed" = "Limpar concluídos";
 "action.clear_all" = "Limpar tudo";
-"action.convert" = "Iniciar compressão";
+"action.convert" = "Converter";
 "action.cancel" = "Cancelar";
-"action.share" = "Compartilhar arquivo comprimido";
+"action.share" = "Compartilhar arquivo convertido";
 "action.remove" = "Remover imagem";
 "empty.title" = "Nenhuma imagem selecionada";
 "empty.subtitle" = "Escolha uma ou mais imagens estáticas para começar.";
 "files.title" = "%ld imagens";
 "files.videos.title" = "%ld vídeos";
 "files.audio.title" = "%ld arquivos de áudio";
-"settings.title" = "Configurações de compressão";
+"settings.title" = "Configurações de conversão";
 "settings.format" = "Formato";
 "settings.quality" = "Qualidade";
 "settings.metadata" = "Metadados";
 "settings.resize" = "Redimensionar";
 "settings.transparent_background" = "Áreas transparentes";
 "settings.output" = "Pasta de saída";
-"settings.output.images" = "Imagens comprimidas";
-"settings.output.videos" = "Vídeos comprimidos";
-"settings.output.audio" = "Áudio comprimido";
+"settings.output.images" = "Imagens convertidas";
+"settings.output.videos" = "Vídeos convertidos";
+"settings.output.audio" = "Áudio convertido";
 "metadata.preserve" = "Preservar";
 "metadata.remove_gps" = "Remover GPS";
 "metadata.remove_all" = "Remover tudo";
@@ -49,16 +49,16 @@
 "color.white" = "Branco";
 "color.black" = "Preto";
 "status.inspecting" = "Analisando";
-"status.ready" = "Pronto para comprimir";
+"status.ready" = "Pronto para converter";
 "status.converting" = "Comprimindo";
-"status.completed" = "Compressão concluída";
+"status.completed" = "Conversão concluída";
 "status.cancelled" = "Cancelado";
 "progress.summary" = "%ld de %ld concluídos";
 "notice.duplicates_ignored" = "Seleções duplicadas foram ignoradas.";
 "notice.import_failed" = "Não foi possível importar imagens: %@";
-"notice.cancelled" = "Compressão cancelada. Os arquivos concluídos foram mantidos.";
-"notice.completed" = "%ld imagens comprimidas.";
-"notice.completed_with_failures" = "%ld imagens comprimidas; %ld falharam.";
+"notice.cancelled" = "Conversão cancelada. Os arquivos concluídos foram mantidos.";
+"notice.completed" = "%ld imagens convertidas.";
+"notice.completed_with_failures" = "%ld imagens convertidas; %ld falharam.";
 "error.source_not_reachable" = "O arquivo de origem não está disponível: %@";
 "error.cannot_open_source" = "O arquivo não é uma imagem compatível: %@";
 "error.unsupported_input" = "Este formato de imagem não é compatível: %@";
@@ -73,11 +73,11 @@
 "error.cannot_create_destination" = "Não foi possível criar o arquivo de saída: %@";
 "error.cannot_finalize" = "O codificador não conseguiu concluir a gravação: %@";
 "error.destination_exists" = "Já existe um arquivo de saída: %@";
-"error.destination_busy" = "Outra tarefa de compressão está gravando neste arquivo: %@";
+"error.destination_busy" = "Outra tarefa de conversão está gravando neste arquivo: %@";
 "error.cannot_reserve" = "Não foi possível criar um nome de saída exclusivo para %@.";
-"error.commit_failed" = "Não foi possível salvar o arquivo comprimido: %@";
-"error.cancelled" = "A compressão foi cancelada.";
-"error.unexpected" = "Erro inesperado na compressão: %@";
+"error.commit_failed" = "Não foi possível salvar o arquivo convertido: %@";
+"error.cancelled" = "A conversão foi cancelada.";
+"error.unexpected" = "Erro inesperado na conversão: %@";
 "converter.mode" = "Tipo de mídia";
 "converter.mode.image" = "Imagens";
 "converter.mode.video" = "Vídeos";
@@ -95,7 +95,7 @@
 "audio.source.video" = "Origem de vídeo";
 "audio.error.video_no_audio" = "Este vídeo não contém uma faixa de áudio.";
 "audio.error.video_protected" = "Não é possível extrair o áudio de um vídeo protegido.";
-"audio.import.title" = "Comprimir áudio";
+"audio.import.title" = "Converter áudio";
 "audio.settings.quality" = "Qualidade";
 "audio.format.mp3" = "MP3";
 "audio.format.aac" = "M4A (codificado em AAC)";
@@ -105,23 +105,23 @@
 "audio.format.aiff" = "AIFF (PCM sem compressão)";
 "audio.format.caf_pcm" = "CAF (PCM sem compressão)";
 "audio.format.caf_alac" = "CAF (Apple Lossless)";
-"conversion.delete_all.title" = "Excluir todos os arquivos de compressão?";
-"conversion.delete_all.message" = "Isso remove as cópias importadas e os resultados comprimidos do app. Os originais no Fotos e no Arquivos não são excluídos.";
+"conversion.delete_all.title" = "Excluir todos os arquivos de conversão?";
+"conversion.delete_all.message" = "Isso remove as cópias importadas e os resultados convertidos do app. Os originais no Fotos e no Arquivos não são excluídos.";
 "conversion.delete.action" = "Excluir arquivos";
 "conversion.delete.failed" = "Não foi possível excluir alguns arquivos gerenciados pelo app. Os itens restantes continuam na lista.";
 "audio.lossless" = "A saída sem perdas preserva a qualidade de áudio disponível.";
 "audio.empty.title" = "Nenhum áudio";
-"audio.empty.subtitle" = "Escolha arquivos de áudio para comprimir ou extraia áudio de vídeos.";
-"audio.notice.completed" = "%ld arquivos de áudio comprimidos.";
+"audio.empty.subtitle" = "Escolha arquivos de áudio para converter ou extraia áudio de vídeos.";
+"audio.notice.completed" = "%ld arquivos de áudio convertidos.";
 "audio.error.source" = "O áudio de origem não está disponível.";
 "audio.error.unsupported" = "O formato de áudio ou vídeo selecionado não é compatível.";
 "audio.error.invalid" = "O arquivo não contém áudio legível.";
 "audio.error.output" = "Não foi possível criar o áudio de saída: %@";
-"audio.error.convert" = "Falha na compressão do áudio: %@";
-"audio.error.commit" = "Não foi possível salvar o áudio comprimido: %@";
+"audio.error.convert" = "Falha na conversão do áudio: %@";
+"audio.error.commit" = "Não foi possível salvar o áudio convertido: %@";
 "video.action.add" = "Adicionar vídeos";
 "video.action.choose" = "Escolher vídeos";
-"video.import.title" = "Comprimir vídeos";
+"video.import.title" = "Converter vídeos";
 "video.import.subtitle" = "Os arquivos são processados neste dispositivo e nunca são enviados.";
 "quality.smaller" = "Menor";
 "quality.balanced" = "Equilibrada";
@@ -133,13 +133,13 @@
 "video.settings.bitrate" = "Taxa de bits";
 "video.settings.resolution" = "Resolução";
 "video.empty.title" = "Nenhum vídeo";
-"video.empty.subtitle" = "Escolha um ou mais vídeos para começar a compressão.";
-"video.notice.completed" = "%ld vídeos comprimidos.";
+"video.empty.subtitle" = "Escolha um ou mais vídeos para começar a conversão.";
+"video.notice.completed" = "%ld vídeos convertidos.";
 "video.error.source" = "O vídeo de origem não está disponível.";
 "video.error.unsupported" = "Este dispositivo não é compatível com as configurações de vídeo selecionadas.";
-"video.error.exporter" = "Não foi possível iniciar a compressão do vídeo.";
-"video.error.export" = "Falha na compressão do vídeo: %@";
-"video.error.commit" = "Não foi possível salvar o vídeo comprimido: %@";
+"video.error.exporter" = "Não foi possível iniciar a conversão do vídeo.";
+"video.error.export" = "Falha na conversão do vídeo: %@";
+"video.error.commit" = "Não foi possível salvar o vídeo convertido: %@";
 "action.choose_files" = "Escolher no Arquivos";
 "format_picker.title" = "Formato de saída";
 "format_picker.done" = "Concluído";
@@ -174,29 +174,29 @@
 "formats.video.title" = "Formatos de vídeo compatíveis";
 "action.done" = "Concluído";
 "import.progress.title" = "Importando";
-"conversion.guide.button" = "Abrir guia de compressão";
-"conversion.guide.title" = "Guia de compressão";
-"conversion.guide.hero.title" = "Comprima mídia e libere espaço";
-"conversion.guide.hero.detail" = "Comprima imagens, vídeos e áudio neste dispositivo sem alterar os originais.";
+"conversion.guide.button" = "Guia de conversão de mídia";
+"conversion.guide.title" = "Guia de conversão de mídia";
+"conversion.guide.hero.title" = "Formatos comuns. Seus ajustes.";
+"conversion.guide.hero.detail" = "Converta formatos comuns e personalize qualidade, taxa de bits e dimensões.";
 "conversion.guide.steps.title" = "Início rápido";
 "conversion.guide.step.choose.title" = "Escolha um tipo de mídia";
-"conversion.guide.step.choose.detail" = "Importe imagens e vídeos do Fotos ou Arquivos. A ferramenta de áudio aceita áudio ou vídeo do Arquivos.";
-"conversion.guide.step.adjust.title" = "Ajuste a compressão";
-"conversion.guide.step.adjust.detail" = "Escolha um formato e ajuste qualidade, resolução, taxa de bits ou metadados conforme necessário.";
+"conversion.guide.step.choose.detail" = "Escolha vídeos, imagens ou áudio. Importe de Arquivos ou selecione imagens e vídeos do Fotos.";
+"conversion.guide.step.adjust.title" = "Ajuste a conversão";
+"conversion.guide.step.adjust.detail" = "Converta formatos comuns e personalize qualidade, taxa de bits e dimensões.";
 "conversion.guide.step.convert.title" = "Comprima e compartilhe";
 "conversion.guide.step.convert.detail" = "Acompanhe o progresso, confira o resultado e compartilhe onde quiser.";
-"conversion.guide.home.title" = "Comece pelo arquivo que deseja reduzir";
-"conversion.guide.home.detail" = "Cada ferramenta funciona separadamente: vá direto à tarefa de que precisa.";
-"conversion.guide.tools.title" = "Três ferramentas de compressão de mídia";
-"conversion.guide.image.detail" = "Comprima imagens, ajuste formato e tamanho de saída e remova dados de localização antes de compartilhar.";
-"conversion.guide.video.detail" = "Comprima vídeos escolhendo formato, codec e resolução. O suporte final depende do dispositivo e do arquivo de origem.";
-"conversion.guide.audio.detail" = "Comprima arquivos de áudio ou selecione um vídeo para extrair e comprimir a faixa de áudio.";
-"conversion.guide.controls.title" = "Ajuste a compressão";
+"conversion.guide.home.title" = "Converter mídia";
+"conversion.guide.home.detail" = "Converta formatos comuns e personalize qualidade, taxa de bits e dimensões.";
+"conversion.guide.tools.title" = "Três ferramentas de conversão de mídia";
+"conversion.guide.image.detail" = "JPG, PNG, HEIC e mais. Ajuste qualidade e dimensões.";
+"conversion.guide.video.detail" = "MP4, MOV, M4V. Escolha codec, taxa de bits e resolução.";
+"conversion.guide.audio.detail" = "MP3, AAC, WAV e mais. Ajuste a taxa de bits ou extraia áudio de vídeos.";
+"conversion.guide.controls.title" = "Ajuste a conversão";
 "conversion.guide.format.detail" = "Escolha um formato que equilibre compatibilidade, qualidade e tamanho para o uso desejado.";
-"conversion.guide.quality.detail" = "Use a qualidade da imagem, o codec e a resolução do vídeo ou a taxa de bits do AAC para reduzir o tamanho. Formatos de áudio sem perdas preservam a qualidade, mas podem não reduzir o tamanho.";
+"conversion.guide.quality.detail" = "Qualidade ou taxa de bits menores geralmente reduzem o tamanho. O resultado depende do conteúdo; formatos sem perda podem não ficar menores.";
 "conversion.guide.metadata.detail" = "Preserve todos os metadados editáveis, remova apenas o GPS ou remova tudo. O padrão é remover o GPS.";
 "conversion.guide.replace.title" = "Substituir originais";
-"conversion.guide.replace.detail" = "Após a compressão, toque na lixeira da tela principal de compressão e selecione imagens ou vídeos. O app salva primeiro as cópias comprimidas no Fotos; depois, o iOS pede confirmação para excluir os originais correspondentes. Só itens concluídos importados do Fotos podem ser substituídos. Áudio independente e arquivos importados do Arquivos não são aceitos. Limpar Tudo remove as cópias de trabalho do app e impede a substituição, mas nunca exclui os originais.";
+"conversion.guide.replace.detail" = "Após a conversão, toque na lixeira da tela principal de conversão e selecione imagens ou vídeos. O app salva primeiro as cópias convertidas no Fotos; depois, o iOS pede confirmação para excluir os originais correspondentes. Só itens concluídos importados do Fotos podem ser substituídos. Áudio independente e arquivos importados do Arquivos não são aceitos. Limpar Tudo remove as cópias de trabalho do app e impede a substituição, mas nunca exclui os originais.";
 "conversion.guide.privacy.title" = "Seus originais continuam seus";
 "conversion.guide.privacy.detail" = "Tudo é processado neste dispositivo. Limpar Tudo remove apenas cópias e resultados gerenciados pelo app, nunca os originais no Fotos ou Arquivos.";
 "conversion.guide.learn_more" = "Explorar esta ferramenta";
@@ -204,31 +204,31 @@
 "conversion.guide.detail.purpose.title" = "Para que serve";
 "conversion.guide.detail.workflow.title" = "Lote, progresso e resultados";
 "conversion.guide.output.detail" = "A pasta de saída gerenciada pelo app aparece na ferramenta, mas não pode ser escolhida. Use Compartilhar para mover um resultado a outro local.";
-"conversion.guide.image.purpose" = "Comprima várias imagens estáticas por formato, qualidade, dimensão máxima e metadados. As mesmas opções valem para o lote atual sem alterar os originais.";
+"conversion.guide.image.purpose" = "JPG, PNG, HEIC e mais. Ajuste qualidade e dimensões.";
 "conversion.guide.image.imports.detail" = "Selecione vários arquivos ou até 100 itens do Fotos. Os formatos dependem deste dispositivo; RAW/DNG/ProRAW só podem ser importados, e imagens animadas não são aceitas.";
-"conversion.guide.image.workflow.detail" = "Acompanhe a análise e a compressão ou cancele durante o processamento; os resultados concluídos permanecem. Compare os tamanhos e compartilhe cada arquivo antes de limpar a lista.";
-"conversion.guide.image.quality.detail" = "JPG, HEIC, HEIF e WebP aceitam qualidade de 10% a 100%, em passos de 5%, com 85% como padrão. Qualidade menor geralmente cria arquivos menores com perdas mais visíveis; outros formatos não mostram esse controle.";
+"conversion.guide.image.workflow.detail" = "Acompanhe a análise e a conversão ou cancele durante o processamento; os resultados concluídos permanecem. Compare os tamanhos e compartilhe cada arquivo antes de limpar a lista.";
+"conversion.guide.image.quality.detail" = "JPG, PNG, HEIC e mais. Ajuste qualidade e dimensões. Qualidade ou taxa de bits menores geralmente reduzem o tamanho. O resultado depende do conteúdo; formatos sem perda podem não ficar menores.";
 "resize.square1024" = "1024 px";
 "conversion.guide.image.resize.detail" = "Mantenha as dimensões originais ou limite o lado maior a 4096, 2048 ou 1280 px para reduzir o tamanho sem ampliar. A opção 1024 × 1024 encaixa a imagem inteira em um fundo quadrado sem cortar nem esticar; imagens pequenas são ampliadas.";
 "conversion.guide.image.transparency.detail" = "JPG e BMP não armazenam pixels transparentes. Nesses formatos, preencha as áreas transparentes com branco ou preto.";
-"conversion.guide.video.purpose" = "Comprima vários vídeos MOV, MP4 ou M4V por formato, codec e resolução sem sobrescrever os originais.";
+"conversion.guide.video.purpose" = "MP4, MOV, M4V. Escolha codec, taxa de bits e resolução.";
 "conversion.guide.video.imports.detail" = "Selecione vários arquivos MOV, MP4 ou M4V, ou até 50 vídeos do Fotos.";
 "conversion.guide.video.workflow.detail" = "Os vídeos são processados um por vez. Acompanhe os estados e a quantidade concluída, cancele se necessário, compare os tamanhos e compartilhe cada resultado.";
 "conversion.guide.video.resolution.detail" = "Reduzir a resolução geralmente diminui o arquivo. H.264 oferece Original, 4K, 1080p, 720p e 480p; HEVC oferece Original, 4K e 1080p; ProRes mantém a resolução original.";
 "conversion.guide.video.compatibility.title" = "Combinações e compatibilidade";
 "conversion.guide.video.compatibility.detail" = "As opções de formato e resolução são limitadas após a escolha do codec. O dispositivo e o vídeo de origem ainda passam por uma verificação final de compatibilidade.";
 "conversion.guide.video.codec.h264.detail" = "Maior compatibilidade: MP4, MOV ou M4V; Original, 4K, 1080p, 720p ou 480p.";
-"conversion.guide.video.codec.hevc.detail" = "Compressão mais eficiente: MP4 ou MOV; Original, 4K ou 1080p. Dispositivos e apps antigos podem ter menor compatibilidade.";
+"conversion.guide.video.codec.hevc.detail" = "Conversão mais eficiente: MP4 ou MOV; Original, 4K ou 1080p. Dispositivos e apps antigos podem ter menor compatibilidade.";
 "conversion.guide.video.codec.prores422.detail" = "Para edição de alta qualidade: apenas MOV, na resolução original. Os arquivos costumam ser grandes e não se destinam a economizar espaço.";
 "conversion.guide.video.codec.prores4444.detail" = "Para pós-produção de alta qualidade: apenas MOV, na resolução original. Os arquivos costumam ser muito grandes e não se destinam a economizar espaço.";
-"conversion.guide.audio.purpose" = "Comprima áudio ou crie um arquivo de áudio comprimido a partir de um vídeo com faixa utilizável. Os originais permanecem intactos.";
+"conversion.guide.audio.purpose" = "MP3, AAC, WAV e mais. Ajuste a taxa de bits ou extraia áudio de vídeos.";
 "conversion.guide.audio.imports.detail" = "Selecione áudio ou vídeo do Arquivos, ou vídeos do Fotos para extrair o áudio. Entradas de áudio: M4A (incluindo ALAC), AAC, MP3, FLAC, WAV, AIFF/AIF e CAF. Entradas de vídeo: MOV, MP4 e M4V.";
 "conversion.guide.audio.workflow.detail" = "Acompanhe o tipo de origem, a duração, o estado e a quantidade concluída, ou cancele. Compare os tamanhos e compartilhe o áudio final.";
 "conversion.guide.audio.quality.detail" = "MP3 e AAC oferecem 96, 128, 192, 256 ou 320 kbps; o padrão é 192 kbps. ALAC, WAV, AIFF e CAF PCM não têm perdas nem ajuste de taxa de bits.";
 "conversion.guide.audio.m4a.title" = "M4A: formato e codec";
-"conversion.guide.audio.m4a.detail" = "M4A é o formato do arquivo, não o método de compressão. M4A (AAC) usa compressão com perdas para arquivos menores e fáceis de compartilhar; M4A (Apple Lossless/ALAC) preserva a qualidade disponível na origem, mas costuma ser maior. Escolha AAC para armazenamento e compartilhamento comuns, ou ALAC quando evitar novas perdas de qualidade importar mais que o tamanho.";
+"conversion.guide.audio.m4a.detail" = "M4A é o formato do arquivo, não o método de conversão. M4A (AAC) usa conversão com perdas para arquivos menores e fáceis de compartilhar; M4A (Apple Lossless/ALAC) preserva a qualidade disponível na origem, mas costuma ser maior. Escolha AAC para armazenamento e compartilhamento comuns, ou ALAC quando evitar novas perdas de qualidade importar mais que o tamanho.";
 "conversion.guide.audio.lossless.title" = "Formatos sem perdas";
-"conversion.guide.audio.lossless.detail" = "M4A (ALAC) e CAF ALAC usam compressão sem perdas; WAV, AIFF e CAF PCM armazenam áudio sem compressão e normalmente são maiores. Eles preservam a qualidade disponível na origem e não têm ajuste de taxa de bits. Converter MP3 ou AAC para um formato sem perdas não recupera detalhes já removidos.";
+"conversion.guide.audio.lossless.detail" = "M4A (ALAC) e CAF ALAC usam conversão sem perdas; WAV, AIFF e CAF PCM armazenam áudio sem conversão e normalmente são maiores. Eles preservam a qualidade disponível na origem e não têm ajuste de taxa de bits. Converter MP3 ou AAC para um formato sem perdas não recupera detalhes já removidos.";
 "conversion.guide.audio.extract.title" = "Extrair de vídeo";
 "conversion.guide.audio.extract.detail" = "Escolha MOV, MP4 ou M4V no Arquivos ou Fotos para ler a faixa de áudio disponível e recodificá-la no formato selecionado. O vídeo não é alterado; não é possível extrair de vídeos protegidos ou sem áudio.";
 "settings.background" = "Fundo";
@@ -245,17 +245,59 @@
 "estimate.calculating" = "Estimando o tamanho da saída…";
 "conversion.replace.button" = "Substituir originais";
 "conversion.replace.title" = "Substituir mídia original?";
-"conversion.replace.message" = "%d itens comprimidos serão salvos no Fotos e, em seguida, seus originais serão excluídos. Esta ação não pode ser desfeita.";
+"conversion.replace.message" = "%d itens convertidos serão salvos no Fotos e, em seguida, seus originais serão excluídos. Esta ação não pode ser desfeita.";
 "conversion.replace.action" = "Substituir originais";
 "conversion.replace.failed" = "Não foi possível substituir alguns originais. Eles foram mantidos por segurança.";
-"conversion.replace.unavailable" = "Não há originais disponíveis para substituição. Importe do Fotos e conclua a compressão antes de usar esta ação.";
+"conversion.replace.unavailable" = "Não há originais disponíveis para substituição. Importe do Fotos e conclua a conversão antes de usar esta ação.";
 "conversion.replace.review.title" = "Substituir originais";
-"conversion.replace.review.summary" = "Mídia comprimida pronta";
-"conversion.replace.review.detail" = "Escolha os originais que deseja substituir. As cópias comprimidas são salvas primeiro.";
+"conversion.replace.review.summary" = "Mídia convertida pronta";
+"conversion.replace.review.detail" = "Escolha os originais que deseja substituir. As cópias convertidas são salvas primeiro.";
 "conversion.replace.select_all" = "Selecionar tudo";
 "conversion.replace.deselect_all" = "Desmarcar tudo";
 "conversion.replace.selected" = "%d selecionados";
 "conversion.guide.audio_replace.title" = "Por que o áudio não pode substituir o original";
-"conversion.guide.audio_replace.detail" = "Os arquivos de áudio vêm do Arquivos, e o iPhone não permite que este app remova esses originais com segurança. O áudio comprimido é salvo como um novo arquivo; depois de conferi-lo, exclua o antigo você mesmo no Arquivos.";
+"conversion.guide.audio_replace.detail" = "Os arquivos de áudio vêm do Arquivos, e o iPhone não permite que este app remova esses originais com segurança. O áudio convertido é salvo como um novo arquivo; depois de conferi-lo, exclua o antigo você mesmo no Arquivos.";
 "video.settings.bitrate.help" = "100% usa o ajuste automático. Valores menores reduzem a taxa de bits em relação ao original.";
 "video.error.hdr_bitrate" = "Para preservar as cores e o brilho de vídeos HDR, use 100% (Auto).";
+
+"Convert" = "Converter";
+
+"cleanup.space.title" = "Espaço para revisar";
+
+"cleanup.space.hint" = "Estimativa sem duplicações. Revise antes de apagar. “Apagados recentemente” pode atrasar a liberação do espaço.";
+
+"cleanup.action" = "Limpeza rápida";
+
+"cleanup.review.hint" = "Fotos semelhantes já estão selecionadas. Uma foto por grupo é mantida. Adicione capturas ou vídeos apenas se não precisar mais deles.";
+
+"cleanup.useSuggestions" = "Usar sugestões";
+
+"cleanup.scan.title" = "Espaço para mais lembranças";
+
+"cleanup.scan.action" = "Encontrar espaço para liberar";
+
+"cleanup.scan.hint" = "Revise fotos semelhantes, vídeos grandes e capturas. A análise não apaga nada.";
+
+"quick.compress.title" = "Guarde as lembranças, reduza o tamanho";
+
+"quick.video" = "Comprimir vídeos";
+
+"quick.image" = "Comprimir fotos";
+
+"quick.compress.hint" = "Escolha os arquivos. Nós cuidamos dos ajustes.";
+
+"quick.action" = "Comprimir";
+
+"quick.ready" = "Ajustes prontos";
+
+"quick.video.detail" = "MP4 / HEVC · Resolução original · Taxa de bits reduzida.";
+
+"quick.image.detail" = "HEIC (ou JPEG) · Qualidade de 75% · Dimensões originais · Remover GPS.";
+
+"quick.originals" = "Cria novas cópias e mantém os originais. O resultado pode ser maior; compare antes de substituir.";
+
+"premium.free.summary" = "Grátis: revisar e apagar mídia, converter e converter vídeos.";
+
+"premium.value.summary" = "Premium: limpar categorias juntas, converter imagens e áudio, organizar pastas e personalizar a aparência.";
+
+"quick.free" = "Grátis";

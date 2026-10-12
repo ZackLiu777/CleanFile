@@ -111,14 +111,11 @@ struct PremiumSubscriptionView: View {
                 .appTypeface(.title.bold(), size: 30, relativeTo: .title, weight: .bold)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
-            Text(AppL10n.string("premium.subtitle"))
+            Text(AppL10n.string("premium.value.summary"))
                 .appTypeface(.body, size: 17, relativeTo: .body)
                 .foregroundStyle(theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
-            Text(AppL10n.string("premium.feature.all"))
-                .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
-                .foregroundStyle(theme.accentPrimary)
-                .fixedSize(horizontal: false, vertical: true)
+
         }
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
@@ -129,8 +126,14 @@ struct PremiumSubscriptionView: View {
         VStack(alignment: .leading, spacing: 20) {
             feature(title: AppL10n.string("Quick Cleanup"), detail: AppL10n.string("premium.quickClean.detail"), symbol: "sparkles")
             feature(title: AppL10n.string("premium.storage.title"), detail: AppL10n.string("premium.storage.detail"), symbol: "folder")
-            feature(title: AppL10n.string("premium.feature.compression.title"), detail: AppL10n.string("premium.feature.compression.detail"), symbol: "arrow.down.right.and.arrow.up.left")
+            feature(title: AppL10n.string("premium.feature.compression.title"), detail: AppL10n.string("premium.feature.compression.detail"), symbol: "arrow.triangle.2.circlepath")
             feature(title: AppL10n.string("premium.feature.appearance.title"), detail: AppL10n.string("premium.feature.appearance.detail"), symbol: "paintpalette")
+            Divider()
+            Text(AppL10n.string("premium.free.summary"))
+                .font(.footnote)
+                .foregroundStyle(theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)

@@ -8,8 +8,8 @@
 import SwiftUI
 
 enum ConversionGuideTool: String, CaseIterable, Identifiable, Hashable {
-    case image
     case video
+    case image
     case audio
 
     var id: Self { self }
@@ -117,6 +117,11 @@ enum ConversionGuideTool: String, CaseIterable, Identifiable, Hashable {
             ]
         case .video:
             [
+                ConversionGuideSetting(
+                    symbol: "slider.horizontal.3",
+                    title: L10n.string("video.settings.bitrate"),
+                    detail: L10n.string("video.settings.bitrate.help") + " " + L10n.string("video.error.hdr_bitrate")
+                ),
                 ConversionGuideSetting(
                     symbol: "rectangle.inset.filled",
                     title: L10n.string("video.settings.resolution"),

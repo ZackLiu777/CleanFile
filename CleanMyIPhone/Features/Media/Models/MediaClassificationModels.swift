@@ -160,6 +160,18 @@ nonisolated struct MediaClassificationResult: Codable, Equatable, Sendable {
 
     var videoIDs: [String] { classifiedVideos.map(\.id) }
 
+    var protectedKeeperIDs: Set<String> { Set(similarImageGroups.map(\.suggestedKeeperID)) }
+
+    var suggestedCleanupIDs: Set<String> {
+        Set(similarImageGroups.flatMap { $0.items.map(\.id) }).subtracting(protectedKeeperIDs)
+    }
+
+    // Categories overlap. Count each candidate once, and never include a keeper.
+    var cleanupReviewIDs: Set<String> {
+        suggestedCleanupIDs.union(screenshotIDs).union(videoIDs).union(livePhotoIDs).subtracting(protectedKeeperIDs)
+    }
+
+
     var similarImageIDs: [String] {
         similarImageGroups.flatMap { $0.items.map(\.id) }
     }

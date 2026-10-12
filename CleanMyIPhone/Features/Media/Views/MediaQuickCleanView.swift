@@ -30,6 +30,7 @@ struct MediaQuickCleanView: View {
             photoLibrary: photoLibrary,
             canUseQuickClean: { accessStore.allows(.quickClean) }
         )
+        quickCleanViewModel.selectSuggestions()
         _viewModel = StateObject(
             wrappedValue: quickCleanViewModel
         )
@@ -187,7 +188,10 @@ struct MediaQuickCleanView: View {
             Label("Review Cleanup Suggestions", systemImage: "sparkles")
                 .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
                 .foregroundStyle(theme.textPrimary)
-            Text("Select one or more categories. Similar-photo groups always keep the recommended photo.")
+            Button("cleanup.useSuggestions") { viewModel.selectSuggestions() }
+                .buttonStyle(.bordered)
+                .disabled(photoLibrary.deletionState.isDeleting || isAnimatingDeletion)
+            Text("cleanup.review.hint")
                 .foregroundStyle(theme.textSecondary)
         }
         .padding(18)
@@ -320,7 +324,7 @@ struct MediaQuickCleanView: View {
             fromByteCount: viewModel.estimatedByteCount(for: category),
             countStyle: .file
         )
-        return "\(count) · ~\(size)"
+        return "\(count) · \(size)"
     }
 
     private var selectedCountText: String {
@@ -335,10 +339,7 @@ struct MediaQuickCleanView: View {
             fromByteCount: viewModel.selectedEstimatedByteCount,
             countStyle: .file
         )
-        return String.localizedStringWithFormat(
-            AppL10n.string("Approximately %@"),
-            size
-        )
+        return size
     }
 
     private func handleDeletionResult() {
@@ -352,7 +353,7 @@ struct MediaQuickCleanView: View {
                 countStyle: .file
             )
             completionMessage = String.localizedStringWithFormat(
-                AppL10n.string("%@ moved to Recently Deleted · ~%@"),
+                AppL10n.string("%@ moved to Recently Deleted · %@"),
                 count,
                 size
             )

@@ -1,14 +1,14 @@
-"converter.title" = "Mediacompressie";
-"converter.heading" = "Media comprimeren";
-"conversion.home.image.title" = "Afbeeldingen comprimeren";
-"conversion.home.image.detail" = "Comprimeer afbeeldingen met formaat- en grootteregelaars en verwijder privé-metagegevens";
-"conversion.home.image.tagline" = "Compressie · HEIC-formaten · GPS verwijderen";
-"conversion.home.video.title" = "Video comprimeren";
-"conversion.home.video.detail" = "Comprimeer video met codecs en uitvoerresolutie";
-"conversion.home.video.tagline" = "Compressie · MP4 / MOV · Resolutie";
-"conversion.home.audio.title" = "Audio comprimeren";
-"conversion.home.audio.detail" = "Comprimeer audio of extraheer een track uit video";
-"conversion.home.audio.tagline" = "Compressie · MP3 / AAC / WAV · Uittreksel uit video";
+"converter.title" = "Converteren";
+"converter.heading" = "Media converteren";
+"conversion.home.image.title" = "Afbeeldingen converteren";
+"conversion.home.image.detail" = "JPG, PNG, HEIC en meer. Pas kwaliteit en afmetingen aan.";
+"conversion.home.image.tagline" = "JPG, PNG, HEIC en meer. Pas kwaliteit en afmetingen aan.";
+"conversion.home.video.title" = "Video’s converteren";
+"conversion.home.video.detail" = "MP4, MOV, M4V. Kies codec, bitrate en resolutie.";
+"conversion.home.video.tagline" = "MP4, MOV, M4V. Kies codec, bitrate en resolutie.";
+"conversion.home.audio.title" = "Audio converteren";
+"conversion.home.audio.detail" = "MP3, AAC, WAV en meer. Pas bitrate aan of haal audio uit video.";
+"conversion.home.audio.tagline" = "MP3, AAC, WAV en meer. Pas bitrate aan of haal audio uit video.";
 "conversion.home.history.summary" = "%@ · Gecomprimeerde %ld bestanden";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "De uitvoer is %@ kleiner";
@@ -20,16 +20,16 @@
 "action.choose_images" = "Kies Afbeeldingen";
 "action.clear_completed" = "Wissen Voltooid";
 "action.clear_all" = "Alles wissen";
-"action.convert" = "Compressie starten";
+"action.convert" = "Converteren";
 "action.cancel" = "Annuleer";
-"action.share" = "Deel gecomprimeerd bestand";
+"action.share" = "Deel geconverteerd bestand";
 "action.remove" = "Afbeelding verwijderen";
 "empty.title" = "Geen afbeeldingen geselecteerd";
 "empty.subtitle" = "Kies een of meer stilstaande beelden om te beginnen.";
 "files.title" = "%ld Afbeeldingen";
 "files.videos.title" = "%ld Video's";
 "files.audio.title" = "%ld Audiobestanden";
-"settings.title" = "Compressie-instellingen";
+"settings.title" = "Conversie-instellingen";
 "settings.format" = "Formaat";
 "settings.quality" = "Kwaliteit";
 "settings.metadata" = "Metagegevens";
@@ -49,14 +49,14 @@
 "color.white" = "Wit";
 "color.black" = "Zwart";
 "status.inspecting" = "Inspecteren";
-"status.ready" = "Klaar om te comprimeren";
-"status.converting" = "Comprimeren";
-"status.completed" = "Compressie voltooid";
+"status.ready" = "Klaar om te converteren";
+"status.converting" = "Converteren";
+"status.completed" = "Conversie voltooid";
 "status.cancelled" = "Geannuleerd";
 "progress.summary" = "%ld van %ld voltooid";
 "notice.duplicates_ignored" = "Dubbele selecties werden genegeerd.";
 "notice.import_failed" = "Kan afbeeldingen niet importeren: %@";
-"notice.cancelled" = "Compressie geannuleerd. Voltooide dossiers werden bewaard.";
+"notice.cancelled" = "Conversie geannuleerd. Voltooide dossiers werden bewaard.";
 "notice.completed" = "Gecomprimeerde %ld afbeeldingen.";
 "notice.completed_with_failures" = "Gecomprimeerde %ld afbeeldingen; %ld is mislukt.";
 "error.source_not_reachable" = "Het bronbestand is niet beschikbaar: %@";
@@ -73,11 +73,11 @@
 "error.cannot_create_destination" = "De uitvoer kon niet worden gemaakt: %@";
 "error.cannot_finalize" = "De encoder kan het schrijven niet voltooien: %@";
 "error.destination_exists" = "Er bestaat al een uitvoerbestand: %@";
-"error.destination_busy" = "Een andere compressietaak is het schrijven van dit bestand: %@";
+"error.destination_busy" = "Een andere conversietaak is het schrijven van dit bestand: %@";
 "error.cannot_reserve" = "Er kon geen unieke uitvoernaam worden gemaakt voor %@.";
-"error.commit_failed" = "Het gecomprimeerde bestand kan niet worden vastgelegd: %@";
-"error.cancelled" = "De compressie is geannuleerd.";
-"error.unexpected" = "Onverwachte compressiefout: %@";
+"error.commit_failed" = "Het geconverteerde bestand kan niet worden vastgelegd: %@";
+"error.cancelled" = "De conversie is geannuleerd.";
+"error.unexpected" = "Onverwachte conversiefout: %@";
 "converter.mode" = "Mediatype";
 "converter.mode.image" = "Afbeeldingen";
 "converter.mode.video" = "Video's";
@@ -95,7 +95,7 @@
 "audio.source.video" = "Videobron";
 "audio.error.video_no_audio" = "Deze video bevat geen audiotrack.";
 "audio.error.video_protected" = "Beveiligde video-audio kan niet worden geëxtraheerd.";
-"audio.import.title" = "Audio comprimeren";
+"audio.import.title" = "Audio converteren";
 "audio.settings.quality" = "Kwaliteit";
 "audio.format.mp3" = "MP3";
 "audio.format.aac" = "M4A (AAC-gecodeerd)";
@@ -105,23 +105,23 @@
 "audio.format.aiff" = "AIFF (ongecomprimeerde PCM)";
 "audio.format.caf_pcm" = "CAF (ongecomprimeerde PCM)";
 "audio.format.caf_alac" = "CAF (Apple zonder verlies)";
-"conversion.delete_all.title" = "Alle compressiebestanden verwijderen?";
-"conversion.delete_all.message" = "Hiermee worden de geïmporteerde kopieën en gecomprimeerde uitvoer van de app verwijderd. Originelen in foto's en bestanden worden niet verwijderd.";
+"conversion.delete_all.title" = "Alle conversiebestanden verwijderen?";
+"conversion.delete_all.message" = "Hiermee worden de geïmporteerde kopieën en geconverteerde uitvoer van de app verwijderd. Originelen in foto's en bestanden worden niet verwijderd.";
 "conversion.delete.action" = "Bestanden verwijderen";
 "conversion.delete.failed" = "Sommige door de app beheerde bestanden kunnen niet worden verwijderd. De overige items werden in de lijst bewaard.";
 "audio.lossless" = "Bij verliesvrije uitvoer blijft de beschikbare audiokwaliteit behouden.";
 "audio.empty.title" = "Geen audio";
-"audio.empty.subtitle" = "Kies audiobestanden om te comprimeren of extraheer audio uit video's.";
+"audio.empty.subtitle" = "Kies audiobestanden om te converteren of extraheer audio uit video's.";
 "audio.notice.completed" = "Gecomprimeerde %ld audiobestanden.";
 "audio.error.source" = "De bronaudio is niet beschikbaar.";
 "audio.error.unsupported" = "Het geselecteerde audio- of videoformaat wordt niet ondersteund.";
 "audio.error.invalid" = "Het bestand bevat geen leesbare audio.";
 "audio.error.output" = "De audio-uitvoer kon niet worden gemaakt: %@";
-"audio.error.convert" = "Audiocompressie mislukt: %@";
-"audio.error.commit" = "De gecomprimeerde audio kan niet worden opgeslagen: %@";
+"audio.error.convert" = "Audioconversie mislukt: %@";
+"audio.error.commit" = "De geconverteerde audio kan niet worden opgeslagen: %@";
 "video.action.add" = "Video's toevoegen";
 "video.action.choose" = "Kies Video's";
-"video.import.title" = "Video's comprimeren";
+"video.import.title" = "Video's converteren";
 "video.import.subtitle" = "Bestanden worden op dit apparaat verwerkt en nooit geüpload.";
 "quality.smaller" = "Kleiner";
 "quality.balanced" = "Evenwichtig";
@@ -133,13 +133,13 @@
 "video.settings.bitrate" = "Bitsnelheid";
 "video.settings.resolution" = "Resolutie";
 "video.empty.title" = "Geen video's";
-"video.empty.subtitle" = "Kies een of meer video's om de compressie te starten.";
+"video.empty.subtitle" = "Kies een of meer video's om de conversie te starten.";
 "video.notice.completed" = "Gecomprimeerde %ld video's.";
 "video.error.source" = "De bronvideo is niet beschikbaar.";
 "video.error.unsupported" = "Dit apparaat ondersteunt de geselecteerde video-instellingen niet.";
 "video.error.exporter" = "De videocompressor kan niet worden gemaakt.";
-"video.error.export" = "Videocompressie mislukt: %@";
-"video.error.commit" = "De gecomprimeerde video kan niet worden opgeslagen: %@";
+"video.error.export" = "Videoconversie mislukt: %@";
+"video.error.commit" = "De geconverteerde video kan niet worden opgeslagen: %@";
 "action.choose_files" = "Kies uit Bestanden";
 "format_picker.title" = "Uitvoerformaat";
 "format_picker.done" = "Klaar";
@@ -174,29 +174,29 @@
 "formats.video.title" = "Ondersteunde videoformaten";
 "action.done" = "Klaar";
 "import.progress.title" = "Importeren";
-"conversion.guide.button" = "Open de compressiegids";
-"conversion.guide.title" = "Compressiegids";
-"conversion.guide.hero.title" = "Comprimeer media, bespaar ruimte";
-"conversion.guide.hero.detail" = "Comprimeer afbeeldingen, video en audio lokaal op dit apparaat zonder de originelen te wijzigen.";
+"conversion.guide.button" = "Handleiding voor mediaconversie";
+"conversion.guide.title" = "Handleiding voor mediaconversie";
+"conversion.guide.hero.title" = "Veelgebruikte formaten. Jouw instellingen.";
+"conversion.guide.hero.detail" = "Converteer veelgebruikte formaten en pas kwaliteit, bitrate en afmetingen aan.";
 "conversion.guide.steps.title" = "Snel beginnen";
 "conversion.guide.step.choose.title" = "Kies een mediatype";
-"conversion.guide.step.choose.detail" = "Importeer afbeeldingen en video uit foto's of bestanden. De Audio-tool accepteert audio of video van Bestanden.";
-"conversion.guide.step.adjust.title" = "Pas de compressie aan";
-"conversion.guide.step.adjust.detail" = "Kies een formaat en pas de kwaliteit, resolutie, bitrate of metadata indien nodig aan.";
-"conversion.guide.step.convert.title" = "Comprimeren en delen";
-"conversion.guide.step.convert.detail" = "Volg de voortgang van de compressie, bekijk het resultaat en deel het waar u maar wilt.";
-"conversion.guide.home.title" = "Begin met het bestand dat u wilt verkleinen";
-"conversion.guide.home.detail" = "Elk gereedschap staat op zichzelf, zodat u direct aan de slag kunt met de klus die u nodig heeft.";
-"conversion.guide.tools.title" = "Drie mediacompressietools";
-"conversion.guide.image.detail" = "Comprimeer afbeeldingen, pas het uitvoerformaat en de grootte aan en verwijder locatiemetadata voordat u deze deelt.";
-"conversion.guide.video.detail" = "Comprimeer video door een container, codec en resolutie te kiezen. De uiteindelijke ondersteuning is afhankelijk van het apparaat en de bron.";
-"conversion.guide.audio.detail" = "Comprimeer audiobestanden, of selecteer hier een video om de audiotrack te extraheren en te comprimeren.";
-"conversion.guide.controls.title" = "Vorm de compressie";
+"conversion.guide.step.choose.detail" = "Kies video’s, afbeeldingen of audio. Importeer uit Bestanden of kies afbeeldingen en video’s uit Foto’s.";
+"conversion.guide.step.adjust.title" = "Pas de conversie aan";
+"conversion.guide.step.adjust.detail" = "Converteer veelgebruikte formaten en pas kwaliteit, bitrate en afmetingen aan.";
+"conversion.guide.step.convert.title" = "Converteren en delen";
+"conversion.guide.step.convert.detail" = "Volg de voortgang van de conversie, bekijk het resultaat en deel het waar u maar wilt.";
+"conversion.guide.home.title" = "Media converteren";
+"conversion.guide.home.detail" = "Converteer veelgebruikte formaten en pas kwaliteit, bitrate en afmetingen aan.";
+"conversion.guide.tools.title" = "Drie mediaconversietools";
+"conversion.guide.image.detail" = "JPG, PNG, HEIC en meer. Pas kwaliteit en afmetingen aan.";
+"conversion.guide.video.detail" = "MP4, MOV, M4V. Kies codec, bitrate en resolutie.";
+"conversion.guide.audio.detail" = "MP3, AAC, WAV en meer. Pas bitrate aan of haal audio uit video.";
+"conversion.guide.controls.title" = "Vorm de conversie";
 "conversion.guide.format.detail" = "Kies een indeling waarin compatibiliteit, kwaliteit en bestandsgrootte in balans zijn voor de manier waarop het bestand zal worden gebruikt.";
-"conversion.guide.quality.detail" = "Gebruik beeldkwaliteit, videocodec en resolutie, of AAC-bitsnelheid om de grootte te verkleinen. Lossless audioformaten behouden de kwaliteit, maar verkleinen mogelijk niet de grootte.";
+"conversion.guide.quality.detail" = "Een lagere kwaliteit of bitrate maakt bestanden meestal kleiner. Het resultaat hangt af van de inhoud; verliesvrije formaten worden soms niet kleiner.";
 "conversion.guide.metadata.detail" = "Bewaar alle beschrijfbare metagegevens, verwijder alleen GPS of verwijder alles. GPS-verwijdering is de standaardinstelling.";
 "conversion.guide.replace.title" = "Originelen vervangen";
-"conversion.guide.replace.detail" = "Tik na het comprimeren op de prullenmand op het beginscherm en selecteer afbeeldings- of videoverzamelingen. De app bewaart eerst de gecomprimeerde kopieën in Foto’s; daarna vraagt iOS om het verwijderen van de bijbehorende originelen te bevestigen. Alleen voltooide items uit Foto’s komen in aanmerking; losse audio en import uit Bestanden worden niet ondersteund. Alles wissen verwijdert alleen werkkopieën en schakelt vervangen uit, maar verwijdert nooit originelen.";
+"conversion.guide.replace.detail" = "Tik na het converteren op de prullenmand op het beginscherm en selecteer afbeeldings- of videoverzamelingen. De app bewaart eerst de geconverteerde kopieën in Foto’s; daarna vraagt iOS om het verwijderen van de bijbehorende originelen te bevestigen. Alleen voltooide items uit Foto’s komen in aanmerking; losse audio en import uit Bestanden worden niet ondersteund. Alles wissen verwijdert alleen werkkopieën en schakelt vervangen uit, maar verwijdert nooit originelen.";
 "conversion.guide.privacy.title" = "Uw originelen blijven van u";
 "conversion.guide.privacy.detail" = "Op dit apparaat wordt alles verwerkt. Alles wissen verwijdert alleen door de app beheerde kopieën en uitvoer, nooit uw originelen in Foto's of Bestanden.";
 "conversion.guide.learn_more" = "Ontdek dit hulpmiddel";
@@ -204,31 +204,31 @@
 "conversion.guide.detail.purpose.title" = "Waar het voor is";
 "conversion.guide.detail.workflow.title" = "Batch, voortgang en resultaten";
 "conversion.guide.output.detail" = "De door de app beheerde uitvoermap wordt in de tool weergegeven, maar kan niet worden geselecteerd. Gebruik Delen om een ​​resultaat ergens anders te verplaatsen.";
-"conversion.guide.image.purpose" = "Comprimeer statische afbeeldingen in batches op formaat, kwaliteit, langste rand en metagegevens. Eén set opties is van toepassing op de huidige batch zonder de originelen te wijzigen.";
+"conversion.guide.image.purpose" = "JPG, PNG, HEIC en meer. Pas kwaliteit en afmetingen aan.";
 "conversion.guide.image.imports.detail" = "Selecteer meerdere bestanden of maximaal 100 items uit Foto's. Formaten weerspiegelen de mogelijkheden van dit apparaat; RAW/DNG/ProRAW kunnen alleen worden geïmporteerd en geanimeerde afbeeldingen worden niet ondersteund.";
-"conversion.guide.image.workflow.detail" = "Volg inspectie- en compressiestatussen, of annuleer terwijl het werk aan de gang is; voltooide resultaten blijven staan. Vergelijk formaten en deel van elke bestandskaart voordat u de lijst wist.";
-"conversion.guide.image.quality.detail" = "JPG, HEIC, HEIF en WebP ondersteunen een kwaliteit van 10%–100% in stappen van 5%, met 85% als standaard. Een lagere kwaliteit zorgt meestal voor kleinere bestanden met meer zichtbaar verlies; andere formaten vertonen geen kwaliteitscontrole.";
+"conversion.guide.image.workflow.detail" = "Volg inspectie- en conversiestatussen, of annuleer terwijl het werk aan de gang is; voltooide resultaten blijven staan. Vergelijk formaten en deel van elke bestandskaart voordat u de lijst wist.";
+"conversion.guide.image.quality.detail" = "JPG, PNG, HEIC en meer. Pas kwaliteit en afmetingen aan. Een lagere kwaliteit of bitrate maakt bestanden meestal kleiner. Het resultaat hangt af van de inhoud; verliesvrije formaten worden soms niet kleiner.";
 "resize.square1024" = "1024px";
 "conversion.guide.image.resize.detail" = "Behoud de oorspronkelijke afmetingen of sluit de langste rand af op 4096, 2048 of 1280 px om de grootte te verkleinen zonder te vergroten. Met de optie 1024 × 1024 wordt de hele afbeelding op een vierkante achtergrond geplaatst, zonder bijsnijden of uitrekken; kleine afbeeldingen worden vergroot.";
 "conversion.guide.image.transparency.detail" = "JPG en BMP kunnen geen transparante pixels opslaan. Wanneer u een van beide formaten gebruikt, vult u transparante gebieden met wit of zwart.";
-"conversion.guide.video.purpose" = "Comprimeer MOV-, MP4- of M4V-video in batch op basis van container, codec en resolutie zonder de originelen te overschrijven.";
+"conversion.guide.video.purpose" = "MP4, MOV, M4V. Kies codec, bitrate en resolutie.";
 "conversion.guide.video.imports.detail" = "Selecteer meerdere MOV-, MP4- of M4V-bestanden, of kies maximaal 50 video's uit Foto's.";
 "conversion.guide.video.workflow.detail" = "Video's worden één voor één verwerkt. Volg de taakstatus en het voltooide aantal, annuleer indien nodig, vergelijk vervolgens de invoer- en uitvoergroottes en deel elk resultaat.";
 "conversion.guide.video.resolution.detail" = "Als u de resolutie verlaagt, wordt de bestandsgrootte doorgaans kleiner. H.264 biedt origineel, 4K, 1080p, 720p en 480p; HEVC biedt origineel, 4K en 1080p; ProRes behoudt de oorspronkelijke resolutie.";
 "conversion.guide.video.compatibility.title" = "Combinaties en apparaatondersteuning";
 "conversion.guide.video.compatibility.detail" = "De keuzes voor containers en resoluties worden kleiner nadat u een codec hebt geselecteerd. Het apparaat en de bronvideo ondergaan nog een laatste compatibiliteitscontrole.";
 "conversion.guide.video.codec.h264.detail" = "Breedste compatibiliteit: MP4, MOV of M4V; Origineel, 4K, 1080p, 720p of 480p.";
-"conversion.guide.video.codec.hevc.detail" = "Efficiëntere compressie: MP4 of MOV; Origineel, 4K of 1080p. Oudere apparaten en apps zijn mogelijk minder compatibel.";
-"conversion.guide.video.codec.prores422.detail" = "Voor hoogwaardige bewerking: alleen MOV, met de originele resolutie. Bestanden zijn doorgaans groot en niet bedoeld voor ruimtebesparende compressie.";
-"conversion.guide.video.codec.prores4444.detail" = "Voor postproductie van hoge kwaliteit: alleen MOV, met de originele resolutie. Bestanden zijn doorgaans erg groot en niet bedoeld voor ruimtebesparende compressie.";
-"conversion.guide.audio.purpose" = "Comprimeer audio of maak een apart gecomprimeerd audiobestand van een video met een bruikbaar nummer. De originele audio en video blijven ongewijzigd.";
+"conversion.guide.video.codec.hevc.detail" = "Efficiëntere conversie: MP4 of MOV; Origineel, 4K of 1080p. Oudere apparaten en apps zijn mogelijk minder compatibel.";
+"conversion.guide.video.codec.prores422.detail" = "Voor hoogwaardige bewerking: alleen MOV, met de originele resolutie. Bestanden zijn doorgaans groot en niet bedoeld voor ruimtebesparende conversie.";
+"conversion.guide.video.codec.prores4444.detail" = "Voor postproductie van hoge kwaliteit: alleen MOV, met de originele resolutie. Bestanden zijn doorgaans erg groot en niet bedoeld voor ruimtebesparende conversie.";
+"conversion.guide.audio.purpose" = "MP3, AAC, WAV en meer. Pas bitrate aan of haal audio uit video.";
 "conversion.guide.audio.imports.detail" = "Selecteer audio of video uit Bestanden, of selecteer video's uit Foto's om de audiotracks eruit te halen. Audio-ingangen: M4A (inclusief ALAC), AAC, MP3, FLAC, WAV, AIFF/AIF en CAF. Video-ingangen: MOV, MP4 en M4V.";
 "conversion.guide.audio.workflow.detail" = "Volg het brontype, de duur, de taakstatus en het voltooide aantal, of annuleer indien nodig. Vergelijk invoer- en uitvoerformaten en deel de voltooide audio.";
 "conversion.guide.audio.quality.detail" = "MP3 en AAC bieden 96, 128, 192, 256 of 320 kbps; de standaardwaarde is 192 kbps. ALAC, WAV, AIFF en PCM CAF zijn verliesvrij en gebruiken geen bitrate-instelling.";
 "conversion.guide.audio.m4a.title" = "M4A: container en codec";
-"conversion.guide.audio.m4a.detail" = "M4A is de bestandscontainer, niet de compressiemethode. M4A (AAC) gebruikt compressie met verlies voor kleinere, deelbare bestanden; M4A (Apple Lossless/ALAC) behoudt de beschikbare kwaliteit van de bron, maar is meestal groter. Kies AAC voor dagelijkse opslag en delen, of ALAC als het voorkomen van verder kwaliteitsverlies belangrijker is dan de grootte.";
+"conversion.guide.audio.m4a.detail" = "M4A is de bestandscontainer, niet de conversiemethode. M4A (AAC) gebruikt conversie met verlies voor kleinere, deelbare bestanden; M4A (Apple Lossless/ALAC) behoudt de beschikbare kwaliteit van de bron, maar is meestal groter. Kies AAC voor dagelijkse opslag en delen, of ALAC als het voorkomen van verder kwaliteitsverlies belangrijker is dan de grootte.";
 "conversion.guide.audio.lossless.title" = "Verliesloze formaten";
-"conversion.guide.audio.lossless.detail" = "M4A (ALAC) en CAF ALAC gebruiken verliesloze compressie; WAV, AIFF en CAF PCM slaan ongecomprimeerde audio op en zijn meestal groter. Deze formaten behouden de kwaliteit die beschikbaar is in de bron en gebruiken geen bitrate-instelling. Het converteren van MP3 of AAC naar lossless kan geen details herstellen die al zijn verwijderd door compressie met verlies.";
+"conversion.guide.audio.lossless.detail" = "M4A (ALAC) en CAF ALAC gebruiken verliesloze conversie; WAV, AIFF en CAF PCM slaan ongeconverteerde audio op en zijn meestal groter. Deze formaten behouden de kwaliteit die beschikbaar is in de bron en gebruiken geen bitrate-instelling. Het converteren van MP3 of AAC naar lossless kan geen details herstellen die al zijn verwijderd door conversie met verlies.";
 "conversion.guide.audio.extract.title" = "Uittreksel uit video";
 "conversion.guide.audio.extract.detail" = "Kies MOV, MP4 of M4V uit Bestanden of Foto's om de beschikbare audiotrack te lezen en deze opnieuw te coderen in het geselecteerde formaat. De video is niet gewijzigd; beveiligde video of video zonder audio kan niet worden geëxtraheerd.";
 "settings.background" = "Achtergrond";
@@ -245,17 +245,59 @@
 "estimate.calculating" = "Uitvoergrootte schatten…";
 "conversion.replace.button" = "Originelen vervangen";
 "conversion.replace.title" = "Originele media vervangen?";
-"conversion.replace.message" = "%d gecomprimeerde items worden in Foto's bewaard, waarna de originelen worden verwijderd. Dit kan niet ongedaan worden gemaakt.";
+"conversion.replace.message" = "%d geconverteerde items worden in Foto's bewaard, waarna de originelen worden verwijderd. Dit kan niet ongedaan worden gemaakt.";
 "conversion.replace.action" = "Originelen vervangen";
 "conversion.replace.failed" = "Sommige originelen konden niet worden vervangen en zijn voor de veiligheid bewaard.";
-"conversion.replace.unavailable" = "Er zijn geen vervangbare originelen. Importeer eerst uit Foto's en voltooi de compressie.";
+"conversion.replace.unavailable" = "Er zijn geen vervangbare originelen. Importeer eerst uit Foto's en voltooi de conversie.";
 "conversion.replace.review.title" = "Originelen vervangen";
 "conversion.replace.review.summary" = "Gecomprimeerde media gereed";
-"conversion.replace.review.detail" = "Kies welke originelen worden vervangen. De gecomprimeerde kopieën worden eerst bewaard.";
+"conversion.replace.review.detail" = "Kies welke originelen worden vervangen. De geconverteerde kopieën worden eerst bewaard.";
 "conversion.replace.select_all" = "Selecteer alles";
 "conversion.replace.deselect_all" = "Deselecteer alles";
 "conversion.replace.selected" = "%d geselecteerd";
 "conversion.guide.audio_replace.title" = "Waarom audio het origineel niet kan vervangen";
-"conversion.guide.audio_replace.detail" = "Audiobestanden komen uit Bestanden. De iPhone staat niet toe dat de app de originelen daar veilig voor je verwijdert. De gecomprimeerde audio wordt als nieuw bestand bewaard. Controleer het en verwijder daarna zelf het oude bestand in Bestanden.";
+"conversion.guide.audio_replace.detail" = "Audiobestanden komen uit Bestanden. De iPhone staat niet toe dat de app de originelen daar veilig voor je verwijdert. De geconverteerde audio wordt als nieuw bestand bewaard. Controleer het en verwijder daarna zelf het oude bestand in Bestanden.";
 "video.settings.bitrate.help" = "100% gebruikt automatische instellingen. Lagere waarden verlagen de bitsnelheid ten opzichte van het origineel.";
 "video.error.hdr_bitrate" = "Gebruik voor HDR-video's 100% (Auto) om kleur en helderheid te behouden.";
+
+"Convert" = "Converteren";
+
+"cleanup.space.title" = "Ruimte om te bekijken";
+
+"cleanup.space.hint" = "Schatting zonder dubbeltelling. Controleer vóór verwijderen. ‘Recent verwijderd’ kan het vrijmaken vertragen.";
+
+"cleanup.action" = "Snel opruimen";
+
+"cleanup.review.hint" = "Vergelijkbare foto's zijn geselecteerd. Eén foto per groep blijft behouden. Voeg alleen onnodige schermafbeeldingen of video's toe.";
+
+"cleanup.useSuggestions" = "Suggesties gebruiken";
+
+"cleanup.scan.title" = "Ruimte voor meer";
+
+"cleanup.scan.action" = "Vrij te maken ruimte zoeken";
+
+"cleanup.scan.hint" = "Bekijk vergelijkbare foto's, grote video's en schermafbeeldingen. De analyse verwijdert niets.";
+
+"quick.compress.title" = "Bewaren, maar kleiner";
+
+"quick.video" = "Video's comprimeren";
+
+"quick.image" = "Foto's comprimeren";
+
+"quick.compress.hint" = "Kies bestanden. Wij regelen de instellingen.";
+
+"quick.action" = "Comprimeren";
+
+"quick.ready" = "Instellingen staan klaar";
+
+"quick.video.detail" = "MP4 / HEVC · Oorspronkelijke resolutie · Lagere bitsnelheid.";
+
+"quick.image.detail" = "HEIC (anders JPEG) · 75% kwaliteit · Oorspronkelijke afmetingen · GPS verwijderen.";
+
+"quick.originals" = "Maakt nieuwe kopieën en bewaart originelen. Het resultaat kan groter zijn; vergelijk vóór vervangen.";
+
+"premium.free.summary" = "Gratis: media bekijken en verwijderen, video's converteren en converteren.";
+
+"premium.value.summary" = "Premium: categorieën samen opruimen, afbeeldingen en audio converteren, mappen ordenen en het uiterlijk aanpassen.";
+
+"quick.free" = "Gratis";

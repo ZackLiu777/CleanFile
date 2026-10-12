@@ -25,13 +25,13 @@
 "premium.feature.required" = "Tilgængelig med Premium";
 "premium.feature.unlock" = "Lås op med Premium";
 "premium.feature.media" = "Ryd op i medier";
-"premium.feature.videoConversion" = "Videokomprimering";
+"premium.feature.videoConversion" = "Videokonvertering";
 "premium.feature.storage" = "Ryd op i filer";
-"premium.feature.imageConversion" = "Billedkomprimering";
+"premium.feature.imageConversion" = "Billedkonvertering";
 "premium.feature.audioConversion" = "Lydkonvertering";
 "premium.feature.darkAppearance" = "Mørkt udseende";
 "premium.feature.customColors" = "Egne farver";
-"premium.feature.compression.title" = "Komprimer billeder og lyd";
+"premium.feature.compression.title" = "Konverter billeder og lyd";
 "premium.feature.compression.detail" = "Konverter billeder og lydfiler med justerbare indstillinger.";
 "premium.feature.appearance.title" = "Gør appen personlig";
 "premium.feature.appearance.detail" = "Lås mørkt udseende og egne app- og baggrundsfarver op.";
@@ -39,7 +39,7 @@
 
 "Photos" = "Fotos";
 "Storage" = "Opbevaring";
-"Compress" = "Komprimer";
+"Compress" = "Konverter";
 "storage.heading" = "Lagerdistribution";
 "Settings" = "Indstillinger";
 "Language" = "Sprog";
@@ -99,7 +99,6 @@
 "Videos" = "Videoer";
 "My Space" = "Mit rum";
 "System & Apps" = "System og apps";
-"Includes iOS, system data, and other app data." = "Inkluderer iOS, systemdata og andre appdata.";
 "Available" = "Tilgængelig";
 "%lld%% used · %@ of %@" = "%lld%% brugt · %@ af %@";
 "Images" = "Billeder";
@@ -149,7 +148,6 @@
 "Read-only" = "Skrivebeskyttet";
 "Screenshots" = "Skærmbilleder";
 "Live Photos" = "Live billeder";
-"Video Categories" = "Videokategorier";
 "%lld items" = "%lld genstande";
 "No Items" = "Ingen varer";
 "No media matched this category." = "Ingen medier matchede denne kategori.";
@@ -193,9 +191,7 @@
 "Press and hold to play" = "Tryk og hold for at afspille";
 "%lld selected" = "%lld valgt";
 "Estimated %@" = "Estimeret %@";
-"Media Actions" = "Medieaktioner";
 "Cleanup Recommendations" = "Oprydningsanbefalinger";
-"Media sizes are estimated without downloading original files." = "Mediestørrelser estimeres uden download af originale filer.";
 "Explore the folder hierarchy" = "Udforsk mappehierarkiet";
 "Tap a folder segment to drill down. Tap the center to go back." = "Tryk på et mappesegment for at se nærmere. Tryk på midten for at gå tilbage.";
 "%lld files" = "%lld filer";
@@ -304,9 +300,9 @@
 "Common Questions" = "Almindelige spørgsmål";
 "Confirm your selection" = "Bekræft dit valg";
 "Compression workspace" = "Kompression arbejdsområde";
-"Compress a file" = "Komprimer en fil";
-"Compress images, videos, and audio without changing the original file." = "Komprimer billeder, videoer og lyd uden at ændre den originale fil.";
-"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Compress importerer en arbejdskopi til appen. Rydning af komprimeringsarbejdsområdet fjerner app-administrerede kopier og output, så eksporter alt, hvad du vil beholde først.";
+"Compress a file" = "Konverter en fil";
+"Compress images, videos, and audio without changing the original file." = "Konverter billeder, videoer og lyd uden at ændre den originale fil.";
+"Compress imports a working copy into the app. Clearing the compression workspace removes app-managed copies and outputs, so export anything you want to keep first." = "Compress importerer en arbejdskopi til appen. Rydning af konverteringsarbejdsområdet fjerner app-administrerede kopier og output, så eksporter alt, hvad du vil beholde først.";
 "Compress keeps imported working copies and outputs inside app-managed storage. The original outside the app is not replaced. Clear the workspace only after exporting results you want to keep." = "Compress holder importerede arbejdskopier og output inde i app-administreret lager. Originalen uden for appen erstattes ikke. Ryd først arbejdsområdet efter eksport af resultater, du vil beholde.";
 "Deleted content may remain in Recently Deleted, and iOS storage totals can take time to recalculate. Check the relevant Recently Deleted location, then recheck iPhone Storage later." = "Slettet indhold forbliver muligvis i Slettet for nylig, og det kan tage tid at genberegne det samlede iOS-lager. Tjek den relevante placering for nyligt slettet, og tjek derefter iPhone-lagerplads igen senere.";
 "Deleted items move to Recently Deleted and may continue using storage until permanently removed. If iCloud Photos is enabled, deletion also syncs to your other devices." = "Slettede elementer flyttes til Slettet for nylig og kan fortsætte med at bruge lagerplads, indtil de fjernes permanent. Hvis iCloud Photos er aktiveret, synkroniseres sletning også med dine andre enheder.";
@@ -314,7 +310,7 @@
 "Deletion stays user controlled" = "Sletning forbliver brugerkontrolleret";
 "Device storage is not iCloud storage" = "Enhedslager er ikke iCloud-lager";
 "Do not install profiles, grant unknown computer access, or erase the iPhone for a promised one-tap cache cleanup. Back up important data before any system reset." = "Installer ikke profiler, giv ikke ukendt computeradgang, eller slet ikke iPhone for en lovet cache-oprydning med et enkelt tryk. Sikkerhedskopier vigtige data før enhver systemnulstilling.";
-"Does analysis or compression upload my files?" = "Uploader analyse eller komprimering mine filer?";
+"Does analysis or compression upload my files?" = "Uploader analyse eller konvertering mine filer?";
 "Explore the results" = "Udforsk resultaterne";
 "Files deleted from an authorized folder may not be recoverable. The app cannot promise that they will appear in Recently Deleted." = "Filer slettet fra en autoriseret mappe kan muligvis ikke gendannes. Appen kan ikke love, at de vises i Recent Deleted.";
 "Find the largest category" = "Find den største kategori";
@@ -329,7 +325,7 @@
 "Help" = "Hjælp";
 "How can we help?" = "Hvordan kan vi hjælpe?";
 "Import your files" = "Importer dine filer";
-"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "Importerede kopier og komprimerede output bruger plads inde i appen. Ryd afsluttet arbejde, når du ikke længere har brug for det, efter at have eksporteret ethvert resultat, du vil beholde.";
+"Imported copies and compressed outputs use space inside the app. Clear completed work when you no longer need it, after exporting any result you want to keep." = "Importerede kopier og konverterede output bruger plads inde i appen. Ryd afsluttet arbejde, når du ikke længere har brug for det, efter at have eksporteret ethvert resultat, du vil beholde.";
 "In Files, confirm whether an item is under On My iPhone, iCloud Drive, or another provider. The same action can have different recovery and sync behavior in each location." = "I Filer skal du bekræfte, om et element er under På min iPhone, iCloud Drive eller en anden udbyder. Den samme handling kan have forskellig gendannelses- og synkroniseringsadfærd på hver placering.";
 "In iPhone Storage, Offload App removes the app but keeps its documents and data. Delete App removes the app and its local data, so verify sync or backup before choosing it." = "I iPhone Storage fjerner Offload App appen, men beholder dens dokumenter og data. Slet app fjerner appen og dens lokale data, så bekræft synkronisering eller backup, før du vælger den.";
 "Install the latest iOS update, restart the iPhone, review Safari data and offline downloads, then let iPhone Storage recalculate. If an unusually large total persists, contact Apple Support." = "Installer den seneste iOS-opdatering, genstart iPhone, gennemgå Safari-data og offline-downloads, og lad derefter iPhone Storage genberegne. Hvis et usædvanligt stort beløb fortsætter, skal du kontakte Apple Support.";
@@ -343,12 +339,12 @@
 "Manage Apps & Downloads" = "Administrer apps og downloads";
 "Manage Files & iCloud Drive" = "Administrer filer og iCloud Drive";
 "Manage compression storage" = "Administrer kompressionslagring";
-"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "Medieanalyse, mappescanning og komprimering sker på denne enhed. Appen uploader ikke dine filer til disse funktioner.";
-"Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "Medier analyserer fotos og videoer, som du tillader gennem fotobiblioteket. Storage analyserer kun en mappe, du vælger. Komprimering reducerer størrelsen af ​​kopier, der importeres til appens private arbejdsområde.";
+"Media analysis, folder scanning, and compression happen on this device. The app does not upload your files for these features." = "Medieanalyse, mappescanning og konvertering sker på denne enhed. Appen uploader ikke dine filer til disse funktioner.";
+"Media analyzes photos and videos that you allow through the Photos library. Storage analyzes only a folder you choose. Compress reduces the size of copies imported into the app's private workspace." = "Medier analyserer fotos og videoer, som du tillader gennem fotobiblioteket. Storage analyserer kun en mappe, du vælger. Konvertering reducerer størrelsen af ​​kopier, der importeres til appens private arbejdsområde.";
 "Media needs Photos access to display and analyze library items. You can choose Full Access, Limited Access, or no access, and change the choice later in System Settings." = "Medier har brug for fotoadgang for at vise og analysere bibliotekselementer. Du kan vælge Fuld adgang, Begrænset adgang eller ingen adgang og ændre valget senere i Systemindstillinger.";
 "Meet the App" = "Mød appen";
-"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "Nej. Den kan analysere de Fotos-elementer, du godkender, den mappe, du vælger, og dens eget komprimeringsarbejdsområde. Andre apps og beskyttet systemlager forbliver private.";
-"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "Nej. Medieanalyse, mappeanalyse og komprimering kører på denne enhed. Apple-tjenester eller filudbydere kan synkronisere deres eget indhold i henhold til dine eksisterende indstillinger.";
+"No. It can analyze the Photos items you authorize, the folder you choose, and its own compression workspace. Other apps and protected system storage remain private." = "Nej. Den kan analysere de Fotos-elementer, du godkender, den mappe, du vælger, og dens eget konverteringsarbejdsområde. Andre apps og beskyttet systemlager forbliver private.";
+"No. Media analysis, folder analysis, and compression run on this device. Apple services or file providers may sync their own content according to your existing settings." = "Nej. Medieanalyse, mappeanalyse og konvertering kører på denne enhed. Apple-tjenester eller filudbydere kan synkronisere deres eget indhold i henhold til dine eksisterende indstillinger.";
 "Not necessarily. They are visually related candidates and can include different frames, edits, or resolutions. Always compare them before selecting one to remove." = "Ikke nødvendigvis. De er visuelt relaterede kandidater og kan omfatte forskellige rammer, redigeringer eller opløsninger. Sammenlign dem altid, før du vælger en, der skal fjernes.";
 "Offload or delete" = "Afload eller slet";
 "Only the items selected in the system permission sheet are available. Counts, groups, and recommendations cannot include the rest of the library." = "Kun de elementer, der er valgt i systemtilladelsesarket, er tilgængelige. Optællinger, grupper og anbefalinger kan ikke omfatte resten af ​​biblioteket.";
@@ -370,7 +366,7 @@
 "Review before deleting" = "Gennemgå før sletning";
 "Review large videos, screenshots, and similar photos safely." = "Gennemgå store videoer, skærmbilleder og lignende billeder sikkert.";
 "Review long videos, 4K videos, screen recordings, and large screenshots first. Similar-photo groups can help you compare bursts or repeated shots, but you should choose the keeper yourself." = "Gennemgå først lange videoer, 4K-videoer, skærmoptagelser og store skærmbilleder. Lignende fotogrupper kan hjælpe dig med at sammenligne serier eller gentagne billeder, men du bør selv vælge målmanden.";
-"Review compression settings" = "Gennemgå komprimeringsindstillinger";
+"Review compression settings" = "Gennemgå konverteringsindstillinger";
 "Review photos, similar items, screenshots, Live Photos, and videos." = "Gennemgå fotos, lignende elementer, skærmbilleder, Live Photos og videoer.";
 "Safari website data" = "Safari hjemmeside data";
 "Safe steps to try" = "Sikre trin at prøve";
@@ -431,7 +427,7 @@
 "Display Options" = "Visningsindstillinger";
 "Interface Animations" = "Interface animationer";
 "Show Media Dates" = "Vis mediedatoer";
-"Control dashboard animations, compression card animations, and date headings in media detail grids." = "Styr dashboardanimationer, komprimeringskortanimationer og datooverskrifter i mediedetaljegitter.";
+"Control dashboard animations, compression card animations, and date headings in media detail grids." = "Styr dashboardanimationer, konverteringskortanimationer og datooverskrifter i mediedetaljegitter.";
 "Calculating size…" = "Beregner størrelse...";
 "Size unavailable" = "Størrelse er ikke tilgængelig";
 "Quick Cleanup" = "Hurtig oprydning";
@@ -450,7 +446,7 @@
 "Selected" = "Valgt";
 "Not selected" = "Ikke valgt";
 "Selects or deselects every suggested item in this category." = "Vælger eller fravælger hvert foreslået element i denne kategori.";
-"%@ moved to Recently Deleted · ~%@" = "%@ flyttet til Slettet for nylig · ~%@";
+"%@ moved to Recently Deleted · %@" = "%@ flyttet til Slettet for nylig · %@";
 "Allow photo access, then wait for the library to load." = "Tillad billedadgang, og vent derefter på, at biblioteket indlæses.";
 "Analyze the available library and let the app group useful cleanup candidates." = "Analyser det tilgængelige bibliotek, og lad appen gruppere nyttige oprydningskandidater.";
 "Preview items at full size and compare similar photos carefully." = "Forhåndsvis elementer i fuld størrelse, og sammenlign lignende billeder omhyggeligt.";
@@ -459,11 +455,11 @@
 "The app reads file metadata and reports inaccessible or unavailable cloud items separately." = "Appen læser filmetadata og rapporterer utilgængelige eller utilgængelige skyelementer separat.";
 "Use the folder map, categories, and detailed lists to find large files." = "Brug mappekortet, kategorierne og de detaljerede lister til at finde store filer.";
 "Confirm the file and location, then delete only content you no longer need." = "Bekræft filen og placeringen, og slet derefter kun indhold, du ikke længere har brug for.";
-"Open image, video, or audio compression. The audio tool can also extract a track from video." = "Åbn billed-, video- eller lydkomprimering. Lydværktøjet kan også udtrække et spor fra video.";
+"Open image, video, or audio compression. The audio tool can also extract a track from video." = "Åbn billed-, video- eller lydkonvertering. Lydværktøjet kan også udtrække et spor fra video.";
 "Select supported items from Photos or Files and wait for the working copies to finish importing." = "Vælg understøttede elementer fra Fotos eller Filer, og vent på, at arbejdskopierne er færdige med at importere.";
 "Choose the format and adjust the available size, quality, bitrate, or metadata options." = "Vælg formatet, og juster de tilgængelige muligheder for størrelse, kvalitet, bithastighed eller metadata.";
 "Keep the task open until each item completes or reports an error." = "Hold opgaven åben, indtil hvert element fuldfører eller rapporterer en fejl.";
-"Use the share action to save or send the compressed output before clearing the workspace." = "Brug delehandlingen til at gemme eller sende det komprimerede output, før du rydder arbejdsområdet.";
+"Use the share action to save or send the compressed output before clearing the workspace." = "Brug delehandlingen til at gemme eller sende det konverterede output, før du rydder arbejdsområdet.";
 "MP3 audio output" = "MP3 lydudgang";
 "In Audio Compression, MP3 is the default widely compatible format. MP3 and AAC support 96, 128, 192, 256, and 320 kbps. M4A (ALAC) and CAF ALAC use lossless compression, while WAV, AIFF, and CAF PCM store uncompressed audio and are usually larger. Lossless conversion preserves the quality still present in the source, but cannot restore detail already removed from MP3 or AAC. Audio inputs include M4A/ALAC, AAC, MP3, FLAC, WAV, AIFF, and CAF. You can also choose MOV, MP4, or M4V videos from Files or Photos and extract their audio tracks." = "I lydkomprimering er MP3 det almindeligt kompatible format. MP3 og AAC understøtter 96, 128, 192, 256 og 320 kbps. M4A (ALAC) og CAF ALAC bruger tabsfri komprimering, mens WAV, AIFF og CAF PCM gemmer ukomprimeret lyd og normalt er større. Tabsfri konvertering bevarer den kvalitet, der stadig findes i kilden, men kan ikke gendanne detaljer, der allerede er fjernet fra MP3 eller AAC. Lydindgange inkluderer M4A/ALAC, AAC, MP3, FLAC, WAV, AIFF og CAF. Du kan også vælge MOV-, MP4- eller M4V-videoer fra Filer eller Billeder og udtrække deres lydspor.";
 "Go to Settings > General > iPhone Storage and wait for the category chart to finish calculating." = "Gå til Indstillinger > Generelt > iPhone-opbevaring, og vent på, at kategoridiagrammet afslutter beregningen.";
@@ -493,7 +489,7 @@
 "intro.media.detail" = "Se, hvor meget plads fotos, videoer og andet indhold bruger, og hvor meget der er ledigt. Tallene er eksempler.";
 "intro.files.title" = "Se, hvad der fylder";
 "intro.files.detail" = "Gennemse valgte mapper, og find hurtigt store filer.";
-"intro.compress.title" = "Se, hvordan komprimering virker";
+"intro.compress.title" = "Se, hvordan konvertering virker";
 "intro.compress.detail" = "Se mulighederne for billeder, videoer og lyd samt et eksempel på forløbet. Statuslinjen er kun en demonstration.";
 "intro.appearance.title" = "Gør appen til din egen";
 "intro.appearance.detail" = "Vælg de farver og det udseende, der passer dig.";
@@ -502,12 +498,12 @@
 "intro.demo" = "Eksempel";
 "premium.continueTemporarily" = "Fortsæt indtil videre";
 "premium.title" = "Mere plads til det, der betyder noget";
-"premium.subtitle" = "Medier, filer og komprimering på ét sted.";
+"premium.subtitle" = "Medier, filer og konvertering på ét sted.";
 "premium.media.title" = "Organiser dine medier";
 "premium.media.detail" = "Gennemgå billeder og videoer, og vælg, hvad du vil fjerne.";
 "premium.storage.title" = "Ryd op i filer";
 "premium.storage.detail" = "Find unødvendige filer i mapper, du godkender.";
-"premium.compression.title" = "Komprimer medier";
+"premium.compression.title" = "Konverter medier";
 "premium.compression.detail" = "Reducer billed-, video- og lydfilstørrelser med justerbare indstillinger.";
 "premium.privacy" = "Medie- og filbehandling forbliver på denne enhed.";
 "premium.plans.title" = "Vælg din plan";
@@ -560,3 +556,80 @@
 "Video preview" = "Videoforhåndsvisning";
 "Photo preview" = "Fotoforhåndsvisning";
 "Cancel" = "Annuller";
+
+"Convert" = "Konvertér";
+
+"cleanup.space.title" = "Plads, der kan ryddes";
+
+
+"cleanup.action" = "Hurtig oprydning";
+
+"cleanup.review.hint" = "Lignende fotos er valgt. Ét foto pr. gruppe bevares. Tilføj kun skærmbilleder eller videoer, du ikke længere behøver.";
+
+"cleanup.useSuggestions" = "Brug forslag";
+
+"cleanup.scan.title" = "Plads til flere minder";
+
+"cleanup.scan.action" = "Find plads at frigøre";
+
+"cleanup.scan.hint" = "Gennemgå lignende fotos, store videoer og skærmbilleder. Analysen sletter intet.";
+
+"quick.compress.title" = "Bevar minderne, reducer størrelsen";
+
+"quick.video" = "Komprimér videoer";
+
+"quick.image" = "Komprimér fotos";
+
+"quick.compress.hint" = "Vælg filer. Vi klarer indstillingerne.";
+
+"quick.action" = "Komprimér";
+
+"quick.ready" = "Indstillingerne er klar";
+
+"quick.video.detail" = "MP4 / HEVC · Oprindelig opløsning · Lavere bitrate.";
+
+"quick.image.detail" = "HEIC (ellers JPEG) · 75 % kvalitet · Oprindelig størrelse · Fjern GPS.";
+
+"quick.originals" = "Opretter nye kopier og bevarer originaler. Resultatet kan være større; sammenlign før udskiftning.";
+
+"premium.free.summary" = "Gratis: gennemgå og slet medier, komprimér og konvertér videoer.";
+
+"premium.value.summary" = "Premium: ryd op i flere kategorier, konvertér billeder og lyd, organisér mapper og tilpas udseendet.";
+
+"quick.free" = "Gratis";
+
+"Convert Images" = "Billeder";
+
+"Convert Videos" = "Videoer";
+
+"Choose what to convert. Originals will remain in Photos." = "Konvertér";
+
+/* Media category batch compression */
+"compression.explanation" = "iCloud-originaler skal muligvis downloades.";
+"compression.empty" = "Ingen medier i denne kategori";
+"compression.saved" = "Original bevaret · prøv igen";
+"compression.noReduction" = "Allerede lille · ingen kopi gemt";
+"compression.cancelling" = "Annullerer…";
+"compression.summary" = "%d gemt · %d mislykkedes";
+"compression.action" = "Komprimer og erstat %d emner";
+"compression.error.live" = "Live Photo-parringen kunne ikke bevares. Originalen er uændret.";
+"compression.error.image" = "Hurtig komprimering understøtter ikke animerede fotos. Originalen er uændret.";
+"compression.cardDetail" = "%d emner · %@";
+
+"compression.replaced" = "Original erstattet";
+
+"compression.replacing" = "Erstatter originaler…";
+
+"compression.error.verify" = "Den komprimerede kopi kunne ikke verificeres. Originalen blev ikke slettet.";
+
+"compression.error.replace" = "Komprimerede kopier er gemt. Originalerne blev ikke slettet. Prøv igen.";
+
+"compression.selection.savings" = "Forventet besparelse: %@";
+
+"compression.action.short" = "Komprimer";
+
+"compression.confirm.title" = "Start komprimering?";
+
+"compression.confirm.message" = "Komprimer %d valgte emner? Når mindre kopier er gemt og kontrolleret, slettes originalerne fra Fotos.";
+
+"compression.confirm.action" = "Bekræft";

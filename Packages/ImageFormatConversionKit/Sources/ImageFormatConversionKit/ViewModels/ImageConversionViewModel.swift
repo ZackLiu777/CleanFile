@@ -369,7 +369,11 @@ public final class ImageConversionViewModel {
     }
 
     /// 启动 `startConversion` 对应流程，并初始化本轮任务需要的状态。
-    public func startConversion(usagePolicy: ConversionUsagePolicy = .unrestricted) {
+    public func startQuickCompression(usagePolicy: ConversionUsagePolicy = .unrestricted) {
+        startConversion(usagePolicy: usagePolicy, usingQuickPreset: true)
+    }
+
+    public func startConversion(usagePolicy: ConversionUsagePolicy = .unrestricted, usingQuickPreset: Bool = false) {
         guard canStartConversion else { return }
         let count = items.filter(Self.isConvertible).count
         guard let permit = usagePolicy.reserve(.images, count) else {
@@ -378,7 +382,7 @@ public final class ImageConversionViewModel {
         }
         // Lock synchronously, before the Task is scheduled, to prevent duplicate batches.
         isConverting = true
-        conversionTask = Task { await runConversion(permit: permit) }
+        conversionTask = Task { await runConversion(permit: permit, usingQuickPreset: usingQuickPreset) }
     }
 
     /// 取消 `cancelConversion` 对应的进行中任务，并收敛到可继续操作的状态。
@@ -392,7 +396,7 @@ public final class ImageConversionViewModel {
     }
 
     /// 封装 `runConversion` 对应的局部行为，供当前类型在统一入口下复用。
-    private func runConversion(permit: ConversionUsagePermit) async {
+    private func runConversion(permit: ConversionUsagePermit, usingQuickPreset: Bool) async {
         defer { permit.finish() }
         isConverting = true
         notice = nil
@@ -411,10 +415,10 @@ public final class ImageConversionViewModel {
             return ImageConversionRequest(
                 sourceURL: item.sourceURL,
                 destinationDirectory: outputDirectory,
-                outputFormat: outputFormat,
-                quality: quality,
-                metadataPolicy: metadataPolicy,
-                resizePolicy: resizePreset.policy,
+                outputFormat: usingQuickPreset ? (availableFormats.contains(.heic) ? .heic : .jpeg) : outputFormat,
+                quality: usingQuickPreset ? 0.5 : quality,
+                metadataPolicy: usingQuickPreset ? .removeGPS : metadataPolicy,
+                resizePolicy: usingQuickPreset ? ImageResizePreset.original.policy : resizePreset.policy,
                 flattenColor: flattenColor,
                 background: background,
                 collisionPolicy: .makeUnique

@@ -365,6 +365,24 @@ struct MediaModelTests {
         #expect(result.videoCount(in: .timeLapse) == 0)
     }
 
+    @Test("Cleanup review de-duplicates categories and protects keepers across categories")
+    func cleanupReviewProtectsKeepersAndCountsOnce() {
+        let result = MediaClassificationResult(
+            similarImageGroups: [SimilarImageGroup(
+                id: "group", items: [item("keeper"), item("extra")], suggestedKeeperID: "keeper"
+            )],
+            classifiedVideos: [],
+            screenshotIDs: ["keeper", "extra", "screenshot"],
+            livePhotoIDs: ["keeper", "extra", "live", "live"],
+            skippedImageCount: 0
+        )
+        #expect(result.suggestedCleanupIDs == ["extra"])
+        #expect(result.cleanupReviewIDs == ["extra", "screenshot", "live"])
+        #expect(!result.cleanupReviewIDs.contains("keeper"))
+        let updated = result.removingAssetIDs(["extra"])
+        #expect(updated.suggestedCleanupIDs.isEmpty)
+    }
+
     @Test("Removing one similar image drops a group that becomes a singleton")
     func removingImageDropsSingletonGroup() {
         let updated = makeResult().removingAssetIDs(["similar"])

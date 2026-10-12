@@ -254,6 +254,14 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
+    // Calibrate once for a whole category, rather than once for every visible item.
+    func estimatedByteCounts(for assetIDs: [String]) -> [String: Int64] {
+        let calibration = makeMediaSizeCalibration()
+        return Dictionary(uniqueKeysWithValues: assetIDs.compactMap { id in
+            assetsByIdentifier[id].map { (id, calibratedByteCount(for: $0, calibration: calibration)) }
+        })
+    }
+
     /// 封装 `displayName` 对应的局部行为，供当前类型在统一入口下复用。
     func displayName(for assetID: String) -> String {
         if let cachedName = displayNamesByIdentifier[assetID] {
@@ -707,14 +715,14 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    private static func calibrationDenominator(for asset: PHAsset) -> Double {
+    nonisolated static func calibrationDenominator(for asset: PHAsset) -> Double {
         if asset.mediaType == .video {
             return max(asset.duration, 1)
         }
         return Double(max(asset.pixelWidth, 1)) * Double(max(asset.pixelHeight, 1))
     }
 
-    private static func contentTypeIdentifier(for asset: PHAsset) -> String {
+    nonisolated static func contentTypeIdentifier(for asset: PHAsset) -> String {
         if #available(iOS 26.0, *) {
             return asset.contentType.identifier
         }
@@ -724,7 +732,7 @@ final class PhotoLibraryViewModel: ObservableObject {
             .first(where: { $0.type == resourceType })?.uniformTypeIdentifier ?? "public.data"
     }
 
-    private static func calibrationKey(for asset: PHAsset) -> String {
+    nonisolated static func calibrationKey(for asset: PHAsset) -> String {
         let format = contentTypeIdentifier(for: asset).lowercased()
         if asset.mediaType == .video {
             let longestEdge = max(asset.pixelWidth, asset.pixelHeight)
@@ -926,7 +934,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     }
 
     /// 封装 `estimatedByteCount` 对应的局部行为，供当前类型在统一入口下复用。
-    private static func fallbackEstimatedByteCount(for asset: PHAsset) -> Int64 {
+    nonisolated static func fallbackEstimatedByteCount(for asset: PHAsset) -> Int64 {
         let pixelCount = Double(max(asset.pixelWidth, 1)) * Double(max(asset.pixelHeight, 1))
         if asset.mediaType == .video {
             let bitsPerSecond: Double

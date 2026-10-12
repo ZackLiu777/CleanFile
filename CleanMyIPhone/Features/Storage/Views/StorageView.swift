@@ -13,12 +13,14 @@ import UniformTypeIdentifiers
 
 /// 定义 `StorageView` 的值语义数据与相关行为。
 struct StorageView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var themeSettings: ThemeSettings
     @EnvironmentObject private var accessStore: PremiumFeatureAccessStore
     @ObservedObject var viewModel: FileScannerViewModel
     let isTabActive: Bool
+    var showsCloseButton = false
     @State private var isImporterPresented = false
     @State private var isSourceImporterPresented = false
     @State private var sunburstRevealProgress = 0.0
@@ -86,6 +88,12 @@ struct StorageView: View {
                 .appSoftScrollEdge()
             }
             .toolbar {
+                if showsCloseButton {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Done") { dismiss() }
+                            .accessibilityIdentifier("storage.close")
+                    }
+                }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button {
                         chooseSources()

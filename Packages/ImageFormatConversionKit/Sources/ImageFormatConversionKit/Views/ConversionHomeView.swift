@@ -7,12 +7,24 @@
 
 import SwiftUI
 
+public struct QuickCompressionRequest: Identifiable, Equatable {
+    public let id = UUID()
+    public let category: ConversionUsageCategory
+
+    public init(category: ConversionUsageCategory) { self.category = category }
+}
+
 @MainActor
 public struct ConversionHomeView: View {
+    private let closeButtonTitle: String
+    private let onClose: (() -> Void)?
     private let theme: ConversionTheme
     private let isTabActive: Bool
     private let animationsEnabled: Bool
     private let onDetailVisibilityChanged: (Bool) -> Void
+    private let quickCompressionRequest: QuickCompressionRequest?
+    @State private var handledQuickRequestID: UUID?
+    @State private var isQuickCompression = false
     private let shareImport: ShareImportRequest?
     private let onShareImportComplete: (UUID, Set<UUID>) -> Void
     @State private var recentRecords: [ConversionHomeKind: ConversionHomeRecord] = [:]
@@ -40,13 +52,19 @@ public struct ConversionHomeView: View {
         isTabActive: Bool = true,
         animationsEnabled: Bool = true,
         onDetailVisibilityChanged: @escaping (Bool) -> Void = { _ in },
+        quickCompressionRequest: QuickCompressionRequest? = nil,
         shareImport: ShareImportRequest? = nil,
-        onShareImportComplete: @escaping (UUID, Set<UUID>) -> Void = { _, _ in }
+        onShareImportComplete: @escaping (UUID, Set<UUID>) -> Void = { _, _ in },
+        closeButtonTitle: String = "Close",
+        onClose: (() -> Void)? = nil
     ) {
+        self.closeButtonTitle = closeButtonTitle
+        self.onClose = onClose
         self.theme = theme
         self.isTabActive = isTabActive
         self.animationsEnabled = animationsEnabled
         self.onDetailVisibilityChanged = onDetailVisibilityChanged
+        self.quickCompressionRequest = quickCompressionRequest
         self.shareImport = shareImport
         self.onShareImportComplete = onShareImportComplete
         _imageViewModel = State(initialValue: ImageConversionViewModel())
@@ -76,6 +94,7 @@ public struct ConversionHomeView: View {
                             id: \.element
                         ) { index, kind in
                             Button {
+                                isQuickCompression = false
                                 if usagePolicy.allows(kind.usageCategory) {
                                     navigationPath.append(kind)
                                 } else {
@@ -133,6 +152,13 @@ public struct ConversionHomeView: View {
             .background(converterBackground)
             .toolbar(.visible, for: .navigationBar)
             .toolbar {
+                if let onClose {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: onClose) { Image(systemName: "xmark") }
+                            .accessibilityLabel(closeButtonTitle)
+                            .accessibilityIdentifier("conversion.close")
+                    }
+                }
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         isGuidePresented = true
@@ -163,6 +189,7 @@ public struct ConversionHomeView: View {
                 if usagePolicy.allows(kind.usageCategory) {
                     ConversionToolDestination(
                         kind: kind,
+                        isQuickCompression: isQuickCompression,
                         imageViewModel: imageViewModel,
                         videoViewModel: videoViewModel,
                         audioViewModel: audioViewModel,
@@ -189,11 +216,13 @@ public struct ConversionHomeView: View {
                 }
                 loadRecentRecords()
                 receiveSharedFilesIfNeeded()
+                receiveQuickCompressionIfNeeded()
             }
             .onChange(of: isTabActive) { _, isActive in
                 if isActive {
                     playEntrance()
                     receiveSharedFilesIfNeeded()
+                    receiveQuickCompressionIfNeeded()
                 } else {
                     cancelAndResetEntrance()
                 }
@@ -201,15 +230,19 @@ public struct ConversionHomeView: View {
             .onChange(of: navigationPath) { _, newPath in
                 onDetailVisibilityChanged(!newPath.isEmpty)
             }
+            .onChange(of: quickCompressionRequest?.id) { _, _ in
+                receiveQuickCompressionIfNeeded()
+            }
             .onChange(of: shareImport?.id) { _, _ in
                 receiveSharedFilesIfNeeded()
+                receiveQuickCompressionIfNeeded()
             }
         }
         .sheet(item: $lockedCategory) { category in
             usagePolicy.upgradeContent(category)
         }
         .onChange(of: usagePolicy.allows(.images)) { _, allowed in
-            if allowed { receiveSharedFilesIfNeeded() }
+            if allowed { receiveSharedFilesIfNeeded(); receiveQuickCompressionIfNeeded() }
         }
         .sheet(isPresented: $isGuidePresented) {
             ConversionGuideView()
@@ -239,6 +272,16 @@ public struct ConversionHomeView: View {
         .foregroundStyle(theme.textPrimary)
     }
 
+    private func receiveQuickCompressionIfNeeded() {
+        guard isTabActive, let request = quickCompressionRequest,
+              request.id != handledQuickRequestID else { return }
+        let kind: ConversionHomeKind = request.category == .video ? .video : .image
+        // Opening a shortcut does not start a batch or change professional settings.
+        handledQuickRequestID = request.id
+        isQuickCompression = true
+        navigationPath = [kind]
+    }
+
     private func receiveSharedFilesIfNeeded() {
         guard isTabActive, let request = shareImport,
               handledShareRequestID != request.id else { return }
@@ -247,6 +290,7 @@ public struct ConversionHomeView: View {
             lockedCategory = category
             return
         }
+        isQuickCompression = false
         handledShareRequestID = request.id
         navigationPath = [request.kind == .image ? .image : .video]
         Task {
@@ -407,8 +451,8 @@ private enum ConversionMotion {
 }
 
 private enum ConversionHomeKind: String, CaseIterable, Identifiable, Hashable, Sendable {
-    case image
     case video
+    case image
     case audio
 
     var id: Self {
@@ -736,6 +780,7 @@ private struct ConversionHomeStaggeredAppear: ViewModifier {
 private struct ConversionToolDestination: View {
     @Environment(\.conversionTheme) private var theme
     let kind: ConversionHomeKind
+    let isQuickCompression: Bool
     let imageViewModel: ImageConversionViewModel
     let videoViewModel: VideoConversionViewModel
     let audioViewModel: AudioConversionViewModel
@@ -749,12 +794,14 @@ private struct ConversionToolDestination: View {
             case .image:
                 ImageConversionContentView(
                     viewModel: imageViewModel,
-                    importSession: imageImportSession
+                    importSession: imageImportSession,
+                    isQuickCompression: isQuickCompression
                 )
             case .video:
                 VideoConversionView(
                     viewModel: videoViewModel,
-                    importSession: videoImportSession
+                    importSession: videoImportSession,
+                    isQuickCompression: isQuickCompression
                 )
             case .audio:
                 AudioConversionView(
@@ -764,7 +811,7 @@ private struct ConversionToolDestination: View {
             }
         }
         .background(converterBackground)
-        .navigationTitle(kind.title)
+        .navigationTitle(isQuickCompression ? L10n.string(kind == .video ? "quick.video" : "quick.image") : kind.title)
         .navigationBarTitleDisplayMode(.inline)
     }
 
