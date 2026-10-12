@@ -87,7 +87,8 @@ public struct ConversionHomeView: View {
                     .padding(.top, 12)
                     .padding(.bottom, 12)
 
-                ScrollView(.vertical, showsIndicators: false) {
+                GeometryReader { geometry in
+                    ScrollView(.vertical, showsIndicators: false) {
                     LazyVStack(spacing: 14) {
                         ForEach(
                             Array(ConversionHomeKind.allCases.enumerated()),
@@ -103,7 +104,8 @@ public struct ConversionHomeView: View {
                             } label: {
                                 ConversionHomeCard(
                                     kind: kind,
-                                    recentRecord: recentRecords[kind]
+                                    recentRecord: recentRecords[kind],
+                                    minimumHeight: min(200, max(130, (min(geometry.size.width, 700) - 8) / 8))
                                 )
                                 .conversionMatchedTransitionSource(
                                     id: kind,
@@ -148,6 +150,7 @@ public struct ConversionHomeView: View {
                     .frame(maxWidth: .infinity)
                 }
                 .converterSoftScrollEdge()
+                }
             }
             .background(converterBackground)
             .toolbar(.visible, for: .navigationBar)
@@ -603,6 +606,7 @@ private struct ConversionHomeCard: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let kind: ConversionHomeKind
     let recentRecord: ConversionHomeRecord?
+    var minimumHeight: CGFloat = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -621,7 +625,8 @@ private struct ConversionHomeCard: View {
                     Text(kind.detail)
                         .appTypeface(.footnote, size: 13, relativeTo: .footnote, weight: .regular)
                         .foregroundStyle(theme.textSecondary)
-                        .lineLimit(2)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
                 }
 
                 Spacer(minLength: 6)
@@ -679,6 +684,7 @@ private struct ConversionHomeCard: View {
         .padding(18)
         .frame(
             maxWidth: .infinity,
+            minHeight: minimumHeight,
             alignment: .leading
         )
         .converterCard(cornerRadius: 24)

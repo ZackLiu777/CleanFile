@@ -2,13 +2,13 @@
 "converter.heading" = "Umbreyta miðlum";
 "conversion.home.image.title" = "Umbreyta myndum";
 "conversion.home.image.detail" = "JPG, PNG, HEIC og fleiri. Stilltu myndgæði og stærð.";
-"conversion.home.image.tagline" = "JPG, PNG, HEIC og fleiri. Stilltu myndgæði og stærð.";
+"conversion.home.image.tagline" = "Umbreyting · HEIC formats · Remove GPS";
 "conversion.home.video.title" = "Umbreyta myndskeiðum";
 "conversion.home.video.detail" = "MP4, MOV, M4V. Veldu kóðun, bitahraða og upplausn.";
-"conversion.home.video.tagline" = "MP4, MOV, M4V. Veldu kóðun, bitahraða og upplausn.";
+"conversion.home.video.tagline" = "Umbreyting · MP4 / MOV · Upplausn";
 "conversion.home.audio.title" = "Umbreyta hljóði";
 "conversion.home.audio.detail" = "MP3, AAC, WAV og fleiri. Stilltu bitahraða eða dragðu hljóð úr myndskeiði.";
-"conversion.home.audio.tagline" = "MP3, AAC, WAV og fleiri. Stilltu bitahraða eða dragðu hljóð úr myndskeiði.";
+"conversion.home.audio.tagline" = "Umbreyting · MP3 / AAC / WAV · Útdráttur úr myndbandi";
 "conversion.home.history.summary" = "%@ · Umbreytaðar %ld skrár";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "Framleiðsla er %@ minni";

@@ -2,13 +2,13 @@
 "converter.heading" = "Konvertera medier";
 "conversion.home.image.title" = "Konvertera bilder";
 "conversion.home.image.detail" = "JPG, PNG, HEIC med flera. Anpassa bildkvalitet och mått.";
-"conversion.home.image.tagline" = "JPG, PNG, HEIC med flera. Anpassa bildkvalitet och mått.";
+"conversion.home.image.tagline" = "Konvertering · HEIC-format · Ta bort GPS";
 "conversion.home.video.title" = "Konvertera videor";
 "conversion.home.video.detail" = "MP4, MOV, M4V. Välj kodek, bithastighet och upplösning.";
-"conversion.home.video.tagline" = "MP4, MOV, M4V. Välj kodek, bithastighet och upplösning.";
+"conversion.home.video.tagline" = "Konvertering · MP4 / MOV · Upplösning";
 "conversion.home.audio.title" = "Konvertera ljud";
 "conversion.home.audio.detail" = "MP3, AAC, WAV med flera. Anpassa bithastighet eller extrahera ljud från video.";
-"conversion.home.audio.tagline" = "MP3, AAC, WAV med flera. Anpassa bithastighet eller extrahera ljud från video.";
+"conversion.home.audio.tagline" = "Konvertering · MP3 / AAC / WAV · Utdrag från video";
 "conversion.home.history.summary" = "%@ · Konverterade %ld-filer";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "Utdata är %@ mindre";

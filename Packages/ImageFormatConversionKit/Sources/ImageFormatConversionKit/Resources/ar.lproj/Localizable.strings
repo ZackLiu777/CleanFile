@@ -2,13 +2,13 @@
 "converter.heading" = "تحويل الوسائط";
 "conversion.home.image.title" = "تحويل الصور";
 "conversion.home.image.detail" = "JPG وPNG وHEIC وغيرها. اضبط جودة الصور وأبعادها.";
-"conversion.home.image.tagline" = "JPG وPNG وHEIC وغيرها. اضبط جودة الصور وأبعادها.";
+"conversion.home.image.tagline" = "تحويل · تنسيقات HEIC · إزالة GPS";
 "conversion.home.video.title" = "تحويل الفيديو";
 "conversion.home.video.detail" = "MP4 وMOV وM4V. اختر الترميز ومعدل البت والدقة.";
-"conversion.home.video.tagline" = "MP4 وMOV وM4V. اختر الترميز ومعدل البت والدقة.";
+"conversion.home.video.tagline" = "تحويل · MP4 / MOV · الدقة";
 "conversion.home.audio.title" = "تحويل الصوت";
 "conversion.home.audio.detail" = "MP3 وAAC وWAV وغيرها. اضبط معدل البت أو استخرج الصوت من الفيديو.";
-"conversion.home.audio.tagline" = "MP3 وAAC وWAV وغيرها. اضبط معدل البت أو استخرج الصوت من الفيديو.";
+"conversion.home.audio.tagline" = "تحويل · MP3 / AAC / WAV · استخراج من الفيديو";
 "conversion.home.history.summary" = "%@ · ملفات %ld المحوّلة";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "الإخراج أصغر %@";

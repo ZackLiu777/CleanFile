@@ -2,13 +2,13 @@
 "converter.heading" = "轉換媒體";
 "conversion.home.image.title" = "轉換圖片";
 "conversion.home.image.detail" = "JPG、PNG、HEIC 等格式，可調整圖片品質和尺寸。";
-"conversion.home.image.tagline" = "JPG、PNG、HEIC 等格式，可調整圖片品質和尺寸。";
+"conversion.home.image.tagline" = "轉換 · HEIC 格式 · 移除 GPS";
 "conversion.home.video.title" = "轉換影片";
 "conversion.home.video.detail" = "MP4、MOV、M4V，可選擇編碼、位元率和解析度。";
-"conversion.home.video.tagline" = "MP4、MOV、M4V，可選擇編碼、位元率和解析度。";
+"conversion.home.video.tagline" = "轉換 · MP4 / MOV · 解析度";
 "conversion.home.audio.title" = "轉換音訊";
 "conversion.home.audio.detail" = "MP3、AAC、WAV 等格式，可調整位元率或擷取影片中的音訊。";
-"conversion.home.audio.tagline" = "MP3、AAC、WAV 等格式，可調整位元率或擷取影片中的音訊。";
+"conversion.home.audio.tagline" = "轉換 · MP3 / AAC / WAV · 從影片擷取音訊";
 "conversion.home.history.summary" = "%@ · 轉換過 %ld 個檔案";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "輸出縮小 %@";

@@ -2,13 +2,13 @@
 "converter.heading" = "转换媒体";
 "conversion.home.image.title" = "转换图片";
 "conversion.home.image.detail" = "JPG、PNG、HEIC 等格式，可调整图片质量和尺寸。";
-"conversion.home.image.tagline" = "JPG、PNG、HEIC 等格式，可调整图片质量和尺寸。";
+"conversion.home.image.tagline" = "转换 · HEIC 格式 · 去 GPS";
 "conversion.home.video.title" = "转换视频";
 "conversion.home.video.detail" = "MP4、MOV、M4V，可选择编码、码率和分辨率。";
-"conversion.home.video.tagline" = "MP4、MOV、M4V，可选择编码、码率和分辨率。";
+"conversion.home.video.tagline" = "转换 · MP4 / MOV · 分辨率";
 "conversion.home.audio.title" = "转换音频";
 "conversion.home.audio.detail" = "MP3、AAC、WAV 等格式，可调整码率或提取视频中的音频。";
-"conversion.home.audio.tagline" = "MP3、AAC、WAV 等格式，可调整码率或提取视频中的音频。";
+"conversion.home.audio.tagline" = "转换 · MP3 / AAC / WAV · 从视频提取音频";
 "conversion.home.history.summary" = "%@ · 转换过 %ld 个文件";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "输出缩小 %@";

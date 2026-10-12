@@ -2,13 +2,13 @@
 "converter.heading" = "Media converteren";
 "conversion.home.image.title" = "Afbeeldingen converteren";
 "conversion.home.image.detail" = "JPG, PNG, HEIC en meer. Pas kwaliteit en afmetingen aan.";
-"conversion.home.image.tagline" = "JPG, PNG, HEIC en meer. Pas kwaliteit en afmetingen aan.";
+"conversion.home.image.tagline" = "Conversie · HEIC-formaten · GPS verwijderen";
 "conversion.home.video.title" = "Video’s converteren";
 "conversion.home.video.detail" = "MP4, MOV, M4V. Kies codec, bitrate en resolutie.";
-"conversion.home.video.tagline" = "MP4, MOV, M4V. Kies codec, bitrate en resolutie.";
+"conversion.home.video.tagline" = "Conversie · MP4 / MOV · Resolutie";
 "conversion.home.audio.title" = "Audio converteren";
 "conversion.home.audio.detail" = "MP3, AAC, WAV en meer. Pas bitrate aan of haal audio uit video.";
-"conversion.home.audio.tagline" = "MP3, AAC, WAV en meer. Pas bitrate aan of haal audio uit video.";
+"conversion.home.audio.tagline" = "Conversie · MP3 / AAC / WAV · Uittreksel uit video";
 "conversion.home.history.summary" = "%@ · Gecomprimeerde %ld bestanden";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "De uitvoer is %@ kleiner";

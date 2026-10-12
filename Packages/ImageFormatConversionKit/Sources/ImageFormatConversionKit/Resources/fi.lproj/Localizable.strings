@@ -2,13 +2,13 @@
 "converter.heading" = "Muunna mediaa";
 "conversion.home.image.title" = "Muunna kuvia";
 "conversion.home.image.detail" = "JPG, PNG, HEIC ja muut. Säädä kuvan laatua ja mittoja.";
-"conversion.home.image.tagline" = "JPG, PNG, HEIC ja muut. Säädä kuvan laatua ja mittoja.";
+"conversion.home.image.tagline" = "Muunnos · HEIC-muodot · Poista GPS";
 "conversion.home.video.title" = "Muunna videoita";
 "conversion.home.video.detail" = "MP4, MOV, M4V. Valitse koodekki, bittinopeus ja tarkkuus.";
-"conversion.home.video.tagline" = "MP4, MOV, M4V. Valitse koodekki, bittinopeus ja tarkkuus.";
+"conversion.home.video.tagline" = "Muunnos · MP4 / MOV · Tarkkuus";
 "conversion.home.audio.title" = "Muunna ääntä";
 "conversion.home.audio.detail" = "MP3, AAC, WAV ja muut. Säädä bittinopeutta tai poimi ääni videosta.";
-"conversion.home.audio.tagline" = "MP3, AAC, WAV ja muut. Säädä bittinopeutta tai poimi ääni videosta.";
+"conversion.home.audio.tagline" = "Muunnos · MP3 / AAC / WAV · Ote videosta";
 "conversion.home.history.summary" = "%@ · Pakatut %ld tiedostot";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "Lähtö on %@ pienempi";

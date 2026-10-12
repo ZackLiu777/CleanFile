@@ -2,13 +2,13 @@
 "converter.heading" = "Конвертировать медиа";
 "conversion.home.image.title" = "Конвертировать изображения";
 "conversion.home.image.detail" = "JPG, PNG, HEIC и другие. Настройка качества и размеров.";
-"conversion.home.image.tagline" = "JPG, PNG, HEIC и другие. Настройка качества и размеров.";
+"conversion.home.image.tagline" = "Конвертация · Форматы HEIC · Удаление GPS";
 "conversion.home.video.title" = "Конвертировать видео";
 "conversion.home.video.detail" = "MP4, MOV, M4V. Выбор кодека, битрейта и разрешения.";
-"conversion.home.video.tagline" = "MP4, MOV, M4V. Выбор кодека, битрейта и разрешения.";
+"conversion.home.video.tagline" = "Конвертация · MP4 / MOV · Разрешение";
 "conversion.home.audio.title" = "Конвертировать аудио";
 "conversion.home.audio.detail" = "MP3, AAC, WAV и другие. Настройка битрейта или извлечение аудио из видео.";
-"conversion.home.audio.tagline" = "MP3, AAC, WAV и другие. Настройка битрейта или извлечение аудио из видео.";
+"conversion.home.audio.tagline" = "Конвертация · MP3 / AAC / WAV · Извлечение из видео";
 "conversion.home.history.summary" = "%@ · Сжатые файлы %ld";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "Вывод на %@ меньше.";

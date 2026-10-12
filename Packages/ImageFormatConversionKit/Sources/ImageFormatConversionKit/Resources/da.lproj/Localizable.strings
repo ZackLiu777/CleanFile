@@ -2,13 +2,13 @@
 "converter.heading" = "Konverter medier";
 "conversion.home.image.title" = "Konverter billeder";
 "conversion.home.image.detail" = "JPG, PNG, HEIC og flere. Tilpas billedkvalitet og mål.";
-"conversion.home.image.tagline" = "JPG, PNG, HEIC og flere. Tilpas billedkvalitet og mål.";
+"conversion.home.image.tagline" = "Konvertering · HEIC-formater · Fjern GPS";
 "conversion.home.video.title" = "Konverter videoer";
 "conversion.home.video.detail" = "MP4, MOV, M4V. Vælg codec, bithastighed og opløsning.";
-"conversion.home.video.tagline" = "MP4, MOV, M4V. Vælg codec, bithastighed og opløsning.";
+"conversion.home.video.tagline" = "Konvertering · MP4 / MOV · Opløsning";
 "conversion.home.audio.title" = "Konverter lyd";
 "conversion.home.audio.detail" = "MP3, AAC, WAV og flere. Tilpas bithastighed eller udtræk lyd fra video.";
-"conversion.home.audio.tagline" = "MP3, AAC, WAV og flere. Tilpas bithastighed eller udtræk lyd fra video.";
+"conversion.home.audio.tagline" = "Konvertering · MP3 / AAC / WAV · Uddrag fra video";
 "conversion.home.history.summary" = "%@ · Konverterede %ld filer";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "Output er %@ mindre";

@@ -2,13 +2,13 @@
 "converter.heading" = "Medien konvertieren";
 "conversion.home.image.title" = "Bilder konvertieren";
 "conversion.home.image.detail" = "JPG, PNG, HEIC und mehr. Bildqualität und Abmessungen anpassen.";
-"conversion.home.image.tagline" = "JPG, PNG, HEIC und mehr. Bildqualität und Abmessungen anpassen.";
+"conversion.home.image.tagline" = "Konvertierung · HEIC-Formate · GPS entfernen";
 "conversion.home.video.title" = "Videos konvertieren";
 "conversion.home.video.detail" = "MP4, MOV, M4V. Codec, Bitrate und Auflösung wählen.";
-"conversion.home.video.tagline" = "MP4, MOV, M4V. Codec, Bitrate und Auflösung wählen.";
+"conversion.home.video.tagline" = "Konvertierung · MP4 / MOV · Auflösung";
 "conversion.home.audio.title" = "Audio konvertieren";
 "conversion.home.audio.detail" = "MP3, AAC, WAV und mehr. Bitrate anpassen oder Audio aus Videos extrahieren.";
-"conversion.home.audio.tagline" = "MP3, AAC, WAV und mehr. Bitrate anpassen oder Audio aus Videos extrahieren.";
+"conversion.home.audio.tagline" = "Konvertierung · MP3 / AAC / WAV · Auszug aus Video";
 "conversion.home.history.summary" = "%@ · Komprimierte %ld-Dateien";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "Die Ausgabe ist %@ kleiner";

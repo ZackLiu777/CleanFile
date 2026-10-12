@@ -2,13 +2,13 @@
 "converter.heading" = "미디어 변환";
 "conversion.home.image.title" = "이미지 변환";
 "conversion.home.image.detail" = "JPG, PNG, HEIC 등. 이미지 품질과 크기 조절.";
-"conversion.home.image.tagline" = "JPG, PNG, HEIC 등. 이미지 품질과 크기 조절.";
+"conversion.home.image.tagline" = "변환 · HEIC 형식 · GPS 제거";
 "conversion.home.video.title" = "동영상 변환";
 "conversion.home.video.detail" = "MP4, MOV, M4V. 코덱, 비트레이트 및 해상도 선택.";
-"conversion.home.video.tagline" = "MP4, MOV, M4V. 코덱, 비트레이트 및 해상도 선택.";
+"conversion.home.video.tagline" = "변환 · MP4 / MOV · 해상도";
 "conversion.home.audio.title" = "오디오 변환";
 "conversion.home.audio.detail" = "MP3, AAC, WAV 등. 비트레이트 조절 또는 동영상에서 오디오 추출.";
-"conversion.home.audio.tagline" = "MP3, AAC, WAV 등. 비트레이트 조절 또는 동영상에서 오디오 추출.";
+"conversion.home.audio.tagline" = "변환 · MP3 / AAC / WAV · 비디오에서 추출";
 "conversion.home.history.summary" = "%@ · %ld개 파일 변환";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "출력이 %@ 감소함";

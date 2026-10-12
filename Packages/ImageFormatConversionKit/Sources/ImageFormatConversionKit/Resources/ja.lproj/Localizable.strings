@@ -2,13 +2,13 @@
 "converter.heading" = "メディアを変換";
 "conversion.home.image.title" = "画像を変換";
 "conversion.home.image.detail" = "JPG、PNG、HEICなど。画像の品質とサイズを調整。";
-"conversion.home.image.tagline" = "JPG、PNG、HEICなど。画像の品質とサイズを調整。";
+"conversion.home.image.tagline" = "変換 · HEIC 形式 · GPS 削除";
 "conversion.home.video.title" = "動画を変換";
 "conversion.home.video.detail" = "MP4、MOV、M4V。コーデック、ビットレート、解像度を選択。";
-"conversion.home.video.tagline" = "MP4、MOV、M4V。コーデック、ビットレート、解像度を選択。";
+"conversion.home.video.tagline" = "変換 · MP4 / MOV · 解像度";
 "conversion.home.audio.title" = "音声を変換";
 "conversion.home.audio.detail" = "MP3、AAC、WAVなど。ビットレート調整や動画からの音声抽出。";
-"conversion.home.audio.tagline" = "MP3、AAC、WAVなど。ビットレート調整や動画からの音声抽出。";
+"conversion.home.audio.tagline" = "変換 · MP3 / AAC / WAV · ビデオから音声抽出";
 "conversion.home.history.summary" = "%@ · %ld ファイルを変換";
 "conversion.home.history.size_comparison" = "%@ → %@";
 "conversion.home.history.smaller" = "出力が%@小さくなりました";
