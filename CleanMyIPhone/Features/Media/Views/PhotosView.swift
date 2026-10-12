@@ -194,21 +194,21 @@ struct PhotosView: View {
     private var mediaDashboard: some View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVStack(spacing: 24) {
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 12) {
-                        mediaTitle.fixedSize(horizontal: true, vertical: false)
-                        Spacer(minLength: 8)
-                        conversionButton.fixedSize(horizontal: true, vertical: false)
+                VStack(spacing: 12) {
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 12) {
+                            mediaTitle.fixedSize(horizontal: true, vertical: false)
+                            Spacer(minLength: 8)
+                            conversionButton.fixedSize(horizontal: true, vertical: false)
+                        }
+                        VStack(alignment: .leading, spacing: 8) {
+                            mediaTitle
+                            conversionButton
+                        }
                     }
-                    VStack(alignment: .leading, spacing: 8) {
-                        mediaTitle
-                        conversionButton
-                    }
+                    .padding(.horizontal, 12)
+                    storageOverview
                 }
-                .padding(12)
-                .padding(.bottom, -16)
-
-                storageOverview
                 analysisContent
                 quickCompressionCards
             }
@@ -402,23 +402,26 @@ struct PhotosView: View {
         buttonTitle: LocalizedStringKey?,
         action: @escaping () -> Void
     ) -> some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                ContentUnavailableView {
-                    Label(title, systemImage: "photo.on.rectangle")
-                } description: {
-                    Text(message)
-                } actions: {
-                    if let buttonTitle {
-                        Button(buttonTitle, action: action)
-                            .buttonStyle(.borderedProminent)
-                            .tint(theme.accentPrimary)
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: 24) {
+                    ContentUnavailableView {
+                        Label(title, systemImage: "photo.on.rectangle")
+                    } description: {
+                        Text(message)
+                    } actions: {
+                        if let buttonTitle {
+                            Button(buttonTitle, action: action)
+                                .buttonStyle(.borderedProminent)
+                                .tint(theme.accentPrimary)
+                        }
                     }
+                    // File imports do not require access to the Photos library.
+                    quickCompressionCards
                 }
-                // File imports do not require access to the Photos library.
-                quickCompressionCards
+                .padding(16)
+                .frame(minHeight: geometry.size.height, alignment: .center)
             }
-            .padding(16)
         }
     }
 }
@@ -439,7 +442,7 @@ private struct MediaDashboardResultsView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Cleanup Recommendations")
                 .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
                 .padding(.horizontal, 12)

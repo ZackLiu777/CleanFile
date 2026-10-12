@@ -13,7 +13,7 @@ nonisolated struct AppLaunchState: Equatable {
     private var destination: Destination
 
     init(destination: Destination, skipsAnimation: Bool = false) {
-        self.destination = destination
+        self.destination = destination 
         phase = skipsAnimation ? .content : .animating
     }
 
