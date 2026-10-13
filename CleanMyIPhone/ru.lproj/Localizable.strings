@@ -633,3 +633,7 @@
 "compression.confirm.message" = "Сжать выбранные объекты (%d)? После сохранения и проверки уменьшенных копий оригиналы будут удалены из Фото.";
 
 "compression.confirm.action" = "Подтвердить";
+
+"similar.group.count" = "Похожие фото: %lld";
+
+"similar.keep" = "Оставить";

@@ -633,3 +633,7 @@
 "compression.confirm.message" = "%d ausgewählte Objekte komprimieren? Nach dem Speichern und Prüfen kleinerer Kopien werden die Originale aus Fotos gelöscht.";
 
 "compression.confirm.action" = "Bestätigen";
+
+"similar.group.count" = "%lld ähnliche Fotos";
+
+"similar.keep" = "Behalten";

@@ -633,3 +633,7 @@
 "compression.confirm.message" = "Pakataanko %d valittua kohdetta? Kun pienemmät kopiot on tallennettu ja tarkistettu, alkuperäiset poistetaan Kuvat-apista.";
 
 "compression.confirm.action" = "Vahvista";
+
+"similar.group.count" = "%lld samankaltaista kuvaa";
+
+"similar.keep" = "Säilytä";

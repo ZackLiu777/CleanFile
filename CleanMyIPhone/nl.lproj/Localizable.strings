@@ -633,3 +633,7 @@
 "compression.confirm.message" = "%d geselecteerde onderdelen comprimeren? Nadat kleinere kopieën zijn opgeslagen en gecontroleerd, worden de originelen uit Foto’s verwijderd.";
 
 "compression.confirm.action" = "Bevestigen";
+
+"similar.group.count" = "%lld vergelijkbare foto’s";
+
+"similar.keep" = "Bewaren";

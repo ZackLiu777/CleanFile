@@ -633,3 +633,7 @@
 "compression.confirm.message" = "Þjappa %d völdum atriðum? Þegar minni afrit hafa verið vistuð og staðfest verður frumritunum eytt úr Myndum.";
 
 "compression.confirm.action" = "Staðfesta";
+
+"similar.group.count" = "%lld svipaðar myndir";
+
+"similar.keep" = "Halda";

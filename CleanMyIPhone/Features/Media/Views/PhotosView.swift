@@ -528,6 +528,7 @@ private struct MediaDashboardResultsView: View {
         NavigationLink {
             MediaCategoryDetailView(
                 title: category.title,
+                showsSimilarGroups: !category.protectedAssetIDs.isEmpty,
                 assetIDs: category.assetIDs,
                 protectedAssetIDs: result.protectedKeeperIDs,
                 suggestedDeletionIDs: category.suggestedDeletionIDs,
@@ -802,16 +803,121 @@ private struct MediaCategoryDetailView: View {
     @EnvironmentObject private var themeSettings: ThemeSettings
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
     let title: String
+    let showsSimilarGroups: Bool
     let assetIDs: [String]
     let protectedAssetIDs: Set<String>
     let suggestedDeletionIDs: Set<String>
     @ObservedObject var viewModel: PhotoLibraryViewModel
     @Environment(\.displayScale) private var displayScale
+    @State private var didInitializeSelection = false
     @State private var isSelecting = false
     @State private var selectedIDs = Set<String>()
     @State private var isDeleteConfirmationPresented = false
     @State private var previewAssetID: String?
     @StateObject private var deletionEffectController = MediaDeletionEffectController()
+
+    private var similarGroups: [SimilarImageGroup] {
+        guard showsSimilarGroups else { return [] }
+        let result: MediaClassificationResult
+        switch viewModel.analysisState {
+        case .success(let value), .partialFailure(let value): result = value
+        default: return []
+        }
+        return result.similarImageGroups.filter { protectedAssetIDs.contains($0.suggestedKeeperID) }
+    }
+
+    private var groupedPhotos: some View {
+        ScrollView {
+            LazyVStack(spacing: 16) {
+                ForEach(similarGroups) { group in
+                    let others = group.items.map(\.id).filter {
+                        $0 != group.suggestedKeeperID && viewModel.asset(withIdentifier: $0) != nil
+                    }
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text(String.localizedStringWithFormat(AppL10n.string("similar.group.count"), others.count + 1))
+                                .appTypeface(.headline, size: 18, relativeTo: .headline, weight: .semibold)
+                            Spacer()
+                            Button {
+                                isSelecting = true
+                                let ids = Set(others)
+                                if ids.isSubset(of: selectedIDs) { selectedIDs.subtract(ids) }
+                                else { selectedIDs.formUnion(ids) }
+                            } label: {
+                                Image(systemName: !others.isEmpty && Set(others).isSubset(of: selectedIDs) ? "checkmark.circle.fill" : "circle")
+                                    .font(.title2)
+                                    .frame(minWidth: 44, minHeight: 44)
+                            }
+                            .accessibilityLabel(Text("Select All"))
+                        }
+                        HStack(alignment: .top, spacing: 8) {
+                            groupPhoto(group.suggestedKeeperID, keeper: true, height: 280)
+                            VStack(spacing: 8) {
+                                ForEach(others.prefix(2), id: \.self) { id in
+                                    groupPhoto(id, keeper: false, height: others.count == 1 ? 280 : 136)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                        // Keep every remaining photo in the page's scroll flow;
+                        // nested fixed-height scrolling hides large groups.
+                        if others.count > 2 {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
+                                ForEach(others.dropFirst(2), id: \.self) { id in
+                                    groupPhoto(id, keeper: false, height: 136)
+                                }
+                            }
+                        }
+                    }
+                    .padding(12)
+                    .appContentCard()
+                }
+            }
+            .padding(12)
+        }
+    }
+
+    private func groupPhoto(_ id: String, keeper: Bool, height: CGFloat) -> some View {
+        Button { previewAssetID = id } label: {
+            Color.clear
+                .frame(maxWidth: .infinity)
+                .frame(height: height)
+                .overlay {
+                    GeometryReader { proxy in
+                        MediaAssetThumbnailView(assetID: id, viewModel: viewModel)
+                            .frame(width: proxy.size.width, height: proxy.size.height)
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(.plain)
+        .overlay(alignment: .bottomLeading) {
+            if keeper {
+                Label("similar.keep", systemImage: "checkmark.shield.fill")
+                    .appTypeface(.caption.bold(), size: 13, relativeTo: .caption, weight: .bold)
+                    .padding(8)
+                    .foregroundStyle(.white)
+                    .background(theme.accentPrimary, in: Capsule())
+                    .padding(6)
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            if !keeper {
+                Button {
+                    isSelecting = true
+                    if !selectedIDs.insert(id).inserted { selectedIDs.remove(id) }
+                } label: {
+                    Image(systemName: selectedIDs.contains(id) ? "checkmark.circle.fill" : "circle")
+                        .font(.title2)
+                        .foregroundStyle(.white, theme.accentPrimary)
+                        .padding(10)
+                        .background(.black.opacity(0.25), in: Circle())
+                }
+                .accessibilityLabel(Text("Select"))
+                .padding(4)
+            }
+        }
+    }
 
     private var visibleAssetIDs: [String] {
         assetIDs.filter { viewModel.asset(withIdentifier: $0) != nil }
@@ -863,6 +969,8 @@ private struct MediaCategoryDetailView: View {
                         systemImage: "photo.on.rectangle",
                         description: Text("No media matched this category.")
                     )
+                } else if !similarGroups.isEmpty {
+                    groupedPhotos
                 } else {
                     MediaInteractiveGrid(
                         sections: displayedSections,
@@ -888,18 +996,17 @@ private struct MediaCategoryDetailView: View {
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        // Selection gestures frequently begin near the leading edge. Hiding the
-        // back item while selecting also disables the navigation pop gesture;
-        // Done restores both without changing normal navigation behavior.
-        .navigationBarBackButtonHidden(isSelecting)
+        // The standard grid uses edge selection gestures; similar groups use
+        // explicit buttons and must retain native back navigation when selected.
+        .navigationBarBackButtonHidden(isSelecting && !showsSimilarGroups)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 if isSelecting {
-                    Button(selectedIDs.count == visibleAssetIDs.count ? "Deselect All" : "Select All") {
-                        if selectedIDs.count == visibleAssetIDs.count {
+                    Button(selectedIDs == Set(visibleAssetIDs).subtracting(protectedAssetIDs) ? "Deselect All" : "Select All") {
+                        if selectedIDs == Set(visibleAssetIDs).subtracting(protectedAssetIDs) {
                             selectedIDs.removeAll()
                         } else {
-                            selectedIDs = Set(visibleAssetIDs)
+                            selectedIDs = Set(visibleAssetIDs).subtracting(protectedAssetIDs)
                         }
                     }
                     Button("Done") {
@@ -1009,6 +1116,11 @@ private struct MediaCategoryDetailView: View {
             }
         }
         .onAppear {
+            if showsSimilarGroups && !didInitializeSelection {
+                didInitializeSelection = true
+                isSelecting = true
+                selectedIDs = Set(visibleAssetIDs).subtracting(protectedAssetIDs)
+            }
             viewModel.startCachingThumbnails(
                 for: preheatedAssetIDs,
                 targetSize: thumbnailTargetSize

@@ -154,6 +154,11 @@ final class FileScannerViewModel: ObservableObject {
     @Published private(set) var deletionState: FileDeletionState = .idle
     @Published private(set) var isRestoringStoredFiles = false
 
+    /// An entitlement change does not itself select or populate a real storage source.
+    var hasSelectedStorageSource: Bool {
+        selectedDirectoryName != nil || isSourceSelection || summary != nil || fileTree != nil
+    }
+
     private let canUseStorage: () -> Bool
     private let scanner: MetadataFileScanner
     private var scanTask: Task<Void, Never>?

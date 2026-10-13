@@ -631,3 +631,7 @@
 "compression.confirm.message" = "선택한 %d개 항목을 압축할까요? 더 작은 사본을 저장하고 확인한 후 사진 앱에서 원본을 삭제합니다.";
 
 "compression.confirm.action" = "확인";
+
+"similar.group.count" = "유사 사진 %lld장";
+
+"similar.keep" = "유지";

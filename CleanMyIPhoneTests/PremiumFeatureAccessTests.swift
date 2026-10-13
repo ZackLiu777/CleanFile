@@ -138,6 +138,18 @@ struct PremiumFeatureAccessTests {
         #expect(!access.allows(.quickClean))
     }
 
+    @Test("Unlocking storage does not fabricate a selected source or consume its preview")
+    @MainActor
+    func storageUnlockPreservesNoSourceState() {
+        var allowed = false
+        let scanner = FileScannerViewModel(canUseStorage: { allowed })
+        #expect(!scanner.hasSelectedStorageSource)
+        allowed = true
+        #expect(!scanner.hasSelectedStorageSource)
+        #expect(scanner.summary == nil)
+        #expect(scanner.fileTree == nil)
+    }
+
     @Test("The storage preview is deterministic and its summary matches its URL-free tree")
     func storagePreviewConsistency() {
         let preview = StorageDashboardPreview.make()

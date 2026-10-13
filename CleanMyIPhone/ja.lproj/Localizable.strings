@@ -631,3 +631,7 @@
 "compression.confirm.message" = "選択した%d項目を圧縮しますか？小さいコピーの保存と検証が完了すると、対応するオリジナルが写真から削除されます。";
 
 "compression.confirm.action" = "確認";
+
+"similar.group.count" = "類似写真 %lld 枚";
+
+"similar.keep" = "保持";

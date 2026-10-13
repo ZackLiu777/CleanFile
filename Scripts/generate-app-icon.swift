@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 
 let outputDirectory = URL(fileURLWithPath: CommandLine.arguments[1], isDirectory: true)
 let variants: [(String, [CGFloat], [CGFloat], [CGFloat])] = [
-    ("Light", [247/255, 245/255, 240/255], [31/255, 41/255, 46/255], [232/255, 163/255, 156/255]),
+    ("Light", [247/255, 245/255, 240/255], [24/255, 59/255, 91/255], [232/255, 163/255, 156/255]),
     ("Dark", [23/255, 28/255, 33/255], [237/255, 235/255, 227/255], [232/255, 163/255, 156/255]),
     ("Tinted", [0, 0, 0], [0.98, 0.98, 0.98], [0.58, 0.58, 0.58])
 ]

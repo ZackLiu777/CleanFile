@@ -633,3 +633,7 @@
 "compression.confirm.message" = "Komprimere %d valgte objekter? Når mindre kopier er lagret og kontrollert, slettes originalene fra Bilder.";
 
 "compression.confirm.action" = "Bekreft";
+
+"similar.group.count" = "%lld lignende bilder";
+
+"similar.keep" = "Behold";

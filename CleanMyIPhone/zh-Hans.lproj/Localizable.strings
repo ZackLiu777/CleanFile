@@ -636,3 +636,7 @@
 "compression.confirm.message" = "压缩选中的 %d 项？较小的副本保存并验证成功后，将从相册删除对应原件。";
 
 "compression.confirm.action" = "确认";
+
+"similar.group.count" = "%lld 张相似照片";
+
+"similar.keep" = "保留";

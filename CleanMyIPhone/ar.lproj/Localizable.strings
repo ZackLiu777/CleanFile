@@ -633,3 +633,7 @@
 "compression.confirm.message" = "هل تريد ضغط %d من العناصر المحددة؟ بعد حفظ النسخ الأصغر والتحقق منها، ستُحذف الملفات الأصلية من الصور.";
 
 "compression.confirm.action" = "تأكيد";
+
+"similar.group.count" = "%lld صور متشابهة";
+
+"similar.keep" = "احتفاظ";

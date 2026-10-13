@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <title>Filevra — Offset planes</title>
+  <defs><linearGradient id="background" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b2e5ff"/><stop offset="1" stop-color="#edfaff"/></linearGradient></defs>
+  <rect width="1024" height="1024" fill="url(#background)"/>
+  <path fill="#3d5e6b" d="M230 230H742V398H398V794H230Z"/>
+  <path fill="#297da6" d="M454 454H794V622H622V794H454Z"/>
+</svg>

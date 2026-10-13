@@ -184,18 +184,18 @@ struct MediaQuickCleanView: View {
     }
 
     private var summaryCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Review Cleanup Suggestions", systemImage: "sparkles")
-                .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
+        VStack(spacing: 8) {
+            Text(estimatedSelectedSizeText)
                 .foregroundStyle(theme.textPrimary)
-            Button("cleanup.useSuggestions") { viewModel.selectSuggestions() }
-                .buttonStyle(.bordered)
-                .disabled(photoLibrary.deletionState.isDeleting || isAnimatingDeletion)
-            Text("cleanup.review.hint")
+                .appTypeface(.largeTitle.bold(), size: 48, relativeTo: .largeTitle, weight: .bold)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .accessibilityIdentifier("media.quickClean.totalSize")
+            Text(selectedCountText)
                 .foregroundStyle(theme.textSecondary)
         }
         .padding(18)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
         .appContentCard()
     }
 
@@ -265,9 +265,6 @@ struct MediaQuickCleanView: View {
                 Text(selectedCountText)
                     .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
                     .foregroundStyle(theme.textPrimary)
-                Text(estimatedSelectedSizeText)
-                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
-                    .foregroundStyle(theme.textSecondary)
             }
 
             Spacer(minLength: 8)

@@ -29,7 +29,8 @@ struct StorageView: View {
     @State private var showsPremium = false
 
     private var preview: StorageDashboardPreview { StorageDashboardPreview.example }
-    private var isPreview: Bool { !accessStore.allows(.storage) }
+    private var isStorageLocked: Bool { !accessStore.allows(.storage) }
+    private var isPreview: Bool { isStorageLocked || !viewModel.hasSelectedStorageSource }
     private var displayedSummary: StorageSummary? { isPreview ? preview.summary : viewModel.summary }
     private var displayedTree: FileNode? { isPreview ? preview.fileTree : viewModel.fileTree }
 
@@ -128,19 +129,19 @@ struct StorageView: View {
             }
         }
         // Drop any pushed real file list when ownership expires, without touching its saved index.
-        .id(isPreview)
+        .id(isStorageLocked)
         .sheet(isPresented: $showsPremium) {
             PremiumSubscriptionView(requiredFeature: .storage)
         }
         .onAppear {
-            if isTabActive, !isPreview {
+            if isTabActive, !isStorageLocked {
                 viewModel.loadIfNeeded()
             }
             animateStorageDashboardIfNeeded()
         }
         .onChange(of: isTabActive) { _, isActive in
             if isActive {
-                if !isPreview { viewModel.loadIfNeeded() }
+                if !isStorageLocked { viewModel.loadIfNeeded() }
                 animateStorageDashboardIfNeeded()
             } else {
                 resetStorageAnimations()
@@ -149,14 +150,17 @@ struct StorageView: View {
         .onChange(of: displayedSummary) { _, _ in
             animateStorageDashboardIfNeeded()
         }
-        .onChange(of: isPreview) { _, previewing in
+        .onChange(of: isStorageLocked) { _, locked in
             isImporterPresented = false
             isSourceImporterPresented = false
-            if previewing {
+            if locked {
                 viewModel.cancelScan()
             } else if isTabActive {
                 viewModel.loadIfNeeded()
             }
+            animateStorageDashboardIfNeeded()
+        }
+        .onChange(of: isPreview) { _, _ in
             animateStorageDashboardIfNeeded()
         }
         .onChange(of: themeSettings.interfaceAnimationsEnabled) { _, _ in
@@ -370,7 +374,7 @@ struct StorageView: View {
         @ViewBuilder label: () -> Label
     ) -> some View {
         if isPreview {
-            Button { showsPremium = true } label: { label() }
+            Button { chooseFolder() } label: { label() }
         } else {
             NavigationLink {
                 ScannedFilesView(viewModel: viewModel, category: category)
@@ -379,7 +383,7 @@ struct StorageView: View {
     }
 
     private func chooseFolder() {
-        guard !isPreview else {
+        guard !isStorageLocked else {
             showsPremium = true
             return
         }
@@ -387,7 +391,7 @@ struct StorageView: View {
     }
 
     private func chooseSources() {
-        guard !isPreview else {
+        guard !isStorageLocked else {
             showsPremium = true
             return
         }
@@ -516,7 +520,7 @@ struct StorageView: View {
 
     /// 处理 `handleImport` 输入，并根据结果推进当前业务状态。
     private func handleImport(_ result: Result<[URL], Error>) {
-        guard !isPreview else { return }
+        guard !isStorageLocked else { return }
         switch result {
         case .success(let urls):
             guard let url = urls.first else {
@@ -530,7 +534,7 @@ struct StorageView: View {
     }
 
     private func handleSourceImport(_ result: Result<[URL], Error>) {
-        guard !isPreview else { return }
+        guard !isStorageLocked else { return }
         switch result {
         case .success(let urls):
             guard !urls.isEmpty else {

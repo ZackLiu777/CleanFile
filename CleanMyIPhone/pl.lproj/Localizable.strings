@@ -631,3 +631,7 @@
 "compression.confirm.message" = "Skompresować %d wybranych elementów? Po zapisaniu i sprawdzeniu mniejszych kopii oryginały zostaną usunięte ze Zdjęć.";
 
 "compression.confirm.action" = "Potwierdź";
+
+"similar.group.count" = "Podobne zdjęcia: %lld";
+
+"similar.keep" = "Zachowaj";
