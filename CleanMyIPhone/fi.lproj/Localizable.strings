@@ -485,14 +485,14 @@
 "premium.entry.subtitle" = "Tutustu ominaisuuksiin ja tilaussuunnitelmiin";
 "premium.close" = "Sulje";
 "premium.retry" = "Yritä uudelleen";
-"intro.media.title" = "Näe tallennustila yhdellä silmäyksellä";
-"intro.media.detail" = "Katso, paljonko kuvat, videot ja muu sisältö vievät tilaa ja paljonko tilaa on jäljellä. Luvut ovat esimerkkejä.";
-"intro.files.title" = "Näe, mikä vie tilaa";
-"intro.files.detail" = "Selaa valittuja kansioita ja löydä suuret tiedostot helposti.";
-"intro.compress.title" = "Esikatsele median muunnosta";
-"intro.compress.detail" = "Tutustu kuvien, videoiden ja äänen muunnosvaihtoehtoihin sekä esimerkkiedistymiseen. Tässä ei pakata tiedostoja.";
-"intro.appearance.title" = "Tee sovelluksesta omasi";
-"intro.appearance.detail" = "Valitse itsellesi sopivat värit ja ulkoasu.";
+"intro.media.title" = "Tilaa tärkeille asioille";
+"intro.media.detail" = "Tarkista samankaltaiset kuvat, näyttökuvat, videot ja Live Photos. Valitse poistettavat kohteet ja vahvista.";
+"intro.files.title" = "Siivoa tarpeettomat näyttökuvat";
+"intro.files.detail" = "Liput, kuitit ja muistiinpanot kertyvät. Tarkista näyttökuvat yhdessä ja poista vain tarpeettomat.";
+"intro.compress.title" = "Säilytä muistot. Säästä tilaa.";
+"intro.compress.detail" = "Pakkaa kuvia ja videoita. Alkuperäiset poistetaan vasta pienempien kopioiden tallennuksen ja tarkistuksen jälkeen.";
+"intro.appearance.title" = "Säilytä parhaat kuvat";
+"intro.appearance.detail" = "Katso samankaltaiset kuvat ryhmissä, säilytä suosikit ja tarkista muut ennen poistamista.";
 "intro.next" = "Jatka";
 "intro.start" = "Aloita";
 "intro.demo" = "Esimerkki";
@@ -637,3 +637,7 @@
 "similar.group.count" = "%lld samankaltaista kuvaa";
 
 "similar.keep" = "Säilytä";
+
+"intro.cleanup.total" = "Valittu siivottava tila";
+
+"intro.compress.saved" = "Tässä esimerkissä säästetty tila";

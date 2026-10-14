@@ -485,14 +485,14 @@
 "premium.entry.subtitle" = "Entdecken Sie Funktionen und Abonnementpläne";
 "premium.close" = "Schließen";
 "premium.retry" = "Erneut versuchen";
-"intro.media.title" = "Speicherplatz im Blick";
-"intro.media.detail" = "Sieh, wie viel Platz Fotos, Videos und andere Inhalte belegen und wie viel frei ist. Die Werte sind Beispiele.";
-"intro.files.title" = "Sieh, was Speicher belegt";
-"intro.files.detail" = "Durchsuche ausgewählte Ordner und finde große Dateien auf einen Blick.";
-"intro.compress.title" = "Medienkonvertierung ansehen";
-"intro.compress.detail" = "Entdecke Optionen für Bilder, Videos und Audio sowie einen beispielhaften Fortschritt. Die Anzeige ist nur eine Demo.";
-"intro.appearance.title" = "Gestalte die App nach deinen Wünschen";
-"intro.appearance.detail" = "Wähle Farben und Darstellung, die zu dir passen.";
+"intro.media.title" = "Platz für das Wesentliche";
+"intro.media.detail" = "Ähnliche Fotos, Screenshots, Videos und Live Photos prüfen. Zu löschende Inhalte auswählen und bestätigen.";
+"intro.files.title" = "Nicht mehr benötigte Screenshots löschen";
+"intro.files.detail" = "Tickets, Belege und Notizen sammeln sich an. Prüfe deine Screenshots gemeinsam und lösche nur, was du nicht mehr brauchst.";
+"intro.compress.title" = "Erinnerungen behalten. Platz sparen.";
+"intro.compress.detail" = "Fotos und Videos komprimieren. Originale werden erst nach Speichern und Prüfen der kleineren Kopien gelöscht.";
+"intro.appearance.title" = "Die besten Fotos behalten";
+"intro.appearance.detail" = "Ähnliche Fotos gruppiert ansehen, Favoriten behalten und die anderen vor dem Löschen prüfen.";
 "intro.next" = "Weiter";
 "intro.start" = "Loslegen";
 "intro.demo" = "Beispiel";
@@ -637,3 +637,7 @@
 "similar.group.count" = "%lld ähnliche Fotos";
 
 "similar.keep" = "Behalten";
+
+"intro.cleanup.total" = "Zum Bereinigen ausgewählt";
+
+"intro.compress.saved" = "In diesem Beispiel gespart";

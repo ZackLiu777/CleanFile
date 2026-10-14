@@ -485,14 +485,14 @@
 "premium.entry.subtitle" = "Utforsk funksjoner og abonnementsplaner";
 "premium.close" = "Lukk";
 "premium.retry" = "Prøv igjen";
-"intro.media.title" = "Se lagringsplassen med et blikk";
-"intro.media.detail" = "Se hvor mye plass bilder, videoer og annet innhold bruker, og hvor mye som er ledig. Tallene er eksempler.";
-"intro.files.title" = "Se hva som tar plass";
-"intro.files.detail" = "Bla gjennom valgte mapper og finn store filer raskt.";
-"intro.compress.title" = "Forhåndsvis konvertering";
-"intro.compress.detail" = "Utforsk alternativer for bilder, videoer og lyd med en eksempelanimasjon. Ingen filer konverteres her.";
-"intro.appearance.title" = "Gjør appen til din egen";
-"intro.appearance.detail" = "Velg farger og utseende som passer deg.";
+"intro.media.title" = "Plass til det som betyr noe";
+"intro.media.detail" = "Se gjennom lignende bilder, skjermbilder, videoer og Live Photos. Velg hva som skal slettes, og bekreft.";
+"intro.files.title" = "Rydd bort unødvendige skjermbilder";
+"intro.files.detail" = "Billetter, kvitteringer og notater hoper seg opp. Gå gjennom skjermbildene samlet og slett bare det du ikke trenger.";
+"intro.compress.title" = "Behold minnene. Spar plass.";
+"intro.compress.detail" = "Komprimer bilder og videoer. Originaler slettes først etter at mindre kopier er lagret og kontrollert.";
+"intro.appearance.title" = "Behold de beste bildene";
+"intro.appearance.detail" = "Se lignende bilder i grupper, behold favorittene og gå gjennom resten før sletting.";
 "intro.next" = "Fortsett";
 "intro.start" = "Kom i gang";
 "intro.demo" = "Eksempel";
@@ -637,3 +637,7 @@
 "similar.group.count" = "%lld lignende bilder";
 
 "similar.keep" = "Behold";
+
+"intro.cleanup.total" = "Valgt plass til opprydding";
+
+"intro.compress.saved" = "Spart plass i dette eksempelet";

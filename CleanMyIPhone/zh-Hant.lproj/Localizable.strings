@@ -518,14 +518,14 @@
 "premium.connection.title" = "需要網路連線";
 "premium.connection.message" = "請連接網際網路，然後再試一次。";
 "premium.retry" = "重試";
-"intro.media.title" = "一眼看清裝置空間";
-"intro.media.detail" = "查看照片、影片和其他內容佔用多少空間，以及還剩多少可用空間。畫面中的數據僅為示例。";
-"intro.files.title" = "看看空間用在哪裡";
-"intro.files.detail" = "瀏覽你選擇的資料夾，輕鬆找出佔空間的大型檔案。";
-"intro.compress.title" = "預覽媒體轉換";
-"intro.compress.detail" = "了解圖片、影片與音訊的轉換選項和進度動畫。此處不會轉換實際檔案。";
-"intro.appearance.title" = "打造喜歡的外觀";
-"intro.appearance.detail" = "挑選適合自己的應用程式顏色和介面風格。";
+"intro.media.title" = "為重要內容騰出空間";
+"intro.media.detail" = "集中檢查相似照片、截圖、影片和 Live Photos。選擇要清理的內容，確認後再刪除。";
+"intro.files.title" = "清理用過就忘的截圖";
+"intro.files.detail" = "票據、訂單和臨時記錄不斷累積。集中檢查截圖，只刪除已經不再需要的內容。";
+"intro.compress.title" = "保留回憶，釋放空間";
+"intro.compress.detail" = "壓縮圖片和影片。較小副本儲存並驗證成功後，才刪除對應原件。";
+"intro.appearance.title" = "留下精彩，整理重複";
+"intro.appearance.detail" = "分組查看相似照片，保留喜歡的照片，刪除前逐張檢查其餘內容。";
 "intro.next" = "繼續";
 "intro.start" = "開始使用";
 "intro.demo" = "示例";
@@ -640,3 +640,7 @@
 "similar.group.count" = "%lld 張相似照片";
 
 "similar.keep" = "保留";
+
+"intro.cleanup.total" = "已選擇可清理空間";
+
+"intro.compress.saved" = "此範例釋放的空間";

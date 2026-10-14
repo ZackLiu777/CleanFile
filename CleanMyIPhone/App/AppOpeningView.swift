@@ -44,9 +44,21 @@ struct AppOpeningView: View {
 #endif
 
 /// Keeps startup presentation separate from the application's navigation and business state.
+private struct AppOpeningCompletedKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var appOpeningCompleted: Bool {
+        get { self[AppOpeningCompletedKey.self] }
+        set { self[AppOpeningCompletedKey.self] = newValue }
+    }
+}
+
 struct AppOpeningContainer<Content: View>: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var launchState: AppLaunchState
+    @State private var openingCompleted = false
     private let destination: AppLaunchState.Destination
     private let content: Content
 
@@ -63,6 +75,7 @@ struct AppOpeningContainer<Content: View>: View {
     var body: some View {
         ZStack {
             content
+                .environment(\.appOpeningCompleted, openingCompleted)
                 .allowsHitTesting(!launchState.showsOpening)
                 .accessibilityHidden(launchState.showsOpening)
             if launchState.showsOpening {
@@ -74,15 +87,22 @@ struct AppOpeningContainer<Content: View>: View {
         .onChange(of: destination) { _, value in
             withAnimation(.easeOut(duration: reduceMotion ? 0.15 : 0.32)) {
                 launchState.destinationChanged(to: value)
+            } completion: {
+                if !launchState.showsOpening { openingCompleted = true }
             }
         }
         .task {
-            guard launchState.phase == .animating else { return }
+            guard launchState.phase == .animating else {
+                openingCompleted = !launchState.showsOpening
+                return
+            }
             let duration: Duration = reduceMotion ? .milliseconds(450) : .milliseconds(2050)
             try? await Task.sleep(for: duration)
             guard !Task.isCancelled else { return }
             withAnimation(.easeOut(duration: reduceMotion ? 0.15 : 0.32)) {
                 launchState.animationFinished()
+            } completion: {
+                if !launchState.showsOpening { openingCompleted = true }
             }
         }
     }

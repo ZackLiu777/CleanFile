@@ -63,7 +63,6 @@ final class MediaQuickCleanViewModel: ObservableObject {
     }
 
     func toggle(_ category: Category) {
-        guard canUseQuickClean() else { return }
         if selectedCategoryIDs.contains(category.id) {
             selectedCategoryIDs.remove(category.id)
         } else {
@@ -72,12 +71,10 @@ final class MediaQuickCleanViewModel: ObservableObject {
     }
 
     func selectSuggestions() {
-        guard canUseQuickClean() else { return }
         selectedCategoryIDs = categories.contains { $0.id == .similarPhotos } ? [.similarPhotos] : []
     }
 
     func toggleAllCategories() {
-        guard canUseQuickClean() else { return }
         if allCategoriesSelected {
             selectedCategoryIDs.removeAll()
         } else {
@@ -197,8 +194,8 @@ final class MediaQuickCleanViewModel: ObservableObject {
         systemImage: String,
         assetIDs: Set<String>
     ) -> Category? {
-        // A keeper can also be a screenshot or Live Photo. Protect it in every category.
-        let assetIDs = assetIDs.subtracting(analysisResult?.protectedKeeperIDs ?? [])
+        // Screenshots are explicitly reviewed as their own category, including similar-photo keepers.
+        let assetIDs = id == .screenshots ? assetIDs : assetIDs.subtracting(analysisResult?.protectedKeeperIDs ?? [])
         guard !assetIDs.isEmpty else { return nil }
         return Category(id: id, title: title, systemImage: systemImage, assetIDs: assetIDs)
     }

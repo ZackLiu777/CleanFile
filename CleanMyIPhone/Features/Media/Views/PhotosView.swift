@@ -25,7 +25,6 @@ struct PhotosView: View {
     var onOpenSettings: () -> Void = {}
     var onOpenConversion: () -> Void = {}
     @State private var animatedStorageFraction = 0.0
-    @State private var showsQuickCleanPremium = false
     @State private var showsQuickClean = false
 
     var body: some View {
@@ -76,8 +75,7 @@ struct PhotosView: View {
                 }
                 ToolbarItemGroup(placement: .topBarLeading) {
                     Button {
-                        if accessStore.allows(.quickClean) { showsQuickClean = true }
-                        else { showsQuickCleanPremium = true }
+                        showsQuickClean = true
                     } label: {
                         Label("Quick Cleanup", systemImage: "sparkles")
                     }
@@ -99,9 +97,6 @@ struct PhotosView: View {
             }
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
-        }
-        .sheet(isPresented: $showsQuickCleanPremium) {
-            PremiumSubscriptionView(requiredFeature: .quickClean)
         }
         .onAppear {
             animateStorageBarIfNeeded()
@@ -513,7 +508,8 @@ private struct MediaDashboardResultsView: View {
             MediaCategorySummary(
                 title: AppL10n.string("Screenshots"),
                 assetIDs: result.screenshotIDs,
-                systemImage: "iphone"
+                systemImage: "iphone",
+                showsDateGroups: true
             ),
             MediaCategorySummary(
                 title: AppL10n.string("Live Photos"),
@@ -529,15 +525,16 @@ private struct MediaDashboardResultsView: View {
             MediaCategoryDetailView(
                 title: category.title,
                 showsSimilarGroups: !category.protectedAssetIDs.isEmpty,
+                showsDateGroups: category.showsDateGroups,
                 assetIDs: category.assetIDs,
-                protectedAssetIDs: result.protectedKeeperIDs,
+                protectedAssetIDs: category.showsDateGroups ? [] : result.protectedKeeperIDs,
                 suggestedDeletionIDs: category.suggestedDeletionIDs,
                 viewModel: viewModel
             )
         } label: {
             MediaCategoryCard(
                 title: category.title,
-                detail: categoryDetail(category.assetIDs.filter { !result.protectedKeeperIDs.contains($0) }),
+                detail: categoryDetail(category.showsDateGroups ? category.assetIDs : category.assetIDs.filter { !result.protectedKeeperIDs.contains($0) }),
                 representativeAssetID: category.assetIDs.first,
                 systemImage: category.systemImage,
                 viewModel: viewModel
@@ -724,14 +721,16 @@ private struct MediaStorageSegment {
 
 /// 定义 `MediaCategorySummary` 的值语义数据与相关行为。
 private struct MediaCategorySummary: Identifiable {
+    let showsDateGroups: Bool
     let title: String
     let assetIDs: [String]
     let systemImage: String
     let protectedAssetIDs: Set<String>
     let suggestedDeletionIDs: Set<String>
 
-    init(title: String, assetIDs: [String], systemImage: String,
+    init(title: String, assetIDs: [String], systemImage: String, showsDateGroups: Bool = false,
          protectedAssetIDs: Set<String> = [], suggestedDeletionIDs: Set<String> = []) {
+        self.showsDateGroups = showsDateGroups
         self.title = title
         self.assetIDs = assetIDs
         self.systemImage = systemImage
@@ -804,6 +803,7 @@ private struct MediaCategoryDetailView: View {
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
     let title: String
     let showsSimilarGroups: Bool
+    let showsDateGroups: Bool
     let assetIDs: [String]
     let protectedAssetIDs: Set<String>
     let suggestedDeletionIDs: Set<String>
@@ -866,6 +866,47 @@ private struct MediaCategoryDetailView: View {
                                 ForEach(others.dropFirst(2), id: \.self) { id in
                                     groupPhoto(id, keeper: false, height: 136)
                                 }
+                            }
+                        }
+                    }
+                    .padding(12)
+                    .appContentCard()
+                }
+            }
+            .padding(12)
+        }
+    }
+
+    private var screenshotsByDate: some View {
+        ScrollView {
+            LazyVStack(spacing: 16) {
+                ForEach(dateSections) { section in
+                    let selectableIDs = Set(section.assetIDs).subtracting(protectedAssetIDs)
+                    let allSelected = !selectableIDs.isEmpty && selectableIDs.isSubset(of: selectedIDs)
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(section.day?.formatted(date: .abbreviated, time: .omitted) ?? AppL10n.string("Unknown Date"))
+                                    .appTypeface(.headline, size: 18, relativeTo: .headline, weight: .semibold)
+                                Text("\(section.assetIDs.count) items")
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Button {
+                                isSelecting = true
+                                if allSelected { selectedIDs.subtract(selectableIDs) }
+                                else { selectedIDs.formUnion(selectableIDs) }
+                            } label: {
+                                Image(systemName: allSelected ? "checkmark.circle.fill" : "circle")
+                                    .font(.title2)
+                                    .frame(minWidth: 44, minHeight: 44)
+                            }
+                            .accessibilityLabel(Text(allSelected ? "Deselect All" : "Select All"))
+                            .disabled(selectableIDs.isEmpty)
+                        }
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
+                            ForEach(section.assetIDs, id: \.self) { id in
+                                groupPhoto(id, keeper: protectedAssetIDs.contains(id), height: 160)
                             }
                         }
                     }
@@ -969,6 +1010,8 @@ private struct MediaCategoryDetailView: View {
                         systemImage: "photo.on.rectangle",
                         description: Text("No media matched this category.")
                     )
+                } else if showsDateGroups {
+                    screenshotsByDate
                 } else if !similarGroups.isEmpty {
                     groupedPhotos
                 } else {
@@ -998,7 +1041,7 @@ private struct MediaCategoryDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         // The standard grid uses edge selection gestures; similar groups use
         // explicit buttons and must retain native back navigation when selected.
-        .navigationBarBackButtonHidden(isSelecting && !showsSimilarGroups)
+        .navigationBarBackButtonHidden(isSelecting && !showsSimilarGroups && !showsDateGroups)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 if isSelecting {
@@ -1116,7 +1159,7 @@ private struct MediaCategoryDetailView: View {
             }
         }
         .onAppear {
-            if showsSimilarGroups && !didInitializeSelection {
+            if (showsSimilarGroups || showsDateGroups) && !didInitializeSelection {
                 didInitializeSelection = true
                 isSelecting = true
                 selectedIDs = Set(visibleAssetIDs).subtracting(protectedAssetIDs)

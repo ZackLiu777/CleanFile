@@ -518,14 +518,14 @@
 "premium.connection.title" = "需要网络连接";
 "premium.connection.message" = "请连接互联网，然后重试。";
 "premium.retry" = "重试";
-"intro.media.title" = "一眼看清设备空间";
-"intro.media.detail" = "查看照片、视频和其他内容占用多少空间，以及还剩多少可用空间。画面中的数据仅为示例。";
-"intro.files.title" = "看看空间用在哪里";
-"intro.files.detail" = "浏览你选择的文件夹，轻松找出占空间的大文件。";
-"intro.compress.title" = "预览媒体转换";
-"intro.compress.detail" = "了解图片、视频与音频的转换选项和进度动画。此处不会转换实际文件。";
-"intro.appearance.title" = "打造喜欢的外观";
-"intro.appearance.detail" = "挑选适合自己的应用颜色和界面风格。";
+"intro.media.title" = "为重要内容腾出空间";
+"intro.media.detail" = "集中检查相似照片、截图、视频和 Live Photos。选择要清理的内容，确认后再删除。";
+"intro.files.title" = "清理用过就忘的截图";
+"intro.files.detail" = "票据、订单和临时记录不断累积。集中检查截图，只删除已经不再需要的内容。";
+"intro.compress.title" = "保留回忆，释放空间";
+"intro.compress.detail" = "压缩图片和视频。较小副本保存并验证成功后，才删除对应原件。";
+"intro.appearance.title" = "留下精彩，整理重复";
+"intro.appearance.detail" = "按组查看相似照片，保留喜欢的照片，删除前逐张检查其余内容。";
 "intro.next" = "继续";
 "intro.start" = "开始使用";
 "intro.demo" = "示例";
@@ -640,3 +640,7 @@
 "similar.group.count" = "%lld 张相似照片";
 
 "similar.keep" = "保留";
+
+"intro.cleanup.total" = "已选择可清理空间";
+
+"intro.compress.saved" = "此示例释放的空间";

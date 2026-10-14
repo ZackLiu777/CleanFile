@@ -72,3 +72,41 @@ struct AppLaunchStateTests {
         #expect(incompatible.compatibleEntries.isEmpty)
     }
 }
+
+@MainActor
+struct PremiumEntryPresentationTests {
+    @Test("An early entitlement result waits for the opening transition without consuming the offer")
+    func waitsForOpening() {
+        var state = PremiumEntryPresentation()
+        let early = state.consumePresentation(for: .notEntitled, openingCompleted: false)
+        #expect(!early)
+        let ready = state.consumePresentation(for: .notEntitled, openingCompleted: true)
+        #expect(ready)
+        let repeated = state.consumePresentation(for: .notEntitled, openingCompleted: true)
+        #expect(!repeated)
+    }
+
+    @Test("Free users see only one offer for the root lifetime")
+    func freeUserVisits() {
+        var state = PremiumEntryPresentation()
+        let presents1 = state.consumePresentation(for: .checking)
+        #expect(!presents1)
+        let presents2 = state.consumePresentation(for: .notEntitled)
+        #expect(presents2)
+        let presents3 = state.consumePresentation(for: .notEntitled)
+        #expect(!presents3)
+        let presents4 = state.consumePresentation(for: .notEntitled)
+        #expect(!presents4)
+    }
+
+    @Test("Premium and unresolved access do not trigger an offer")
+    func premiumVisits() {
+        var state = PremiumEntryPresentation()
+        let presents5 = state.consumePresentation(for: .entitled)
+        #expect(!presents5)
+        let presents6 = state.consumePresentation(for: .checking)
+        #expect(!presents6)
+        let presents7 = state.consumePresentation(for: .entitled)
+        #expect(!presents7)
+    }
+}

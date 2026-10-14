@@ -485,14 +485,14 @@
 "premium.entry.subtitle" = "Esplora funzionalità e piani di abbonamento";
 "premium.close" = "Chiudi";
 "premium.retry" = "Riprova";
-"intro.media.title" = "Controlla lo spazio a colpo d’occhio";
-"intro.media.detail" = "Scopri quanto spazio occupano foto, video e altri contenuti e quanto ne resta. I dati sono esempi.";
-"intro.files.title" = "Scopri cosa occupa spazio";
-"intro.files.detail" = "Esplora le cartelle selezionate e individua subito i file più grandi.";
-"intro.compress.title" = "Anteprima della conversione";
-"intro.compress.detail" = "Esplora le opzioni per immagini, video e audio con un’animazione di avanzamento. Qui non viene convertito alcun file.";
-"intro.appearance.title" = "Personalizza l’app";
-"intro.appearance.detail" = "Scegli i colori e l’aspetto che preferisci.";
+"intro.media.title" = "Spazio per ciò che conta";
+"intro.media.detail" = "Controlla foto simili, screenshot, video e Live Photos. Scegli cosa eliminare, poi conferma.";
+"intro.files.title" = "Elimina gli screenshot inutili";
+"intro.files.detail" = "Biglietti, ricevute e appunti si accumulano. Rivedi gli screenshot insieme ed elimina solo ciò che non serve più.";
+"intro.compress.title" = "Conserva i ricordi. Libera spazio.";
+"intro.compress.detail" = "Comprimi foto e video. Gli originali vengono eliminati dopo il salvataggio e la verifica delle copie ridotte.";
+"intro.appearance.title" = "Conserva le foto migliori";
+"intro.appearance.detail" = "Visualizza le foto simili in gruppi, conserva le preferite e controlla le altre prima di eliminarle.";
 "intro.next" = "Continua";
 "intro.start" = "Inizia";
 "intro.demo" = "Esempio";
@@ -637,3 +637,7 @@
 "similar.group.count" = "%lld foto simili";
 
 "similar.keep" = "Mantieni";
+
+"intro.cleanup.total" = "Spazio selezionato da liberare";
+
+"intro.compress.saved" = "Spazio risparmiato in questo esempio";

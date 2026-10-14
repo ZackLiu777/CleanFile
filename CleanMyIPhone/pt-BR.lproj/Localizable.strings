@@ -513,14 +513,14 @@
 "premium.connection.title" = "Conexão necessária";
 "premium.connection.message" = "Conecte-se à internet e tente novamente.";
 "premium.retry" = "Tentar novamente";
-"intro.media.title" = "Veja seu espaço rapidamente";
-"intro.media.detail" = "Veja quanto espaço fotos, vídeos e outros conteúdos ocupam e quanto está livre. Os números são exemplos.";
-"intro.files.title" = "Descubra o que ocupa espaço";
-"intro.files.detail" = "Explore as pastas escolhidas e encontre arquivos grandes rapidamente.";
-"intro.compress.title" = "Prévia da conversão de mídia";
-"intro.compress.detail" = "Conheça as opções para imagens, vídeos e áudio com uma animação de progresso. Nenhum arquivo é convertido aqui.";
-"intro.appearance.title" = "Deixe com a sua cara";
-"intro.appearance.detail" = "Escolha as cores e a aparência de que você mais gosta.";
+"intro.media.title" = "Abra espaço para o que importa";
+"intro.media.detail" = "Revise fotos semelhantes, capturas, vídeos e Live Photos. Escolha o que excluir e confirme.";
+"intro.files.title" = "Limpe capturas que não precisa mais";
+"intro.files.detail" = "Ingressos, recibos e anotações se acumulam. Revise suas capturas juntas e exclua apenas o que não precisa mais.";
+"intro.compress.title" = "Guarde memórias. Economize espaço.";
+"intro.compress.detail" = "Comprima fotos e vídeos. Os originais só são excluídos após salvar e verificar as cópias menores.";
+"intro.appearance.title" = "Guarde as melhores fotos";
+"intro.appearance.detail" = "Veja fotos semelhantes em grupos, guarde suas favoritas e revise as outras antes de excluir.";
 "intro.next" = "Continuar";
 "intro.start" = "Começar a usar";
 "intro.demo" = "Exemplo";
@@ -635,3 +635,7 @@
 "similar.group.count" = "%lld fotos semelhantes";
 
 "similar.keep" = "Manter";
+
+"intro.cleanup.total" = "Espaço selecionado para limpar";
+
+"intro.compress.saved" = "Espaço economizado neste exemplo";

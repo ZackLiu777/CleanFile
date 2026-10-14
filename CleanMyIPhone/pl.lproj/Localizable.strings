@@ -513,14 +513,14 @@
 "premium.connection.title" = "Wymagane połączenie z siecią";
 "premium.connection.message" = "Połącz się z internetem i spróbuj ponownie.";
 "premium.retry" = "Spróbuj ponownie";
-"intro.media.title" = "Zobacz stan pamięci urządzenia";
-"intro.media.detail" = "Sprawdź, ile miejsca zajmują zdjęcia, filmy i inne dane oraz ile miejsca pozostało. Pokazane wartości są przykładowe.";
-"intro.files.title" = "Sprawdź, co zajmuje miejsce";
-"intro.files.detail" = "Przeglądaj wybrane foldery i szybko znajdź duże pliki.";
-"intro.compress.title" = "Zobacz podgląd konwersji";
-"intro.compress.detail" = "Poznaj opcje konwersji obrazów, filmów i dźwięku oraz przykładową animację postępu. Żadne pliki nie są tutaj kompresowane.";
-"intro.appearance.title" = "Dostosuj wygląd do siebie";
-"intro.appearance.detail" = "Wybierz kolory i wygląd aplikacji, które Ci odpowiadają.";
+"intro.media.title" = "Miejsce na to, co ważne";
+"intro.media.detail" = "Przejrzyj podobne zdjęcia, zrzuty ekranu, filmy i Live Photos. Wybierz elementy do usunięcia i potwierdź.";
+"intro.files.title" = "Usuń zbędne zrzuty ekranu";
+"intro.files.detail" = "Bilety, paragony i notatki się gromadzą. Przejrzyj zrzuty ekranu razem i usuń tylko to, czego już nie potrzebujesz.";
+"intro.compress.title" = "Zachowaj wspomnienia. Oszczędź miejsce.";
+"intro.compress.detail" = "Kompresuj zdjęcia i filmy. Oryginały są usuwane dopiero po zapisaniu i sprawdzeniu mniejszych kopii.";
+"intro.appearance.title" = "Zachowaj najlepsze zdjęcia";
+"intro.appearance.detail" = "Oglądaj podobne zdjęcia w grupach, zachowaj ulubione i sprawdź pozostałe przed usunięciem.";
 "intro.next" = "Kontynuuj";
 "intro.start" = "Rozpocznij";
 "intro.demo" = "Przykład";
@@ -635,3 +635,7 @@
 "similar.group.count" = "Podobne zdjęcia: %lld";
 
 "similar.keep" = "Zachowaj";
+
+"intro.cleanup.total" = "Wybrane miejsce do oczyszczenia";
+
+"intro.compress.saved" = "Miejsce oszczędzone w tym przykładzie";

@@ -485,14 +485,14 @@
 "premium.entry.subtitle" = "Kannaðu eiginleika og áskriftaráætlanir";
 "premium.close" = "Loka";
 "premium.retry" = "Reyna aftur";
-"intro.media.title" = "Sjáðu geymslurýmið í hnotskurn";
-"intro.media.detail" = "Sjáðu hversu mikið pláss myndir, myndskeið og annað efni taka og hversu mikið er laust. Tölurnar eru dæmi.";
-"intro.files.title" = "Sjáðu hvað tekur pláss";
-"intro.files.detail" = "Skoðaðu valdar möppur og finndu stórar skrár í fljótu bragði.";
-"intro.compress.title" = "Forskoðaðu umbreyting";
-"intro.compress.detail" = "Skoðaðu valkosti fyrir myndir, myndskeið og hljóð ásamt dæmi um framvindu. Engum skrám er umbreytt hér.";
-"intro.appearance.title" = "Sérsníddu útlitið";
-"intro.appearance.detail" = "Veldu liti og útlit sem henta þér.";
+"intro.media.title" = "Pláss fyrir það sem skiptir máli";
+"intro.media.detail" = "Skoðaðu svipaðar myndir, skjámyndir, myndskeið og Live Photos. Veldu hvað á að eyða og staðfestu.";
+"intro.files.title" = "Hreinsaðu óþarfar skjámyndir";
+"intro.files.detail" = "Miðar, kvittanir og minnispunktar safnast upp. Skoðaðu skjámyndir saman og eyddu aðeins því sem þú þarft ekki lengur.";
+"intro.compress.title" = "Varðveittu minningar. Sparaðu pláss.";
+"intro.compress.detail" = "Þjappaðu myndum og myndskeiðum. Frumritum er aðeins eytt eftir að minni afrit eru vistuð og sannreynd.";
+"intro.appearance.title" = "Haltu bestu myndunum";
+"intro.appearance.detail" = "Skoðaðu svipaðar myndir í hópum, haltu uppáhaldsmyndunum og yfirfarðu hinar fyrir eyðingu.";
 "intro.next" = "Halda áfram";
 "intro.start" = "Hefjast handa";
 "intro.demo" = "Dæmi";
@@ -637,3 +637,7 @@
 "similar.group.count" = "%lld svipaðar myndir";
 
 "similar.keep" = "Halda";
+
+"intro.cleanup.total" = "Valið pláss til hreinsunar";
+
+"intro.compress.saved" = "Sparað pláss í þessu dæmi";

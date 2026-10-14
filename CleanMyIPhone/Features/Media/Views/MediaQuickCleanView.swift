@@ -41,9 +41,7 @@ struct MediaQuickCleanView: View {
         ZStack {
             AppBackground()
 
-            if !accessStore.allows(.quickClean) {
-                PremiumFeatureLockedView(feature: .quickClean)
-            } else if presentedCategories.isEmpty {
+            if presentedCategories.isEmpty {
                 emptyContent
             } else {
                 categoryContent
@@ -52,18 +50,16 @@ struct MediaQuickCleanView: View {
         .navigationTitle("Quick Cleanup")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if accessStore.allows(.quickClean) {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(viewModel.allCategoriesSelected ? "Deselect All" : "Select All") {
-                        viewModel.toggleAllCategories()
-                    }
-                    .disabled(presentedCategories.isEmpty || photoLibrary.deletionState.isDeleting || isAnimatingDeletion)
-                    .accessibilityIdentifier("media.quickClean.selectAll")
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(viewModel.allCategoriesSelected ? "Deselect All" : "Select All") {
+                    viewModel.toggleAllCategories()
                 }
+                .disabled(presentedCategories.isEmpty || photoLibrary.deletionState.isDeleting || isAnimatingDeletion)
+                .accessibilityIdentifier("media.quickClean.selectAll")
             }
         }
         .safeAreaInset(edge: .bottom) {
-            if accessStore.allows(.quickClean), !presentedCategories.isEmpty {
+            if !presentedCategories.isEmpty {
                 cleanupBar
             }
         }
@@ -270,6 +266,10 @@ struct MediaQuickCleanView: View {
             Spacer(minLength: 8)
 
             Button(role: .destructive) {
+                guard accessStore.allows(.quickClean) else {
+                    showsPremium = true
+                    return
+                }
                 isDeleteConfirmationPresented = true
             } label: {
                 if photoLibrary.deletionState.isDeleting {

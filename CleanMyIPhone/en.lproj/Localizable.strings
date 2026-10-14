@@ -513,14 +513,14 @@
 "premium.connection.title" = "Network Connection Required";
 "premium.connection.message" = "Connect to the internet, then try again.";
 "premium.retry" = "Retry";
-"intro.media.title" = "See your storage at a glance";
-"intro.media.detail" = "See how much space photos, videos, and other content use—and how much is free. The figures are examples.";
-"intro.files.title" = "See what takes up space";
-"intro.files.detail" = "Browse selected folders and spot larger files at a glance.";
-"intro.compress.title" = "Preview media conversion";
-"intro.compress.detail" = "Explore image, video, and audio options with a sample progress animation. No files are converted here.";
-"intro.appearance.title" = "Make it yours";
-"intro.appearance.detail" = "Choose the colors and appearance that feel right for you.";
+"intro.media.title" = "Make room for what matters";
+"intro.media.detail" = "Review similar photos, screenshots, videos and Live Photos. Choose what to remove, then confirm.";
+"intro.files.title" = "Clear screenshots you no longer need";
+"intro.files.detail" = "Tickets, receipts and saved snippets add up. Review your screenshots together and delete only what you no longer need.";
+"intro.compress.title" = "Keep your memories. Save space.";
+"intro.compress.detail" = "Compress photos and videos. Originals are removed only after smaller copies are saved and verified.";
+"intro.appearance.title" = "Keep the best. Clear the rest.";
+"intro.appearance.detail" = "See similar photos together, keep your favorites and review the others before deleting.";
 "intro.next" = "Continue";
 "intro.start" = "Get Started";
 "intro.demo" = "Example";
@@ -635,3 +635,7 @@
 "similar.group.count" = "%lld similar photos";
 
 "similar.keep" = "Keep";
+
+"intro.cleanup.total" = "Selected for cleanup";
+
+"intro.compress.saved" = "Space saved in this example";

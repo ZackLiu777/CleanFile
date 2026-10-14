@@ -513,14 +513,14 @@
 "premium.connection.title" = "Connexion réseau requise";
 "premium.connection.message" = "Connectez-vous à Internet, puis réessayez.";
 "premium.retry" = "Réessayer";
-"intro.media.title" = "Visualisez votre stockage";
-"intro.media.detail" = "Voyez l’espace occupé par les photos, vidéos et autres contenus, ainsi que l’espace libre. Ces chiffres sont des exemples.";
-"intro.files.title" = "Voyez ce qui prend de la place";
-"intro.files.detail" = "Parcourez les dossiers choisis et repérez les fichiers volumineux.";
-"intro.compress.title" = "Découvrez la conversion";
-"intro.compress.detail" = "Explorez les options pour images, vidéos et audio avec une animation de progression. Aucun fichier n’est converti ici.";
-"intro.appearance.title" = "Personnalisez l’application";
-"intro.appearance.detail" = "Choisissez les couleurs et l’apparence qui vous plaisent.";
+"intro.media.title" = "Faites place à l’essentiel";
+"intro.media.detail" = "Examinez photos similaires, captures, vidéos et Live Photos. Choisissez quoi supprimer, puis confirmez.";
+"intro.files.title" = "Triez vos captures oubliées";
+"intro.files.detail" = "Billets, reçus et notes s’accumulent. Examinez vos captures ensemble et supprimez uniquement celles devenues inutiles.";
+"intro.compress.title" = "Gardez vos souvenirs. Gagnez de la place.";
+"intro.compress.detail" = "Compressez photos et vidéos. Les originaux sont supprimés après sauvegarde et vérification des copies réduites.";
+"intro.appearance.title" = "Gardez vos meilleures photos";
+"intro.appearance.detail" = "Regroupez les photos similaires, gardez vos favorites et vérifiez les autres avant de les supprimer.";
 "intro.next" = "Continuer";
 "intro.start" = "Commencer";
 "intro.demo" = "Exemple";
@@ -635,3 +635,7 @@
 "similar.group.count" = "%lld photos similaires";
 
 "similar.keep" = "Garder";
+
+"intro.cleanup.total" = "Espace sélectionné à nettoyer";
+
+"intro.compress.saved" = "Espace gagné dans cet exemple";

@@ -29,7 +29,7 @@ struct FirstLaunchIntroductionContainer<Content: View>: View {
 }
 
 private enum IntroductionPage: Int, CaseIterable {
-    case media, files, compress, appearance
+    case media, appearance, compress, files
 
     var title: LocalizedStringKey {
         switch self {
@@ -51,10 +51,10 @@ private enum IntroductionPage: Int, CaseIterable {
 
     var icon: String {
         switch self {
-        case .media: "photo.on.rectangle.angled"
-        case .files: "folder"
+        case .media: "sparkles"
+        case .files: "iphone"
         case .compress: "arrow.down.right.and.arrow.up.left"
-        case .appearance: "paintpalette"
+        case .appearance: "photo.stack"
         }
     }
 }
@@ -62,9 +62,7 @@ private enum IntroductionPage: Int, CaseIterable {
 struct FirstLaunchIntroductionView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.scenePhase) private var scenePhase
     @State private var page = 0
-    @State private var animationOrigin = Date()
     var showsCloseButton = false
     let onComplete: () -> Void
 
@@ -73,10 +71,10 @@ struct FirstLaunchIntroductionView: View {
             VStack(spacing: 0) {
                 HStack {
                     Text("Filevra")
-                        .font(.headline.weight(.bold))
+                        .appTypeface(.headline.bold(), size: 17, relativeTo: .headline, weight: .bold)
                     Spacer()
                     Text("\(page + 1) / 4")
-                        .font(.subheadline.monospacedDigit())
+                        .appTypeface(.subheadline, size: 15, relativeTo: .subheadline)
                         .foregroundStyle(theme.textSecondary)
                     if showsCloseButton {
                         Button(action: onComplete) {
@@ -92,27 +90,24 @@ struct FirstLaunchIntroductionView: View {
 
                 TabView(selection: $page) {
                     ForEach(IntroductionPage.allCases, id: \.rawValue) { item in
-                        VStack(spacing: 18) {
-                            Spacer(minLength: 10)
-                            TimelineView(.animation(minimumInterval: 1.0 / 24,
-                                                    paused: reduceMotion || scenePhase != .active || page != item.rawValue)) { context in
-                                let phase = reduceMotion ? 0.55 : max(0, context.date.timeIntervalSince(animationOrigin))
-                                IntroductionArtwork(page: item, phase: phase)
-                                    .frame(height: min(geometry.size.height * 0.54, 445))
+                        ScrollView {
+                            VStack(spacing: 20) {
+                                IntroductionArtwork(page: item)
+                                    .frame(minHeight: min(geometry.size.height * 0.48, 370))
+                                    .accessibilityHidden(true)
+                                Text(item.title)
+                                    .appTypeface(.largeTitle.bold(), size: 31, relativeTo: .largeTitle, weight: .bold)
+                                    .multilineTextAlignment(.center)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                Text(item.detail)
+                                    .appTypeface(.body, size: 17, relativeTo: .body)
+                                    .foregroundStyle(theme.textSecondary)
+                                    .multilineTextAlignment(.center)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
-                            .accessibilityHidden(true)
-                            Text(item.title)
-                                .appTypeface(.largeTitle.bold(), size: 31, relativeTo: .largeTitle, weight: .bold)
-                                .multilineTextAlignment(.center)
-                                .minimumScaleFactor(0.75)
-                            Text(item.detail)
-                                .font(.body)
-                                .foregroundStyle(theme.textSecondary)
-                                .multilineTextAlignment(.center)
-                                .fixedSize(horizontal: false, vertical: true)
-                            Spacer(minLength: 12)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 20)
                         }
-                        .padding(.horizontal, 8)
                         .tag(item.rawValue)
                     }
                 }
@@ -132,14 +127,14 @@ struct FirstLaunchIntroductionView: View {
                     if page == 3 {
                         onComplete()
                     } else {
-                        withAnimation(.easeInOut(duration: 0.3)) { page += 1 }
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { page += 1 }
                     }
                 } label: {
                     HStack(spacing: 10) {
                         Text(page == 3 ? "intro.start" : "intro.next")
                         Image(systemName: page == 3 ? "checkmark" : "arrow.right")
                     }
-                    .font(.headline.weight(.bold))
+                    .appTypeface(.headline.bold(), size: 17, relativeTo: .headline, weight: .bold)
                     .frame(maxWidth: .infinity)
                     .frame(height: 56)
                     .foregroundStyle(theme.textInverted)
@@ -155,174 +150,171 @@ struct FirstLaunchIntroductionView: View {
                     .ignoresSafeArea()
             }
         }
-        .onChange(of: page) { _, _ in animationOrigin = Date() }
     }
 }
 
 private struct IntroductionArtwork: View {
     @Environment(\.appTheme) private var theme
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let page: IntroductionPage
-    let phase: TimeInterval
-
-    private var step: Int { Int(phase.truncatingRemainder(dividingBy: 6) / 1.5) }
-    private let appearancePalettes: [AppAccentPaletteID] = [.pink, .coral, .gold, .sage, .sky, .teal, .berry]
-    private var appearanceIndex: Int {
-        reduceMotion ? 0 : Int(phase / 0.85) % appearancePalettes.count
-    }
-    private var appearanceAccent: Color {
-        appearancePalettes[appearanceIndex].color ?? theme.accentPrimary
-    }
 
     var body: some View {
         VStack(spacing: 18) {
-            Image(systemName: page.icon)
-                .font(.system(size: 48, weight: .medium))
-                .foregroundStyle(theme.accentPrimary)
-                .symbolEffect(.pulse, options: .repeating, isActive: step == 2)
+            HStack {
+                Image(systemName: page.icon)
+                    .font(.title2)
+                    .foregroundStyle(theme.accentPrimary)
+                Spacer()
+                Text("intro.demo")
+                    .appTypeface(.caption, size: 12, relativeTo: .caption)
+                    .foregroundStyle(theme.textSecondary)
+            }
             switch page {
             case .media: mediaArtwork
-            case .files: filesArtwork
+            case .appearance: similarArtwork
             case .compress: compressArtwork
-            case .appearance: appearanceArtwork
+            case .files: filesArtwork
             }
         }
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(page == .appearance ? appearanceAccent.opacity(0.12) : theme.cardSurface,
-                    in: RoundedRectangle(cornerRadius: 28))
+        .padding(20)
+        .frame(maxWidth: .infinity)
+        .background(theme.cardSurface, in: RoundedRectangle(cornerRadius: 28))
         .overlay(RoundedRectangle(cornerRadius: 28).stroke(theme.divider, lineWidth: 1))
-        .animation(.spring(response: 0.55, dampingFraction: 0.78), value: step)
-        .animation(.easeInOut(duration: 0.4), value: appearanceIndex)
     }
 
     private var mediaArtwork: some View {
-        VStack(spacing: 12) {
-            Text("intro.demo")
-                .font(.caption)
+        VStack(spacing: 14) {
+            Text(ByteCountFormatter.string(fromByteCount: 8_800_000_000, countStyle: .file))
+                .appTypeface(.largeTitle.bold(), size: 48, relativeTo: .largeTitle, weight: .bold)
+                .foregroundStyle(theme.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            Text("intro.cleanup.total")
+                .appTypeface(.subheadline, size: 15, relativeTo: .subheadline)
                 .foregroundStyle(theme.textSecondary)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-            MediaStorageOverview(
-                storage: DeviceStorageSnapshot(totalBytes: 128_000_000_000, availableBytes: 38_000_000_000),
-                photoBytes: 25_000_000_000,
-                videoBytes: 12_000_000_000,
-                animatedUsedFraction: step == 0 ? 0 : 90.0 / 128.0,
-                animationsEnabled: true
-            )
+            sampleRow("Similar Photos", symbol: "photo.stack", bytes: 2_100_000_000)
+            sampleRow("Screenshots", symbol: "iphone", bytes: 600_000_000)
+            sampleRow("Videos", symbol: "video.fill", bytes: 5_700_000_000)
+            sampleRow("Live Photos", symbol: "livephoto", bytes: 400_000_000)
+        }
+    }
 
-            HStack(spacing: 8) {
-                ForEach(0..<3) { index in
-                    Image(systemName: ["photo", "video", "photo.stack"][index])
-                        .font(.title3)
-                        .foregroundStyle(theme.accentPrimary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(theme.backgroundSecondary, in: RoundedRectangle(cornerRadius: 12))
-                        .overlay(alignment: .topTrailing) {
-                            if step >= 2 && index != 1 {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(theme.accentPrimary)
-                                    .padding(4)
-                            }
-                        }
-                        .opacity(step == 3 && index != 1 ? 0.4 : 1)
+    private func sampleRow(_ title: LocalizedStringKey, symbol: String, bytes: Int64) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .foregroundStyle(theme.accentPrimary)
+                .frame(width: 28)
+            Text(title)
+                .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .semibold)
+            Spacer(minLength: 4)
+            Text(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))
+                .appTypeface(.subheadline, size: 15, relativeTo: .subheadline)
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(theme.accentPrimary)
+        }
+        .padding(12)
+        .background(theme.backgroundSecondary.opacity(0.6), in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private var similarArtwork: some View {
+        VStack(spacing: 12) {
+            Text("Similar Photos")
+                .appTypeface(.headline, size: 18, relativeTo: .headline, weight: .semibold)
+            HStack(spacing: 10) {
+                samplePhoto(keeper: true)
+                    .frame(height: 210)
+                VStack(spacing: 10) {
+                    samplePhoto(keeper: false)
+                    samplePhoto(keeper: false)
                 }
+                .frame(height: 210)
             }
         }
+    }
+
+    private func samplePhoto(keeper: Bool) -> some View {
+        Color.clear
+            .overlay {
+                GeometryReader { proxy in
+                    Image("IntroductionSamplePhoto")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .scaleEffect(keeper ? 1 : 1.12)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay(alignment: keeper ? .bottomLeading : .topTrailing) {
+                if keeper {
+                    Label("similar.keep", systemImage: "checkmark.shield.fill")
+                        .appTypeface(.caption.bold(), size: 13, relativeTo: .caption, weight: .bold)
+                        .padding(8)
+                        .background(theme.cardSurface, in: Capsule())
+                        .padding(8)
+                } else {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(theme.accentPrimary)
+                        .padding(8)
+                }
+            }
     }
 
     private var filesArtwork: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Label("Folder Map", systemImage: "circle.hexagongrid")
-                    .font(.headline)
-                Spacer()
-                Text("intro.demo")
-                    .font(.caption)
-                    .foregroundStyle(theme.textSecondary)
-            }
-            SunburstChartView(
-                root: Self.sampleFolderTree,
-                revealProgress: reduceMotion ? 1 : min(1, Double(phase) / 2.5)
-            )
-            .frame(height: 265)
-            .allowsHitTesting(false)
-        }
-    }
-
-    private static let sampleFolderTree: FileNode = {
-        // A fixed, in-memory hierarchy gives the introduction the same dense
-        // multi-ring chart as a scanned folder without inspecting user files.
-        func branch(id: String, bytes: Int64, depth: Int, category: FileCategory) -> FileNode {
-            guard depth < 6 else {
-                return FileNode(id: id, name: id, byteCount: bytes,
-                                children: [], category: category, isDirectory: false)
-            }
-            let weights: [Int64] = depth.isMultiple(of: 2) ? [5, 3, 2] : [4, 3, 2, 1]
-            let total = weights.reduce(0, +)
-            var allocated: Int64 = 0
-            let children = weights.enumerated().map { index, weight in
-                let childBytes = index == weights.count - 1
-                    ? bytes - allocated : bytes * weight / total
-                allocated += childBytes
-                return branch(id: "\(id).\(index)", bytes: childBytes,
-                              depth: depth + 1, category: category)
-            }
-            return FileNode(id: id, name: id, byteCount: bytes,
-                            children: children, category: nil, isDirectory: true)
-        }
-
-        let groups: [(String, Int64, FileCategory)] = [
-            ("images", 410_000_000, .image),
-            ("videos", 320_000_000, .video),
-            ("documents", 160_000_000, .document),
-            ("audio", 70_000_000, .audio)
-        ]
-        return FileNode(
-            id: "intro.folder", name: "Sample", byteCount: 960_000_000,
-            children: groups.map { name, bytes, category in
-                branch(id: "intro.\(name)", bytes: bytes, depth: 1, category: category)
-            },
-            category: nil, isDirectory: true
-        )
-    }()
-
-    private var compressArtwork: some View {
-        VStack(spacing: 22) {
-            ConversionIntroductionPreview(theme: theme.conversionTheme, step: step)
-                .frame(height: 230)
-
-            let progress = reduceMotion ? 1 : phase.truncatingRemainder(dividingBy: 4) / 4
-            HStack(spacing: 12) {
-                Image(systemName: "arrow.down.right.and.arrow.up.left")
-                    .foregroundStyle(theme.accentPrimary)
-                WaveProgressView(progress: progress, height: 12, tint: theme.accentPrimary)
-                Text("\(Int(progress * 100))%")
-                    .font(.caption.monospacedDigit().weight(.bold))
-                    .foregroundStyle(theme.accentPrimary)
-                    .frame(width: 42, alignment: .trailing)
-            }
-            .padding(.horizontal, 12)
-        }
-    }
-
-    private var appearanceArtwork: some View {
-        return VStack(spacing: 22) {
-            AppearanceThemePreview(previewTint: appearanceAccent)
-                .environment(\.appTheme, theme.applyingAccent(appearanceAccent))
+        VStack(spacing: 18) {
+            Text("Screenshots")
+                .appTypeface(.headline, size: 18, relativeTo: .headline, weight: .semibold)
             HStack(spacing: 10) {
-                ForEach(appearancePalettes.indices, id: \.self) { index in
-                    Circle()
-                        .fill(appearancePalettes[index].color ?? theme.accentPrimary)
-                        .frame(width: 26, height: 26)
-                        .overlay {
-                            Circle()
-                                .stroke(theme.textPrimary, lineWidth: appearanceIndex == index ? 2 : 0)
-                                .padding(-4)
+                ForEach(0..<3) { index in
+                    VStack(spacing: 12) {
+                        Capsule().fill(theme.textPrimary.opacity(0.3)).frame(width: 24, height: 4)
+                        Image(systemName: ["ticket", "calendar", "cart"][index])
+                            .font(.title)
+                            .foregroundStyle(theme.accentPrimary)
+                        Text(["10:30", "12 / 24", "128.00"][index])
+                            .appTypeface(.caption.bold(), size: 13, relativeTo: .caption, weight: .bold)
+                        ForEach(0..<3) { _ in
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(theme.textSecondary.opacity(0.18))
+                                .frame(height: 5)
                         }
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(theme.accentPrimary)
+                    }
+                    .padding(12)
+                    .frame(maxWidth: .infinity)
+                    .background(theme.backgroundSecondary, in: RoundedRectangle(cornerRadius: 16))
                 }
             }
+            sampleRow("Screenshots", symbol: "iphone", bytes: 600_000_000)
+        }
+    }
+
+    private var compressArtwork: some View {
+        VStack(spacing: 20) {
+            Image("IntroductionSamplePhoto")
+                .resizable()
+                .scaledToFill()
+                .frame(height: 145)
+                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            HStack(spacing: 12) {
+                Text(ByteCountFormatter.string(fromByteCount: 2_000_000_000, countStyle: .file))
+                Image(systemName: "arrow.right")
+                    .foregroundStyle(theme.textSecondary)
+                Text(ByteCountFormatter.string(fromByteCount: 1_100_000_000, countStyle: .file))
+            }
+            .appTypeface(.title2.bold(), size: 26, relativeTo: .title2, weight: .bold)
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            VStack(spacing: 6) {
+                Text("intro.compress.saved")
+                    .appTypeface(.subheadline, size: 15, relativeTo: .subheadline)
+                Text(ByteCountFormatter.string(fromByteCount: 900_000_000, countStyle: .file))
+                    .appTypeface(.largeTitle.bold(), size: 36, relativeTo: .largeTitle, weight: .bold)
+            }
             .frame(maxWidth: .infinity)
+            .padding(16)
+            .background(theme.accentPrimary.opacity(0.12), in: RoundedRectangle(cornerRadius: 18))
         }
     }
 }

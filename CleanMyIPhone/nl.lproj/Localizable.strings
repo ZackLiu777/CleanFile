@@ -485,14 +485,14 @@
 "premium.entry.subtitle" = "Ontdek functies en abonnementen";
 "premium.close" = "Sluiten";
 "premium.retry" = "Opnieuw proberen";
-"intro.media.title" = "Bekijk je opslag in één oogopslag";
-"intro.media.detail" = "Zie hoeveel ruimte foto's, video's en andere inhoud gebruiken en hoeveel er vrij is. De cijfers zijn voorbeelden.";
-"intro.files.title" = "Zie wat ruimte inneemt";
-"intro.files.detail" = "Blader door geselecteerde mappen en ontdek grote bestanden in één oogopslag.";
-"intro.compress.title" = "Bekijk mediaconversie";
-"intro.compress.detail" = "Verken opties voor afbeeldingen, video's en audio met een voorbeeld van de voortgang. Er worden hier geen bestanden geconverteerd.";
-"intro.appearance.title" = "Maak de app persoonlijk";
-"intro.appearance.detail" = "Kies kleuren en een uiterlijk die bij je passen.";
+"intro.media.title" = "Ruimte voor wat belangrijk is";
+"intro.media.detail" = "Bekijk vergelijkbare foto’s, schermafbeeldingen, video’s en Live Photos. Kies wat je wilt verwijderen en bevestig.";
+"intro.files.title" = "Ruim overbodige schermafbeeldingen op";
+"intro.files.detail" = "Tickets, bonnetjes en notities stapelen zich op. Bekijk je schermafbeeldingen samen en verwijder alleen wat je niet meer nodig hebt.";
+"intro.compress.title" = "Bewaar herinneringen. Bespaar ruimte.";
+"intro.compress.detail" = "Comprimeer foto’s en video’s. Originelen worden pas verwijderd nadat kleinere kopieën zijn opgeslagen en gecontroleerd.";
+"intro.appearance.title" = "Bewaar je beste foto’s";
+"intro.appearance.detail" = "Bekijk vergelijkbare foto’s in groepen, bewaar favorieten en controleer de rest vóór verwijdering.";
 "intro.next" = "Doorgaan";
 "intro.start" = "Aan de slag";
 "intro.demo" = "Voorbeeld";
@@ -637,3 +637,7 @@
 "similar.group.count" = "%lld vergelijkbare foto’s";
 
 "similar.keep" = "Bewaren";
+
+"intro.cleanup.total" = "Geselecteerde opruimruimte";
+
+"intro.compress.saved" = "Bespaarde ruimte in dit voorbeeld";
