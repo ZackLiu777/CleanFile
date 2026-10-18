@@ -329,6 +329,9 @@ struct ConversionFileTray<Content: View>: View {
     let progress: ConversionImportProgress?
     let rowCount: Int
     let canClear: Bool
+    let outputURLs: [URL]
+    @State private var showsBatchActions = false
+    @State private var clearAfterDismiss = false
     let onClear: () -> Void
     let content: Content
 
@@ -338,6 +341,7 @@ struct ConversionFileTray<Content: View>: View {
         progress: ConversionImportProgress?,
         rowCount: Int = 1,
         canClear: Bool,
+        outputURLs: [URL],
         onClear: @escaping () -> Void,
         @ViewBuilder content: () -> Content
     ) {
@@ -345,6 +349,7 @@ struct ConversionFileTray<Content: View>: View {
         self.progress = progress
         self.rowCount = max(1, min(rowCount, 2))
         self.canClear = canClear
+        self.outputURLs = outputURLs
         self.onClear = onClear
         self.content = content()
     }
@@ -358,7 +363,14 @@ struct ConversionFileTray<Content: View>: View {
 
                 Spacer(minLength: 8)
 
-                Button(L10n.string("action.clear_all"), role: .destructive, action: onClear)
+                Button(L10n.string(outputURLs.isEmpty ? "action.clear_all" : "action.batch_actions")) {
+                    if outputURLs.isEmpty {
+                        onClear()
+                    } else {
+                        clearAfterDismiss = false
+                        showsBatchActions = true
+                    }
+                }
                     .font(.subheadline.weight(.medium))
                     .buttonStyle(.plain)
                     .disabled(!canClear)
@@ -400,6 +412,28 @@ struct ConversionFileTray<Content: View>: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .converterCard()
+        .sheet(isPresented: $showsBatchActions, onDismiss: {
+            if clearAfterDismiss {
+                clearAfterDismiss = false
+                onClear()
+            }
+        }) {
+            #if os(iOS)
+            ConversionBatchActivitySheet(urls: outputURLs, onClear: {
+                clearAfterDismiss = true
+            }, onFinish: {
+                showsBatchActions = false
+            })
+            #else
+            VStack {
+                ShareLink(items: outputURLs) { Text(L10n.string("action.share")) }
+                Button(L10n.string("action.clear_all"), role: .destructive) {
+                    clearAfterDismiss = true
+                    showsBatchActions = false
+                }
+            }.padding()
+            #endif
+        }
     }
 }
 
@@ -548,3 +582,49 @@ struct ConversionStatusDot: View {
             .accessibilityLabel(accessibilityLabel)
     }
 }
+
+#if os(iOS)
+private struct ConversionBatchActivitySheet: UIViewControllerRepresentable {
+    let urls: [URL]
+    let onClear: @MainActor @Sendable () -> Void
+    let onFinish: () -> Void
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(
+            activityItems: urls,
+            applicationActivities: [ConversionClearActivity(onClear: onClear)]
+        )
+        controller.completionWithItemsHandler = { _, _, _, _ in
+            onFinish()
+        }
+        return controller
+    }
+
+    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
+}
+
+@MainActor
+private final class ConversionClearActivity: UIActivity {
+    nonisolated private let onClear: @MainActor @Sendable () -> Void
+
+    init(onClear: @escaping @MainActor @Sendable () -> Void) {
+        self.onClear = onClear
+        super.init()
+    }
+
+    override var activityType: UIActivity.ActivityType? {
+        UIActivity.ActivityType("filevra.conversion.clearAll")
+    }
+    override var activityTitle: String? { L10n.string("action.clear_all") }
+    override var activityImage: UIImage? { UIImage(systemName: "trash") }
+    override class var activityCategory: UIActivity.Category { .action }
+    override func canPerform(withActivityItems activityItems: [Any]) -> Bool { true }
+    override func prepare(withActivityItems activityItems: [Any]) {}
+    override func perform() {
+        let action = onClear
+        // Record the request synchronously before finishing can dismiss the sheet.
+        MainActor.assumeIsolated { action() }
+        activityDidFinish(true)
+    }
+}
+#endif

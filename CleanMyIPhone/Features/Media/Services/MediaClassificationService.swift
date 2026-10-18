@@ -416,7 +416,7 @@ struct MediaClassificationService {
     /// 判断 `candidatePairs` 条件是否成立，供调用方选择正确的处理分支。
     nonisolated private static func candidatePairs(from features: [CandidateFeature]) -> CandidateSearchResult {
         let orderedFeatures = features.sorted(by: { $0.id < $1.id })
-        let index = SegmentedHammingIndex(features: orderedFeatures)
+        let index = SegmentedHammingIndex(features: orderedFeatures, pruneDenseBuckets: true)
         let evaluationLimit = orderedFeatures.count >= 500_000 ? 4_096 : Int.max
         let pairs = index.allPairs(
             maximumDistance: maximumPerceptualHashDistance,
@@ -560,8 +560,10 @@ nonisolated final class SegmentedHammingIndex: @unchecked Sendable {
     private let features: [CandidateFeature]
     /// 8 × 65,536 的键空间是固定的；连续数组避免每次探测都执行 Dictionary 哈希。
     private let buckets: [[Int32]]
+    private let pruneDenseBuckets: Bool
 
-    init(features: [CandidateFeature]) {
+    init(features: [CandidateFeature], pruneDenseBuckets: Bool = false) {
+        self.pruneDenseBuckets = pruneDenseBuckets
         self.features = features
         var builtBuckets = [[Int32]](repeating: [], count: 8 * (1 << 16))
         for (featureIndex, feature) in features.enumerated() {
@@ -614,6 +616,61 @@ nonisolated final class SegmentedHammingIndex: @unchecked Sendable {
     }
 
     private func matches(
+        queryIndex: Int,
+        maximumDistance: Int,
+        maximumResults: Int,
+        maximumEvaluations: Int,
+        visited: inout [UInt32],
+        generation: UInt32
+    ) -> [(index: Int32, distance: Int)] {
+        // Sparse queries keep the original hot loop; pruning is useful only for a dense first bucket.
+        guard pruneDenseBuckets,
+              buckets[Self.bucketIndex(band: 0, value: Self.bandValue(of: features[queryIndex].perceptualHash, offset: 0))].count >= 128 else {
+            return originalMatches(queryIndex: queryIndex, maximumDistance: maximumDistance,
+                                   maximumResults: maximumResults, maximumEvaluations: maximumEvaluations,
+                                   visited: &visited, generation: generation)
+        }
+        let hash = features[queryIndex].perceptualHash
+        let bandValues = Self.bandOffsets.map { Self.bandValue(of: hash, offset: $0) }
+        var matches: [(index: Int32, distance: Int)] = []
+        matches.reserveCapacity(maximumResults)
+        var evaluated = 0
+
+        search: for mask in Self.probeMasks {
+            for band in Self.bandOffsets.indices {
+                let indices = buckets[
+                    Self.bucketIndex(band: band, value: bandValues[band] ^ mask)
+                ]
+                for rawIndex in indices {
+                    let index = Int(rawIndex)
+                    // Buckets are appended in index order: the remaining suffix cannot be a prior asset.
+                    if pruneDenseBuckets, index >= queryIndex { break }
+                    guard index < queryIndex, visited[index] != generation else { continue }
+                    visited[index] = generation
+                    evaluated += 1
+                    let distance = (features[index].perceptualHash ^ hash).nonzeroBitCount
+                    if distance <= maximumDistance {
+                        Self.retainNearest(
+                            (rawIndex, distance),
+                            in: &matches,
+                            maximumResults: maximumResults
+                        )
+                    }
+                    // All zero-distance hashes occur in the first exact bucket. Once full,
+                    // its ascending traversal has already found the globally preferred zero matches.
+                    if pruneDenseBuckets, mask == 0, band == 0,
+                       matches.count == maximumResults, matches.last?.distance == 0 {
+                        break search
+                    }
+                    if evaluated >= maximumEvaluations { break search }
+                }
+            }
+        }
+        matches.sort { Self.isPreferred($0, over: $1) }
+        return matches
+    }
+
+    private func originalMatches(
         queryIndex: Int,
         maximumDistance: Int,
         maximumResults: Int,

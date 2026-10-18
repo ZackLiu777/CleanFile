@@ -574,7 +574,7 @@
 
 "cleanup.scan.hint" = "Проверьте похожие фото, большие видео и снимки экрана. Анализ ничего не удаляет.";
 
-"quick.compress.title" = "Сохраните важное, уменьшите размер";
+"quick.compress.title" = "Сжатие";
 
 "quick.video" = "Сжать видео";
 
@@ -641,3 +641,7 @@
 "intro.cleanup.total" = "Выбрано для очистки";
 
 "intro.compress.saved" = "Экономия в этом примере";
+
+"media.more" = "Ещё";
+
+"Other Photos" = "Другие фото";

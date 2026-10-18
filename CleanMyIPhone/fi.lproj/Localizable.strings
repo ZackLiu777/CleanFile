@@ -574,7 +574,7 @@
 
 "cleanup.scan.hint" = "Tarkista samankaltaiset kuvat, suuret videot ja näyttökuvat. Analyysi ei poista mitään.";
 
-"quick.compress.title" = "Säilytä muistot, pienennä kokoa";
+"quick.compress.title" = "Pakkaa";
 
 "quick.video" = "Pakkaa videot";
 
@@ -641,3 +641,7 @@
 "intro.cleanup.total" = "Valittu siivottava tila";
 
 "intro.compress.saved" = "Tässä esimerkissä säästetty tila";
+
+"media.more" = "Lisää";
+
+"Other Photos" = "Muut kuvat";

@@ -301,3 +301,5 @@
 "premium.value.summary" = "Premium：批量清理分类、转换图片和音频、整理文件夹、自定义外观。";
 
 "quick.free" = "免费";
+
+"action.batch_actions" = "批量操作";

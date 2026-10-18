@@ -1017,7 +1017,7 @@ private struct MediaInteractiveGridCellContent: View {
         }
     }
 
-    /// 在 2 列模式显示文件名和真实资源体积，较密网格隐藏文字以保证缩略图可读性。
+    /// 在 2 列模式显示文件名和与删除汇总一致的容量，较密网格隐藏文字。
     private var assetInformation: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(viewModel.displayName(for: assetID))
@@ -1045,13 +1045,10 @@ private struct MediaInteractiveGridCellContent: View {
     }
 
     private var byteCountText: String {
-        if let byteCount = viewModel.exactByteCount(for: assetID) {
-            return ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
-        }
-        if viewModel.isExactByteCountUnavailable(for: assetID) {
-            return AppL10n.string("Size unavailable")
-        }
-        return AppL10n.string("Calculating size…")
+        ByteCountFormatter.string(
+            fromByteCount: viewModel.estimatedByteCount(for: assetID),
+            countStyle: .file
+        )
     }
 
     /// 根据选中状态显示圆形标记，并随密度缩放以避免遮挡小缩略图。

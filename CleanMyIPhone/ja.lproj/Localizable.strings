@@ -572,7 +572,7 @@
 
 "cleanup.scan.hint" = "類似写真や大きな動画、スクリーンショットを確認します。分析中は削除しません。";
 
-"quick.compress.title" = "思い出はそのまま、サイズを小さく";
+"quick.compress.title" = "圧縮";
 
 "quick.video" = "動画を圧縮";
 
@@ -639,3 +639,7 @@
 "intro.cleanup.total" = "選択した整理容量";
 
 "intro.compress.saved" = "この例で節約した容量";
+
+"media.more" = "その他";
+
+"Other Photos" = "その他の写真";

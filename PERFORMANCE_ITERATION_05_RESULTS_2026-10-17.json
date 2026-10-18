@@ -1,0 +1,378 @@
+{
+  "date": "2026-10-17",
+  "tests_passed": 4,
+  "decision": "candidate_only",
+  "records": [
+    {
+      "name": "snapshot-encode",
+      "new_ns": 21160125,
+      "old_ns": 20623042,
+      "round": 0
+    },
+    {
+      "name": "snapshot-read",
+      "new_ns": 27199917,
+      "old_ns": 27735208,
+      "round": 0
+    },
+    {
+      "name": "tree-build-finalize",
+      "new_ns": 6225625,
+      "old_ns": 5258625,
+      "round": 0
+    },
+    {
+      "name": "snapshot-encode",
+      "new_ns": 20654042,
+      "old_ns": 20845625,
+      "round": 1
+    },
+    {
+      "name": "snapshot-read",
+      "new_ns": 28257333,
+      "old_ns": 27424875,
+      "round": 1
+    },
+    {
+      "name": "tree-build-finalize",
+      "new_ns": 6445625,
+      "old_ns": 5488584,
+      "round": 1
+    },
+    {
+      "name": "snapshot-encode",
+      "new_ns": 21701667,
+      "old_ns": 20583792,
+      "round": 2
+    },
+    {
+      "name": "snapshot-read",
+      "new_ns": 28149542,
+      "old_ns": 27863000,
+      "round": 2
+    },
+    {
+      "name": "tree-build-finalize",
+      "new_ns": 6221209,
+      "old_ns": 5626000,
+      "round": 2
+    },
+    {
+      "name": "snapshot-encode",
+      "new_ns": 21112875,
+      "old_ns": 21349666,
+      "round": 3
+    },
+    {
+      "name": "snapshot-read",
+      "new_ns": 29801542,
+      "old_ns": 28930958,
+      "round": 3
+    },
+    {
+      "name": "tree-build-finalize",
+      "new_ns": 6474458,
+      "old_ns": 5529083,
+      "round": 3
+    },
+    {
+      "name": "snapshot-encode",
+      "new_ns": 20873458,
+      "old_ns": 20515166,
+      "round": 4
+    },
+    {
+      "name": "snapshot-read",
+      "new_ns": 28138583,
+      "old_ns": 28595709,
+      "round": 4
+    },
+    {
+      "name": "tree-build-finalize",
+      "new_ns": 5980209,
+      "old_ns": 5491000,
+      "round": 4
+    },
+    {
+      "name": "hash-0",
+      "new_ns": 1229000,
+      "old_ns": 34674875,
+      "round": 0
+    },
+    {
+      "name": "hash-0",
+      "new_ns": 1215250,
+      "old_ns": 34962500,
+      "round": 1
+    },
+    {
+      "name": "hash-0",
+      "new_ns": 1311375,
+      "old_ns": 34494167,
+      "round": 2
+    },
+    {
+      "name": "hash-0",
+      "new_ns": 1239625,
+      "old_ns": 34670417,
+      "round": 3
+    },
+    {
+      "name": "hash-0",
+      "new_ns": 1327250,
+      "old_ns": 33685917,
+      "round": 4
+    },
+    {
+      "name": "hash-1",
+      "new_ns": 3877333,
+      "old_ns": 32161500,
+      "round": 0
+    },
+    {
+      "name": "hash-1",
+      "new_ns": 3807334,
+      "old_ns": 32481084,
+      "round": 1
+    },
+    {
+      "name": "hash-1",
+      "new_ns": 3956125,
+      "old_ns": 32953500,
+      "round": 2
+    },
+    {
+      "name": "hash-1",
+      "new_ns": 3936125,
+      "old_ns": 33042250,
+      "round": 3
+    },
+    {
+      "name": "hash-1",
+      "new_ns": 3903791,
+      "old_ns": 32831584,
+      "round": 4
+    },
+    {
+      "name": "hash-2",
+      "new_ns": 5188166,
+      "old_ns": 5404708,
+      "round": 0
+    },
+    {
+      "name": "hash-2",
+      "new_ns": 5125708,
+      "old_ns": 6020292,
+      "round": 1
+    },
+    {
+      "name": "hash-2",
+      "new_ns": 6490083,
+      "old_ns": 4726000,
+      "round": 2
+    },
+    {
+      "name": "hash-2",
+      "new_ns": 4137667,
+      "old_ns": 6333125,
+      "round": 3
+    },
+    {
+      "name": "hash-2",
+      "new_ns": 6647166,
+      "old_ns": 4070250,
+      "round": 4
+    }
+  ],
+  "previous_records": [
+    {
+      "name": "snapshot-encode",
+      "new_ns": 21211625,
+      "old_ns": 20968250,
+      "round": 0
+    },
+    {
+      "name": "snapshot-read",
+      "new_ns": 27646125,
+      "old_ns": 28731417,
+      "round": 0
+    },
+    {
+      "name": "tree-build-finalize",
+      "new_ns": 5880708,
+      "old_ns": 5554416,
+      "round": 0
+    },
+    {
+      "name": "snapshot-encode",
+      "new_ns": 20873083,
+      "old_ns": 20210125,
+      "round": 1
+    },
+    {
+      "name": "snapshot-read",
+      "new_ns": 26796875,
+      "old_ns": 32413334,
+      "round": 1
+    },
+    {
+      "name": "tree-build-finalize",
+      "new_ns": 11632250,
+      "old_ns": 8129250,
+      "round": 1
+    },
+    {
+      "name": "snapshot-encode",
+      "new_ns": 21305667,
+      "old_ns": 29346250,
+      "round": 2
+    },
+    {
+      "name": "snapshot-read",
+      "new_ns": 30708750,
+      "old_ns": 27682167,
+      "round": 2
+    },
+    {
+      "name": "tree-build-finalize",
+      "new_ns": 8517459,
+      "old_ns": 6690667,
+      "round": 2
+    },
+    {
+      "name": "snapshot-encode",
+      "new_ns": 22865375,
+      "old_ns": 20981542,
+      "round": 3
+    },
+    {
+      "name": "snapshot-read",
+      "new_ns": 31274167,
+      "old_ns": 31593208,
+      "round": 3
+    },
+    {
+      "name": "tree-build-finalize",
+      "new_ns": 8249958,
+      "old_ns": 5607458,
+      "round": 3
+    },
+    {
+      "name": "snapshot-encode",
+      "new_ns": 24103625,
+      "old_ns": 21878625,
+      "round": 4
+    },
+    {
+      "name": "snapshot-read",
+      "new_ns": 29326541,
+      "old_ns": 29481708,
+      "round": 4
+    },
+    {
+      "name": "tree-build-finalize",
+      "new_ns": 6620416,
+      "old_ns": 7569208,
+      "round": 4
+    },
+    {
+      "name": "hash-0",
+      "new_ns": 1431125,
+      "old_ns": 37930666,
+      "round": 0
+    },
+    {
+      "name": "hash-0",
+      "new_ns": 1356042,
+      "old_ns": 35372458,
+      "round": 1
+    },
+    {
+      "name": "hash-0",
+      "new_ns": 1403833,
+      "old_ns": 34917250,
+      "round": 2
+    },
+    {
+      "name": "hash-0",
+      "new_ns": 1289458,
+      "old_ns": 35671125,
+      "round": 3
+    },
+    {
+      "name": "hash-0",
+      "new_ns": 1313166,
+      "old_ns": 36028834,
+      "round": 4
+    },
+    {
+      "name": "hash-1",
+      "new_ns": 3906625,
+      "old_ns": 32919209,
+      "round": 0
+    },
+    {
+      "name": "hash-1",
+      "new_ns": 3886834,
+      "old_ns": 33183958,
+      "round": 1
+    },
+    {
+      "name": "hash-1",
+      "new_ns": 4064667,
+      "old_ns": 33291541,
+      "round": 2
+    },
+    {
+      "name": "hash-1",
+      "new_ns": 3833250,
+      "old_ns": 33429791,
+      "round": 3
+    },
+    {
+      "name": "hash-1",
+      "new_ns": 3970250,
+      "old_ns": 33419125,
+      "round": 4
+    },
+    {
+      "name": "hash-2",
+      "new_ns": 18675916,
+      "old_ns": 4682375,
+      "round": 0
+    },
+    {
+      "name": "hash-2",
+      "new_ns": 17093916,
+      "old_ns": 4950250,
+      "round": 1
+    },
+    {
+      "name": "hash-2",
+      "new_ns": 18746000,
+      "old_ns": 4169208,
+      "round": 2
+    },
+    {
+      "name": "hash-2",
+      "new_ns": 17261958,
+      "old_ns": 4804125,
+      "round": 3
+    },
+    {
+      "name": "hash-2",
+      "new_ns": 18223125,
+      "old_ns": 4215166,
+      "round": 4
+    }
+  ],
+  "source_sha256": {
+    "CleanMyIPhone/Features/Media/Services/MediaClassificationService.swift": "d4b464a29b465f262abb125fd1efaff79abce4567adcc589bb2445583d42099c",
+    "CleanMyIPhone/Features/Storage/Models/FileTree.swift": "d063d2e67e4f1bddb39dc575a70815c7f7d4a08f4f39caf96afecec0508c117b",
+    "CleanMyIPhone/Infrastructure/Persistence/FileSnapshotEncodingCandidate.swift": "052092b83ac2e90f2ad8a31679c8823b8ab86bbf542671cf46320591f51249fe",
+    "CleanMyIPhoneTests/PerformanceIteration05Tests.swift": "d1bce7518da9f93b9fe3ad89b51eb46ba599afe13314d60b07cf55b50d659038"
+  },
+  "scope": "Release simulator, synthetic hashes and metadata, five alternating rounds, no real media, no peak RSS measurement",
+  "raw_log": "/tmp/perf05-density-test.log",
+  "result_bundle": "/tmp/perf05-density-results.xcresult"
+}

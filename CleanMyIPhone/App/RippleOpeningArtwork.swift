@@ -23,13 +23,38 @@ struct RippleOpeningArtwork: View {
                     .frame(width: diameter, height: diameter)
                     .offset(y: (1 - eased) * size * Double(index - 2) * 0.035)
             }
-            Image(systemName: "sparkle")
-                .font(.system(size: size * 0.10, weight: .light))
+            OpeningAppMark()
+                .fill(theme.accentPrimary)
+                .frame(width: size * 0.16, height: size * 0.16)
                 .foregroundStyle(theme.accentPrimary)
                 .scaleEffect(0.4 + progress * 0.6)
                 .opacity(progress)
         }
         .frame(width: size, height: size)
         .accessibilityHidden(true)
+    }
+}
+
+/// Uses the app icon's two planes, cropped to their shared artwork bounds.
+private struct OpeningAppMark: Shape {
+    func path(in rect: CGRect) -> Path {
+        let planes: [[CGPoint]] = [
+            [CGPoint(x: 0, y: 0), CGPoint(x: 512, y: 0),
+             CGPoint(x: 512, y: 168), CGPoint(x: 168, y: 168),
+             CGPoint(x: 168, y: 564), CGPoint(x: 0, y: 564)],
+            [CGPoint(x: 224, y: 224), CGPoint(x: 564, y: 224),
+             CGPoint(x: 564, y: 392), CGPoint(x: 392, y: 392),
+             CGPoint(x: 392, y: 564), CGPoint(x: 224, y: 564)]
+        ]
+        let scale = min(rect.width, rect.height) / 564
+        let origin = CGPoint(x: rect.midX - 282 * scale, y: rect.midY - 282 * scale)
+        return Path { path in
+            for plane in planes {
+                path.addLines(plane.map {
+                    CGPoint(x: origin.x + $0.x * scale, y: origin.y + $0.y * scale)
+                })
+                path.closeSubpath()
+            }
+        }
     }
 }

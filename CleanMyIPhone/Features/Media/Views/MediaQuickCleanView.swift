@@ -124,8 +124,13 @@ struct MediaQuickCleanView: View {
                 Text(error.localizedDescription)
             }
         }
+        .onAppear { viewModel.refreshSelectionIndex() }
+        .onDisappear { viewModel.cancelSelectionIndexPreparation() }
         .onChange(of: photoLibrary.analysisState) { _, _ in
             viewModel.refreshCategories()
+        }
+        .onChange(of: photoLibrary.mediaSizeRevision) { _, _ in
+            viewModel.refreshSelectionIndex()
         }
         .onChange(of: viewModel.categories) { _, categories in
             guard !isAnimatingDeletion else { return }
@@ -281,7 +286,7 @@ struct MediaQuickCleanView: View {
             .buttonStyle(.borderedProminent)
             .tint(theme.negativeRed)
             .disabled(
-                viewModel.selectedAssetIDs.isEmpty
+                viewModel.selectedAssetCount == 0
                     || photoLibrary.deletionState.isDeleting
                     || isAnimatingDeletion
             )
@@ -327,7 +332,7 @@ struct MediaQuickCleanView: View {
     private var selectedCountText: String {
         String.localizedStringWithFormat(
             AppL10n.string("%lld items selected"),
-            Int64(viewModel.selectedAssetIDs.count)
+            Int64(viewModel.selectedAssetCount)
         )
     }
 

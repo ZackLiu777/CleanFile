@@ -1,0 +1,3262 @@
+{
+  "date": "2026-10-17",
+  "environment": "Apple M2 / iPhone 18 Pro Simulator / Release -O / coverage off",
+  "scope": "Synthetic metadata only; no real files read or deleted; fixture creation excluded; five alternating-order rounds",
+  "records": [
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1417,
+      "old_ns": 2750,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1083,
+      "old_ns": 750,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 750,
+      "old_ns": 1000,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 875,
+      "old_ns": 709,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 709,
+      "old_ns": 834,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1042,
+      "old_ns": 1292,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1250,
+      "old_ns": 1042,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1083,
+      "old_ns": 1208,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1125,
+      "old_ns": 1167,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1042,
+      "old_ns": 1166,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 542,
+      "old_ns": 1250,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 750,
+      "old_ns": 500,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 542,
+      "old_ns": 667,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 583,
+      "old_ns": 458,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 500,
+      "old_ns": 625,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 708,
+      "old_ns": 1042,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 875,
+      "old_ns": 708,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 709,
+      "old_ns": 792,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 834,
+      "old_ns": 709,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 750,
+      "old_ns": 791,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 13541,
+      "old_ns": 647875,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 10542,
+      "old_ns": 510125,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4916,
+      "old_ns": 287125,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2833,
+      "old_ns": 351291,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 5583,
+      "old_ns": 283916,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 16667,
+      "old_ns": 150084,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 12000,
+      "old_ns": 145834,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 12292,
+      "old_ns": 111791,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 6917,
+      "old_ns": 90417,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 8125,
+      "old_ns": 92459,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 5291,
+      "old_ns": 112084,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2667,
+      "old_ns": 84292,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1958,
+      "old_ns": 82333,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1708,
+      "old_ns": 83500,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2250,
+      "old_ns": 83208,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4834,
+      "old_ns": 273459,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4333,
+      "old_ns": 250292,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4417,
+      "old_ns": 246250,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2584,
+      "old_ns": 240834,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2666,
+      "old_ns": 248417,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 293875,
+      "old_ns": 40580000,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 912166,
+      "old_ns": 42423292,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 539500,
+      "old_ns": 55626916,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 439500,
+      "old_ns": 57270875,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 283292,
+      "old_ns": 41014917,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1475084,
+      "old_ns": 12527834,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 613292,
+      "old_ns": 11806250,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 633916,
+      "old_ns": 10186000,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 625042,
+      "old_ns": 9588041,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 628792,
+      "old_ns": 9774750,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 248167,
+      "old_ns": 10511541,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 180584,
+      "old_ns": 8993209,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 378583,
+      "old_ns": 9527916,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 217125,
+      "old_ns": 8990833,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 254625,
+      "old_ns": 9833209,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 261500,
+      "old_ns": 29583292,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 193583,
+      "old_ns": 34449625,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 292833,
+      "old_ns": 34234625,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 241958,
+      "old_ns": 31242333,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 342042,
+      "old_ns": 43764041,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1329125,
+      "old_ns": 209186417,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1231417,
+      "old_ns": 207285750,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1317292,
+      "old_ns": 215428417,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1696500,
+      "old_ns": 201451917,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1421417,
+      "old_ns": 225649792,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4092583,
+      "old_ns": 61229167,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 5621042,
+      "old_ns": 55714417,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 3109917,
+      "old_ns": 57933500,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 3055917,
+      "old_ns": 50832625,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 3245750,
+      "old_ns": 56314500,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1482584,
+      "old_ns": 67452958,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1141875,
+      "old_ns": 52851833,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2297500,
+      "old_ns": 57538500,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1288667,
+      "old_ns": 48573125,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1346166,
+      "old_ns": 46448209,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1183958,
+      "old_ns": 172393875,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1106417,
+      "old_ns": 167076417,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1222250,
+      "old_ns": 173580375,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1112333,
+      "old_ns": 173597083,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1174000,
+      "old_ns": 156200750,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 209,
+      "old_ns": 30084,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 125,
+      "old_ns": 4125,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 42,
+      "old_ns": 2208,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 84,
+      "old_ns": 1916,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 42,
+      "old_ns": 1875,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 41,
+      "old_ns": 1834,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 42,
+      "old_ns": 1750,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 41,
+      "old_ns": 1709,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 83,
+      "old_ns": 1667,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 42,
+      "old_ns": 1750,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 17958,
+      "old_ns": 62500,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14750,
+      "old_ns": 60250,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 13458,
+      "old_ns": 60708,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14458,
+      "old_ns": 60208,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14083,
+      "old_ns": 61333,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 13833,
+      "old_ns": 64125,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14083,
+      "old_ns": 60833,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14000,
+      "old_ns": 61791,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 13791,
+      "old_ns": 61209,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 13792,
+      "old_ns": 61417,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 148333,
+      "old_ns": 5707542,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 140167,
+      "old_ns": 5652291,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 141292,
+      "old_ns": 5664500,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 138166,
+      "old_ns": 5707625,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 143834,
+      "old_ns": 5673584,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 117333,
+      "old_ns": 690125,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 121750,
+      "old_ns": 670042,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 126291,
+      "old_ns": 679000,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 125500,
+      "old_ns": 699375,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 140708,
+      "old_ns": 698542,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1640667,
+      "old_ns": 640833459,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1643541,
+      "old_ns": 708955583,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1714125,
+      "old_ns": 626095000,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1865500,
+      "old_ns": 630708750,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1617042,
+      "old_ns": 625406167,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1406208,
+      "old_ns": 7959833,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1322708,
+      "old_ns": 7779416,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1348375,
+      "old_ns": 7938500,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1338750,
+      "old_ns": 7879958,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1536166,
+      "old_ns": 8247750,
+      "round": 4,
+      "shape": 1
+    }
+  ],
+  "source_sha256": {
+    "CleanMyIPhone/Features/Storage/Models/StorageSelectionAlgorithms.swift": "a122697266b813f9c17c97d726a9876137cf17411ac14aa10e8967e10abfe459",
+    "CleanMyIPhoneTests/PerformanceIteration03Tests.swift": "887fb050611034f99d2e4cee970bc2eca6064acd3cd295a35d1bdf1f8208dec9",
+    "CleanMyIPhone/Features/Storage/ViewModels/FileScannerViewModel.swift": "2d634df11f33013f9415ee5b22e830772cba269f07aa49ee5651d7b5355e7a20"
+  },
+  "measurement_note": "Measured before enum/file rename and production wiring; algorithm unchanged. Integration build/correctness checked separately.",
+  "raw_log": "/tmp/perf03-revised-test.log",
+  "initial_source": "import Foundation\n\n/// Candidates stay disconnected until timing and behavioral checks justify promotion.\nnonisolated enum StorageSelectionCandidate {\n    static func originalLargest(_ files: [ScannedFile]) -> [ScannedFile] {\n        Array(files.sorted { $0.byteCount > $1.byteCount }.prefix(10))\n    }\n\n    static func largest(_ files: [ScannedFile]) -> [ScannedFile] {\n        var result: [ScannedFile] = []\n        result.reserveCapacity(10)\n        for file in files {\n            // Strict comparison preserves input order for ties, including unknown sizes.\n            if result.count == 10, file.byteCount <= result[9].byteCount { continue }\n            let index = result.firstIndex { file.byteCount > $0.byteCount } ?? result.count\n            result.insert(file, at: index)\n            if result.count > 10 { result.removeLast() }\n        }\n        return result\n    }\n\n    static func originalSources(_ sources: [URL]) -> [URL] {\n        sources.reduce(into: [URL]()) { result, source in\n            let normalized = source.standardizedFileURL\n            if !result.contains(where: { $0.standardizedFileURL == normalized }) {\n                result.append(source)\n            }\n        }\n    }\n\n    static func sources(_ sources: [URL]) -> [URL] {\n        var seen: Set<URL> = []\n        return sources.filter { seen.insert($0.standardizedFileURL).inserted }\n    }\n}\n",
+  "initial_records": [
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 3291,
+      "old_ns": 1833,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4958,
+      "old_ns": 958,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2667,
+      "old_ns": 916,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2541,
+      "old_ns": 792,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2459,
+      "old_ns": 1000,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2459,
+      "old_ns": 1292,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2667,
+      "old_ns": 1083,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2875,
+      "old_ns": 1125,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2500,
+      "old_ns": 1125,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2458,
+      "old_ns": 1167,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2750,
+      "old_ns": 1083,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2583,
+      "old_ns": 666,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2500,
+      "old_ns": 667,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2500,
+      "old_ns": 583,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2500,
+      "old_ns": 667,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2625,
+      "old_ns": 1000,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2625,
+      "old_ns": 834,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2500,
+      "old_ns": 916,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2584,
+      "old_ns": 791,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2458,
+      "old_ns": 833,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 53959,
+      "old_ns": 701041,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 16167,
+      "old_ns": 621416,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 37791,
+      "old_ns": 877500,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 12416,
+      "old_ns": 864334,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 13083,
+      "old_ns": 424125,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 296792,
+      "old_ns": 1727583,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 304667,
+      "old_ns": 105792,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 272500,
+      "old_ns": 101125,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 275916,
+      "old_ns": 103417,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 271917,
+      "old_ns": 105416,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 18417,
+      "old_ns": 234750,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 9750,
+      "old_ns": 107291,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4042,
+      "old_ns": 114958,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4042,
+      "old_ns": 100500,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 5958,
+      "old_ns": 104333,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 7667,
+      "old_ns": 259667,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 7208,
+      "old_ns": 274458,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 8250,
+      "old_ns": 864583,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 7125,
+      "old_ns": 396000,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 8500,
+      "old_ns": 704417,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1197500,
+      "old_ns": 50193291,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1109000,
+      "old_ns": 38740750,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 339417,
+      "old_ns": 42513375,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 749750,
+      "old_ns": 45666375,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 369084,
+      "old_ns": 40014417,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 45306083,
+      "old_ns": 19653625,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 54638209,
+      "old_ns": 22699250,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 47725541,
+      "old_ns": 18051542,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 56969500,
+      "old_ns": 14733584,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 44536209,
+      "old_ns": 27632042,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 267208,
+      "old_ns": 13286917,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 226333,
+      "old_ns": 10078708,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 951500,
+      "old_ns": 11407792,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 952250,
+      "old_ns": 12280041,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 278250,
+      "old_ns": 11418708,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 305333,
+      "old_ns": 35639459,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 258208,
+      "old_ns": 34262167,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 377667,
+      "old_ns": 31824292,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 222708,
+      "old_ns": 30305750,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 249667,
+      "old_ns": 28522875,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2478500,
+      "old_ns": 218134084,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2321916,
+      "old_ns": 252488583,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1680166,
+      "old_ns": 216390625,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1710417,
+      "old_ns": 236889042,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1342917,
+      "old_ns": 203257750,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 147522000,
+      "old_ns": 60527584,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 151131292,
+      "old_ns": 55109292,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 141413417,
+      "old_ns": 54039833,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 142507083,
+      "old_ns": 53743041,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 137082959,
+      "old_ns": 50766417,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4193000,
+      "old_ns": 83447083,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 3296625,
+      "old_ns": 77023250,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1793834,
+      "old_ns": 76110708,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1721000,
+      "old_ns": 70731834,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1257250,
+      "old_ns": 169258458,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1388292,
+      "old_ns": 217070583,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1484708,
+      "old_ns": 171328166,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1131500,
+      "old_ns": 180596625,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1081417,
+      "old_ns": 166357542,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1316958,
+      "old_ns": 155693250,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 6292,
+      "old_ns": 16708,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 3958,
+      "old_ns": 1500,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1750,
+      "old_ns": 2250,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 2291,
+      "old_ns": 1334,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1500,
+      "old_ns": 1917,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1583,
+      "old_ns": 2042,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 2083,
+      "old_ns": 1417,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1542,
+      "old_ns": 1750,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1917,
+      "old_ns": 1250,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1625,
+      "old_ns": 1959,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 15334,
+      "old_ns": 65208,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 15208,
+      "old_ns": 63334,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 15625,
+      "old_ns": 68541,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 15958,
+      "old_ns": 63458,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 13959,
+      "old_ns": 64458,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14375,
+      "old_ns": 64417,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14833,
+      "old_ns": 63166,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14250,
+      "old_ns": 64833,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14875,
+      "old_ns": 63416,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14250,
+      "old_ns": 64208,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 161417,
+      "old_ns": 5995958,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 150458,
+      "old_ns": 6068208,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 166708,
+      "old_ns": 6002500,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 153625,
+      "old_ns": 6249292,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 154417,
+      "old_ns": 6035000,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 128334,
+      "old_ns": 730958,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 126584,
+      "old_ns": 751750,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 167458,
+      "old_ns": 742875,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 137917,
+      "old_ns": 738958,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 156708,
+      "old_ns": 971000,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1495167,
+      "old_ns": 616854000,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1440875,
+      "old_ns": 604075250,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1529875,
+      "old_ns": 600971416,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1469958,
+      "old_ns": 586902083,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1546333,
+      "old_ns": 582057208,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1214750,
+      "old_ns": 7135458,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1217292,
+      "old_ns": 7084667,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1229875,
+      "old_ns": 7163459,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1233833,
+      "old_ns": 7281333,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1252750,
+      "old_ns": 7194208,
+      "round": 4,
+      "shape": 1
+    }
+  ],
+  "integrated_records": [
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1292,
+      "old_ns": 1750,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 5500,
+      "old_ns": 2166,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1041,
+      "old_ns": 1667,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1000,
+      "old_ns": 917,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 875,
+      "old_ns": 917,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 7375,
+      "old_ns": 1375,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1417,
+      "old_ns": 1083,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1083,
+      "old_ns": 1292,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1250,
+      "old_ns": 1125,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1125,
+      "old_ns": 1208,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 667,
+      "old_ns": 708,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2750,
+      "old_ns": 750,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 625,
+      "old_ns": 708,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 625,
+      "old_ns": 583,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 667,
+      "old_ns": 625,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 916,
+      "old_ns": 1000,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 875,
+      "old_ns": 791,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 750,
+      "old_ns": 833,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 875,
+      "old_ns": 750,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 792,
+      "old_ns": 833,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 5250,
+      "old_ns": 319167,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 3625,
+      "old_ns": 308583,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 15250,
+      "old_ns": 335166,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 3667,
+      "old_ns": 311833,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 3500,
+      "old_ns": 294750,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 7459,
+      "old_ns": 109416,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 7208,
+      "old_ns": 103666,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 6542,
+      "old_ns": 104916,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 7083,
+      "old_ns": 104750,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 6750,
+      "old_ns": 102208,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 3042,
+      "old_ns": 129959,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2417,
+      "old_ns": 190208,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2209,
+      "old_ns": 117834,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1708,
+      "old_ns": 134792,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1791,
+      "old_ns": 101000,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4042,
+      "old_ns": 262750,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2625,
+      "old_ns": 278542,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2416,
+      "old_ns": 275084,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2083,
+      "old_ns": 280167,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4583,
+      "old_ns": 823666,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 247958,
+      "old_ns": 34707125,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 175500,
+      "old_ns": 42372208,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 299500,
+      "old_ns": 35994417,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 272458,
+      "old_ns": 36192042,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 384833,
+      "old_ns": 38602000,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 617625,
+      "old_ns": 11457542,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 621666,
+      "old_ns": 11626583,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 638750,
+      "old_ns": 11931042,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 632709,
+      "old_ns": 12110833,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 660750,
+      "old_ns": 11489959,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 367708,
+      "old_ns": 12128500,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 328083,
+      "old_ns": 10518083,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 373959,
+      "old_ns": 11059791,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 336875,
+      "old_ns": 10806250,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 422584,
+      "old_ns": 10599542,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 611875,
+      "old_ns": 31129167,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 328042,
+      "old_ns": 31574667,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 443208,
+      "old_ns": 28327042,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 260584,
+      "old_ns": 28302000,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 100000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 241875,
+      "old_ns": 28095625,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1251917,
+      "old_ns": 191435959,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1190875,
+      "old_ns": 188000083,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 997291,
+      "old_ns": 183038375,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 928041,
+      "old_ns": 191068834,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1112416,
+      "old_ns": 198381583,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4084916,
+      "old_ns": 75850625,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 3015667,
+      "old_ns": 62344292,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 4525625,
+      "old_ns": 53675417,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 6062416,
+      "old_ns": 55228833,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2989375,
+      "old_ns": 55156000,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1770833,
+      "old_ns": 67673167,
+      "round": 0,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1560792,
+      "old_ns": 55139792,
+      "round": 1,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1112750,
+      "old_ns": 49140000,
+      "round": 2,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1158541,
+      "old_ns": 47889375,
+      "round": 3,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1130625,
+      "old_ns": 48141917,
+      "round": 4,
+      "shape": 2
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1361208,
+      "old_ns": 170814375,
+      "round": 0,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1108250,
+      "old_ns": 158887667,
+      "round": 1,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 2861792,
+      "old_ns": 165667166,
+      "round": 2,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1446417,
+      "old_ns": 179949958,
+      "round": 3,
+      "shape": 3
+    },
+    {
+      "count": 500000,
+      "equal": true,
+      "experiment": "top10",
+      "new_ns": 1287375,
+      "old_ns": 163515791,
+      "round": 4,
+      "shape": 3
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 125,
+      "old_ns": 86291,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 125,
+      "old_ns": 5417,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 42,
+      "old_ns": 2458,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 83,
+      "old_ns": 2042,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 42,
+      "old_ns": 1833,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 42,
+      "old_ns": 2291,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 41,
+      "old_ns": 1792,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 42,
+      "old_ns": 1666,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 42,
+      "old_ns": 1750,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 1,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 42,
+      "old_ns": 1750,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 19583,
+      "old_ns": 63958,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14958,
+      "old_ns": 61417,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 13667,
+      "old_ns": 62292,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14875,
+      "old_ns": 60958,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 13500,
+      "old_ns": 61583,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14041,
+      "old_ns": 61750,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14208,
+      "old_ns": 61583,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14042,
+      "old_ns": 62375,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 14333,
+      "old_ns": 60625,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 10,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 13916,
+      "old_ns": 61500,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 142875,
+      "old_ns": 5754458,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 143750,
+      "old_ns": 5760250,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 142000,
+      "old_ns": 5762959,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 140208,
+      "old_ns": 5923791,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 152291,
+      "old_ns": 5812542,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 124916,
+      "old_ns": 733458,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 125250,
+      "old_ns": 726958,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 124875,
+      "old_ns": 727917,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 125917,
+      "old_ns": 725291,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 100,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 126250,
+      "old_ns": 726167,
+      "round": 4,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1513125,
+      "old_ns": 593103542,
+      "round": 0,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1416167,
+      "old_ns": 592097125,
+      "round": 1,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1571042,
+      "old_ns": 671708875,
+      "round": 2,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1505541,
+      "old_ns": 575419042,
+      "round": 3,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1696208,
+      "old_ns": 576270959,
+      "round": 4,
+      "shape": 0
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1372458,
+      "old_ns": 9844000,
+      "round": 0,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1710375,
+      "old_ns": 10458042,
+      "round": 1,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1216708,
+      "old_ns": 8153959,
+      "round": 2,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1199167,
+      "old_ns": 8544917,
+      "round": 3,
+      "shape": 1
+    },
+    {
+      "count": 1000,
+      "equal": true,
+      "experiment": "sources",
+      "new_ns": 1634791,
+      "old_ns": 10386000,
+      "round": 4,
+      "shape": 1
+    }
+  ],
+  "integrated_test_log": "/tmp/perf03-final-test.log",
+  "integrated_tests_passed": 2,
+  "empty_filter_run_excluded": "/tmp/perf03-integrated-test.log"
+}

@@ -572,7 +572,7 @@
 
 "cleanup.scan.hint" = "Revisa fotos similares, vídeos grandes y capturas. El análisis no elimina nada.";
 
-"quick.compress.title" = "Conserva más, ocupa menos";
+"quick.compress.title" = "Comprimir";
 
 "quick.video" = "Comprimir vídeos";
 
@@ -639,3 +639,7 @@
 "intro.cleanup.total" = "Espacio seleccionado para limpiar";
 
 "intro.compress.saved" = "Espacio ahorrado en este ejemplo";
+
+"media.more" = "Más";
+
+"Other Photos" = "Otras fotos";

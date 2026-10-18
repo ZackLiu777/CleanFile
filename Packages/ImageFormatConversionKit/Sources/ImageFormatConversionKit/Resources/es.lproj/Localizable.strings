@@ -301,3 +301,5 @@
 "premium.value.summary" = "Premium: limpiar categorías juntas, convertir imágenes y audio, organizar carpetas y personalizar el aspecto.";
 
 "quick.free" = "Gratis";
+
+"action.batch_actions" = "Acciones por lotes";

@@ -1,0 +1,1828 @@
+{
+  "date": "2026-10-17",
+  "decision": "keep_original",
+  "tests_passed": 3,
+  "environment": "Release -O, coverage disabled, iPhone 18 Pro Simulator, Apple M2",
+  "measurement_scope": "Synthetic String identifiers and String result payloads; fixture creation excluded; enqueue/dequeue included; no real PhotoKit resources or codec execution",
+  "records": [
+    {
+      "count": 1,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 76792,
+      "old_ns": 78250,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 1,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 77042,
+      "old_ns": 76292,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 1,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 76500,
+      "old_ns": 76417,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 1,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 76750,
+      "old_ns": 74583,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 1,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 76500,
+      "old_ns": 76083,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 362542,
+      "old_ns": 340708,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 353667,
+      "old_ns": 341708,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 343958,
+      "old_ns": 341542,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 344542,
+      "old_ns": 340833,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 343167,
+      "old_ns": 340625,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 32,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 872166,
+      "old_ns": 846334,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 32,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 863500,
+      "old_ns": 849708,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 32,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 864125,
+      "old_ns": 868000,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 32,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 870708,
+      "old_ns": 850083,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 32,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1643916,
+      "old_ns": 849625,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 37208,
+      "old_ns": 275625,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 36416,
+      "old_ns": 249625,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 33917,
+      "old_ns": 254250,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 36917,
+      "old_ns": 246667,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 32791,
+      "old_ns": 262792,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 10000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 591209,
+      "old_ns": 14700125,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 10000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 308958,
+      "old_ns": 16623583,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 10000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 222416,
+      "old_ns": 15207875,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 10000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 206167,
+      "old_ns": 13268375,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 10000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 205459,
+      "old_ns": 12576500,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 50000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1051917,
+      "old_ns": 397373500,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 50000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 984084,
+      "old_ns": 391877875,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 50000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1078833,
+      "old_ns": 393230500,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 50000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1019167,
+      "old_ns": 434211125,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 50000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1068250,
+      "old_ns": 420208125,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 5042,
+      "old_ns": 20000,
+      "round": 0,
+      "shape": "ascending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 5083,
+      "old_ns": 2834,
+      "round": 1,
+      "shape": "ascending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 3000,
+      "old_ns": 3667,
+      "round": 2,
+      "shape": "ascending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 3834,
+      "old_ns": 2708,
+      "round": 3,
+      "shape": "ascending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 2917,
+      "old_ns": 3375,
+      "round": 4,
+      "shape": "ascending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 5041,
+      "old_ns": 6000,
+      "round": 0,
+      "shape": "descending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 5708,
+      "old_ns": 4958,
+      "round": 1,
+      "shape": "descending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 5166,
+      "old_ns": 5750,
+      "round": 2,
+      "shape": "descending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 5541,
+      "old_ns": 4959,
+      "round": 3,
+      "shape": "descending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 6083,
+      "old_ns": 10250,
+      "round": 4,
+      "shape": "descending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4333,
+      "old_ns": 5459,
+      "round": 0,
+      "shape": "shuffled"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 5584,
+      "old_ns": 4084,
+      "round": 1,
+      "shape": "shuffled"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4333,
+      "old_ns": 4875,
+      "round": 2,
+      "shape": "shuffled"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4792,
+      "old_ns": 4083,
+      "round": 3,
+      "shape": "shuffled"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4208,
+      "old_ns": 4667,
+      "round": 4,
+      "shape": "shuffled"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 2875,
+      "old_ns": 3375,
+      "round": 0,
+      "shape": "sparse"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 3375,
+      "old_ns": 2667,
+      "round": 1,
+      "shape": "sparse"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 2917,
+      "old_ns": 3292,
+      "round": 2,
+      "shape": "sparse"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 3416,
+      "old_ns": 2709,
+      "round": 3,
+      "shape": "sparse"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 2917,
+      "old_ns": 3291,
+      "round": 4,
+      "shape": "sparse"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 149292,
+      "old_ns": 217416,
+      "round": 0,
+      "shape": "ascending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 151583,
+      "old_ns": 215792,
+      "round": 1,
+      "shape": "ascending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 149458,
+      "old_ns": 217458,
+      "round": 2,
+      "shape": "ascending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 151084,
+      "old_ns": 217125,
+      "round": 3,
+      "shape": "ascending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 151541,
+      "old_ns": 217667,
+      "round": 4,
+      "shape": "ascending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 291542,
+      "old_ns": 220375,
+      "round": 0,
+      "shape": "descending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 287917,
+      "old_ns": 222625,
+      "round": 1,
+      "shape": "descending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 269416,
+      "old_ns": 204334,
+      "round": 2,
+      "shape": "descending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 272209,
+      "old_ns": 194333,
+      "round": 3,
+      "shape": "descending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 273416,
+      "old_ns": 191667,
+      "round": 4,
+      "shape": "descending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 216125,
+      "old_ns": 1548958,
+      "round": 0,
+      "shape": "shuffled"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 198875,
+      "old_ns": 1530792,
+      "round": 1,
+      "shape": "shuffled"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 200709,
+      "old_ns": 1473750,
+      "round": 2,
+      "shape": "shuffled"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 200500,
+      "old_ns": 1480333,
+      "round": 3,
+      "shape": "shuffled"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 195417,
+      "old_ns": 1508166,
+      "round": 4,
+      "shape": "shuffled"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 172125,
+      "old_ns": 173125,
+      "round": 0,
+      "shape": "sparse"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 169834,
+      "old_ns": 172875,
+      "round": 1,
+      "shape": "sparse"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 167666,
+      "old_ns": 172167,
+      "round": 2,
+      "shape": "sparse"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 170208,
+      "old_ns": 167542,
+      "round": 3,
+      "shape": "sparse"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 173833,
+      "old_ns": 170292,
+      "round": 4,
+      "shape": "sparse"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 12835083,
+      "old_ns": 17734542,
+      "round": 0,
+      "shape": "ascending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 12849875,
+      "old_ns": 17905792,
+      "round": 1,
+      "shape": "ascending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 12940459,
+      "old_ns": 17691834,
+      "round": 2,
+      "shape": "ascending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 12733916,
+      "old_ns": 17857791,
+      "round": 3,
+      "shape": "ascending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 12918875,
+      "old_ns": 17409625,
+      "round": 4,
+      "shape": "ascending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 23327167,
+      "old_ns": 18108792,
+      "round": 0,
+      "shape": "descending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 23277042,
+      "old_ns": 18330000,
+      "round": 1,
+      "shape": "descending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 23205208,
+      "old_ns": 18359541,
+      "round": 2,
+      "shape": "descending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 22685209,
+      "old_ns": 18319750,
+      "round": 3,
+      "shape": "descending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 22504250,
+      "old_ns": 18205792,
+      "round": 4,
+      "shape": "descending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 36964625,
+      "old_ns": 179301792,
+      "round": 0,
+      "shape": "shuffled"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 22909958,
+      "old_ns": 149770875,
+      "round": 1,
+      "shape": "shuffled"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 20987917,
+      "old_ns": 153404333,
+      "round": 2,
+      "shape": "shuffled"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 21334625,
+      "old_ns": 153893375,
+      "round": 3,
+      "shape": "shuffled"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 21406708,
+      "old_ns": 156007375,
+      "round": 4,
+      "shape": "shuffled"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 17720959,
+      "old_ns": 17924333,
+      "round": 0,
+      "shape": "sparse"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 18469459,
+      "old_ns": 17941625,
+      "round": 1,
+      "shape": "sparse"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 27242958,
+      "old_ns": 19037416,
+      "round": 2,
+      "shape": "sparse"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 20629875,
+      "old_ns": 19769583,
+      "round": 3,
+      "shape": "sparse"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 23252292,
+      "old_ns": 23863791,
+      "round": 4,
+      "shape": "sparse"
+    }
+  ],
+  "initial_records": [
+    {
+      "count": 1,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 75042,
+      "old_ns": 76250,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 1,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 91584,
+      "old_ns": 74500,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 1,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 73958,
+      "old_ns": 74542,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 1,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 76250,
+      "old_ns": 76541,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 1,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 139500,
+      "old_ns": 214333,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 653291,
+      "old_ns": 646000,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 651708,
+      "old_ns": 655041,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 659875,
+      "old_ns": 636542,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 669834,
+      "old_ns": 645042,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 663042,
+      "old_ns": 638500,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 32,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1412208,
+      "old_ns": 1805417,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 32,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1803417,
+      "old_ns": 1304417,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 32,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1338166,
+      "old_ns": 1776584,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 32,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 952167,
+      "old_ns": 1696292,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 32,
+      "cycles": 1000,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1793333,
+      "old_ns": 1148958,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 37209,
+      "old_ns": 270500,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 36542,
+      "old_ns": 250458,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 32375,
+      "old_ns": 252459,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 32708,
+      "old_ns": 247208,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 33000,
+      "old_ns": 257250,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 10000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 538292,
+      "old_ns": 38888792,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 10000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 362291,
+      "old_ns": 29732166,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 10000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 453708,
+      "old_ns": 16742833,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 10000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 349917,
+      "old_ns": 23251708,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 10000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 201292,
+      "old_ns": 22451083,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 50000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1161542,
+      "old_ns": 642697416,
+      "round": 0,
+      "shape": "fifo"
+    },
+    {
+      "count": 50000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1064917,
+      "old_ns": 552445666,
+      "round": 1,
+      "shape": "fifo"
+    },
+    {
+      "count": 50000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1171042,
+      "old_ns": 496060875,
+      "round": 2,
+      "shape": "fifo"
+    },
+    {
+      "count": 50000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1077250,
+      "old_ns": 443384042,
+      "round": 3,
+      "shape": "fifo"
+    },
+    {
+      "count": 50000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "media-queue",
+      "new_ns": 1082167,
+      "old_ns": 403895000,
+      "round": 4,
+      "shape": "fifo"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4125,
+      "old_ns": 21667,
+      "round": 0,
+      "shape": "ascending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4875,
+      "old_ns": 2667,
+      "round": 1,
+      "shape": "ascending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 2792,
+      "old_ns": 3833,
+      "round": 2,
+      "shape": "ascending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 3750,
+      "old_ns": 2708,
+      "round": 3,
+      "shape": "ascending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 2792,
+      "old_ns": 3416,
+      "round": 4,
+      "shape": "ascending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4958,
+      "old_ns": 5667,
+      "round": 0,
+      "shape": "descending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 5583,
+      "old_ns": 4834,
+      "round": 1,
+      "shape": "descending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4875,
+      "old_ns": 5542,
+      "round": 2,
+      "shape": "descending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 5542,
+      "old_ns": 4750,
+      "round": 3,
+      "shape": "descending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 5000,
+      "old_ns": 5334,
+      "round": 4,
+      "shape": "descending"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4791,
+      "old_ns": 8958,
+      "round": 0,
+      "shape": "shuffled"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 5875,
+      "old_ns": 3875,
+      "round": 1,
+      "shape": "shuffled"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4250,
+      "old_ns": 4958,
+      "round": 2,
+      "shape": "shuffled"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4875,
+      "old_ns": 3875,
+      "round": 3,
+      "shape": "shuffled"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 4084,
+      "old_ns": 4541,
+      "round": 4,
+      "shape": "shuffled"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 2709,
+      "old_ns": 3458,
+      "round": 0,
+      "shape": "sparse"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 3459,
+      "old_ns": 2583,
+      "round": 1,
+      "shape": "sparse"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 2750,
+      "old_ns": 3292,
+      "round": 2,
+      "shape": "sparse"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 3166,
+      "old_ns": 2625,
+      "round": 3,
+      "shape": "sparse"
+    },
+    {
+      "count": 8,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 2791,
+      "old_ns": 3250,
+      "round": 4,
+      "shape": "sparse"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 211916,
+      "old_ns": 214292,
+      "round": 0,
+      "shape": "ascending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 214667,
+      "old_ns": 209416,
+      "round": 1,
+      "shape": "ascending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 209792,
+      "old_ns": 205625,
+      "round": 2,
+      "shape": "ascending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 214917,
+      "old_ns": 209083,
+      "round": 3,
+      "shape": "ascending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 200000,
+      "old_ns": 188334,
+      "round": 4,
+      "shape": "ascending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 199417,
+      "old_ns": 186250,
+      "round": 0,
+      "shape": "descending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 201583,
+      "old_ns": 189500,
+      "round": 1,
+      "shape": "descending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 209000,
+      "old_ns": 219333,
+      "round": 2,
+      "shape": "descending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 201000,
+      "old_ns": 185500,
+      "round": 3,
+      "shape": "descending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 200125,
+      "old_ns": 187292,
+      "round": 4,
+      "shape": "descending"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 200459,
+      "old_ns": 1531250,
+      "round": 0,
+      "shape": "shuffled"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 201208,
+      "old_ns": 1522000,
+      "round": 1,
+      "shape": "shuffled"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 204750,
+      "old_ns": 1506000,
+      "round": 2,
+      "shape": "shuffled"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 205416,
+      "old_ns": 1498709,
+      "round": 3,
+      "shape": "shuffled"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 201208,
+      "old_ns": 1493875,
+      "round": 4,
+      "shape": "shuffled"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 174083,
+      "old_ns": 181041,
+      "round": 0,
+      "shape": "sparse"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 172833,
+      "old_ns": 169333,
+      "round": 1,
+      "shape": "sparse"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 171250,
+      "old_ns": 168292,
+      "round": 2,
+      "shape": "sparse"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 178250,
+      "old_ns": 168166,
+      "round": 3,
+      "shape": "sparse"
+    },
+    {
+      "count": 1000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 169209,
+      "old_ns": 170667,
+      "round": 4,
+      "shape": "sparse"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 19447500,
+      "old_ns": 17616208,
+      "round": 0,
+      "shape": "ascending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 18762750,
+      "old_ns": 17788333,
+      "round": 1,
+      "shape": "ascending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 19481875,
+      "old_ns": 17532375,
+      "round": 2,
+      "shape": "ascending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 18983542,
+      "old_ns": 17618875,
+      "round": 3,
+      "shape": "ascending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 19236625,
+      "old_ns": 17510167,
+      "round": 4,
+      "shape": "ascending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 19233375,
+      "old_ns": 18230833,
+      "round": 0,
+      "shape": "descending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 19533625,
+      "old_ns": 19363750,
+      "round": 1,
+      "shape": "descending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 19906750,
+      "old_ns": 19280458,
+      "round": 2,
+      "shape": "descending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 19377084,
+      "old_ns": 18455375,
+      "round": 3,
+      "shape": "descending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 21518708,
+      "old_ns": 18698125,
+      "round": 4,
+      "shape": "descending"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 20270125,
+      "old_ns": 148268292,
+      "round": 0,
+      "shape": "shuffled"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 20775875,
+      "old_ns": 146184416,
+      "round": 1,
+      "shape": "shuffled"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 19823292,
+      "old_ns": 146598083,
+      "round": 2,
+      "shape": "shuffled"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 19658459,
+      "old_ns": 145932250,
+      "round": 3,
+      "shape": "shuffled"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 20954625,
+      "old_ns": 145601959,
+      "round": 4,
+      "shape": "shuffled"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 18152625,
+      "old_ns": 17220416,
+      "round": 0,
+      "shape": "sparse"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 17544417,
+      "old_ns": 17375584,
+      "round": 1,
+      "shape": "sparse"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 17635208,
+      "old_ns": 17934709,
+      "round": 2,
+      "shape": "sparse"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 18028541,
+      "old_ns": 25269250,
+      "round": 3,
+      "shape": "sparse"
+    },
+    {
+      "count": 100000,
+      "cycles": 1,
+      "equal": true,
+      "experiment": "batch-order",
+      "new_ns": 27286625,
+      "old_ns": 34141000,
+      "round": 4,
+      "shape": "sparse"
+    }
+  ],
+  "source_sha256": {
+    "CleanMyIPhone/Features/Media/Models/MediaSizeRequestQueue.swift": "797cb01cfab0c76af2ac13310b866ff9fd2cab8b0a9a9def960d4c0b79d9957b",
+    "Packages/ImageFormatConversionKit/Sources/ImageFormatConversionKit/Engines/BatchResultOrderingCandidate.swift": "119c20c455d10b4a1cafff6cd92e332845c0c21c630327ed98ccc012315b4023",
+    "CleanMyIPhoneTests/PerformanceIteration04Tests.swift": "e52409396df75812f20f77d6e4e0106528e66bf397f944bfe08e91d32086f75b"
+  },
+  "initial_sources": {
+    "queue": "import Foundation\n\n/// FIFO for PhotoKit identifier requests. All mutation remains owned by the ViewModel.\nnonisolated struct MediaSizeRequestQueue {\n    private var storage: [String] = []\n    private var head = 0\n\n    var count: Int { storage.count - head }\n    var isEmpty: Bool { count == 0 }\n\n    mutating func append(_ identifier: String) { storage.append(identifier) }\n\n    mutating func popFirst() -> String? {\n        guard head < storage.count else { return nil }\n        // Short queues keep the original array path; large queues avoid repeated tail copies.\n        if head == 0, storage.count <= 32 { return storage.removeFirst() }\n        let identifier = storage[head]\n        storage[head] = \"\"\n        head += 1\n        if head == storage.count {\n            storage.removeAll(keepingCapacity: true)\n            head = 0\n        } else if head >= 1_024, head >= storage.count - head {\n            storage.removeFirst(head)\n            head = 0\n        }\n        return identifier\n    }\n\n    mutating func removeAll() {\n        storage.removeAll()\n        head = 0\n    }\n}\n\n/// Both timed paths live in the same module and include enqueue/dequeue work.\nnonisolated enum MediaSizeRequestQueueComparison {\n    static func original(_ identifiers: [String], cycles: Int) -> Int {\n        var checksum = 0\n        for _ in 0..<cycles {\n            var queue: [String] = []\n            for identifier in identifiers { queue.append(identifier) }\n            while !queue.isEmpty { checksum &+= queue.removeFirst().utf8.count }\n        }\n        return checksum\n    }\n\n    static func proposed(_ identifiers: [String], cycles: Int) -> Int {\n        var checksum = 0\n        for _ in 0..<cycles {\n            var queue = MediaSizeRequestQueue()\n            for identifier in identifiers { queue.append(identifier) }\n            while let identifier = queue.popFirst() { checksum &+= identifier.utf8.count }\n        }\n        return checksum\n    }\n}\n",
+    "ordering": "/// Candidate only. Request indexes are unique and in 0..<total, as guaranteed by the batch loop.\nenum BatchResultOrderingCandidate {\n    static func original<Value>(_ values: [(Int, Value)]) -> [Value] {\n        values.sorted { $0.0 < $1.0 }.map(\\.1)\n    }\n\n    static func proposed<Value>(_ values: [(Int, Value)], total: Int) -> [Value] {\n        guard values.count > 32, total >= values.count,\n              total / 4 <= values.count else { return original(values) }\n        var positions = Array(repeating: -1, count: total)\n        for (position, pair) in values.enumerated() {\n            guard positions.indices.contains(pair.0), positions[pair.0] == -1 else {\n                return original(values)\n            }\n            positions[pair.0] = position\n        }\n        var result: [Value] = []\n        result.reserveCapacity(values.count)\n        for position in positions where position >= 0 { result.append(values[position].1) }\n        return result\n    }\n}\n"
+  },
+  "raw_logs": [
+    "/tmp/perf04-test.log",
+    "/tmp/perf04-revised-test.log"
+  ],
+  "result_bundles": [
+    "/tmp/perf04-results.xcresult",
+    "/tmp/perf04-revised-results.xcresult"
+  ]
+}

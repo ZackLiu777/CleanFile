@@ -26,6 +26,13 @@ struct PhotosView: View {
     var onOpenConversion: () -> Void = {}
     @State private var animatedStorageFraction = 0.0
     @State private var showsQuickClean = false
+    @State private var swipeReviewRequest: SwipeReviewRequest?
+
+    private struct SwipeReviewRequest: Identifiable {
+        let id = UUID()
+        let assetIDs: [String]
+        let suggestedDeletionIDs: Set<String>
+    }
 
     var body: some View {
         NavigationStack {
@@ -70,20 +77,30 @@ struct PhotosView: View {
                 }
             }
             .toolbar {
-                if !showsDashboardHeader {
-                    ToolbarItem(placement: .topBarTrailing) { conversionButton }
-                }
-                ToolbarItemGroup(placement: .topBarLeading) {
-                    Button {
-                        showsQuickClean = true
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        Button { showsQuickClean = true } label: {
+                            Label("Quick Cleanup", systemImage: "sparkles")
+                        }
+                        .accessibilityIdentifier("media.quickClean.open")
+                        Button(action: openAllPhotosSwipeReview) {
+                            Label("Swipe Review", systemImage: "rectangle.stack")
+                        }
+                        .disabled(!viewModel.assets.contains { $0.mediaType == .image })
+                        .accessibilityIdentifier("media.swipeReview.open")
+                        Button(action: onOpenStorage) {
+                            Label("Storage", systemImage: "externaldrive")
+                        }
+                        .accessibilityIdentifier("media.storage")
+                        Button(action: onOpenConversion) {
+                            Label("Convert", systemImage: "arrow.triangle.2.circlepath")
+                        }
+                        .accessibilityIdentifier("media.convert")
                     } label: {
-                        Label("Quick Cleanup", systemImage: "sparkles")
+                        Label("media.more", systemImage: "ellipsis")
+                            .labelStyle(.iconOnly)
                     }
-                    .accessibilityIdentifier("media.quickClean.open")
-                    Button(action: onOpenStorage) {
-                        Label("Storage", systemImage: "externaldrive")
-                    }
-                    .accessibilityIdentifier("media.storage")
+                    .accessibilityIdentifier("media.more")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: onOpenSettings) {
@@ -97,6 +114,15 @@ struct PhotosView: View {
             }
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
+        }
+        .fullScreenCover(item: $swipeReviewRequest) { request in
+            MediaSwipeReviewView(
+                assetIDs: request.assetIDs,
+                protectedAssetIDs: [],
+                suggestedDeletionIDs: request.suggestedDeletionIDs,
+                photoLibrary: viewModel,
+                onDismiss: { swipeReviewRequest = nil }
+            )
         }
         .onAppear {
             animateStorageBarIfNeeded()
@@ -114,6 +140,22 @@ struct PhotosView: View {
         .onChange(of: themeSettings.interfaceAnimationsEnabled) { _, _ in
             animateStorageBarIfNeeded()
         }
+    }
+
+    private func openAllPhotosSwipeReview() {
+        // Freeze the review inventory once at entry, rather than rebuilding it for each swipe.
+        let identifiers = viewModel.assets.compactMap { asset in
+            asset.mediaType == .image ? asset.localIdentifier : nil
+        }
+        guard !identifiers.isEmpty else { return }
+        let suggestions: Set<String>
+        switch viewModel.analysisState {
+        case .success(let result), .partialFailure(let result):
+            suggestions = result.suggestedCleanupIDs
+        default:
+            suggestions = []
+        }
+        swipeReviewRequest = SwipeReviewRequest(assetIDs: identifiers, suggestedDeletionIDs: suggestions)
     }
 
     @ViewBuilder
@@ -159,61 +201,36 @@ struct PhotosView: View {
         .padding(.horizontal)
     }
 
-    private var showsDashboardHeader: Bool {
-        (viewModel.authorizationStatus == .authorized || viewModel.authorizationStatus == .limited)
-            && (viewModel.isLoading || !viewModel.assets.isEmpty)
-    }
-
     private var mediaTitle: some View {
         Text("My Space")
             .appTypeface(.largeTitle.bold(), size: 34, relativeTo: .largeTitle, weight: .bold)
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    private var conversionButton: some View {
-        Button(action: onOpenConversion) {
-            Label("Convert", systemImage: "arrow.triangle.2.circlepath")
-                .font(.subheadline.weight(.semibold))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .foregroundStyle(theme.textPrimary)
-                .background(theme.accentPrimary.opacity(0.18), in: Capsule())
-                .overlay { Capsule().strokeBorder(theme.accentPrimary.opacity(0.35), lineWidth: 1) }
-                .frame(minHeight: 44)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("media.convert")
-    }
-
     private var mediaDashboard: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            LazyVStack(spacing: 24) {
-                VStack(spacing: 12) {
-                    ViewThatFits(in: .horizontal) {
-                        HStack(spacing: 12) {
-                            mediaTitle.fixedSize(horizontal: true, vertical: false)
-                            Spacer(minLength: 8)
-                            conversionButton.fixedSize(horizontal: true, vertical: false)
-                        }
-                        VStack(alignment: .leading, spacing: 8) {
-                            mediaTitle
-                            conversionButton
-                        }
+        GeometryReader { geometry in
+            let frame = geometry.frame(in: .global)
+            let windowHeight = frame.maxY + geometry.safeAreaInsets.bottom
+            let topInset = max(4, (windowHeight * 0.19 - frame.minY) / 2)
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVStack(spacing: 24) {
+                    VStack(spacing: 12) {
+                        mediaTitle
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 12)
+                        storageOverview
                     }
-                    .padding(.horizontal, 12)
-                    storageOverview
+                    analysisContent
+                    quickCompressionCards
                 }
-                analysisContent
-                quickCompressionCards
+                .padding(.horizontal, 4)
+                .padding(.top, topInset)
+                .padding(.bottom, 8)
+                .frame(maxWidth: 900)
+                .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 4)
-            .padding(.top, 4)
-            .padding(.bottom, 24)
-            .frame(maxWidth: 900)
-            .frame(maxWidth: .infinity)
+            .appSoftScrollEdge()
         }
-        .appSoftScrollEdge()
     }
 
     @ViewBuilder
@@ -346,7 +363,9 @@ struct PhotosView: View {
                             detail: String(format: NSLocalizedString("compression.cardDetail", comment: ""), assets.count,
                                            sizeText(Set(assets.map(\.localIdentifier)))),
                             representativeAssetID: assets.first?.localIdentifier,
-                            systemImage: category.symbol, viewModel: viewModel
+                            systemImage: category.symbol,
+                            aspectRatio: 3.0 / 4.0,
+                            viewModel: viewModel
                         )
                         .overlay(alignment: .topTrailing) {
                             if category != .video && !accessStore.allows(.imageConversion) {
@@ -438,10 +457,6 @@ private struct MediaDashboardResultsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Cleanup Recommendations")
-                .appTypeface(.title2.bold(), size: 22, relativeTo: .title2, weight: .bold)
-                .padding(.horizontal, 12)
-
             LazyVGrid(columns: columns, spacing: 10) {
                 ForEach(cleanupCategories) { category in
                     categoryLink(category)
@@ -655,10 +670,6 @@ struct MediaStorageOverview: View {
                     .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
                 }
             }
-
-            Text(storageSummary)
-                .appTypeface(.system(.subheadline, design: .rounded).weight(.medium), size: 15, relativeTo: .subheadline, weight: .medium)
-                .foregroundStyle(theme.textPrimary)
         }
         .accessibilityElement(children: .combine)
     }
@@ -695,15 +706,6 @@ struct MediaStorageOverview: View {
             widths[largestIndex] = max(widths[largestIndex] - overflow, 0)
         }
         return widths
-    }
-
-    private var storageSummary: String {
-        String.localizedStringWithFormat(
-            AppL10n.string("%lld%% used · %@ of %@"),
-            Int64((storage.usedFraction * 100).rounded()),
-            byteCountText(storage.usedBytes),
-            byteCountText(storage.totalBytes)
-        )
     }
 
     /// 计算 `byteCountText` 所需的派生值，避免展示层重复实现相同规则。
@@ -747,12 +749,13 @@ private struct MediaCategoryCard: View {
     let detail: String
     let representativeAssetID: String?
     let systemImage: String
+    var aspectRatio: CGFloat = 1
     @ObservedObject var viewModel: PhotoLibraryViewModel
 
     var body: some View {
         Rectangle()
             .fill(Color(.tertiarySystemFill))
-            .aspectRatio(1, contentMode: .fit)
+            .aspectRatio(aspectRatio, contentMode: .fit)
             .overlay {
                 if let representativeAssetID {
                     GeometryReader { proxy in
@@ -809,6 +812,7 @@ private struct MediaCategoryDetailView: View {
     let suggestedDeletionIDs: Set<String>
     @ObservedObject var viewModel: PhotoLibraryViewModel
     @Environment(\.displayScale) private var displayScale
+    @StateObject private var dateSectionStore = MediaDateSectionStore()
     @State private var didInitializeSelection = false
     @State private var isSelecting = false
     @State private var selectedIDs = Set<String>()
@@ -965,12 +969,12 @@ private struct MediaCategoryDetailView: View {
     }
 
     private var dateSections: [MediaDateSection] {
-        MediaDateSectionBuilder.sections(
-            from: visibleAssetIDs.compactMap { assetID in
+        dateSectionStore.sections(assetIDs: assetIDs, libraryRevision: viewModel.mediaAssetRevision) {
+            assetIDs.compactMap { assetID in
                 guard let asset = viewModel.asset(withIdentifier: assetID) else { return nil }
                 return MediaDatedAsset(id: assetID, creationDate: asset.creationDate)
             }
-        )
+        }
     }
 
     private var chronologicallySortedAssetIDs: [String] {

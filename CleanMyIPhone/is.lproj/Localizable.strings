@@ -574,7 +574,7 @@
 
 "cleanup.scan.hint" = "Skoðaðu svipaðar myndir, stór myndskeið og skjámyndir. Greiningin eyðir engu.";
 
-"quick.compress.title" = "Geymdu minningarnar, minnkaðu stærðina";
+"quick.compress.title" = "Þjappa";
 
 "quick.video" = "Þjappa myndskeiðum";
 
@@ -641,3 +641,7 @@
 "intro.cleanup.total" = "Valið pláss til hreinsunar";
 
 "intro.compress.saved" = "Sparað pláss í þessu dæmi";
+
+"media.more" = "Meira";
+
+"Other Photos" = "Aðrar myndir";

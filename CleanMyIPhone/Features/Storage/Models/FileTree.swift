@@ -137,6 +137,34 @@ nonisolated struct FileTreeAccumulator: @unchecked Sendable {
         Self.makeNode(root)
     }
 
+    /// Candidate consuming finalization: release mutable subtrees as immutable output is built.
+    /// The accumulator is empty afterward and must not be used for further appends.
+    mutating func makeTreeReleasingStorage() -> FileNode {
+        Self.consumeNode(root)
+    }
+
+    private static func consumeNode(_ value: MutableNode) -> FileNode {
+        var children: [FileNode] = []
+        children.reserveCapacity(value.childrenByName.count)
+        // Preserve traversal order before removing dictionary entries.
+        let names = Array(value.childrenByName.keys)
+        for name in names {
+            if let child = value.childrenByName.removeValue(forKey: name) {
+                children.append(consumeNode(child))
+            }
+        }
+        children.sort {
+            if $0.byteCount == $1.byteCount {
+                return $0.name.localizedStandardCompare($1.name) == .orderedAscending
+            }
+            return $0.byteCount > $1.byteCount
+        }
+        let dominantCategory = children.max(by: { $0.byteCount < $1.byteCount })?.category
+        return FileNode(id: value.id, name: value.name, byteCount: value.byteCount,
+                        children: children, category: value.category ?? dominantCategory,
+                        isDirectory: value.isDirectory)
+    }
+
     /// 创建 `makeNode` 所需的值或资源，统一封装构造细节。
     private static func makeNode(_ value: MutableNode) -> FileNode {
         let children = value.childrenByName.values

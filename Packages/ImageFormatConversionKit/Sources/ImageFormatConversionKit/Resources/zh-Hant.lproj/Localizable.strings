@@ -301,3 +301,5 @@
 "premium.value.summary" = "Premium：批次清理分類、轉換圖片和音訊、整理檔案夾、自訂外觀。";
 
 "quick.free" = "免費";
+
+"action.batch_actions" = "批次操作";

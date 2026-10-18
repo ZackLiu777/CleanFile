@@ -33,6 +33,9 @@ struct MediaPreviewGallery: View {
     @EnvironmentObject private var themeSettings: ThemeSettings
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
 
+    @Environment(\.scenePhase) private var scenePhase
+    @StateObject private var playback: GalleryVideoPlayback
+    @State private var isGalleryVisible = false
     @State private var selectedAssetID: String
     @State private var isSwipeReviewPresented = false
 
@@ -54,12 +57,16 @@ struct MediaPreviewGallery: View {
         self.viewModel = viewModel
         self.onDismiss = onDismiss
         _selectedAssetID = State(initialValue: initialAssetID)
+        _playback = StateObject(wrappedValue: GalleryVideoPlayback(selectedAssetID: initialAssetID))
     }
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Button("Close", systemImage: "xmark", action: onDismiss)
+                Button("Close", systemImage: "xmark") {
+                    playback.setEnabled(false)
+                    onDismiss()
+                }
                     .labelStyle(.iconOnly)
                     .accessibilityIdentifier("media.preview.close")
                 Spacer()
@@ -73,9 +80,14 @@ struct MediaPreviewGallery: View {
             .padding(.horizontal, 20)
             .frame(height: 52)
 
-            TabView(selection: $selectedAssetID) {
+            TabView(selection: assetSelection) {
                 ForEach(assetIDs, id: \.self) { assetID in
-                    MediaPreviewPage(assetID: assetID, viewModel: viewModel)
+                    MediaPreviewPage(
+                        assetID: assetID,
+                        isActive: assetID == selectedAssetID && isGalleryVisible && scenePhase == .active && !isSwipeReviewPresented,
+                        playback: playback,
+                        viewModel: viewModel
+                    )
                         .tag(assetID)
                 }
             }
@@ -114,7 +126,11 @@ struct MediaPreviewGallery: View {
                 onDismiss: { isSwipeReviewPresented = false }
             )
         }
+        .onChange(of: scenePhase) { _, _ in updatePlaybackAvailability() }
+        .onChange(of: isSwipeReviewPresented) { _, _ in updatePlaybackAvailability() }
         .onAppear {
+            isGalleryVisible = true
+            updatePlaybackAvailability()
             tabBarVisibility.setHidden(
                 true,
                 source: "media.preview",
@@ -122,12 +138,26 @@ struct MediaPreviewGallery: View {
             )
         }
         .onDisappear {
+            isGalleryVisible = false
+            playback.setEnabled(false)
             tabBarVisibility.setHidden(
                 false,
                 source: "media.preview",
                 scope: .media
             )
         }
+    }
+
+    private var assetSelection: Binding<String> {
+        Binding(get: { selectedAssetID }, set: { identifier in
+            // Pause synchronously at selection, without waiting for page onDisappear.
+            playback.select(identifier)
+            selectedAssetID = identifier
+        })
+    }
+
+    private func updatePlaybackAvailability() {
+        playback.setEnabled(isGalleryVisible && scenePhase == .active && !isSwipeReviewPresented)
     }
 
     private var positionText: String {
@@ -140,7 +170,7 @@ struct MediaPreviewGallery: View {
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 6) {
                     ForEach(assetIDs, id: \.self) { identifier in
-                        Button { selectedAssetID = identifier } label: {
+                        Button { assetSelection.wrappedValue = identifier } label: {
                             GalleryThumbnail(asset: viewModel.asset(withIdentifier: identifier), viewModel: viewModel)
                                 .frame(width: 48, height: 58)
                                 .clipShape(RoundedRectangle(cornerRadius: 6))
@@ -206,13 +236,15 @@ private struct GalleryThumbnail: View {
 /// 定义 `MediaPreviewPage` 的值语义数据与相关行为。
 private struct MediaPreviewPage: View {
     let assetID: String
+    let isActive: Bool
+    let playback: GalleryVideoPlayback
     @ObservedObject var viewModel: PhotoLibraryViewModel
     @Environment(\.appTheme) private var theme
 
     var body: some View {
         if let asset = viewModel.asset(withIdentifier: assetID) {
             if asset.mediaType == .video {
-                VideoAssetPreview(asset: asset, viewModel: viewModel)
+                VideoAssetPreview(asset: asset, isActive: isActive, playback: playback, viewModel: viewModel)
             } else if asset.mediaSubtypes.contains(.photoLive) {
                 LivePhotoAssetPreview(asset: asset, viewModel: viewModel)
             } else {
@@ -442,17 +474,20 @@ private final class ZoomScrollView: UIScrollView {
 /// 定义 `VideoAssetPreview` 的值语义数据与相关行为。
 private struct VideoAssetPreview: View {
     let asset: PHAsset
+    let isActive: Bool
+    let playback: GalleryVideoPlayback
     @ObservedObject var viewModel: PhotoLibraryViewModel
     @Environment(\.appTheme) private var theme
     @State private var player: AVPlayer?
     @State private var state: MediaPreviewState = .loading
     @State private var requestID: PHImageRequestID?
+    @State private var requestGeneration: UUID?
 
     var body: some View {
         ZStack {
             if let player {
-                VideoPlayer(player: player)
-                    .onAppear { player.play() }
+                VideoPlayer(player: isActive ? player : nil)
+                    .onAppear { synchronizePlayback() }
             } else if state == .loading {
                 ProgressView("Loading Video…")
                     .tint(theme.accentPrimary)
@@ -463,8 +498,10 @@ private struct VideoAssetPreview: View {
             }
         }
         .task(id: asset.localIdentifier, loadPlayer)
+        .onChange(of: isActive) { _, _ in synchronizePlayback() }
         .onDisappear {
-            player?.pause()
+            requestGeneration = nil
+            playback.pause(player)
             if let requestID { viewModel.cancelThumbnail(requestID) }
             requestID = nil
         }
@@ -472,17 +509,36 @@ private struct VideoAssetPreview: View {
 
     /// 加载 `loadPlayer` 所需的数据，并将结果转换为当前层可消费的状态。
     private func loadPlayer() async {
+        guard player == nil else {
+            synchronizePlayback()
+            return
+        }
         state = .loading
+        let generation = UUID()
+        requestGeneration = generation
         requestID = viewModel.requestPlayerItem(for: asset) { item in
+            guard requestGeneration == generation else { return }
             guard let item else {
                 state = .unavailable
                 return
             }
-            player = AVPlayer(playerItem: item)
+            let loadedPlayer = AVPlayer(playerItem: item)
+            player = loadedPlayer
             state = .ready
-            player?.play()
+            // The callback can outlive the page's captured isActive value.
+            // Consult the shared current selection rather than that old value.
+            playback.activate(loadedPlayer, for: asset.localIdentifier)
         }
     }
+    private func synchronizePlayback() {
+        guard let player else { return }
+        if isActive {
+            playback.activate(player, for: asset.localIdentifier)
+        } else {
+            playback.pause(player)
+        }
+    }
+
 }
 
 /// 定义 `LivePhotoAssetPreview` 的值语义数据与相关行为。

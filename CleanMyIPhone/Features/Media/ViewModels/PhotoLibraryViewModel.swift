@@ -23,14 +23,23 @@ final class PhotoLibraryViewModel: ObservableObject {
     private static var didStartColdLaunchAnalysis = false
 
     @Published private(set) var authorizationStatus: PHAuthorizationStatus
-    @Published private(set) var assets: [PHAsset] = []
+    @Published private(set) var mediaAssetRevision: UInt64 = 0
+    @Published private(set) var mediaSizeRevision: UInt64 = 0
+    @Published private(set) var assets: [PHAsset] = [] {
+        didSet {
+            mediaAssetRevision &+= 1
+            mediaSizeRevision &+= 1
+        }
+    }
     @Published private(set) var isLoading = false
     @Published private(set) var analysisState: MediaAnalysisState = .idle
     @Published private(set) var deletionState: MediaDeletionState = .idle
     @Published private(set) var storageSnapshot: DeviceStorageSnapshot?
     @Published private(set) var estimatedPhotoLibraryBytes: Int64 = 0
     @Published private(set) var estimatedVideoLibraryBytes: Int64 = 0
-    @Published private(set) var exactByteCountsByIdentifier: [String: Int64] = [:]
+    @Published private(set) var exactByteCountsByIdentifier: [String: Int64] = [:] {
+        didSet { mediaSizeRevision &+= 1 }
+    }
     @Published private(set) var unavailableByteCountIdentifiers = Set<String>()
 
     private let imageManager = PHCachingImageManager()
@@ -48,6 +57,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     private var assetsByIdentifier: [String: PHAsset] = [:]
     private var displayNamesByIdentifier: [String: String] = [:]
     private var pendingByteCountIdentifiers: [String] = []
+    private var longPendingByteCountIdentifiers: MediaSizeRequestQueue?
     private var pendingByteCountIdentifierSet = Set<String>()
     private var byteCountTasks: [String: Task<Void, Never>] = [:]
     private var mediaSizeIndexSaveTask: Task<Void, Never>?
@@ -308,7 +318,17 @@ final class PhotoLibraryViewModel: ObservableObject {
               !pendingByteCountIdentifierSet.contains(assetID),
               assetsByIdentifier[assetID] != nil else { return }
 
-        pendingByteCountIdentifiers.append(assetID)
+        if longPendingByteCountIdentifiers != nil {
+            longPendingByteCountIdentifiers?.append(assetID)
+        } else {
+            pendingByteCountIdentifiers.append(assetID)
+            if pendingByteCountIdentifiers.count >= 1_000 {
+                var queue = MediaSizeRequestQueue()
+                for identifier in pendingByteCountIdentifiers { queue.append(identifier) }
+                longPendingByteCountIdentifiers = queue
+                pendingByteCountIdentifiers.removeAll()
+            }
+        }
         pendingByteCountIdentifierSet.insert(assetID)
         startPendingByteCountRequests()
     }
@@ -316,15 +336,25 @@ final class PhotoLibraryViewModel: ObservableObject {
     /// Stops data reads when the media detail page is no longer visible.
     func cancelExactByteCountRequests() {
         pendingByteCountIdentifiers.removeAll()
+        longPendingByteCountIdentifiers = nil
         pendingByteCountIdentifierSet.removeAll()
         byteCountTasks.values.forEach { $0.cancel() }
         byteCountTasks.removeAll()
     }
 
     private func startPendingByteCountRequests() {
-        while byteCountTasks.count < maximumConcurrentByteCountRequests,
-              let assetID = pendingByteCountIdentifiers.first {
-            pendingByteCountIdentifiers.removeFirst()
+        while byteCountTasks.count < maximumConcurrentByteCountRequests {
+            let assetID: String
+            if let identifier = longPendingByteCountIdentifiers?.popFirst() {
+                assetID = identifier
+                if longPendingByteCountIdentifiers?.isEmpty == true {
+                    longPendingByteCountIdentifiers = nil
+                }
+            } else if !pendingByteCountIdentifiers.isEmpty {
+                assetID = pendingByteCountIdentifiers.removeFirst()
+            } else {
+                break
+            }
             pendingByteCountIdentifierSet.remove(assetID)
             guard let asset = assetsByIdentifier[assetID] else { continue }
             let resources = Self.displayResources(for: asset)
@@ -703,15 +733,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
 
         return samples.compactMapValues { values in
-            // Fewer than three verified items are retained in the index but are not
-            // enough to define a reliable coefficient for the rest of the group.
-            guard values.count >= 3 else { return nil }
-            let sorted = values.sorted()
-            let middle = sorted.count / 2
-            if sorted.count.isMultiple(of: 2) {
-                return (sorted[middle - 1] + sorted[middle]) / 2
-            }
-            return sorted[middle]
+            MediaCalibrationMedianCandidate.preferredCoefficient(values)
         }
     }
 

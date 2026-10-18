@@ -301,3 +301,5 @@
 "premium.value.summary" = "Premium: 카테고리 일괄 정리, 이미지 및 오디오 변환, 폴더 정리, 외관 맞춤 설정.";
 
 "quick.free" = "무료";
+
+"action.batch_actions" = "일괄 작업";

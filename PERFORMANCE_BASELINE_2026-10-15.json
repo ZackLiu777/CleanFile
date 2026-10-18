@@ -1,0 +1,26 @@
+{
+  "iteration": "2026-10-15-01",
+  "baseline_commit": "9bffc4228c82701d75598d72a10c7d8004f60d52",
+  "production_strategy": "unchanged-baseline",
+  "baseline_source_sha256": {
+    "CleanMyIPhone/Features/Media/Models/MediaDateGrouping.swift": "a60fe9c8c42531e61ae29a0691c41514f047eafa47f670c2c965d9c93d0bce30",
+    "CleanMyIPhone/Features/Media/Views/PhotosView.swift": "a40138d4c27ce23ded8af636521d6aa4cf723ae91cc56e0dffd06167a6b691fa",
+    "CleanMyIPhone/Features/Media/ViewModels/MediaQuickCleanViewModel.swift": "bbf3e251dc7d9206d4375bc63c30b0daa8466b38cb159e0f0b5befa450898021",
+    "CleanMyIPhone/Features/Media/ViewModels/PhotoLibraryViewModel.swift": "56fe290f510e612cc192aeb89b743594eaab999b1fc1c06264ca599a8566a762",
+    "CleanMyIPhone/Features/Media/Views/MediaQuickCleanView.swift": "612f953b3f85b135f69247e0effd79e30e2757c9fd9be13d85913151f63a2e1c",
+    "CleanMyIPhone/Features/Media/Services/MediaClassificationService.swift": "c90201e81cd7dfaca2928237e63e91ba433549dbe220501d52d497ecde63fd12"
+  },
+  "local_test_execution": "not-authorized-not-executed",
+  "comparison_fixture_counts": [
+    1000,
+    10000,
+    100000
+  ],
+  "comparison_scenarios": [
+    "cold-build",
+    "warm-query",
+    "interactions-total"
+  ],
+  "samples_per_scenario": 5,
+  "promotion": "manual-only-after-equivalence-cpu-memory-and-device-review"
+}

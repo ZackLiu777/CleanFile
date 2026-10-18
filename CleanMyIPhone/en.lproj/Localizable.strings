@@ -572,7 +572,7 @@
 
 "cleanup.scan.hint" = "Find similar photos and review large videos and screenshots. Nothing is deleted during analysis.";
 
-"quick.compress.title" = "Keep it. Make it smaller.";
+"quick.compress.title" = "Compress";
 
 "quick.video" = "Compress videos";
 
@@ -639,3 +639,7 @@
 "intro.cleanup.total" = "Selected for cleanup";
 
 "intro.compress.saved" = "Space saved in this example";
+
+"media.more" = "More";
+
+"Other Photos" = "Other Photos";

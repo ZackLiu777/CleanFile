@@ -510,7 +510,7 @@ private enum ConversionHomeKind: String, CaseIterable, Identifiable, Hashable, S
                 .prefix(4)
                 .map(\.displayName)
         case .video:
-            ["MP4", "MOV", "M4V", "HEVC"]
+            VideoOutputContainer.allCases.map { $0.rawValue.uppercased() }
         case .audio:
             ["MP3", "AAC", "WAV", "AIFF"]
         }

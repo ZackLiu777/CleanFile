@@ -574,7 +574,7 @@
 
 "cleanup.scan.hint" = "Granska liknande bilder, stora videor och skärmbilder. Analysen raderar inget.";
 
-"quick.compress.title" = "Behåll minnena, minska storleken";
+"quick.compress.title" = "Komprimera";
 
 "quick.video" = "Komprimera videor";
 
@@ -641,3 +641,7 @@
 "intro.cleanup.total" = "Valt utrymme för rensning";
 
 "intro.compress.saved" = "Sparat utrymme i detta exempel";
+
+"media.more" = "Mer";
+
+"Other Photos" = "Övriga bilder";

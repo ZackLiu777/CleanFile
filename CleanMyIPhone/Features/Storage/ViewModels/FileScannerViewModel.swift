@@ -123,9 +123,7 @@ nonisolated enum DerivedFileStateBuilder {
         guard !Task.isCancelled else { return nil }
         let summary = StorageSummary(files: retainedFiles)
         guard !Task.isCancelled else { return nil }
-        let largestFiles = Array(
-            retainedFiles.sorted { $0.byteCount > $1.byteCount }.prefix(10)
-        )
+        let largestFiles = StorageSelectionAlgorithms.largest(retainedFiles)
         guard !Task.isCancelled else { return nil }
         let fileTree = FileTreeBuilder.build(rootURL: rootURL, files: retainedFiles)
         guard !Task.isCancelled else { return nil }
@@ -274,12 +272,7 @@ final class FileScannerViewModel: ObservableObject {
     /// intentionally left unchanged.
     func scan(sources: [URL]) {
         guard canUseStorage() else { return }
-        let uniqueSources = sources.reduce(into: [URL]()) { result, source in
-            let normalized = source.standardizedFileURL
-            if !result.contains(where: { $0.standardizedFileURL == normalized }) {
-                result.append(source)
-            }
-        }
+        let uniqueSources = StorageSelectionAlgorithms.sources(sources)
         guard !uniqueSources.isEmpty else {
             reportSelectionFailure()
             return

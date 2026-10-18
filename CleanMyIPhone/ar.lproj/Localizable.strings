@@ -574,7 +574,7 @@
 
 "cleanup.scan.hint" = "راجع الصور المتشابهة والفيديوهات الكبيرة ولقطات الشاشة. التحليل لا يحذف شيئًا.";
 
-"quick.compress.title" = "احتفظ بالذكريات وقلّل الحجم";
+"quick.compress.title" = "ضغط";
 
 "quick.video" = "ضغط الفيديو";
 
@@ -641,3 +641,7 @@
 "intro.cleanup.total" = "المساحة المحددة للتنظيف";
 
 "intro.compress.saved" = "المساحة الموفرة في هذا المثال";
+
+"media.more" = "المزيد";
+
+"Other Photos" = "صور أخرى";

@@ -301,3 +301,5 @@
 "premium.value.summary" = "Premium：カテゴリの一括整理、画像と音声の変換、フォルダの整理、外観のカスタマイズ。";
 
 "quick.free" = "無料";
+
+"action.batch_actions" = "一括操作";

@@ -574,7 +574,7 @@
 
 "cleanup.scan.hint" = "Bekijk vergelijkbare foto's, grote video's en schermafbeeldingen. De analyse verwijdert niets.";
 
-"quick.compress.title" = "Bewaren, maar kleiner";
+"quick.compress.title" = "Comprimeren";
 
 "quick.video" = "Video's comprimeren";
 
@@ -641,3 +641,7 @@
 "intro.cleanup.total" = "Geselecteerde opruimruimte";
 
 "intro.compress.saved" = "Bespaarde ruimte in dit voorbeeld";
+
+"media.more" = "Meer";
+
+"Other Photos" = "Andere foto’s";

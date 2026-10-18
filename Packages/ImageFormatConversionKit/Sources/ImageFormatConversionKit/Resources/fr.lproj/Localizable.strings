@@ -301,3 +301,5 @@
 "premium.value.summary" = "Premium : nettoyer plusieurs catégories, convertir images et audio, organiser les dossiers et personnaliser l’apparence.";
 
 "quick.free" = "Gratuit";
+
+"action.batch_actions" = "Actions groupées";

@@ -572,7 +572,7 @@
 
 "cleanup.scan.hint" = "Przejrzyj podobne zdjęcia, duże filmy i zrzuty ekranu. Analiza niczego nie usuwa.";
 
-"quick.compress.title" = "Zachowaj wspomnienia, zmniejsz rozmiar";
+"quick.compress.title" = "Kompresuj";
 
 "quick.video" = "Kompresuj filmy";
 
@@ -639,3 +639,7 @@
 "intro.cleanup.total" = "Wybrane miejsce do oczyszczenia";
 
 "intro.compress.saved" = "Miejsce oszczędzone w tym przykładzie";
+
+"media.more" = "Więcej";
+
+"Other Photos" = "Inne zdjęcia";

@@ -129,12 +129,8 @@ public struct ImageBatchConverter: Sendable {
             }
         }
 
-        let successes = indexedSuccesses
-            .sorted { $0.0 < $1.0 }
-            .map(\.1)
-        let failures = indexedFailures
-            .sorted { $0.0 < $1.0 }
-            .map(\.1)
+        let successes = BatchResultOrderingCandidate.preferred(indexedSuccesses, total: requests.count)
+        let failures = BatchResultOrderingCandidate.preferred(indexedFailures, total: requests.count)
 
         return ImageBatchConversionResult(
             successes: successes,

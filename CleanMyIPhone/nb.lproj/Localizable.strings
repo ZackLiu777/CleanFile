@@ -574,7 +574,7 @@
 
 "cleanup.scan.hint" = "Se gjennom lignende bilder, store videoer og skjermbilder. Analysen sletter ingenting.";
 
-"quick.compress.title" = "Behold minnene, reduser størrelsen";
+"quick.compress.title" = "Komprimer";
 
 "quick.video" = "Komprimer videoer";
 
@@ -641,3 +641,7 @@
 "intro.cleanup.total" = "Valgt plass til opprydding";
 
 "intro.compress.saved" = "Spart plass i dette eksempelet";
+
+"media.more" = "Mer";
+
+"Other Photos" = "Andre bilder";

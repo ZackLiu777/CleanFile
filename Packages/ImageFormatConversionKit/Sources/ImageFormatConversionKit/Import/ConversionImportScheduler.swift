@@ -13,6 +13,7 @@ actor ConversionImportScheduler {
 
     private var activeOperations = 0
     private var waiters: [CheckedContinuation<Void, Never>] = []
+    private var longWaiters: ConversionFIFOQueueCandidate<CheckedContinuation<Void, Never>>?
 
     /// 封装 `withPermit` 对应的局部行为，供当前类型在统一入口下复用。
     func withPermit<T: Sendable>(
@@ -37,16 +38,35 @@ actor ConversionImportScheduler {
             return
         }
         await withCheckedContinuation { continuation in
-            waiters.append(continuation)
+            if longWaiters != nil {
+                longWaiters?.append(continuation)
+            } else {
+                waiters.append(continuation)
+                if waiters.count >= 1_000 {
+                    var queue = ConversionFIFOQueueCandidate<CheckedContinuation<Void, Never>>()
+                    for waiter in waiters { queue.append(waiter) }
+                    longWaiters = queue
+                    waiters.removeAll()
+                }
+            }
         }
     }
 
     /// 封装 `release` 对应的局部行为，供当前类型在统一入口下复用。
     private func release() {
         activeOperations = max(activeOperations - 1, 0)
-        while activeOperations < currentLimit, !waiters.isEmpty {
+        while activeOperations < currentLimit {
+            let waiter: CheckedContinuation<Void, Never>
+            if let next = longWaiters?.popFirst() {
+                waiter = next
+                if longWaiters?.isEmpty == true { longWaiters = nil }
+            } else if !waiters.isEmpty {
+                waiter = waiters.removeFirst()
+            } else {
+                break
+            }
             activeOperations += 1
-            waiters.removeFirst().resume()
+            waiter.resume()
         }
     }
 

@@ -577,7 +577,7 @@
 
 "cleanup.scan.hint" = "找出相似照片，檢查大型影片和截圖。分析不會刪除任何內容。";
 
-"quick.compress.title" = "保留精彩，縮小體積";
+"quick.compress.title" = "壓縮";
 
 "quick.video" = "壓縮影片";
 
@@ -644,3 +644,7 @@
 "intro.cleanup.total" = "已選擇可清理空間";
 
 "intro.compress.saved" = "此範例釋放的空間";
+
+"media.more" = "更多";
+
+"Other Photos" = "其他圖片";

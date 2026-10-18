@@ -572,7 +572,7 @@
 
 "cleanup.scan.hint" = "유사 사진, 큰 동영상과 스크린샷을 확인합니다. 분석 중에는 삭제하지 않습니다.";
 
-"quick.compress.title" = "추억은 그대로, 크기는 작게";
+"quick.compress.title" = "압축";
 
 "quick.video" = "동영상 압축";
 
@@ -639,3 +639,7 @@
 "intro.cleanup.total" = "선택한 정리 용량";
 
 "intro.compress.saved" = "이 예시에서 절약한 공간";
+
+"media.more" = "더 보기";
+
+"Other Photos" = "기타 사진";
