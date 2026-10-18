@@ -835,3 +835,24 @@ Packages/ImageFormatConversionKit/
 - 三种转换页共用托盘根据完成输出切换入口：无完成输出直接显示清除全部并请求原确认弹窗，有输出才打开批量操作面板。
 - 修正自定义清除活动先结束活动、后记录待确认状态的顺序问题：先在主线程同步记录清除请求，再结束活动；完成回调关闭面板，由 onDismiss 发起原清除确认。保存/取消不记录清除请求，每次打开重置状态。
 - Build: Passed（/tmp/CleanFile-BatchConfirmationFix-build.log）。Tests: 未在本地执行（按项目规则）；GitHub Actions: 待验证。未进行真机交互验证。
+
+## 2026-10-19 — 批量清除无响应修复
+
+- 分享面板待清除请求改由稳定引用对象保留，避免关闭回调使用过期的值状态；活动点击时先保存请求并显式更新 SwiftUI sheet 关闭状态。
+- 面板 onDismiss 消费请求并在后续主线程任务中触发原确认弹窗，避免与分享面板退出同轮提交展示；保留原确认后 removeAll 流程。
+- Build: Passed（/tmp/CleanFile-ClearActionRecovery-build.log）；Tests: 未在本地执行（按项目规则）；GitHub Actions: 待验证。尚未进行真机交互验证。
+
+## 2026-10-19 — 替换无响应的跨面板确认链路
+
+- 用户再次反馈 Clear All 无响应，上次关闭后再弹窗方案未通过真机反馈验证。
+- 删除 pending-request 与 onDismiss 转发逻辑；自定义 UIActivity 通过 activityViewController 直接提供原生 UIAlertController，确认后调用新增明确的 onConfirmedClear 回调，再结束活动。取消只结束活动，不清除。
+- 图片、视频、音频托盘均将确认回调绑定至现有 viewModel.removeAll；未完成转换时继续使用原“清除全部”确认入口。
+- Build: Passed（/tmp/CleanFile-ClearActivityConfirmation-build.log）；Tests: 未在本地执行（按项目规则）；GitHub Actions: 待验证。真机交互尚未验证，不能把编译成功视为此问题已通过交互验证。
+
+## 2026-10-19 — 分享退出后再确认清除
+
+- 根据真机截图要求，不再让自定义 UIActivity 在分享页上叠加确认框。
+- 用单个 UIKit 展示控制器串行管理分享和确认，状态为 idle / sharing / dismissingForClear / confirming；自定义清除活动只发出请求。
+- 清除请求先进入 dismissingForClear，通过分享控制器 dismiss 的完成回调进入 confirming 并展示原生确认框；点击确认才调用原 removeAll，取消或完成恢复 idle。移除 SwiftUI sheet 与 UIKit 双重展示管理以及延迟/Task.yield 中转。
+- 继续保留无转换输出时直接请求原清除确认、以及图片/视频/音频共用行为。
+- Build: Passed（/tmp/CleanFile-BatchStateMachine-build.log）；Tests: 未在本地执行（按项目规则）；GitHub Actions: 待验证。尚未进行真机交互验证。

@@ -331,8 +331,8 @@ struct ConversionFileTray<Content: View>: View {
     let canClear: Bool
     let outputURLs: [URL]
     @State private var showsBatchActions = false
-    @State private var clearAfterDismiss = false
     let onClear: () -> Void
+    let onConfirmedClear: @MainActor @Sendable () -> Void
     let content: Content
 
     /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
@@ -343,6 +343,7 @@ struct ConversionFileTray<Content: View>: View {
         canClear: Bool,
         outputURLs: [URL],
         onClear: @escaping () -> Void,
+        onConfirmedClear: @escaping @MainActor @Sendable () -> Void,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
@@ -351,6 +352,7 @@ struct ConversionFileTray<Content: View>: View {
         self.canClear = canClear
         self.outputURLs = outputURLs
         self.onClear = onClear
+        self.onConfirmedClear = onConfirmedClear
         self.content = content()
     }
 
@@ -367,7 +369,6 @@ struct ConversionFileTray<Content: View>: View {
                     if outputURLs.isEmpty {
                         onClear()
                     } else {
-                        clearAfterDismiss = false
                         showsBatchActions = true
                     }
                 }
@@ -412,28 +413,17 @@ struct ConversionFileTray<Content: View>: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .converterCard()
-        .sheet(isPresented: $showsBatchActions, onDismiss: {
-            if clearAfterDismiss {
-                clearAfterDismiss = false
-                onClear()
-            }
-        }) {
-            #if os(iOS)
-            ConversionBatchActivitySheet(urls: outputURLs, onClear: {
-                clearAfterDismiss = true
-            }, onFinish: {
-                showsBatchActions = false
-            })
-            #else
-            VStack {
-                ShareLink(items: outputURLs) { Text(L10n.string("action.share")) }
-                Button(L10n.string("action.clear_all"), role: .destructive) {
-                    clearAfterDismiss = true
-                    showsBatchActions = false
-                }
-            }.padding()
-            #endif
+        #if os(iOS)
+        .background {
+            ConversionBatchPresenter(isPresented: $showsBatchActions, urls: outputURLs,
+                                     onConfirmedClear: onConfirmedClear)
+                .frame(width: 0, height: 0)
         }
+        #else
+        .sheet(isPresented: $showsBatchActions) {
+            ConversionBatchActionsPanel(urls: outputURLs, onConfirmedClear: onConfirmedClear)
+        }
+        #endif
     }
 }
 
@@ -584,23 +574,106 @@ struct ConversionStatusDot: View {
 }
 
 #if os(iOS)
-private struct ConversionBatchActivitySheet: UIViewControllerRepresentable {
+private struct ConversionBatchPresenter: UIViewControllerRepresentable {
+    @Binding var isPresented: Bool
     let urls: [URL]
-    let onClear: @MainActor @Sendable () -> Void
-    let onFinish: () -> Void
+    let onConfirmedClear: @MainActor @Sendable () -> Void
 
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        let controller = UIActivityViewController(
-            activityItems: urls,
-            applicationActivities: [ConversionClearActivity(onClear: onClear)]
-        )
-        controller.completionWithItemsHandler = { _, _, _, _ in
-            onFinish()
-        }
-        return controller
+    func makeUIViewController(context: Context) -> ConversionBatchPresentationController {
+        ConversionBatchPresentationController()
     }
 
-    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
+    func updateUIViewController(_ controller: ConversionBatchPresentationController, context: Context) {
+        controller.update(requested: isPresented, urls: urls, onConfirmedClear: onConfirmedClear,
+                          onFinish: { isPresented = false })
+    }
+}
+
+@MainActor
+private final class ConversionBatchPresentationController: UIViewController {
+    private enum State { case idle, sharing, dismissingForClear, confirming }
+    private var state = State.idle
+    private var requested = false
+    private var urls: [URL] = []
+    private var onConfirmedClear: @MainActor @Sendable () -> Void = {}
+    private var onFinish: () -> Void = {}
+    private var activityController: UIActivityViewController?
+    private var clearActivity: ConversionClearActivity?
+
+    override func loadView() {
+        view = UIView()
+        view.backgroundColor = .clear
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        presentIfNeeded()
+    }
+
+    func update(requested: Bool, urls: [URL],
+                onConfirmedClear: @escaping @MainActor @Sendable () -> Void,
+                onFinish: @escaping () -> Void) {
+        self.requested = requested
+        self.urls = urls
+        self.onConfirmedClear = onConfirmedClear
+        self.onFinish = onFinish
+        presentIfNeeded()
+    }
+
+    private func presentIfNeeded() {
+        guard requested, state == .idle, viewIfLoaded?.window != nil else { return }
+        state = .sharing
+        let activity = ConversionClearActivity { [weak self] in self?.requestClear() }
+        let controller = UIActivityViewController(activityItems: urls, applicationActivities: [activity])
+        clearActivity = activity
+        activityController = controller
+        controller.popoverPresentationController?.sourceView = view
+        controller.popoverPresentationController?.sourceRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+        controller.completionWithItemsHandler = { [weak self] _, _, _, _ in
+            Task { @MainActor in
+                guard let self, self.state == .sharing else { return }
+                self.finish()
+            }
+        }
+        present(controller, animated: true)
+    }
+
+    private func requestClear() {
+        guard state == .sharing, let controller = activityController else { return }
+        state = .dismissingForClear
+        // UIKit's completion is the boundary: the share page is gone before confirmation.
+        controller.dismiss(animated: true) { [weak self] in
+            guard let self, self.state == .dismissingForClear else { return }
+            self.clearActivity?.activityDidFinish(true)
+            self.activityController = nil
+            self.clearActivity = nil
+            self.state = .confirming
+            self.presentConfirmation()
+        }
+    }
+
+    private func presentConfirmation() {
+        let alert = UIAlertController(title: L10n.string("conversion.delete_all.title"),
+                                      message: L10n.string("conversion.delete_all.message"),
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: L10n.string("action.cancel"), style: .cancel) { [weak self] _ in
+            self?.finish()
+        })
+        alert.addAction(UIAlertAction(title: L10n.string("conversion.delete.action"), style: .destructive) { [weak self] _ in
+            guard let self, self.state == .confirming else { return }
+            self.onConfirmedClear()
+            self.finish()
+        })
+        present(alert, animated: true)
+    }
+
+    private func finish() {
+        state = .idle
+        requested = false
+        activityController = nil
+        clearActivity = nil
+        onFinish()
+    }
 }
 
 @MainActor
@@ -612,9 +685,7 @@ private final class ConversionClearActivity: UIActivity {
         super.init()
     }
 
-    override var activityType: UIActivity.ActivityType? {
-        UIActivity.ActivityType("filevra.conversion.clearAll")
-    }
+    override var activityType: UIActivity.ActivityType? { UIActivity.ActivityType("filevra.conversion.clearAll") }
     override var activityTitle: String? { L10n.string("action.clear_all") }
     override var activityImage: UIImage? { UIImage(systemName: "trash") }
     override class var activityCategory: UIActivity.Category { .action }
@@ -622,9 +693,31 @@ private final class ConversionClearActivity: UIActivity {
     override func prepare(withActivityItems activityItems: [Any]) {}
     override func perform() {
         let action = onClear
-        // Record the request synchronously before finishing can dismiss the sheet.
         MainActor.assumeIsolated { action() }
-        activityDidFinish(true)
     }
 }
 #endif
+
+private struct ConversionBatchActionsPanel: View {
+    @Environment(\.dismiss) private var dismiss
+    let urls: [URL]
+    let onConfirmedClear: @MainActor @Sendable () -> Void
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Text(L10n.string("conversion.delete_all.title")).font(.headline)
+            Text(L10n.string("conversion.delete_all.message"))
+            HStack {
+                Button(L10n.string("action.cancel")) { dismiss() }
+                Button(L10n.string("conversion.delete.action"), role: .destructive) {
+                    onConfirmedClear()
+                    dismiss()
+                }
+            }
+            if !urls.isEmpty {
+                ShareLink(items: urls) { Text(L10n.string("action.share")) }
+            }
+        }
+        .padding(24)
+    }
+}

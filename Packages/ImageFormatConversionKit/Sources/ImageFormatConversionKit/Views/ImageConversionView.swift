@@ -499,7 +499,8 @@ struct ImageConversionContentView: View {
             rowCount: displayedFileCount > 3 ? 2 : 1,
             canClear: !viewModel.isConverting && activeImportProgress == nil,
             outputURLs: viewModel.items.compactMap { $0.status.conversionPresentation.outputURL },
-            onClear: { isClearAllConfirmationPresented = true }
+            onClear: { isClearAllConfirmationPresented = true },
+            onConfirmedClear: { viewModel.removeAll() }
         ) {
             ForEach(viewModel.items) { item in
                 let presentation = item.status.conversionPresentation
