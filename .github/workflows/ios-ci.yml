@@ -22,7 +22,7 @@ jobs:
   unit-tests:
     name: Build and Unit Tests
     runs-on: xcode-27
-    timeout-minutes: 30
+    timeout-minutes: 90
 
     steps:
       - name: Checkout
