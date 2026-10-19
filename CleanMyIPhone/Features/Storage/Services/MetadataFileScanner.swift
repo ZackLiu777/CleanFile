@@ -203,7 +203,7 @@ struct MetadataFileScanner: Sendable {
     private nonisolated func isDirectorySource(_ source: URL) throws -> Bool {
         try fileAccess.withAccess(to: source) {
             try Task.checkCancellation()
-            let values = try source.resourceValues(forKeys: [.isDirectoryKey])
+            let values = try source.resolvingSymlinksInPath().resourceValues(forKeys: [.isDirectoryKey])
             if let isDirectory = values.isDirectory { return isDirectory }
             return source.hasDirectoryPath
         }
@@ -295,7 +295,11 @@ struct MetadataFileScanner: Sendable {
         progressOffset: Int,
         progressByteOffset: Int64
     ) throws -> DirectoryEnumeration {
-        let directoryValues = try directory.resourceValues(forKeys: [.isDirectoryKey])
+        // Resolve only the selected/coordinated root, while its access grant is active.
+        // Enumeration and relative paths must share this namespace; emitted URLs
+        // are still reconstructed under selectedDirectory for subsequent scoped access.
+        let enumerationDirectory = directory.resolvingSymlinksInPath().standardizedFileURL
+        let directoryValues = try enumerationDirectory.resourceValues(forKeys: [.isDirectoryKey])
         guard directoryValues.isDirectory == true else {
             throw FileScanError.notDirectory
         }
@@ -313,7 +317,7 @@ struct MetadataFileScanner: Sendable {
         var treeAccumulator = FileTreeAccumulator(rootURL: selectedDirectory)
         var largestFilesAccumulator = LargestFilesAccumulator(limit: 10)
         let fileManager = FileManager()
-        let rootComponents = directory.standardizedFileURL.pathComponents
+        let rootComponents = enumerationDirectory.pathComponents
 
         continuation.yield(.progress(ScanProgress(
             scannedFileCount: progressOffset,
@@ -325,7 +329,7 @@ struct MetadataFileScanner: Sendable {
         // single URLResourceValues.isDirectory value can incorrectly flatten a
         // cloud-backed folder when that value is temporarily unavailable.
         guard let enumerator = fileManager.enumerator(
-            at: directory,
+            at: enumerationDirectory,
             includingPropertiesForKeys: Self.metadataKeys,
             options: [.skipsHiddenFiles],
             errorHandler: { url, _ in

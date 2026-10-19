@@ -25,6 +25,29 @@ struct MetadataFileScannerEdgeCaseTests {
         #expect(file.relativePathComponents == ["item.txt"])
     }
 
+    @Test("Mixed-source scanning recognizes a selected directory alias and preserves nested URLs")
+    func selectedDirectoryAliasInMixedSources() async throws {
+        let workspace = try TemporaryScanWorkspace()
+        defer { workspace.remove() }
+        let actual = workspace.root.appendingPathComponent("Actual", isDirectory: true)
+        let nested = actual.appendingPathComponent("Nested", isDirectory: true)
+        let selected = workspace.root.appendingPathComponent("Selected", isDirectory: true)
+        try workspace.fileManager.createDirectory(at: nested, withIntermediateDirectories: true)
+        try Data([1, 2]).write(to: nested.appendingPathComponent("item.txt"))
+        try workspace.fileManager.createSymbolicLink(at: selected, withDestinationURL: actual)
+        var events: [FileScanEvent] = []
+        let scanner = MetadataFileScanner(fileAccess: UnrestrictedFileAccess())
+        for try await event in scanner.scan(sources: [selected]) { events.append(event) }
+        let result = try #require(completedResult(in: events))
+        #expect(result.files.count == 1)
+        let file = try #require(result.files.first)
+        #expect(file.url == selected.appendingPathComponent("Nested/item.txt"))
+        // scan(sources:) prefixes each source in its virtual aggregate tree.
+        #expect(file.relativePathComponents == ["Selected", "Nested", "item.txt"])
+        #expect(result.summary.totalBytes == 2)
+        #expect(result.failures.isEmpty)
+    }
+
     @Test("Scanning an empty directory emits a completed zero-file result")
     func emptyDirectoryCompletesWithZeroFiles() async throws {
         let workspace = try TemporaryScanWorkspace()

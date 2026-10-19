@@ -106,11 +106,13 @@ actor FileDeletionService {
     /// 判断 `isDescendant` 条件是否成立，供调用方选择正确的处理分支。
     nonisolated static func contains(_ candidate: URL, root: URL) -> Bool {
         guard candidate.isFileURL, root.isFileURL else { return false }
-        let rootComponents = root.resolvingSymlinksInPath().standardizedFileURL.pathComponents
+        let resolvedRoot = root.resolvingSymlinksInPath().standardizedFileURL
+        let rootComponents = resolvedRoot.pathComponents
         let candidateComponents = candidate.resolvingSymlinksInPath().standardizedFileURL.pathComponents
         guard candidateComponents.starts(with: rootComponents) else { return false }
         if candidateComponents.count == rootComponents.count {
-            let isDirectory = try? root.resourceValues(forKeys: [.isDirectoryKey]).isDirectory
+            // The selected URL may describe a link, whose metadata is not the target's type.
+            let isDirectory = try? resolvedRoot.resourceValues(forKeys: [.isDirectoryKey]).isDirectory
             return !(isDirectory ?? root.hasDirectoryPath)
         }
         return true

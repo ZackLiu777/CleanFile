@@ -25,6 +25,8 @@ struct FileDeletionEdgeCaseTests {
         #expect(FileDeletionService.contains(alias.appendingPathComponent("inside.txt"), root: root))
         #expect(!FileDeletionService.contains(root.appendingPathComponent("Escape/outside.txt"), root: root))
         #expect(!FileDeletionService.contains(root, root: alias))
+        #expect(!FileDeletionService.contains(alias, root: root))
+        #expect(!FileDeletionService.contains(alias, root: alias))
     }
 
     @Test("Deleting an empty selection is rejected before touching the file system")

@@ -856,3 +856,21 @@ Packages/ImageFormatConversionKit/
 - 清除请求先进入 dismissingForClear，通过分享控制器 dismiss 的完成回调进入 confirming 并展示原生确认框；点击确认才调用原 removeAll，取消或完成恢复 idle。移除 SwiftUI sheet 与 UIKit 双重展示管理以及延迟/Task.yield 中转。
 - 继续保留无转换输出时直接请求原清除确认、以及图片/视频/音频共用行为。
 - Build: Passed（/tmp/CleanFile-BatchStateMachine-build.log）；Tests: 未在本地执行（按项目规则）；GitHub Actions: 待验证。尚未进行真机交互验证。
+
+## 2026-10-19 — CI 目录别名边界失败排查
+
+- 根据用户提供的两个失败测试名审查对应代码，发现目录链接读取自身 isDirectory 元数据与目标类型不一致的风险。
+- 删除边界相等时改为读取解析后的根目标类型，保持根目录不可删除与逃逸链接拒绝逻辑。
+- 扫描在授权及协调范围内解析枚举根，类型检查、枚举与相对路径使用同一命名空间；输出仍按用户选中的原 URL 重建。混合来源目录识别同样读取链接目标类型。
+- 保留全部原断言，增加根别名互指不可删除及混合来源目录链接的嵌套路径回归用例。
+- git diff --check: Passed。Build/Test target compile: 未完成，沙箱拒绝 Xcode 缓存访问（/tmp/CleanFile-DirectoryAlias-testcompile.log）。Tests: 未在本地执行；GitHub Actions: 待验证。
+- 真实 CI 日志未取得：gh run list 的网络访问被沙箱阻止；升级权限请求的自动审批因额度限制无法完成（并非安全判定）。因此不能确认具体失败断言或任务取消原因，也未声称两个测试已通过。
+
+## 2026-10-19 — 已授权目录边界本地测试结果
+
+- 用户明确允许本轮本地测试，实际执行 FileDeletionEdgeCaseTests 与 MetadataFileScannerEdgeCaseTests 两个完整套件（仅测试临时目录）。
+- 首轮：原 CI 两个失败用例均通过；新增 selectedDirectoryAliasInMixedSources 失败。xcresult 断言显示相对路径实际为 Selected/Nested/item.txt，而新增预期误写为 Nested/item.txt。
+- 审查 scanSourcesSynchronously 确认来源名前缀是既有虚拟汇总目录树语义，修正新增测试预期并补充解释；原失败用例断言保持原样，没有降低断言或更改 CI。
+- 重跑：17 个测试、2 个套件全部通过，** TEST SUCCEEDED **。包含原 canonicalDirectoryBoundaries、selectedRootNamespaceIsPreserved 及新增目录别名混合来源回归。
+- Build: Passed；Local Tests: Passed（用户本轮授权）。GitHub Actions: 待验证，原 CI 取消原因仍未知。
+- 首轮结果：/tmp/CleanFile-DirectoryAlias-Authorized.xcresult；最终结果：/tmp/CleanFile-DirectoryAlias-Authorized-Retry.xcresult；最终日志：/tmp/CleanFile-DirectoryAlias-Authorized-Retry.log。
