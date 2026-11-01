@@ -1,3 +1,8 @@
+// 快速清理分类和用户选择界面。
+// 页面展示分类与估算空间，并在用户确认后委托状态对象执行删除及展示结果。
+// 通过快速清理模型展示推荐分类、重叠资源去重后的选择和估算空间。
+// 确认删除后按相册返回结果展示完成提示；卡片消散仅是成功后的视觉反馈。
+
 //
 //  MediaQuickCleanView.swift
 //  CleanMyIPhone
@@ -5,6 +10,7 @@
 
 import SwiftUI
 
+/// 呈现清理分类及选择汇总，通过确认流程将删除请求交给状态对象。
 struct MediaQuickCleanView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -23,6 +29,7 @@ struct MediaQuickCleanView: View {
     @State private var categoryScrollPosition: MediaQuickCleanViewModel.Category.ID?
     @State private var showsPremium = false
 
+    /// 创建快速清理模型并选中建议分类；删除时由模型重新检查权限。
     init(photoLibrary: PhotoLibraryViewModel, accessStore: PremiumFeatureAccessStore) {
         self.photoLibrary = photoLibrary
         self.accessStore = accessStore
@@ -200,6 +207,7 @@ struct MediaQuickCleanView: View {
         .appContentCard()
     }
 
+    /// 展示分类及选择状态；正在处理删除的分类继续保留选中外观。
     private func categoryButton(_ category: MediaQuickCleanViewModel.Category) -> some View {
         let isSelected = viewModel.isSelected(category)
             || pendingDeletionCategoryIDs.contains(category.id)
@@ -317,6 +325,7 @@ struct MediaQuickCleanView: View {
         }
     }
 
+    /// 组合分类资源数量及估算占用空间。
     private func categoryDetail(_ category: MediaQuickCleanViewModel.Category) -> String {
         let count = String.localizedStringWithFormat(
             AppL10n.string("%lld items"),
@@ -344,6 +353,7 @@ struct MediaQuickCleanView: View {
         return size
     }
 
+    /// 仅根据相册报告的成功结果生成移入最近删除的完成提示。
     private func handleDeletionResult() {
         if case let .success(deletedCount, estimatedBytes) = photoLibrary.deletionState {
             let count = String.localizedStringWithFormat(

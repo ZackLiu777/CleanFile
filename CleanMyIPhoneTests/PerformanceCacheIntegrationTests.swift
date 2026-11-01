@@ -1,8 +1,19 @@
+//
+//  性能缓存集成边界
+//
+//  覆盖详情页日期缓存失效及选择索引构建取消。
+//  通过构建次数和取消结果确认缓存不会复用过期输入。
+//  日期缓存用构建次数检查修订号和资源变化；选择索引用已取消任务检查取消传播。
+//  输入为合成媒体标识，不需要相册内容。
+//
+
 import Foundation
 import Testing
 @testable import CleanMyIPhone
 
+/// 验证缓存实际接入及构建取消时的行为。
 struct PerformanceCacheIntegrationTests {
+    /// 检查资源成员或相册修订变化时重建缓存，未变化时复用。
     @Test @MainActor func detailDateCacheInvalidation() {
         let store = MediaDateSectionStore()
         var builds = 0
@@ -20,6 +31,7 @@ struct PerformanceCacheIntegrationTests {
         #expect(builds == 3)
     }
 
+    /// 任务已取消时，较大选择索引构建应抛出取消错误。
     @Test func cancelledIndexBuild() async {
         let cancelled = await Task {
             withUnsafeCurrentTask { $0?.cancel() }

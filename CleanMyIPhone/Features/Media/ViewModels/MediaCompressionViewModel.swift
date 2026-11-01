@@ -1,9 +1,16 @@
+// 媒体压缩界面的状态与批次协调。
+// 准备阶段支持预览和分页；压缩副本成功后才尝试替换原件，并分别记录取消与替换失败。
+// 页面将媒体目录准备、选择汇总、确认及执行动作委托给该模型。
+// 耗时准备通过代次丢弃过期结果；批次结果区分保存副本与后续替换原件。
+
 import Combine
 import Foundation
 import Photos
 
+/// 保存选择、预估大小和每项压缩结果，并协调准备、压缩及原件替换的生命周期。
 @MainActor
 final class MediaCompressionViewModel: ObservableObject {
+    /// 区分准备后空闲、处理、替换、取消和终态，避免将替换失败误报为压缩成功。
     enum Phase: Equatable { case idle, processing(completed: Int, total: Int), replacing, cancelling, finished, cancelled, replacementFailure(String) }
     let category: MediaCompressionCategory
     private var catalog = MediaCompressionCatalog(items: [])
@@ -35,6 +42,7 @@ final class MediaCompressionViewModel: ObservableObject {
     private let operation: @Sendable (String, MediaCompressionCategory) async throws -> MediaCompressionOutcome
     private var task: Task<Void, Never>?
 
+    /// 连接相册并等待异步准备压缩目录；批次完成后刷新相册。
     convenience init(category: MediaCompressionCategory, library: PhotoLibraryViewModel) {
         self.init(category: category, items: [], onBatchCompletion: { library.refresh() })
         self.library = library
@@ -48,6 +56,7 @@ final class MediaCompressionViewModel: ObservableObject {
         isPreparing = true
     }
 
+    /// 按当前分类异步准备目录；预览和最终结果均检查代次，避免取消或重试后的旧结果覆盖新数据。
     func prepare() async {
         guard !hasPrepared else { return }
         preparationGeneration += 1
@@ -91,12 +100,14 @@ final class MediaCompressionViewModel: ObservableObject {
         }
     }
 
+    /// 仅发布属于当前准备任务且未取消的预览，并分别展示实况照片和普通照片。
     private func showPreview(_ preview: [MediaCompressionItem], generation: Int) {
         guard generation == preparationGeneration, !Task.isCancelled else { return }
         visibleLiveItems = preview.filter(\.isLivePhoto)
         visiblePhotoItems = preview.filter { !$0.isLivePhoto }
     }
 
+    /// 安装完整目录和初始选择汇总，首屏只展示每类前 120 项。
     private func install(_ prepared: MediaCompressionCatalog) {
         catalog = prepared
         eligibleOriginal = prepared.originalBytes
@@ -107,6 +118,7 @@ final class MediaCompressionViewModel: ObservableObject {
         visiblePhotoItems = Array(prepared.photoItems.prefix(120))
     }
 
+    /// 滚动到当前可见末尾时分批追加同类媒体，避免一次构造所有列表项。
     func revealMore(after item: MediaCompressionItem) {
         guard !isPreparing else { return }
         if item.isLivePhoto, item.id == visibleLiveItems.last?.id, visibleLiveItems.count < catalog.liveItems.count {
@@ -116,6 +128,7 @@ final class MediaCompressionViewModel: ObservableObject {
         }
     }
 
+    /// 建立压缩模型，可注入压缩和替换操作；未提供时使用原生服务。
     init(category: MediaCompressionCategory, items: [MediaCompressionItem],
          onBatchCompletion: @escaping @MainActor () -> Void = {},
          replaceOriginals: (@Sendable (Set<String>) async throws -> Set<String>)? = nil,
@@ -134,10 +147,12 @@ final class MediaCompressionViewModel: ObservableObject {
     var eligibleIDs: Set<String> { Set(catalog.byID.keys).subtracting(finishedIDs) }
     var pendingIDs: Set<String> { selectedIDs }
     var allSelected: Bool { pendingCount > 0 && pendingCount == items.count - finishedIDs.count }
+    /// 已完成项目不可再次选择，其余项目按全选状态与例外集合判断。
     func isSelected(_ id: String) -> Bool {
         !finishedIDs.contains(id) && (selectsAll != selectionExceptions.contains(id))
     }
 
+    /// 已保存副本使用实际大小，其余使用估算值；限制输出大小范围以保持汇总合理。
     private func sizes(for id: String) -> (Int64, Int64) {
         if case let .saved(original, output) = states[id] { return (max(0, original), min(max(0, original), max(0, output))) }
         guard let index = catalog.byID[id] else { return (0, 0) }
@@ -145,6 +160,7 @@ final class MediaCompressionViewModel: ObservableObject {
         return (max(0, item.originalBytes), min(max(0, item.originalBytes), max(0, item.estimatedBytes)))
     }
 
+    /// 按增量维护选择数量与空间汇总，避免每次切换都遍历整个媒体目录。
     private func adjustSelection(original: Int64, output: Int64, count: Int) {
         let source = selectedSizeSummary.original + original
         let destination = selectedSizeSummary.output + output
@@ -152,6 +168,7 @@ final class MediaCompressionViewModel: ObservableObject {
         pendingCount += count
     }
 
+    /// 更新单项状态时同步调整可选集合和汇总，确保已完成项目不再进入后续批次。
     private func setState(_ state: MediaCompressionItemState, for id: String) {
         let selected = isSelected(id)
         let old = sizes(for: id)
@@ -179,6 +196,7 @@ final class MediaCompressionViewModel: ObservableObject {
         return nil
     }
 
+    /// 以默认选择状态和例外集合表达全选，避免为大型目录逐项写入选择状态。
     func toggleAll() {
         guard !isProcessing, !isPreparing else { return }
         selectsAll = !allSelected
@@ -186,6 +204,7 @@ final class MediaCompressionViewModel: ObservableObject {
         pendingCount = selectsAll ? items.count - finishedIDs.count : 0
         selectedSizeSummary = selectsAll ? (eligibleOriginal, eligibleOutput, eligibleOriginal - eligibleOutput) : (0, 0, 0)
     }
+    /// 只切换仍可处理的项目，并增量更新所选大小和数量。
     func toggle(_ id: String) {
         guard !isProcessing, !isPreparing, catalog.byID[id] != nil, !finishedIDs.contains(id) else { return }
         let sign: Int64 = isSelected(id) ? -1 : 1
@@ -193,14 +212,17 @@ final class MediaCompressionViewModel: ObservableObject {
         if !selectionExceptions.insert(id).inserted { selectionExceptions.remove(id) }
         adjustSelection(original: sign * size.0, output: sign * size.1, count: Int(sign))
     }
+    /// 准备完成且存在待处理项目时请求用户确认，不在此处开始压缩。
     func requestCompression() {
         guard !isProcessing, !isPreparing, preparationError == nil, pendingCount > 0 else { return }
         confirmationRequested = true
         isConfirmationPresented = true
     }
 
+    /// 撤销尚未确认的压缩请求，关闭确认界面。
     func cancelConfirmation() { confirmationRequested = false; isConfirmationPresented = false }
 
+    /// 只有存在有效确认请求时启动批次，防止弹窗绑定变化被误当成确认。
     @discardableResult
     func confirmCompression() -> Task<Void, Never>? {
         // SwiftUI dismisses the alert binding before executing its action.
@@ -210,6 +232,7 @@ final class MediaCompressionViewModel: ObservableObject {
         return start()
     }
 
+    /// 顺序处理选中媒体；成功创建副本后再替换原件，保留单项失败、取消和部分替换结果。
     @discardableResult
     func start() -> Task<Void, Never>? {
         guard !isProcessing, !isPreparing, preparationError == nil else { return nil }
@@ -281,6 +304,7 @@ final class MediaCompressionViewModel: ObservableObject {
         }
         return task
     }
+    /// 请求取消当前处理或替换任务；已提交的系统更改仍由结果记录。
     func cancel() {
         guard isProcessing else { return }
         phase = .cancelling

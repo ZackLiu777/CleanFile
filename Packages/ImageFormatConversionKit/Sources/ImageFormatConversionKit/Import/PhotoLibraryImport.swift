@@ -1,6 +1,9 @@
 //
-//  文件职责：集中定义 PhotoLibraryImport 相关的生产逻辑与共享能力。
-//  所属模块：ImageFormatConversionKit。
+//  将 PhotosPicker 提供的图片和视频转换为应用可继续访问的本地文件。
+//  导入受全局调度器约束，传输进度和取消通过受锁保护的状态桥接。
+//  交付文件先落到临时路径并检查大小；发送方拥有的原文件只复制不移动。
+//  图片和视频各自提供 Transferable 包装，转换页面通过统一入口发起传输。
+//  传输完成后返回可由应用继续访问的路径，工作区后续负责自身的暂存与清理。
 //
 
 import CoreTransferable
@@ -9,7 +12,7 @@ import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// 定义 `ImportedPhotoFile` 的值语义数据与相关行为。
+/// 图片传输交付后保存到应用可访问的本地路径。
 struct ImportedPhotoFile: Transferable, Sendable {
     let url: URL
 
@@ -22,7 +25,7 @@ struct ImportedPhotoFile: Transferable, Sendable {
     }
 }
 
-/// 定义 `ImportedVideoFile` 的值语义数据与相关行为。
+/// 视频传输交付后保存到应用可访问的本地路径。
 struct ImportedVideoFile: Transferable, Sendable {
     let url: URL
 
@@ -35,9 +38,9 @@ struct ImportedVideoFile: Transferable, Sendable {
     }
 }
 
-/// 定义 `PhotoLibraryImport` 使用的有限状态或选项集合。
+/// 桥接 PhotosPicker 的传输、进度、取消和交付文件保存。
 enum PhotoLibraryImport {
-    /// 加载 `loadTransferable` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 通过共享调度器限制并发传输，然后加载指定的可传输类型。
     static func loadTransferable<T: Transferable & Sendable>(
         from item: PhotosPickerItem,
         type: T.Type,
@@ -52,7 +55,8 @@ enum PhotoLibraryImport {
         }
     }
 
-    /// 加载 `loadTransferableWithoutScheduling` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 将回调式传输转换为异步结果，并定期上报变化的百分比。
+    /// 调用任务取消时向传输进度对象发送取消请求。
     private static func loadTransferableWithoutScheduling<T: Transferable & Sendable>(
         from item: PhotosPickerItem,
         type: T.Type,
@@ -91,7 +95,8 @@ enum PhotoLibraryImport {
         }
     }
 
-    /// Persists a PhotosPicker delivery without moving a sender-owned original.
+    /// 将交付文件保存为本地副本：发送方原件始终复制，临时交付文件可同卷移动。
+    /// 先写入部分文件并检查大小，成功后再改名提交；失败时清理部分文件。
     static func adopt(_ received: ReceivedTransferredFile) throws -> URL {
         let performanceID = ConversionPerformance.begin("Conversion Provider Copy")
         defer { ConversionPerformance.end("Conversion Provider Copy", id: performanceID) }
@@ -133,6 +138,7 @@ enum PhotoLibraryImport {
         }
     }
 
+    /// 无法读取卷标识时保守返回 false，调用方因此使用复制路径。
     private static func isSameVolume(_ source: URL, _ destinationDirectory: URL) -> Bool {
         let keys: Set<URLResourceKey> = [.volumeIdentifierKey]
         guard let sourceVolume = try? source.resourceValues(forKeys: keys).volumeIdentifier,
@@ -143,7 +149,7 @@ enum PhotoLibraryImport {
         return sourceVolume.isEqual(destinationVolume)
     }
 
-    /// 封装 `destinationURL` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 在应用支持目录创建带 UUID 的导入路径，避免不同交付文件重名。
     private static func destinationURL(fileName: String) throws -> URL {
         let fileManager = FileManager.default
         let baseDirectory = fileManager.urls(
@@ -165,27 +171,27 @@ enum PhotoLibraryImport {
     }
 }
 
-/// 封装 `TransferProgressOperation` 的引用语义、状态与业务行为。
+/// 用锁保护传输进度和完成状态，供回调、轮询和取消处理器共享。
 private final class TransferProgressOperation: @unchecked Sendable {
     private let lock = NSLock()
     private var progress: Progress?
     private var finished = false
 
-    /// 封装 `attach` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 保存 PhotosPicker 返回的进度对象。
     func attach(_ progress: Progress) {
         lock.withLock {
             self.progress = progress
         }
     }
 
-    /// 封装 `finish` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 标记传输回调已结束，使进度轮询退出。
     func finish() {
         lock.withLock {
             finished = true
         }
     }
 
-    /// 取消 `cancel` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 请求取消底层传输并停止进度轮询。
     func cancel() {
         lock.withLock {
             progress?.cancel()
@@ -193,7 +199,7 @@ private final class TransferProgressOperation: @unchecked Sendable {
         }
     }
 
-    /// 封装 `snapshot` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 原子读取进度和结束状态，避免观察到不一致的共享状态。
     func snapshot() -> (fraction: Double, isFinished: Bool) {
         lock.withLock {
             (progress?.fractionCompleted ?? 0, finished)

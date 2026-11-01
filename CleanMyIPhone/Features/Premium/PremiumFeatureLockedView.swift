@@ -1,5 +1,9 @@
+// 付费功能不可用时使用的统一入口。
+// 页面区分权益正在核验与需要 Premium 两种提示，并提供订阅页面入口。
+// 实际权限判定仍由 PremiumFeatureAccessStore 负责。
 import SwiftUI
 
+/// 展示指定功能的锁定状态和解锁操作。
 struct PremiumFeatureLockedView: View {
     @Environment(\.appTheme) private var theme
     @EnvironmentObject private var accessStore: PremiumFeatureAccessStore

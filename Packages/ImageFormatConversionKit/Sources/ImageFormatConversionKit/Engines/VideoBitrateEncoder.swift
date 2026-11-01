@@ -1,13 +1,21 @@
+//
+//  自定义码率视频编码，将视频、音频和可选元数据轨道分别流式传递。
+//  码率及尺寸由源视频和请求计算；HDR 在此 SDR 路径中明确拒绝。
+//  锁保护活动 reader / writer 的取消入口，任一轨道失败时停止整个编码。
+//  视频转换引擎仅在请求自定义码率的路径中使用此编码器。
+//  媒体样本通过系统 reader 和 writer 处理；输出路径及最终提交由上层协调。
+//
+
 import AVFoundation
 import Foundation
 
-/// Encodes a video at a target fraction of its source track's measured bit rate.
-/// The preset exporter remains responsible for the automatic (100%) setting.
+/// 按源视频码率的指定比例编码；自动码率仍由系统预设导出器处理。
 final class VideoBitrateEncoder: @unchecked Sendable {
     private let lock = NSLock()
     private var reader: AVAssetReader?
     private var writer: AVAssetWriter?
 
+    /// 通过锁访问活动读写器，可从任务取消处理器安全地请求停止。
     func cancel() {
         lock.withLock {
             reader?.cancelReading()
@@ -15,6 +23,8 @@ final class VideoBitrateEncoder: @unchecked Sendable {
         }
     }
 
+    /// 创建视频及可选音频、元数据管线，并等待所有管线结束后完成写入。
+    /// 自定义 SDR 编码拒绝 HDR，任一管线失败时取消所有读写。
     func encode(
         asset: AVURLAsset,
         request: VideoConversionRequest,
@@ -157,6 +167,7 @@ final class VideoBitrateEncoder: @unchecked Sendable {
         }
     }
 
+    /// 将目标容器转换为 AVFoundation 文件类型。
     private static func fileType(_ container: VideoOutputContainer) -> AVFileType {
         switch container {
         case .mp4: .mp4
@@ -166,7 +177,9 @@ final class VideoBitrateEncoder: @unchecked Sendable {
     }
 }
 
+/// 为自定义码率路径计算偶数像素尺寸和目标视频码率。
 enum VideoBitratePlan {
+    /// 按最长边等比缩小，不放大源视频，并将两个维度调整为偶数。
     static func dimensions(source: CGSize, resolution: VideoResolutionPreset) -> (width: Int, height: Int) {
         let longestEdge: CGFloat = switch resolution {
         case .original: max(abs(source.width), abs(source.height))
@@ -182,6 +195,7 @@ enum VideoBitratePlan {
         )
     }
 
+    /// 按码率比例和像素面积比例计算目标值，并设置最低码率。
     static func rate(
         sourceRate: Double,
         fraction: Double,
@@ -201,6 +215,7 @@ private final class SamplePipe: @unchecked Sendable {
     let reader: AVAssetReader
     let writer: AVAssetWriter
 
+    /// 绑定一组轨道读写端以及负责整体状态的 reader 和 writer。
     init(output: AVAssetReaderTrackOutput, input: AVAssetWriterInput, reader: AVAssetReader, writer: AVAssetWriter) {
         self.output = output
         self.input = input
@@ -208,6 +223,7 @@ private final class SamplePipe: @unchecked Sendable {
         self.writer = writer
     }
 
+    /// 持续传递样本并检查取消；视频管线按时间戳报告进度。
     func append(duration: Double, progress: (@Sendable (Double) async -> Void)?) async throws {
         while true {
             try Task.checkCancellation()

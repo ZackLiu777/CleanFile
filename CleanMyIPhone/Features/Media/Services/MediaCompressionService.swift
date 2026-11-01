@@ -1,14 +1,24 @@
+//
+//  媒体压缩与原件替换
+//
+//  协调 PhotoKit 资源下载、原生转换、压缩副本保存和独立的原件替换。
+//  副本必须更小并通过保存验证；替换前再次验证原件和副本，删除由 PhotoKit 事务执行。
+//
+
 import Foundation
 import Photos
 import ImageFormatConversionKit
 import os
 
 /// A batch owns one service and processes one asset at a time, bounding disk and decoder use.
+/// 为单批次串行管理压缩操作及已保存副本，限制同时占用的临时磁盘和解码资源。
 actor MediaCompressionService {
     private let images = ImageConversionEngine()
     private let videos = VideoConversionEngine()
     private var replacements: [String: SavedCompressionReplacement] = [:]
 
+    /// 下载指定资源并生成压缩副本；只有输出更小时才保存，并验证新资源后记录可替换关系。
+    /// 原件不会在此步骤删除；临时目录在操作结束后清理。
     func compress(id: String, category: MediaCompressionCategory) async throws -> MediaCompressionOutcome {
         try Task.checkCancellation()
         guard let asset = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject else {
@@ -94,6 +104,8 @@ actor MediaCompressionService {
         return .saved(original: originalBytes, output: outputBytes, createdAssetID: copyID)
     }
 
+    /// 确认所有原件仍存在且未在压缩后修改，并逐一核对已保存副本后，统一请求 PhotoKit 删除。
+    /// 系统拒绝或验证失败会抛出错误；用户取消被转换为取消错误。
     func replaceOriginals(_ ids: Set<String>) async throws -> Set<String> {
         guard !ids.isEmpty else { return [] }
         try Task.checkCancellation()
@@ -132,6 +144,7 @@ actor MediaCompressionService {
         return ids
     }
 
+    /// 检查单帧约束后选择保留透明度的输出格式，并保留源元数据。
     private func compressImage(_ source: URL, to output: URL) async throws -> URL {
         let info = try await images.inspect(source)
         guard info.frameCount == 1 else { throw MediaCompressionError.specialImage }
@@ -142,6 +155,7 @@ actor MediaCompressionService {
             background: info.hasAlpha ? .transparent : nil)).outputURL
     }
 
+    /// 优先按目标码率转换；当系统不支持 HDR 指定码率时回退到保留 HDR 的导出路径。
     private func compressVideo(_ source: URL, to output: URL, live: Bool) async throws -> URL {
         do {
             let result = try await videos.convert(VideoConversionRequest(sourceURL: source, destinationDirectory: output,
@@ -157,10 +171,12 @@ actor MediaCompressionService {
         }
     }
 
+    /// 汇总临时资源的文件大小；元数据查询抛错时向上传递，缺少大小值时按零计入。
     private func byteCount(_ urls: [URL]) throws -> Int64 {
         try urls.reduce(0) { $0 + Int64(try $1.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) }
     }
 
+    /// 将 PhotoKit 数据流写入临时文件，允许从云端获取资源并将任务取消转发给请求。
     private func download(_ resource: PHAssetResource, to folder: URL, name: String) async throws -> URL {
         let ext = (resource.originalFilename as NSString).pathExtension
         let url = folder.appendingPathComponent(name).appendingPathExtension(ext.isEmpty ? "dat" : ext)
@@ -181,6 +197,7 @@ actor MediaCompressionService {
         return url
     }
 
+    /// 通过 PhotoKit 验证静态图与视频能否组成 Live Photo，忽略低质量中间回调。
     private func validLivePhoto(_ urls: [URL]) async -> Bool {
         await withCheckedContinuation { continuation in
             PHLivePhoto.request(withResourceFileURLs: urls, placeholderImage: nil,
@@ -192,6 +209,7 @@ actor MediaCompressionService {
     }
 }
 
+/// 区分无法保留 Live Photo、特殊图片及副本验证或原件替换失败等可展示错误。
 nonisolated enum MediaCompressionError: LocalizedError {
     case invalidLivePhoto, specialImage, verificationFailed, replacementFailed
     var errorDescription: String? {
@@ -206,6 +224,7 @@ nonisolated enum MediaCompressionError: LocalizedError {
 
 /// PhotoKit callbacks may arrive outside the actor. The mutex owns the stream and request lifecycle.
 nonisolated private final class MediaResourceDownload: Sendable {
+    /// 由锁保护的下载状态，协调 PhotoKit 回调、取消请求和文件写入错误。
     private struct State {
         var handle: FileHandle?
         var requestID: PHAssetResourceDataRequestID?
@@ -214,10 +233,12 @@ nonisolated private final class MediaResourceDownload: Sendable {
     }
     private let state: OSAllocatedUnfairLock<State>
 
+    /// 在指定临时 URL 创建空文件并打开写入句柄；创建或打开失败时抛出错误。
     init(url: URL) throws {
         guard FileManager.default.createFile(atPath: url.path, contents: nil) else { throw CocoaError(.fileWriteUnknown) }
         state = OSAllocatedUnfairLock(initialState: State(handle: try FileHandle(forWritingTo: url)))
     }
+    /// 记录异步请求标识；若安装前已经取消或写入失败，立即取消该请求。
     func install(_ id: PHAssetResourceDataRequestID) {
         let cancel = state.withLock { value in
             value.requestID = id
@@ -225,6 +246,7 @@ nonisolated private final class MediaResourceDownload: Sendable {
         }
         if cancel { PHAssetResourceManager.default().cancelDataRequest(id) }
     }
+    /// 在锁保护下将回调数据增量写入文件；写入失败时取消正在进行的资源请求。
     func receive(_ data: Data) {
         let cancelID = state.withLock { value -> PHAssetResourceDataRequestID? in
             guard !value.cancelled, value.error == nil else { return nil }
@@ -234,10 +256,12 @@ nonisolated private final class MediaResourceDownload: Sendable {
         }
         if let cancelID { PHAssetResourceManager.default().cancelDataRequest(cancelID) }
     }
+    /// 记录取消状态并取消已安装的请求，兼容请求标识尚未返回的竞态。
     func cancel() {
         let id = state.withLock { value in value.cancelled = true; return value.requestID }
         if let id { PHAssetResourceManager.default().cancelDataRequest(id) }
     }
+    /// 关闭文件并统一返回取消、写入错误或 PhotoKit 错误，确保调用方只处理最终结果。
     func finish(error: Error?) -> Result<Void, Error> {
         state.withLock { value in
             do { try value.handle?.close() } catch { value.error = value.error ?? error }
@@ -248,9 +272,11 @@ nonisolated private final class MediaResourceDownload: Sendable {
             return .success(())
         }
     }
+    /// 若请求未正常完成，释放时尽力关闭剩余句柄。
     deinit { state.withLock { try? $0.handle?.close() } }
 }
 
+/// 记录压缩副本与原件修改时间，供后续替换前核对资源是否发生变化。
 nonisolated private struct SavedCompressionReplacement: Sendable {
     let copyID: String
     let modificationDate: Date?

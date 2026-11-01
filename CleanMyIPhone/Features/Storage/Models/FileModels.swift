@@ -1,4 +1,11 @@
 //
+//  文件扫描领域模型
+//
+//  定义文件元数据、类别、统计累加器、扫描事件及删除状态。
+//  文件大小可能未知；结果描述扫描快照，不保证源文件在后续操作时仍可访问。
+//
+
+//
 //  FileModels.swift
 //  CleanMyIPhone
 //
@@ -11,7 +18,7 @@
 import Foundation
 import UniformTypeIdentifiers
 
-/// 定义 `FileCategory` 使用的有限状态或选项集合。
+/// 文件概览使用的分类；无法识别的类型归入 other。
 nonisolated enum FileCategory: String, CaseIterable, Codable, Hashable, Sendable {
     case video
     case image
@@ -33,7 +40,7 @@ nonisolated enum FileCategory: String, CaseIterable, Codable, Hashable, Sendable
         }
     }
 
-    /// 解析 `classify` 对应的业务语义，并返回稳定的分类或映射结果。
+    /// 优先按系统类型标识判断；缺失或不能识别时回退到扩展名。
     nonisolated static func classify(typeIdentifier: String?, fileExtension: String) -> FileCategory {
         if let typeIdentifier, let type = UTType(typeIdentifier) {
             if type.conforms(to: .movie) || type.conforms(to: .video) {
@@ -59,7 +66,7 @@ nonisolated enum FileCategory: String, CaseIterable, Codable, Hashable, Sendable
         return classify(fileExtension: fileExtension)
     }
 
-    /// 解析 `classify` 对应的业务语义，并返回稳定的分类或映射结果。
+    /// 按不区分大小写的已知扩展名分类，不读取文件内容。
     nonisolated static func classify(fileExtension: String) -> FileCategory {
         switch fileExtension.lowercased() {
         case "mp4", "mov", "m4v", "avi", "mkv", "webm": .video
@@ -73,7 +80,7 @@ nonisolated enum FileCategory: String, CaseIterable, Codable, Hashable, Sendable
     }
 }
 
-/// 定义 `ScannedFile` 的值语义数据与相关行为。
+/// 一次扫描得到的文件元数据快照；大小未知时须结合 hasKnownByteCount 判断。
 nonisolated struct ScannedFile: Identifiable, Codable, Hashable, Sendable {
     let id: URL
     let url: URL
@@ -85,6 +92,7 @@ nonisolated struct ScannedFile: Identifiable, Codable, Hashable, Sendable {
     let creationDate: Date?
     let modificationDate: Date?
 
+    /// URL 用于恢复快照中的标识，因此不另行编码派生的 `id`。
     private enum CodingKeys: String, CodingKey {
         case url
         case name
@@ -96,7 +104,7 @@ nonisolated struct ScannedFile: Identifiable, Codable, Hashable, Sendable {
         case modificationDate
     }
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 以给定的相对路径和元数据构建记录；URL 同时作为当前快照的标识。
     nonisolated init(
         url: URL,
         name: String,
@@ -118,7 +126,7 @@ nonisolated struct ScannedFile: Identifiable, Codable, Hashable, Sendable {
         self.modificationDate = modificationDate
     }
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 从系统资源值构建记录；缺少名称时使用 URL 末尾，缺少大小时标记未知。
     nonisolated init(
         url: URL,
         resourceValues: URLResourceValues,
@@ -139,6 +147,7 @@ nonisolated struct ScannedFile: Identifiable, Codable, Hashable, Sendable {
         )
     }
 
+    /// 解码文件记录并通过常规初始化恢复 URL 标识。
     nonisolated init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let url = try container.decode(URL.self, forKey: .url)
@@ -154,6 +163,7 @@ nonisolated struct ScannedFile: Identifiable, Codable, Hashable, Sendable {
         )
     }
 
+    /// 编码文件 URL、相对路径及元数据，保留大小是否已知的信息。
     nonisolated func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(url, forKey: .url)
@@ -167,9 +177,9 @@ nonisolated struct ScannedFile: Identifiable, Codable, Hashable, Sendable {
     }
 }
 
-/// 定义 `FileDisplayOrder` 使用的有限状态或选项集合。
+/// 集中定义文件列表的展示排序规则。
 nonisolated enum FileDisplayOrder {
-    /// 封装 `bySizeDescending` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 已知大小排在未知大小之前，随后按大小降序及本地化名称排序。
     static func bySizeDescending(_ files: [ScannedFile]) -> [ScannedFile] {
         files.sorted { lhs, rhs in
             if lhs.hasKnownByteCount != rhs.hasKnownByteCount {
@@ -183,9 +193,10 @@ nonisolated enum FileDisplayOrder {
     }
 }
 
-/// 定义 `RelativePathComponents` 使用的有限状态或选项集合。
+/// 从标准化文件 URL 中提取相对于选定根目录的安全路径组件。
 enum RelativePathComponents: Sendable {
     /// Produces the file's hierarchy below the user-selected root without guessing.
+    /// 从根 URL 构造路径组件并委托校验；不属于根目录或与根相同的 URL 返回 nil。
     nonisolated static func make(fileURL: URL, relativeTo rootURL: URL) -> [String]? {
         make(
             fileURL: fileURL,
@@ -194,6 +205,7 @@ enum RelativePathComponents: Sendable {
     }
 
     /// Reuses the selected root's components across a large directory walk.
+    /// 复用已计算的根组件，验证标准化后的文件路径属于根目录且相对组件有效。
     nonisolated static func make(
         fileURL: URL,
         rootComponents: [String]
@@ -221,7 +233,7 @@ enum RelativePathComponents: Sendable {
     }
 }
 
-/// 定义 `StorageCategorySummary` 的值语义数据与相关行为。
+/// 单个文件类别的数量、已知字节、未知大小数量和已知字节占比。
 nonisolated struct StorageCategorySummary: Identifiable, Codable, Hashable, Sendable {
     let category: FileCategory
     let fileCount: Int
@@ -232,14 +244,14 @@ nonisolated struct StorageCategorySummary: Identifiable, Codable, Hashable, Send
     var id: FileCategory { category }
 }
 
-/// 定义 `StorageSummary` 的值语义数据与相关行为。
+/// 文件扫描的整体数量、已知大小和分类汇总；未知大小单独计数。
 nonisolated struct StorageSummary: Codable, Hashable, Sendable {
     let fileCount: Int
     let totalBytes: Int64
     let unknownByteCountFileCount: Int
     let categories: [StorageCategorySummary]
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 逐项累积文件记录并生成统计结果，不访问源文件。
     nonisolated init(files: [ScannedFile]) {
         var accumulator = StorageSummaryAccumulator()
         for file in files {
@@ -248,6 +260,7 @@ nonisolated struct StorageSummary: Codable, Hashable, Sendable {
         self = accumulator.makeSummary()
     }
 
+    /// 使用已计算的计数和分类结果构造汇总；调用方负责保证各项统计一致。
     nonisolated init(
         fileCount: Int,
         totalBytes: Int64,
@@ -267,7 +280,9 @@ nonisolated struct StorageSummary: Codable, Hashable, Sendable {
 
 /// Builds the dashboard summary during enumeration so completion does not
 /// traverse every scanned file several more times.
+/// 随扫描增量汇总文件分类，避免完成后再多次遍历所有记录。
 nonisolated struct StorageSummaryAccumulator: Sendable {
+    /// 某一分类的增量统计；未知大小单独计数，不加入字节总量。
     private struct CategoryValues: Sendable {
         var fileCount = 0
         var byteCount: Int64 = 0
@@ -279,6 +294,7 @@ nonisolated struct StorageSummaryAccumulator: Sendable {
     private var unknownByteCountFileCount = 0
     private var grouped: [FileCategory: CategoryValues] = [:]
 
+    /// 计入文件及其分类；只有大小已知时才加入字节总量。
     mutating func append(_ file: ScannedFile) {
         fileCount += 1
         var values = grouped[file.category, default: CategoryValues()]
@@ -295,6 +311,7 @@ nonisolated struct StorageSummaryAccumulator: Sendable {
         grouped[file.category] = values
     }
 
+    /// 为所有分类生成汇总，占比以已知总字节为分母，零总量时为零。
     func makeSummary() -> StorageSummary {
         let categories = FileCategory.allCases.map { category in
             let values = grouped[category, default: CategoryValues()]
@@ -319,15 +336,18 @@ nonisolated struct StorageSummaryAccumulator: Sendable {
 
 /// Keeps only the largest files in a fixed-size min-heap. For the dashboard's
 /// ten entries this changes the scan-end full sort into O(n log 10) work.
+/// 以固定容量的最小堆保存最大的已知大小文件，避免对全部文件排序。
 nonisolated struct LargestFilesAccumulator: Sendable {
     private let limit: Int
     private var heap: [ScannedFile] = []
 
+    /// 设置保留数量；负数按零处理。
     init(limit: Int) {
         self.limit = max(0, limit)
         heap.reserveCapacity(self.limit)
     }
 
+    /// 忽略大小未知的文件；堆满时仅用更大的候选替换堆顶。
     mutating func append(_ file: ScannedFile) {
         guard limit > 0, file.hasKnownByteCount else { return }
 
@@ -342,6 +362,7 @@ nonisolated struct LargestFilesAccumulator: Sendable {
         siftDown(from: 0)
     }
 
+    /// 按大小降序、名称升序输出当前候选，不改变堆。
     func sortedDescending() -> [ScannedFile] {
         heap.sorted { lhs, rhs in
             if lhs.byteCount != rhs.byteCount {
@@ -351,6 +372,7 @@ nonisolated struct LargestFilesAccumulator: Sendable {
         }
     }
 
+    /// 新节点插入后向上恢复最小堆顺序。
     private mutating func siftUp(from index: Int) {
         var child = index
         while child > 0 {
@@ -361,6 +383,7 @@ nonisolated struct LargestFilesAccumulator: Sendable {
         }
     }
 
+    /// 替换堆顶后向下恢复最小堆顺序。
     private mutating func siftDown(from index: Int) {
         var parent = index
         while true {
@@ -377,6 +400,7 @@ nonisolated struct LargestFilesAccumulator: Sendable {
         }
     }
 
+    /// 按大小及名称判断候选顺序，使堆内大小相同时仍有确定的比较规则。
     private func isLarger(_ lhs: ScannedFile, than rhs: ScannedFile) -> Bool {
         if lhs.byteCount != rhs.byteCount {
             return lhs.byteCount > rhs.byteCount
@@ -385,13 +409,13 @@ nonisolated struct LargestFilesAccumulator: Sendable {
     }
 }
 
-/// 定义 `ScanProgress` 的值语义数据与相关行为。
+/// 扫描阶段已发现的文件数与字节数。
 struct ScanProgress: Equatable, Sendable {
     let scannedFileCount: Int
     let scannedByteCount: Int64
 }
 
-/// 定义 `FileScanResult` 的值语义数据与相关行为。
+/// 完整或部分扫描得到的文件、失败记录、概览、目录树与大文件候选。
 struct FileScanResult: Sendable {
     let files: [ScannedFile]
     let failures: [FileScanFailure]
@@ -400,25 +424,25 @@ struct FileScanResult: Sendable {
     let largestFiles: [ScannedFile]
 }
 
-/// 定义 `FileScanFailure` 的值语义数据与相关行为。
+/// 单个扫描项目无法处理时记录的名称与原因，允许其余项目继续。
 struct FileScanFailure: Hashable, Sendable {
     let fileName: String
     let reason: FileScanFailureReason
 }
 
-/// 定义 `FileScanFailureReason` 使用的有限状态或选项集合。
+/// 记录项目不可访问或无法生成相对路径等局部失败原因。
 enum FileScanFailureReason: String, Error, Hashable, Sendable {
     case inaccessible
     case relativePathUnavailable
 }
 
-/// 定义 `FileScanEvent` 使用的有限状态或选项集合。
+/// 扫描流发送的进度或最终结果事件。
 enum FileScanEvent: Sendable {
     case progress(ScanProgress)
     case completed(FileScanResult)
 }
 
-/// 定义 `FileScanError` 使用的有限状态或选项集合。
+/// 扫描无法继续时使用的取消、来源、枚举和授权错误。
 enum FileScanError: LocalizedError, Equatable, Sendable {
     case cancelled
     case notDirectory
@@ -437,7 +461,7 @@ enum FileScanError: LocalizedError, Equatable, Sendable {
     }
 }
 
-/// 定义 `ScanState` 使用的有限状态或选项集合。
+/// 界面消费的扫描状态，包括部分成功、取消和失败。
 enum ScanState: Equatable, Sendable {
     case idle
     case scanning(ScanProgress)
@@ -453,13 +477,13 @@ enum ScanState: Equatable, Sendable {
     }
 }
 
-/// 定义 `FileDeletionResult` 的值语义数据与相关行为。
+/// 记录成功删除的 URL 集合和失败文件数，供调用方更新状态。
 struct FileDeletionResult: Equatable, Sendable {
     let deletedURLs: Set<URL>
     let failedFileCount: Int
 }
 
-/// 定义 `FileDeletionState` 使用的有限状态或选项集合。
+/// 删除操作的互斥状态，单独表示部分成功。
 enum FileDeletionState: Equatable, Sendable {
     case idle
     case deleting(itemCount: Int)
@@ -473,7 +497,7 @@ enum FileDeletionState: Equatable, Sendable {
     }
 }
 
-/// 定义 `FileDeletionError` 使用的有限状态或选项集合。
+/// 区分未选择目标、授权不可用、越界选择及删除失败。
 enum FileDeletionError: LocalizedError, Equatable, Sendable {
     case noItemsSelected
     case folderAccessUnavailable

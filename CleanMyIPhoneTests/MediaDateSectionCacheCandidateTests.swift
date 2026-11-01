@@ -1,9 +1,20 @@
+//
+//  媒体日期分组缓存
+//
+//  检查分组结果、缓存命中、修订号和日历环境变化。
+//  覆盖未知日期、夏令时、返回值隔离与主动失效。
+//  相册成员与修订号、时区及日历设置改变时必须重新生成日期分组。
+//  使用构造的资源标识和固定日历，对照原始分组结果与输入构造次数。
+//
+
 import Foundation
 import Testing
 @testable import CleanMyIPhone
 
+/// 对比分组基线并检查所有会影响缓存有效性的输入。
 @Suite("Media date section cache candidate")
 struct MediaDateSectionCacheCandidateTests {
+    /// 用空日期、缺失日期与相同时间等输入对照原始分组结果。
     @Test("Candidate preserves baseline dates, unknown dates, ties and identifier order")
     func matchesBaseline() {
         let calendar = utcCalendar
@@ -31,6 +42,7 @@ struct MediaDateSectionCacheCandidateTests {
         }
     }
 
+    /// 选择状态变化但修订不变时，验证缓存命中且不重新构造输入。
     @Test("Repeated selection-only reads do not reconstruct the metadata input")
     func repeatedReadsReuseSnapshot() {
         var cache = MediaDateSectionCacheCandidate()
@@ -56,6 +68,7 @@ struct MediaDateSectionCacheCandidateTests {
         #expect(selectedIDs.isEmpty)
     }
 
+    /// 数量不变也可能更换资源；来源或代次变化必须使缓存失效。
     @Test("Generation and source changes invalidate input even with unchanged item count")
     func revisionChangesInvalidate() {
         var cache = MediaDateSectionCacheCandidate()
@@ -87,6 +100,7 @@ struct MediaDateSectionCacheCandidateTests {
         #expect(inputReads == revisions.count)
     }
 
+    /// 日历、时区、地区和周设置变化时均重建分组。
     @Test("Calendar, timezone, locale and week settings all invalidate the cache")
     func calendarChangesInvalidate() throws {
         var losAngeles = utcCalendar
@@ -121,6 +135,7 @@ struct MediaDateSectionCacheCandidateTests {
         #expect(inputReads == calendars.count)
     }
 
+    /// 在夏令时切换附近对照基线，避免按固定秒数错误划分日期。
     @Test("Daylight-saving boundaries produce exactly the baseline sections")
     func daylightSavingBoundaries() throws {
         var calendar = Calendar(identifier: .gregorian)
@@ -155,6 +170,7 @@ struct MediaDateSectionCacheCandidateTests {
         #expect(actual == MediaDateSectionBuilder.sections(from: input, calendar: calendar))
     }
 
+    /// 修改返回数组不能污染缓存中的值，验证写时复制边界。
     @Test("Mutating returned arrays does not mutate cached sections")
     func returnedArraysKeepValueSemantics() {
         var cache = MediaDateSectionCacheCandidate()
@@ -169,6 +185,7 @@ struct MediaDateSectionCacheCandidateTests {
         #expect(returned != next)
     }
 
+    /// 显式失效后即使修订号不变，也必须重新读取输入并构建分组。
     @Test("Explicit invalidation rebuilds the same revision")
     func explicitInvalidation() {
         var cache = MediaDateSectionCacheCandidate()

@@ -1,18 +1,30 @@
+//
+//  高级功能访问边界
+//
+//  覆盖免费、验证中、有效及过期权益下的功能访问。
+//  检查执行前重新确认权限，以及预览与外观偏好的保留。
+//  测试转换策略在执行时重新读取权限，免费用户的选择操作不会直接删除媒体。
+//  偏好迁移使用独立 UserDefaults 域；存储预览和资源标识均为合成数据。
+//
+
 import Foundation
 import ImageFormatConversionKit
 import SwiftUI
 import Testing
 @testable import CleanMyIPhone
 
+/// 检查各类权益状态的功能门禁和偏好保留。
 @Suite("Premium feature access")
 @MainActor
 struct PremiumFeatureAccessTests {
+    /// 遍历功能，确认未订阅时只有媒体与视频转换可用。
     @Test("Free access is limited by feature, never by batch size", arguments: PremiumFeature.allCases)
     func freeFeatureMatrix(feature: PremiumFeature) {
         let access = PremiumFeatureAccessStore(accessState: .notEntitled)
         #expect(access.allows(feature) == [.media, .videoConversion].contains(feature))
     }
 
+    /// 权益待验证时保留媒体、视频转换和已保存的高级外观。
     @Test("Pending verification keeps media and video available", arguments: PremiumFeature.allCases)
     func pendingFeatureMatrix(feature: PremiumFeature) {
         let access = PremiumFeatureAccessStore()
@@ -20,12 +32,14 @@ struct PremiumFeatureAccessTests {
         #expect(access.preservesPremiumAppearance)
     }
 
+    /// 有效权益应解锁枚举中的每项功能。
     @Test("A valid trial or purchase unlocks every feature", arguments: PremiumFeature.allCases)
     func premiumFeatureMatrix(feature: PremiumFeature) {
         let access = PremiumFeatureAccessStore(accessState: .entitled)
         #expect(access.allows(feature))
     }
 
+    /// 重复完成及取消大批视频转换后仍可预留视频；无效数量和付费格式被拒绝。
     @Test("Video batches stay free after repeated successes and cancellation")
     func unlimitedFreeVideo() throws {
         let access = PremiumFeatureAccessStore(accessState: .notEntitled)
@@ -43,6 +57,7 @@ struct PremiumFeatureAccessTests {
         #expect(access.conversionPolicy.reserve(.video, -1) == nil)
     }
 
+    /// 已创建的转换策略在真正执行时重新检查权益变化。
     @Test("A retained conversion policy rechecks ownership at execution")
     func upgradeAndExpiration() throws {
         let access = PremiumFeatureAccessStore(accessState: .notEntitled)
@@ -65,6 +80,7 @@ struct PremiumFeatureAccessTests {
         #expect(!access.allows(.storage))
     }
 
+    /// 检查旧配额数据、地区设置变化及重新创建访问状态不会解锁付费功能。
     @Test("Old free counters and calendar preferences cannot unlock paid features")
     func obsoleteQuotaAndRelaunch() throws {
         let domain = "FilevraFeatureMigrationTests." + UUID().uuidString
@@ -87,6 +103,7 @@ struct PremiumFeatureAccessTests {
         #expect(reinstalled.conversionPolicy.reserve(.images, 1) == nil)
     }
 
+    /// 没有权益时阻止恢复、扫描和删除等存储操作。
     @Test("Storage cannot start restoration, scans, or deletion without access")
     func storageExecutionGate() async {
         let access = PremiumFeatureAccessStore(accessState: .notEntitled)
@@ -103,6 +120,7 @@ struct PremiumFeatureAccessTests {
         #expect(model.deletionState == .idle)
     }
 
+    /// 免费用户可浏览和选择候选，但执行清理仍需通过权限检查。
     @Test("Free users can select quick cleanup items but execution still requires Premium")
     func quickCleanExecutionGate() async {
         let access = PremiumFeatureAccessStore(accessState: .notEntitled)
@@ -139,6 +157,7 @@ struct PremiumFeatureAccessTests {
         #expect(!access.allows(.quickClean))
     }
 
+    /// 解锁存储权限本身不会伪造选择的目录、汇总或文件树。
     @Test("Unlocking storage does not fabricate a selected source or consume its preview")
     @MainActor
     func storageUnlockPreservesNoSourceState() {
@@ -151,6 +170,7 @@ struct PremiumFeatureAccessTests {
         #expect(scanner.fileTree == nil)
     }
 
+    /// 重复生成预览并核对树叶节点与分类数量、字节汇总及标识的一致性。
     @Test("The storage preview is deterministic and its summary matches its URL-free tree")
     func storagePreviewConsistency() {
         let preview = StorageDashboardPreview.make()
@@ -163,6 +183,7 @@ struct PremiumFeatureAccessTests {
         #expect(preview.summary.unknownByteCountFileCount == 0)
         #expect(preview.summary.nonEmptyCategories.count == FileCategory.allCases.count)
 
+        /// 递归收集预览树中的文件叶节点，用于与分类统计逐项对照。
         func leaves(_ node: FileNode) -> [FileNode] {
             node.isDirectory ? node.children.flatMap(leaves) : [node]
         }
@@ -178,6 +199,7 @@ struct PremiumFeatureAccessTests {
         #expect(FileTreeDiagnostics.maximumDepth(of: preview.fileTree) >= 4)
     }
 
+    /// 无高级权益时允许免费浅色主题，拒绝高级主题及自定义颜色生效。
     @Test("Light preset themes remain free", arguments: [AppThemeID.system, .cream, .porcelain, .sage])
     func freeLightThemes(themeID: AppThemeID) throws {
         let domain = "FilevraFreeThemesTests." + UUID().uuidString
@@ -197,6 +219,7 @@ struct PremiumFeatureAccessTests {
         #expect(settings.effectiveAccentPaletteID != .custom)
     }
 
+    /// 权益过期后回退有效外观，但重建设置并恢复权益后仍可找回原偏好。
     @Test("Expired access hides premium appearance while preserving preferences through relaunch")
     func preservesThemePreferences() throws {
         let domain = "FilevraPremiumThemeRestoreTests." + UUID().uuidString
@@ -228,6 +251,7 @@ struct PremiumFeatureAccessTests {
         #expect(restored.effectiveColorScheme == .dark)
     }
 
+    /// 权益尚未确认时保留偏好；确认过期后才允许回退外观。
     @Test("Unknown ownership preserves saved appearance; confirmed expiration enables fallback")
     func pendingAppearance() {
         let access = PremiumFeatureAccessStore()

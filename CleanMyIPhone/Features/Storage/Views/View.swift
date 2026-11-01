@@ -1,13 +1,13 @@
-//
-//  文件职责：声明  界面结构、交互入口与展示状态。
-//  所属模块：CleanMyIPhone。
-//
+// 存储旭日图的数据适配、几何布局和交互。
+// 将文件树映射为可绘制节点，支持按扇区定位与层级导航；可视化数据不执行文件操作。
+// 适配器限制可见节点与层级，绘图和命中检测共享环形几何参数。
+// 目录点击只改变图表导航根节点；文件扫描、授权与删除由其他模块负责。
 
 import Combine
 import SwiftUI
 
 // MARK: - 1. 数据结构
-/// 定义 `DemoFileNode` 的值语义数据与相关行为。
+/// 保存旭日图节点的名称、颜色、大小与子节点，以及预计算的总大小和深度。
 struct DemoFileNode: Identifiable {
     let id: UUID
     let name: String
@@ -17,6 +17,7 @@ struct DemoFileNode: Identifiable {
     let totalByteCount: Int64
     let maximumDepth: Int
 
+    /// 构造旭日图节点，并预先计算包含子节点的总大小和最大深度。
     init(
         name: String,
         byteCount: Int64,
@@ -42,21 +43,21 @@ struct DemoFileNode: Identifiable {
     }
 }
 
+/// 限制可视节点数量与深度，将文件树映射为旭日图数据并保留原节点映射。
 @MainActor
-/// 定义 `SunburstTreeAdapter` 的值语义数据与相关行为。
 struct SunburstTreeAdapter {
     private nonisolated static let defaultNodeBudget = 1_200
     private nonisolated static let maximumChildrenPerNode = 24
     private nonisolated static let maximumVisibleDepth = 8
     private nonisolated static let minimumRootByteFraction = 0.000_1
 
-    /// 定义 `AdaptedTree` 的值语义数据与相关行为。
+    /// 同时保存绘图节点和原文件节点映射，供点击后定位真实目录。
     struct AdaptedTree {
         let rootNode: DemoFileNode
         let sourceNodes: [UUID: FileNode]
     }
 
-    /// 封装 `adapt` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 以节点预算选取可见分支，构建绘图树并建立节点到来源的映射。
     static func adapt(
         _ root: FileNode,
         nodeBudget: Int = defaultNodeBudget
@@ -87,7 +88,7 @@ struct SunburstTreeAdapter {
         return AdaptedTree(rootNode: rootNode, sourceNodes: sourceNodes)
     }
 
-    /// 封装 `adaptNode` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将一个来源节点和可见子节点转为绘图节点，同时登记来源映射。
     private static func adaptNode(
         _ node: FileNode,
         color: Color,
@@ -112,6 +113,7 @@ struct SunburstTreeAdapter {
         return adaptedNode
     }
 
+    /// 为可见子项生成节点；超出显示范围的容量合并到其他项，保持占比可解释。
     private static func adaptChildren(
         of parent: FileNode,
         rootByteCount: Int64,
@@ -227,7 +229,7 @@ struct SunburstTreeAdapter {
         return selectedNodeIDs
     }
 
-    /// 封装 `stableValue` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将字符串与盐值稳定映射到指定范围，使相同节点的展示参数可重复。
     private static func stableValue(
         for value: String,
         salt: UInt64,
@@ -244,7 +246,7 @@ struct SunburstTreeAdapter {
     }
 }
 
-/// 定义 `StorageVisualizationPalette` 使用的有限状态或选项集合。
+/// 集中提供文件分类在存储可视化中的固定颜色。
 enum StorageVisualizationPalette {
     static let colors: [Color] = [
         color(for: .image),
@@ -256,7 +258,7 @@ enum StorageVisualizationPalette {
         color(for: .other)
     ]
 
-    /// 计算 `color` 所需的派生值，避免展示层重复实现相同规则。
+    /// 按文件分类选择颜色；未分类节点使用其他文件颜色。
     static func color(for category: FileCategory?) -> Color {
         switch category {
         case .image: Color(red: 0.2, green: 0.9, blue: 0.95)
@@ -270,9 +272,9 @@ enum StorageVisualizationPalette {
     }
 }
 
-/// 定义 `SunburstCapacityFormatter` 的值语义数据与相关行为。
+/// 将字节数转换为旭日图中心显示的数值与单位。
 struct SunburstCapacityFormatter {
-    /// 生成 `text` 使用的展示文本，保持格式与本地化规则一致。
+    /// 按十进制容量单位格式化非负字节数，并按单位调整小数位。
     static func text(for byteCount: Int64) -> (value: String, unit: String) {
         let byteCount = max(0, byteCount)
         if byteCount >= 1_000_000_000 {
@@ -301,7 +303,7 @@ struct SunburstCapacityFormatter {
 }
 
 // MARK: - 2. 自适应绘图尺寸
-/// 定义 `SunburstChartGeometry` 的值语义数据与相关行为。
+/// 保存图表尺寸和环形层级的几何参数，供绘制和命中判断共用。
 struct SunburstChartGeometry {
     static let sectorGapDegrees = 0.2
     static let minimumChildSweepDegrees = 0.25
@@ -318,7 +320,7 @@ struct SunburstChartGeometry {
     let ringSpacing: CGFloat
     let maximumDepth: Int
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 根据画布可用半径和可见深度等比缩放环宽、中心及间距。
     init(size: CGSize, maximumDepth: Int) {
         self.maximumDepth = max(1, maximumDepth)
         let availableRadius = max(0, min(size.width, size.height) / 2 - Self.edgeInset)
@@ -331,7 +333,7 @@ struct SunburstChartGeometry {
         ringSpacing = Self.designRingSpacing * scale
     }
 
-    /// 封装 `radii` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 计算指定层级缩放后的环内径与外径，深层使用较窄环宽。
     func radii(at depth: Int) -> (inner: CGFloat, outer: CGFloat) {
         var radius = centerRadius
         for currentDepth in 1..<depth {
@@ -343,7 +345,7 @@ struct SunburstChartGeometry {
         return (radius, radius + width)
     }
 
-    /// 封装 `designRadii` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 计算未缩放设计尺寸下的层级半径，供整体适配使用。
     private static func designRadii(at depth: Int) -> (inner: CGFloat, outer: CGFloat) {
         var radius = designCenterRadius
         for currentDepth in 1..<depth {
@@ -357,14 +359,14 @@ struct SunburstChartGeometry {
 }
 
 // MARK: - 3. 扇形 Shape
-/// 定义 `SunburstSectorShape` 的值语义数据与相关行为。
+/// 根据角度与内外半径构造单个环形扇区路径。
 struct SunburstSectorShape: Shape {
     var startAngle: Angle
     var endAngle: Angle
     var innerRadius: CGFloat
     var outerRadius: CGFloat
 
-    /// 封装 `path` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 根据内外半径绘制环形扇区，并限制扇区间的角度间隙。
     func path(in rect: CGRect) -> Path {
         let center = CGPoint(x: rect.midX, y: rect.midY)
         var path = Path()
@@ -412,7 +414,7 @@ private struct SunburstLayeredRevealShape: Shape {
         set { progress = newValue }
     }
 
-    /// 封装 `path` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 根据进度绘制已完整显示的层级和当前正在展开的环形遮罩。
     func path(in rect: CGRect) -> Path {
         let clampedProgress = min(max(progress, 0), 1)
         guard clampedProgress > 0 else { return Path() }
@@ -464,7 +466,7 @@ private struct SunburstLayeredRevealShape: Shape {
 }
 
 // MARK: - 4. 递归节点 View
-/// 定义 `SunburstNodeView` 的值语义数据与相关行为。
+/// 递归绘制节点及其可见子扇区，并沿用父级颜色作为默认值。
 struct SunburstNodeView: View {
     let node: DemoFileNode
     let startAngle: Angle
@@ -509,7 +511,7 @@ struct SunburstNodeView: View {
         }
     }
 
-    /// 定义 `ChildSlice` 的值语义数据与相关行为。
+    /// 保存子节点的扇区起止角度与显示颜色。
     private struct ChildSlice {
         let child: DemoFileNode
         let startAngle: Angle
@@ -517,7 +519,7 @@ struct SunburstNodeView: View {
         let color: Color
     }
 
-    /// 封装 `computeChildSlices` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 按子节点占比划分父扇区；过窄的子扇区不绘制，但仍保留其角度。
     private func computeChildSlices(
         children: [DemoFileNode],
         total: Double,
@@ -549,9 +551,9 @@ struct SunburstNodeView: View {
 }
 
 // MARK: - 5. 颜色扩展
-/// 扩展 `Color`，集中实现当前文件所需的附加能力。
+/// 提供旭日图颜色的饱和度与亮度调整。
 extension Color {
-    /// 封装 `饱和度调整` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 按给定比例调整颜色的饱和度和亮度，并限制到可显示范围。
     func 饱和度调整(satFactor: Double, brightFactor: Double) -> Color {
         var hue: CGFloat = 0
         var saturation: CGFloat = 0
@@ -579,14 +581,14 @@ extension Color {
 }
 
 // MARK: - 6. 旭日图主 View
-/// 定义 `SunburstChartCanvas` 的值语义数据与相关行为。
+/// 组合旭日图扇区、中心容量、分层显示和点击回调。
 private struct SunburstChartCanvas: View {
     let rootNode: DemoFileNode
     let revealProgress: Double
     var onNodeTap: ((DemoFileNode) -> Void)?
     var onCenterTap: (() -> Void)?
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 配置图表根节点、展开进度和中心及节点点击回调。
     init(
         rootNode: DemoFileNode,
         revealProgress: Double = 1,
@@ -657,7 +659,7 @@ private struct SunburstChartCanvas: View {
         }
     }
 
-    /// 定义 `RootSlice` 的值语义数据与相关行为。
+    /// 保存根节点的直接子项对应的角度范围和颜色。
     private struct RootSlice {
         let child: DemoFileNode
         let startAngle: Angle
@@ -669,7 +671,7 @@ private struct SunburstChartCanvas: View {
         SunburstCapacityFormatter.text(for: rootNode.totalByteCount)
     }
 
-    /// 封装 `rootSlices` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 从顶部开始按子节点大小占比分配根层扇区。
     private func rootSlices() -> [RootSlice] {
         guard let children = rootNode.children, !children.isEmpty else { return [] }
 
@@ -694,7 +696,7 @@ private struct SunburstChartCanvas: View {
         return slices
     }
 
-    /// 处理 `handleTap` 输入，并根据结果推进当前业务状态。
+    /// 中心区域触发返回回调，其他区域通过命中检测定位对应节点。
     private func handleTap(
         _ location: CGPoint,
         size: CGSize,
@@ -719,9 +721,9 @@ private struct SunburstChartCanvas: View {
     }
 }
 
-/// 定义 `SunburstChartHitTester` 使用的有限状态或选项集合。
+/// 根据触点位置、角度和层级查找对应扇区。
 private enum SunburstChartHitTester {
-    /// 封装 `node` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将触点转换为半径和角度，并从根层开始查找命中的扇区。
     static func node(
         at location: CGPoint,
         canvasSize: CGSize,
@@ -768,7 +770,7 @@ private enum SunburstChartHitTester {
         return nil
     }
 
-    /// 封装 `node` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 递归检查角度范围、扇区间隙和层级半径，优先查找更深的可见子节点。
     private static func node(
         _ node: DemoFileNode,
         startAngle: Double,
@@ -820,8 +822,8 @@ private enum SunburstChartHitTester {
 }
 
 // MARK: - 7. 生产数据与交互
+/// 维护当前文件树层级与返回路径，供旭日图导航使用。
 @MainActor
-/// 封装 `SunburstChartViewModel` 的引用语义、状态与业务行为。
 private final class SunburstChartViewModel: ObservableObject {
     @Published private(set) var chartRoot: DemoFileNode
 
@@ -829,7 +831,7 @@ private final class SunburstChartViewModel: ObservableObject {
     private var sourceNodes: [UUID: FileNode]
     private var history: [FileNode] = []
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 适配初始文件树，并保存图表节点到原始文件节点的映射。
     init(root: FileNode) {
         currentRoot = root
         let adaptedTree = SunburstTreeAdapter.adapt(root)
@@ -837,13 +839,13 @@ private final class SunburstChartViewModel: ObservableObject {
         sourceNodes = adaptedTree.sourceNodes
     }
 
-    /// 封装 `replaceRoot` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 替换图表数据根节点并重置当前导航上下文。
     func replaceRoot(_ root: FileNode) {
         history = []
         apply(root)
     }
 
-    /// 控制 `open` 对应界面或资源的展示生命周期。
+    /// 仅进入有子节点的真实目录，并将当前根节点压入返回历史。
     func open(_ chartNode: DemoFileNode) {
         guard let sourceNode = sourceNodes[chartNode.id],
               sourceNode.isDirectory,
@@ -857,13 +859,13 @@ private final class SunburstChartViewModel: ObservableObject {
         apply(sourceNode)
     }
 
-    /// 封装 `navigateBack` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 返回上一级目录；到达根节点时不再后退。
     func navigateBack() {
         guard let parent = history.popLast() else { return }
         apply(parent)
     }
 
-    /// 更新 `apply` 对应的数据，使界面状态与底层结果保持一致。
+    /// 切换当前根节点并重新构建可视树及原始节点映射。
     private func apply(_ root: FileNode) {
         currentRoot = root
         let adaptedTree = SunburstTreeAdapter.adapt(root)
@@ -872,8 +874,9 @@ private final class SunburstChartViewModel: ObservableObject {
     }
 }
 
-/// 定义 `SunburstChartView` 的值语义数据与相关行为。
+/// 持有旭日图导航状态，并在输入根节点变化时更新图表。
 struct SunburstChartView: View {
+    /// 保存根节点及首尾子节点的摘要，用于识别图表输入变化。
     private struct RootSignature: Equatable {
         let id: String
         let byteCount: Int64
@@ -886,7 +889,7 @@ struct SunburstChartView: View {
     let revealProgress: Double
     @StateObject private var viewModel: SunburstChartViewModel
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 以文件树创建图表状态，并保存初始展开进度。
     init(root: FileNode, revealProgress: Double = 1) {
         self.root = root
         self.revealProgress = revealProgress
@@ -927,9 +930,9 @@ struct SunburstChartView: View {
 }
 
 // MARK: - 8. Preview Mock 数据
-/// 扩展 `DemoFileNode`，集中实现当前文件所需的附加能力。
+/// 提供用于图表预览的随机示例树。
 extension DemoFileNode {
-    /// 创建 `createRandomTree` 所需的值或资源，统一封装构造细节。
+    /// 递归生成指定深度内的示例节点，供预览图表使用。
     static func createRandomTree(
         currentDepth: Int,
         maxDepth: Int,

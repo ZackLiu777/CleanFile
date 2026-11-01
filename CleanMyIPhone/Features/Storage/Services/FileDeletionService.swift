@@ -1,4 +1,11 @@
 //
+//  授权范围内的文件删除
+//
+//  协调用户选中的根目录授权、路径边界校验及逐文件删除。
+//  单项失败计数并继续，取消则抛出；符号链接解析后仍须位于授权边界内。
+//
+
+//
 //  FileDeletionService.swift
 //  CleanMyIPhone
 //
@@ -10,11 +17,11 @@
 
 import Foundation
 
-/// 使用 Actor 隔离 `FileDeletionService` 的可变状态，确保并发访问安全。
+/// 管理显式触发的删除操作；只允许处理属于所选根目录的文件，并返回逐项执行结果。
 actor FileDeletionService {
     private let fileManager = FileManager.default
 
-    /// 执行 `delete` 移除流程，并同步更新受影响的业务状态。
+    /// 单根目录的便利入口，将同一删除语义委托给多根目录实现。
     func delete(
         files: [ScannedFile],
         selectedRoot: URL
@@ -22,6 +29,9 @@ actor FileDeletionService {
         try delete(files: files, selectedRoots: [selectedRoot])
     }
 
+    /// 保留原始授权 URL 并校验每个目标，随后通过文件协调器逐项删除。
+    /// 目标不属于所选根目录时拒绝整批；单个目标无法访问或删除失败则计入失败数并继续。
+    /// 取消会立即向上抛出，已经成功删除的文件不会在此处恢复。
     func delete(
         files: [ScannedFile],
         selectedRoots: [URL]
@@ -103,7 +113,8 @@ actor FileDeletionService {
         )
     }
 
-    /// 判断 `isDescendant` 条件是否成立，供调用方选择正确的处理分支。
+    /// 解析符号链接并按路径组件检查目标是否落在根目录内，避免字符串前缀造成越界。
+    /// 根本身只有在其不是目录时才被视作可删除目标。
     nonisolated static func contains(_ candidate: URL, root: URL) -> Bool {
         guard candidate.isFileURL, root.isFileURL else { return false }
         let resolvedRoot = root.resolvingSymlinksInPath().standardizedFileURL

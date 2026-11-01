@@ -1,12 +1,13 @@
+// PhotoKit 授权、资源清单、分析和界面状态。
+// 通过代次防止旧分析覆盖新状态；精确大小读取受并发限制，缓存仅在资源元数据匹配时恢复。
+// 页面通过此模型请求授权、缩略图和预览，并读取资源清单、分类进度与删除结果。
+// PhotoKit 操作和后台分析的生命周期与界面状态分开；用户确认后才提交资源删除。
+
 //
 //  PhotoLibraryViewModel.swift
 //  CleanMyIPhone
 //
 
-//
-//  文件职责：协调 PhotoLibrary 页面状态、用户操作与底层服务。
-//  所属模块：CleanMyIPhone。
-//
 
 import Combine
 import AVFoundation
@@ -15,8 +16,8 @@ import PhotosUI
 import SwiftUI
 import UIKit
 
+/// 协调 PhotoKit 授权、资源清单、分析、删除及大小估算的界面状态。
 @MainActor
-/// 封装 `PhotoLibraryViewModel` 的引用语义、状态与业务行为。
 final class PhotoLibraryViewModel: ObservableObject {
     /// Process-lifetime gate: a cold launch analyzes once, while tab changes,
     /// view reconstruction, and foreground transitions do not restart the scan.
@@ -66,7 +67,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     // enough visible cells to make progress when one of them is backed by iCloud.
     private let maximumConcurrentByteCountRequests = 6
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 读取当前相册授权状态；预览环境不触发真实相册访问。
     init() {
         let environment = ProcessInfo.processInfo.environment
         isRunningInPreviews = environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
@@ -76,13 +77,13 @@ final class PhotoLibraryViewModel: ObservableObject {
             : PHPhotoLibrary.authorizationStatus(for: .readWrite)
     }
 
-    /// 更新 `refresh` 对应的数据，使界面状态与底层结果保持一致。
+    /// 刷新相册资源后启动新一轮分析。
     func refresh() {
         refreshLibrary(resetAnalysis: true)
         startAnalysis()
     }
 
-    /// 更新 `refreshLibrary` 对应的数据，使界面状态与底层结果保持一致。
+    /// 刷新容量与资源清单，取消过期分析，并按调用方要求重置分析状态。
     private func refreshLibrary(resetAnalysis: Bool) {
         guard !isRunningInPreviews else { return }
 
@@ -126,6 +127,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         await task.value
     }
 
+    /// 并行读取持久化快照与资源清单；仅在代次仍有效时恢复数据并决定是否重新分析。
     private func loadInitialLibrary(generation: Int) async {
         let interval = MediaPerformance.begin("Media Initial Load")
         defer { MediaPerformance.end("Media Initial Load", id: interval) }
@@ -161,7 +163,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         startColdLaunchAnalysisIfNeeded(requiresAnalysis: !canReuseAnalysis)
     }
 
-    /// 封装 `requestAccess` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 请求相册读写授权，并在主线程更新授权状态和后续加载流程。
     func requestAccess() {
         guard !isRunningInPreviews else { return }
 
@@ -178,6 +180,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
+    /// 每个进程冷启动至多自动触发一次分析，避免切换标签或重建视图重复扫描。
     private func startColdLaunchAnalysisIfNeeded(requiresAnalysis: Bool = true) {
         guard !isRunningInPreviews,
               authorizationStatus == .authorized || authorizationStatus == .limited,
@@ -191,7 +194,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    /// 控制 `presentLimitedLibraryPicker` 对应界面或资源的展示生命周期。
+    /// 从当前展示控制器打开系统有限相册选择器；用户更改后刷新资源。
     func presentLimitedLibraryPicker() {
         guard let windowScene = UIApplication.shared.connectedScenes
             .compactMap({ $0 as? UIWindowScene })
@@ -213,13 +216,13 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    /// 控制 `openSettings` 对应界面或资源的展示生命周期。
+    /// 打开本应用的系统设置页面，供用户调整相册授权。
     func openSettings() {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
     }
 
-    /// 封装 `requestThumbnail` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 向 PhotoKit 请求适合列表的缩略图，返回请求标识供调用方取消。
     func requestThumbnail(
         for asset: PHAsset,
         targetSize: CGSize,
@@ -245,17 +248,17 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    /// 封装 `asset` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 通过资源标识查询当前相册索引。
     func asset(withIdentifier identifier: String) -> PHAsset? {
         assetsByIdentifier[identifier]
     }
 
-    /// 封装 `cachedThumbnail` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 读取内存中已有的缩略图；未命中时返回 nil。
     func cachedThumbnail(for identifier: String) -> UIImage? {
         thumbnailCache.object(forKey: identifier as NSString)
     }
 
-    /// 封装 `estimatedByteCount` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 对仍在资源索引中的标识汇总估算大小；优先使用精确缓存，其余使用同类校准或回退值。
     func estimatedByteCount(for assetIDs: Set<String>) -> Int64 {
         let calibration = makeMediaSizeCalibration()
         return assetIDs.reduce(Int64.zero) { total, identifier in
@@ -264,7 +267,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    // Calibrate once for a whole category, rather than once for every visible item.
+    /// 为一组资源共用一次校准计算；不在当前资源索引中的标识不会出现在结果中。
     func estimatedByteCounts(for assetIDs: [String]) -> [String: Int64] {
         let calibration = makeMediaSizeCalibration()
         return Dictionary(uniqueKeysWithValues: assetIDs.compactMap { id in
@@ -272,7 +275,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         })
     }
 
-    /// 封装 `displayName` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 优先使用缓存名称，否则读取资源元数据并缓存展示名称。
     func displayName(for assetID: String) -> String {
         if let cachedName = displayNamesByIdentifier[assetID] {
             return cachedName
@@ -296,21 +299,24 @@ final class PhotoLibraryViewModel: ObservableObject {
         return name
     }
 
-    /// 封装 `estimatedByteCount` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 返回单个资源的精确或估算大小；资源不在当前索引时返回零。
     func estimatedByteCount(for assetID: String) -> Int64 {
         guard let asset = assetsByIdentifier[assetID] else { return 0 }
         return calibratedByteCount(for: asset, calibration: makeMediaSizeCalibration())
     }
 
+    /// 只查询已完成的精确大小缓存，不触发资源读取。
     func exactByteCount(for assetID: String) -> Int64? {
         exactByteCountsByIdentifier[assetID]
     }
 
+    /// 查询本次运行中被标记为不可用的资源；CancellationError 不会触发该标记。
     func isExactByteCountUnavailable(for assetID: String) -> Bool {
         unavailableByteCountIdentifiers.contains(assetID)
     }
 
-    /// Queues a bounded, streaming request for the asset's real underlying resource size.
+    /// 将尚未缓存、未标记为不可用且未排队的资源加入队列；重复请求不会启动重复读取。
+    /// 实际读取可能访问 iCloud，等待项较多时切换为适合长队列的结构。
     func requestExactByteCount(for assetID: String) {
         guard exactByteCountsByIdentifier[assetID] == nil,
               !unavailableByteCountIdentifiers.contains(assetID),
@@ -333,7 +339,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         startPendingByteCountRequests()
     }
 
-    /// Stops data reads when the media detail page is no longer visible.
+    /// 取消未完成的精确大小读取并清空等待队列，避免页面离开后继续消耗资源。
     func cancelExactByteCountRequests() {
         pendingByteCountIdentifiers.removeAll()
         longPendingByteCountIdentifiers = nil
@@ -342,6 +348,8 @@ final class PhotoLibraryViewModel: ObservableObject {
         byteCountTasks.removeAll()
     }
 
+    /// 在并发上限内调度资源读取，成功后更新精确大小并合并保存与汇总计算。
+    /// CancellationError 不记录为失败；其他读取错误标记为不可用，随后继续调度等待项。
     private func startPendingByteCountRequests() {
         while byteCountTasks.count < maximumConcurrentByteCountRequests {
             let assetID: String
@@ -379,6 +387,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
+    /// 选取展示项所需的资源，避免重复计入编辑前后版本；实况照片还包括配对视频。
     private static func displayResources(for asset: PHAsset) -> [PHAssetResource] {
         let resources = PHAssetResource.assetResources(for: asset)
 
@@ -414,6 +423,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
+    /// 按给定类型优先级返回第一个匹配资源，不读取资源内容。
     private static func firstResource(
         in resources: [PHAssetResource],
         preferredTypes: [PHAssetResourceType]
@@ -426,7 +436,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         return nil
     }
 
-    /// 启动 `startCachingThumbnails` 对应流程，并初始化本轮任务需要的状态。
+    /// 为当前索引中存在的资源预热指定尺寸的缩略图缓存，不允许网络下载。
     func startCachingThumbnails(for assetIDs: ArraySlice<String>, targetSize: CGSize) {
         let assets = assetIDs.compactMap { assetsByIdentifier[$0] }
         guard !assets.isEmpty else { return }
@@ -442,7 +452,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         )
     }
 
-    /// 取消 `stopCachingThumbnails` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 停止为指定资源和尺寸预热 PhotoKit 缩略图缓存。
     func stopCachingThumbnails(for assetIDs: ArraySlice<String>, targetSize: CGSize) {
         let assets = assetIDs.compactMap { assetsByIdentifier[$0] }
         guard !assets.isEmpty else { return }
@@ -454,12 +464,12 @@ final class PhotoLibraryViewModel: ObservableObject {
         )
     }
 
-    /// 取消 `cancelThumbnail` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 通过 PhotoKit 请求标识取消正在进行的媒体请求。
     func cancelThumbnail(_ requestID: PHImageRequestID) {
         imageManager.cancelImageRequest(requestID)
     }
 
-    /// 封装 `requestPreviewImage` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 请求指定尺寸的高质量图片预览，并返回可取消的 PhotoKit 请求标识。
     func requestPreviewImage(
         for asset: PHAsset,
         targetSize: CGSize,
@@ -480,7 +490,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    /// 封装 `requestPlayerItem` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 请求视频播放资源，允许 PhotoKit 根据需要从网络获取。
     func requestPlayerItem(
         for asset: PHAsset,
         completion: @escaping @MainActor (AVPlayerItem?) -> Void
@@ -494,7 +504,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    /// 封装 `requestLivePhoto` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 请求指定尺寸的高质量实况照片，允许从网络获取资源。
     func requestLivePhoto(
         for asset: PHAsset,
         targetSize: CGSize,
@@ -514,7 +524,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    /// 启动 `startAnalysis` 对应流程，并初始化本轮任务需要的状态。
+    /// 基于当前资源快照开始分类；回调和最终结果必须属于当前代次，避免旧任务覆盖新状态。
     func startAnalysis() {
         guard !analysisState.isAnalyzing else { return }
         guard !assets.isEmpty else {
@@ -558,7 +568,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    /// 取消 `cancelAnalysis` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 推进分析代次并取消任务，让迟到的进度与结果失效。
     func cancelAnalysis() {
         guard analysisState.isAnalyzing else { return }
         analysisGeneration &+= 1
@@ -567,7 +577,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         analysisState = .cancelled
     }
 
-    /// 执行 `deleteAssets` 移除流程，并同步更新受影响的业务状态。
+    /// 删除前重新确认权限和全部资源仍可用；仅在 PhotoKit 提交成功后更新资源、分析与大小缓存。
     @discardableResult
     func deleteAssets(withIDs assetIDs: Set<String>) async -> Bool {
         guard !deletionState.isDeleting else { return false }
@@ -622,13 +632,13 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    /// 重置 `clearDeletionResult` 管理的状态，避免旧任务或旧数据影响下一次操作。
+    /// 仅在没有删除操作进行时清除上次删除结果。
     func clearDeletionResult() {
         guard !deletionState.isDeleting else { return }
         deletionState = .idle
     }
 
-    /// 加载 `fetchAssetsIfAllowed` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 授权可用时读取相册；无权限时清空资源并重建索引。
     private func fetchAssetsIfAllowed() {
         guard authorizationStatus == .authorized || authorizationStatus == .limited else {
             assets = []
@@ -639,7 +649,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         fetchAssets()
     }
 
-    /// 加载 `fetchAssets` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 按创建时间倒序取得 PhotoKit 资源并重建索引。
     private func fetchAssets() {
         let interval = MediaPerformance.begin("Media Fetch Assets")
         defer { MediaPerformance.end("Media Fetch Assets", id: interval) }
@@ -660,7 +670,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         isLoading = false
     }
 
-    /// 封装 `rebuildAssetIndex` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 重建资源标识索引和资源库修订号，并移除不再存在资源的大小及名称缓存。
     private func rebuildAssetIndex() {
         let interval = MediaPerformance.begin("Media Rebuild Index")
         defer { MediaPerformance.end("Media Rebuild Index", id: interval) }
@@ -677,6 +687,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
+    /// 根据最新精确大小和校准系数分别重算照片、视频的相册大小估算。
     private func recalculateLibraryByteCounts() {
         let interval = MediaPerformance.begin("Media Recalculate Sizes")
         defer { MediaPerformance.end("Media Recalculate Sizes", id: interval) }
@@ -704,6 +715,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
+    /// 优先使用精确大小；没有可用校准系数时回退到资源元数据估算。
     private func calibratedByteCount(
         for asset: PHAsset,
         calibration: [String: Double]
@@ -737,6 +749,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
+    /// 视频按时长、图片按像素数作为大小校准基数，避免零值。
     nonisolated static func calibrationDenominator(for asset: PHAsset) -> Double {
         if asset.mediaType == .video {
             return max(asset.duration, 1)
@@ -744,6 +757,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         return Double(max(asset.pixelWidth, 1)) * Double(max(asset.pixelHeight, 1))
     }
 
+    /// 从系统类型或资源元数据取得格式标识；未知格式回退到通用数据类型。
     nonisolated static func contentTypeIdentifier(for asset: PHAsset) -> String {
         if #available(iOS 26.0, *) {
             return asset.contentType.identifier
@@ -754,6 +768,7 @@ final class PhotoLibraryViewModel: ObservableObject {
             .first(where: { $0.type == resourceType })?.uniformTypeIdentifier ?? "public.data"
     }
 
+    /// 按媒体格式、分辨率及子类型分组，避免不同资源共用不适合的估算系数。
     nonisolated static func calibrationKey(for asset: PHAsset) -> String {
         let format = contentTypeIdentifier(for: asset).lowercased()
         if asset.mediaType == .video {
@@ -784,6 +799,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         return "image|\(format)|\(resolution)|\(subtype)"
     }
 
+    /// 仅恢复仍存在且修改日期未变的非负大小，避免复用过期结果。
     private func restoreMediaSizeIndex(from snapshot: MediaSizeIndexSnapshot?) {
         guard let snapshot else { return }
         exactByteCountsByIdentifier = snapshot.entries.reduce(into: [:]) { result, pair in
@@ -795,6 +811,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         recalculateLibraryByteCounts()
     }
 
+    /// 合并短时间内的大小更新，并保存带修改日期的快照以便后续校验。
     private func scheduleMediaSizeIndexSave() {
         mediaSizeIndexSaveTask?.cancel()
         let entries = exactByteCountsByIdentifier.reduce(
@@ -814,7 +831,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    /// 更新 `updateAnalysisAfterDeleting` 对应的数据，使界面状态与底层结果保持一致。
+    /// 从成功或部分成功的分析结果中移除已删除资源，同时保留原有结果状态。
     private func updateAnalysisAfterDeleting(_ deletedIDs: Set<String>) {
         switch analysisState {
         case .success(let result):
@@ -826,7 +843,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    /// 加载 `restoreAnalysis` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 恢复时先剔除已不存在的资源；返回值表示资源库修订号是否匹配、结果能否直接复用。
     @discardableResult
     private func restoreAnalysis(from snapshot: MediaStateSnapshot?) -> Bool {
         guard let snapshot else {
@@ -845,7 +862,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         return snapshot.libraryRevision == libraryRevision
     }
 
-    /// 持久化 `persistAnalysisState` 对应的数据，并保持后续恢复所需的信息完整。
+    /// 持久化完整或部分分析结果及相册修订号；其他状态保存空快照。
     private func persistAnalysisState() {
         let snapshot: MediaStateSnapshot?
         switch analysisState {
@@ -875,6 +892,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         let prime: UInt64 = 1_099_511_628_211
 
         @inline(__always)
+        /// 按字节混入数值元数据，生成稳定的相册修订指纹。
         func mix(_ value: UInt64, into fingerprint: inout UInt64) {
             var remaining = value
             for _ in 0 ..< MemoryLayout<UInt64>.size {
@@ -955,7 +973,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         )
     }
 
-    /// 封装 `estimatedByteCount` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 精确大小和校准不可用时，依据视频分辨率、时长或图片像素等元数据估算大小。
     nonisolated static func fallbackEstimatedByteCount(for asset: PHAsset) -> Int64 {
         let pixelCount = Double(max(asset.pixelWidth, 1)) * Double(max(asset.pixelHeight, 1))
         if asset.mediaType == .video {
@@ -990,8 +1008,9 @@ final class PhotoLibraryViewModel: ObservableObject {
     }
 }
 
-/// Counts PhotoKit resource chunks without retaining complete photos or videos in memory.
+/// 逐块累计 PhotoKit 资源字节数，不将完整照片或视频保留在内存中。
 private enum MediaAssetResourceByteCounter {
+    /// 顺序累计所选资源；没有可读资源或任一读取失败时抛出错误。
     static func byteCount(for resources: [PHAssetResource]) async throws -> Int64 {
         guard !resources.isEmpty else { throw MediaAssetResourceByteCountError.noResources }
         var total: Int64 = 0
@@ -1002,6 +1021,7 @@ private enum MediaAssetResourceByteCounter {
         return total
     }
 
+    /// 允许 PhotoKit 通过网络获取资源；任务取消时同时取消底层数据请求。
     private static func byteCount(for resource: PHAssetResource) async throws -> Int64 {
         let accumulator = MediaAssetResourceByteAccumulator()
         let request = MediaAssetResourceRequestToken()
@@ -1033,14 +1053,17 @@ private enum MediaAssetResourceByteCounter {
     }
 }
 
+/// 无可计数资源时使用的内部错误。
 private enum MediaAssetResourceByteCountError: Error {
     case noResources
 }
 
+/// 用锁保护 PhotoKit 回调中的累计字节数，避免跨回调共享可变状态发生竞争。
 private final class MediaAssetResourceByteAccumulator: @unchecked Sendable {
     private let lock = NSLock()
     private var byteCount: Int64 = 0
 
+    /// 在锁保护下累加一段资源回调的字节数。
     func add(_ count: Int) {
         lock.lock()
         byteCount += Int64(count)
@@ -1054,12 +1077,14 @@ private final class MediaAssetResourceByteAccumulator: @unchecked Sendable {
     }
 }
 
+/// 协调请求标识注册与取消的先后顺序，处理取消先于 PhotoKit 返回标识的情况。
 private final class MediaAssetResourceRequestToken: @unchecked Sendable {
     private let lock = NSLock()
     nonisolated(unsafe) private var requestID: PHAssetResourceDataRequestID?
     nonisolated(unsafe) private weak var manager: PHAssetResourceManager?
     nonisolated(unsafe) private var isCancelled = false
 
+    /// 保存请求标识；若此前已取消，注册后立即取消该请求。
     nonisolated func store(
         _ requestID: PHAssetResourceDataRequestID,
         manager: PHAssetResourceManager
@@ -1072,6 +1097,7 @@ private final class MediaAssetResourceRequestToken: @unchecked Sendable {
         if shouldCancel { manager.cancelDataRequest(requestID) }
     }
 
+    /// 记录取消并取消已注册的请求；尚未注册时由后续注册路径补做。
     nonisolated func cancel() {
         lock.lock()
         isCancelled = true

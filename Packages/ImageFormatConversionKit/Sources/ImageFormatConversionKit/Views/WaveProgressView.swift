@@ -1,3 +1,9 @@
+// 转换相关流程共用的波浪进度指示器。
+// 按传入进度绘制填充比例，并根据减少动态效果设置调整动画。
+// 组件仅展示进度，不决定任务是否完成或成功。
+// 导入及转换界面传入数值、颜色和高度，组件将进度限制在可显示范围。
+// 减少动态效果时不启动循环波浪；组件不拥有或取消后台任务。
+
 import SwiftUI
 
 /// A compact animated progress indicator shared by media analysis, import,
@@ -9,6 +15,7 @@ public struct WaveProgressView: View {
     @State private var waveOffset: Angle = .zero
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    /// 设置显示高度和颜色，并将输入进度限制在零到一之间。
     public init(progress: Double, height: CGFloat = 12, tint: Color = .accentColor) {
         self.progress = min(max(progress, 0), 1)
         self.height = height
@@ -55,6 +62,7 @@ public struct WaveProgressView: View {
     }
 }
 
+/// 根据进度和波形偏移生成指示器填充路径。
 private struct WaveProgressShape: Shape {
     var offset: Angle
     let waveHeight: CGFloat
@@ -64,6 +72,7 @@ private struct WaveProgressShape: Shape {
         set { offset = .degrees(newValue) }
     }
 
+    /// 根据偏移和波高绘制闭合填充路径；尺寸无效时返回空路径。
     func path(in rect: CGRect) -> Path {
         guard rect.width > 0, rect.height > 0 else { return Path() }
 

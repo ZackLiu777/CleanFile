@@ -1,9 +1,20 @@
+//
+//  模型契约完整性
+//
+//  覆盖存储与媒体值模型的展示、状态、错误和编码契约。
+//  使用边界输入检查未知大小、异常容量和可选元数据。
+//  检查已知大小优先排序、未知字节统计、错误描述及可选日期的编码往返。
+//  所有文件与媒体记录均在内存中构造，示例 URL 不用于读取文件。
+//
+
 import Foundation
 import Testing
 @testable import CleanMyIPhone
 
+/// 验证存储领域模型的状态、错误、显示和序列化契约。
 @Suite("Storage model contracts")
 struct StorageModelContractExhaustiveTests {
+    /// 遍历所有文件类别，确保每一项都能提供非空展示名。
     @Test("Every file category has a stable display name")
     func fileCategoryDisplayNamesAreNonEmpty() {
         for category in FileCategory.allCases {
@@ -11,6 +22,7 @@ struct StorageModelContractExhaustiveTests {
         }
     }
 
+    /// 即使未知大小的占位数值更大，也必须排在已知大小之后。
     @Test("File display order keeps known sizes before unknown sizes")
     func displayOrderPrioritizesKnownSizes() {
         let files = [
@@ -24,6 +36,7 @@ struct StorageModelContractExhaustiveTests {
         #expect(sorted.map { $0.name } == ["large.mp4", "small.txt", "unknown.bin"])
     }
 
+    /// 验证未知大小数量单独统计，不参与已知字节总量。
     @Test("Summary accumulator separates unknown bytes from known totals")
     func summaryAccumulatorTracksUnknownBytes() {
         var accumulator = StorageSummaryAccumulator()
@@ -43,6 +56,7 @@ struct StorageModelContractExhaustiveTests {
         #expect(video?.percentage == 0.25)
     }
 
+    /// 比较零层和两层诊断输出，验证深度限制不会隐藏根节点摘要。
     @Test("Tree diagnostics honor the requested print depth")
     func treeDiagnosticsRespectDepthLimit() {
         let leaf = FileNode(
@@ -79,6 +93,7 @@ struct StorageModelContractExhaustiveTests {
         #expect(detailed.contains("leaf.txt children = 0"))
     }
 
+    /// 枚举扫描及删除的各个状态，只有进行中状态的活动标记为真。
     @Test("Scan and deletion state activity flags are mutually exclusive")
     func stateActivityFlagsAreExclusive() {
         let summary = StorageSummary(files: [])
@@ -103,6 +118,7 @@ struct StorageModelContractExhaustiveTests {
         #expect(deletionStates.map { $0.isDeleting } == [false, true, false, false, false])
     }
 
+    /// 检查扫描和删除错误的每个列举情形均有可展示的描述。
     @Test("Storage errors expose descriptions for every case")
     func storageErrorsHaveDescriptions() {
         let scanErrors: [FileScanError] = [
@@ -123,6 +139,7 @@ struct StorageModelContractExhaustiveTests {
         #expect(deletionErrors.allSatisfy { !($0.errorDescription ?? "").isEmpty })
     }
 
+    /// 编码往返保留可选日期与大小未知标记。
     @Test("Scanned file Codable keeps optional metadata and unknown size flags")
     func scannedFileCodablePreservesMetadata() throws {
         let creationDate = Date(timeIntervalSince1970: 123)
@@ -145,6 +162,7 @@ struct StorageModelContractExhaustiveTests {
         #expect(decoded.modificationDate == modificationDate)
     }
 
+    /// 生成可配置类别、大小状态和日期的内存文件记录，用于模型契约检查。
     private func makeFile(
         _ name: String,
         bytes: Int64,
@@ -167,8 +185,10 @@ struct StorageModelContractExhaustiveTests {
     }
 }
 
+/// 验证媒体容量、错误、视频类别和分类结果契约。
 @Suite("Media model contracts")
 struct MediaModelContractExhaustiveTests {
+    /// 异常容量也必须产生受约束的可展示占比。
     @Test("Device storage snapshot clamps impossible capacities safely")
     func deviceStorageSnapshotClampsImpossibleValues() {
         let overAvailable = DeviceStorageSnapshot(totalBytes: 100, availableBytes: 200)
@@ -180,6 +200,7 @@ struct MediaModelContractExhaustiveTests {
         #expect(negativeCapacity.usedFraction == 0)
     }
 
+    /// 检查媒体分析与删除错误均提供非空描述。
     @Test("Media analysis and deletion error descriptions cover every case")
     func mediaErrorsHaveDescriptions() {
         let analysisErrors: [MediaAnalysisError] = [.photoAccessUnavailable, .unexpected]
@@ -194,6 +215,7 @@ struct MediaModelContractExhaustiveTests {
         #expect(deletionErrors.allSatisfy { !($0.errorDescription ?? "").isEmpty })
     }
 
+    /// 遍历视频分类，确认所有类别均有展示名。
     @Test("Every video category has a readable display name")
     func videoCategoryDisplayNamesAreNonEmpty() {
         for category in VideoCategory.allCases {
@@ -201,6 +223,7 @@ struct MediaModelContractExhaustiveTests {
         }
     }
 
+    /// 检查相似组与视频标识的展开结果，并确认分类计数只包含匹配标签。
     @Test("Media result exposes flattened identifiers and category counts")
     func mediaResultFlattensIdentifiers() {
         let first = SimilarImageItem(id: "first", pixelWidth: 100, pixelHeight: 100, creationDate: nil)

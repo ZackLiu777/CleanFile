@@ -1,11 +1,22 @@
+//
+//  性能迭代 04
+//
+//  对照媒体大小请求队列和批量结果排序实现。
+//  覆盖队列压缩、复用、无效索引及不同规模的计时比较。
+//  交错入队出队及清空复用检验队列顺序，排序用例包含重复与越界索引。
+//  对照路径使用相同的合成输入，并交替计时顺序。
+//
+
 import Foundation
 import Dispatch
 import Testing
 @testable import CleanMyIPhone
 @testable import ImageFormatConversionKit
 
+/// 覆盖请求队列和批处理排序的正确性及性能比较。
 @Suite("Performance iteration 04", .serialized)
 struct PerformanceIteration04Tests {
+    /// 大量交错入队和出队，并在清空后复用队列以验证顺序与计数。
     @Test func queueCorrectness() {
         var queue = MediaSizeRequestQueue()
         var expected: [String] = []
@@ -30,6 +41,7 @@ struct PerformanceIteration04Tests {
         }
     }
 
+    /// 比较稀疏、重复及越界索引的批处理排序结果。
     @Test func orderingCorrectness() {
         for count in [0, 1, 32, 33, 100, 1_000] {
             for step in [1, 2, 20] {
@@ -43,6 +55,7 @@ struct PerformanceIteration04Tests {
         }
     }
 
+    /// 在多种规模及输入顺序下记录新旧队列和排序耗时，同时验证结果一致。
     @Test func performance() throws {
         for count in [1, 8, 32, 1_000, 10_000, 50_000] {
             let values = (0..<count).map { "synthetic-photo-identifier-\($0)/L0/001" }
@@ -76,17 +89,20 @@ struct PerformanceIteration04Tests {
             }
         }
     }
+    /// 根据轮次交替新旧实现的执行顺序，返回各自耗时。
     private func timedPair(_ round: Int, _ old: () -> Void, _ new: () -> Void) -> (UInt64, UInt64) {
         var a: UInt64 = 0, b: UInt64 = 0
         if round.isMultiple(of: 2) { a = timed(old); b = timed(new) }
         else { b = timed(new); a = timed(old) }
         return (a, b)
     }
+    /// 以单调时钟测量一次闭包执行的纳秒数。
     private func timed(_ body: () -> Void) -> UInt64 {
         let start = DispatchTime.now().uptimeNanoseconds
         body()
         return DispatchTime.now().uptimeNanoseconds - start
     }
+    /// 输出队列或排序实验的规模、输入形状、耗时及等价性。
     private func record(_ experiment: String, _ count: Int, _ shape: String, _ cycles: Int, _ round: Int, _ times: (UInt64, UInt64), _ equal: Bool) throws {
         let data = try JSONSerialization.data(withJSONObject: ["experiment": experiment, "count": count, "shape": shape, "cycles": cycles, "round": round, "old_ns": times.0, "new_ns": times.1, "equal": equal], options: [.sortedKeys])
         print("PERF04 " + String(decoding: data, as: UTF8.self))

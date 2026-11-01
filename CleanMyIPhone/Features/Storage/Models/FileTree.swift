@@ -1,4 +1,11 @@
 //
+//  文件树构建
+//
+//  将扫描得到的相对路径和大小累积为供展示使用的目录树。
+//  构建过程复用可变节点，最终生成值类型树；诊断仅用于检查树结构。
+//
+
+//
 //  FileTree.swift
 //  CleanMyIPhone
 //
@@ -10,7 +17,7 @@
 
 import Foundation
 
-/// 定义 `FileNode` 的值语义数据与相关行为。
+/// 展示用不可变树节点，目录汇总子节点大小，文件节点携带自身分类。
 struct FileNode: Identifiable, Hashable, Sendable {
     let id: String
     let name: String
@@ -20,7 +27,7 @@ struct FileNode: Identifiable, Hashable, Sendable {
     let isDirectory: Bool
     let isAggregate: Bool
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 保存节点的展示信息；`isAggregate` 用于区分由多个节点汇总的展示项。
     nonisolated init(
         id: String,
         name: String,
@@ -40,9 +47,9 @@ struct FileNode: Identifiable, Hashable, Sendable {
     }
 }
 
-/// 定义 `FileTreeBuilder` 的值语义数据与相关行为。
+/// 将已有扫描文件列表转换为展示树的便利入口。
 struct FileTreeBuilder: Sendable {
-    /// 创建 `build` 所需的值或资源，统一封装构造细节。
+    /// 逐项累积相对路径并生成最终树；不访问文件内容。
     nonisolated static func build(rootURL: URL, files: [ScannedFile]) -> FileNode {
         var accumulator = FileTreeAccumulator(rootURL: rootURL)
         for file in files {
@@ -54,6 +61,8 @@ struct FileTreeBuilder: Sendable {
 
 /// Builds the hierarchy as files are discovered instead of performing a
 /// second full pass when enumeration has already finished.
+/// 扫描期间逐项维护可变树，避免枚举结束后重新遍历文件列表。
+/// 内部引用节点仅供单个扫描工作者使用，最终结果是独立的值类型。
 nonisolated struct FileTreeAccumulator: @unchecked Sendable {
     /// The accumulator is confined to a single scan worker. Reference semantics
     /// avoid copying a Set and a dictionary value for every path component.
@@ -65,6 +74,7 @@ nonisolated struct FileTreeAccumulator: @unchecked Sendable {
         var category: FileCategory?
         let isDirectory: Bool
 
+        /// 创建一个尚无子节点的可变树节点；目录和文件共用该构建期表示。
         init(
             id: String,
             name: String,
@@ -83,6 +93,7 @@ nonisolated struct FileTreeAccumulator: @unchecked Sendable {
 
     private let root: MutableNode
 
+    /// 根据所选 URL 创建树根；根名称缺失时使用本地化的默认名称。
     init(rootURL: URL) {
         let rootName = rootURL.lastPathComponent.isEmpty
             ? AppL10n.string("Selected Folder")
@@ -96,6 +107,7 @@ nonisolated struct FileTreeAccumulator: @unchecked Sendable {
         )
     }
 
+    /// 按相对路径创建或复用节点并累加已知大小；未知大小按零参与展示汇总。
     mutating func append(_ file: ScannedFile) {
         let components = file.relativePathComponents
         guard !components.isEmpty else { return }
@@ -133,16 +145,19 @@ nonisolated struct FileTreeAccumulator: @unchecked Sendable {
         }
     }
 
+    /// 从当前累积状态构造不可变树，保留累积器以供继续使用。
     func makeTree() -> FileNode {
         Self.makeNode(root)
     }
 
     /// Candidate consuming finalization: release mutable subtrees as immutable output is built.
     /// The accumulator is empty afterward and must not be used for further appends.
+    /// 构造不可变树的同时释放可变子树；调用后不得继续向该累积器添加文件。
     mutating func makeTreeReleasingStorage() -> FileNode {
         Self.consumeNode(root)
     }
 
+    /// 递归取出并释放子节点，按大小及名称排序并计算目录的主导类别。
     private static func consumeNode(_ value: MutableNode) -> FileNode {
         var children: [FileNode] = []
         children.reserveCapacity(value.childrenByName.count)
@@ -165,7 +180,7 @@ nonisolated struct FileTreeAccumulator: @unchecked Sendable {
                         isDirectory: value.isDirectory)
     }
 
-    /// 创建 `makeNode` 所需的值或资源，统一封装构造细节。
+    /// 递归复制节点并按大小、名称稳定排序；目录类别取占用最大的子节点类别。
     private static func makeNode(_ value: MutableNode) -> FileNode {
         let children = value.childrenByName.values
             .map(makeNode)
@@ -188,11 +203,11 @@ nonisolated struct FileTreeAccumulator: @unchecked Sendable {
     }
 }
 
-/// 定义 `FileTreeDiagnostics` 使用的有限状态或选项集合。
+/// 计算及输出文件树的层级诊断信息，供开发期间检查扫描结果。
 enum FileTreeDiagnostics: Sendable {
-    /// 封装 `maximumDepth` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 计算根节点以下的最大层数；空根返回零。
     nonisolated static func maximumDepth(of root: FileNode) -> Int {
-        /// 封装 `depth` 对应的局部行为，供当前类型在统一入口下复用。
+        /// 从当前节点开始递归计数，叶节点深度为一。
         func depth(of node: FileNode) -> Int {
             guard !node.children.isEmpty else { return 1 }
             return 1 + (node.children.map { depth(of: $0) }.max() ?? 0)
@@ -202,7 +217,7 @@ enum FileTreeDiagnostics: Sendable {
         return root.children.map { depth(of: $0) }.max() ?? 0
     }
 
-    /// 封装 `debugDescription` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 按指定深度生成树结构诊断文本，供开发时检查层级。
     nonisolated static func debugDescription(
         of root: FileNode,
         maximumPrintedDepth: Int = 4
@@ -213,7 +228,7 @@ enum FileTreeDiagnostics: Sendable {
             "Tree maximum depth = \(maximumDepth(of: root))"
         ]
 
-        /// 记录 `appendChildren` 产生的结果，并通知依赖该状态的调用方。
+        /// 在允许的打印深度内递归追加子节点，按深度缩进。
         func appendChildren(of node: FileNode, depth: Int) {
             guard depth <= maximumPrintedDepth else { return }
 
@@ -227,7 +242,7 @@ enum FileTreeDiagnostics: Sendable {
         return lines.joined(separator: "\n")
     }
 
-    /// 封装 `log` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将格式化后的树结构写入调试输出；文本包含节点名称。
     nonisolated static func log(_ root: FileNode) {
         debugPrint(debugDescription(of: root))
     }

@@ -1,4 +1,11 @@
 //
+//  应用状态持久化
+//
+//  定义媒体、文件和存储概览快照，并在应用支持目录中读写 JSON。
+//  文件记录保存相对路径而非临时绝对 URL；持久化失败不会中断扫描或删除。
+//
+
+//
 //  AppStateStore.swift
 //  CleanMyIPhone
 //
@@ -10,12 +17,13 @@
 
 import Foundation
 
-/// 定义 `MediaStateSnapshot` 的值语义数据与相关行为。
+/// 保存最近的媒体分类结果、是否部分完成及可用于验证缓存的新旧相册修订。
 nonisolated struct MediaStateSnapshot: Codable, Sendable {
     let result: MediaClassificationResult
     let isPartial: Bool
     let libraryRevision: MediaLibraryRevision?
 
+    /// 保存分类结果及其完整性标记；未提供修订号时，后续无法用该值验证相册版本。
     init(
         result: MediaClassificationResult,
         isPartial: Bool,
@@ -39,6 +47,7 @@ nonisolated struct MediaSizeIndexSnapshot: Codable, Sendable {
     let entries: [String: MediaSizeIndexEntry]
 }
 
+/// 保存某资源的已验证大小及对应修改时间，供后续判断缓存是否仍适用。
 nonisolated struct MediaSizeIndexEntry: Codable, Sendable {
     let modificationDate: Date? 
     let byteCount: Int64
@@ -51,6 +60,7 @@ nonisolated struct MediaHashCacheSnapshot: Codable, Sendable {
     let version: Int
     let entries: [String: Entry]
 
+    /// 一条感知哈希及其源资源元数据键；源文件变化后键不再匹配。
     nonisolated struct Entry: Codable, Sendable {
         let cacheKey: FeatureCacheKey
         let hash: UInt64
@@ -61,7 +71,7 @@ nonisolated struct MediaHashCacheSnapshot: Codable, Sendable {
     }
 }
 
-/// 定义 `FileStateSnapshot` 的值语义数据与相关行为。
+/// 保存目录授权书签、展示名、相对文件记录及跳过数量，并携带架构版本。
 nonisolated struct FileStateSnapshot: Codable, Sendable {
     static let currentSchemaVersion = 3
 
@@ -71,6 +81,7 @@ nonisolated struct FileStateSnapshot: Codable, Sendable {
     let files: [PersistedScannedFile]
     let skippedFileCount: Int
 
+    /// 将扫描结果转换为相对路径记录，并写入当前快照版本和目录授权书签。
     init(
         directoryBookmark: Data,
         selectedDirectoryName: String,
@@ -86,6 +97,7 @@ nonisolated struct FileStateSnapshot: Codable, Sendable {
 
     /// Builds large snapshots cooperatively so a superseded scan does not keep
     /// converting an obsolete index in the background.
+    /// 分批检查取消并生成持久化记录；扫描已被替代时返回 nil，避免继续构造旧快照。
     static func prepare(
         directoryBookmark: Data,
         selectedDirectoryName: String,
@@ -106,6 +118,7 @@ nonisolated struct FileStateSnapshot: Codable, Sendable {
         )
     }
 
+    /// 接收已分批转换完成的记录，供可取消的 `prepare` 路径构造快照。
     private init(
         directoryBookmark: Data,
         selectedDirectoryName: String,
@@ -148,6 +161,7 @@ nonisolated struct PersistedScannedFile: Codable, Hashable, Sendable {
         case modificationDate = "md"
     }
 
+    /// 兼容旧版快照使用的完整字段名，仅用于读取历史数据。
     private enum LegacyCodingKeys: String, CodingKey {
         case name
         case relativePathComponents
@@ -158,6 +172,7 @@ nonisolated struct PersistedScannedFile: Codable, Hashable, Sendable {
         case modificationDate
     }
 
+    /// 从扫描结果提取可持久化的相对路径及元数据，不保存临时的提供方绝对 URL。
     init(_ file: ScannedFile) {
         name = file.name
         relativePathComponents = file.relativePathComponents
@@ -168,6 +183,7 @@ nonisolated struct PersistedScannedFile: Codable, Hashable, Sendable {
         modificationDate = file.modificationDate
     }
 
+    /// 优先读取紧凑字段名；旧格式仍使用原字段名解码，以兼容已有快照。
     init(from decoder: Decoder) throws {
         let compact = try decoder.container(keyedBy: CodingKeys.self)
         if compact.contains(.name) {
@@ -201,11 +217,11 @@ nonisolated struct StorageDashboardSnapshot: Codable, Sendable {
     let skippedFileCount: Int
 }
 
-/// 使用 Actor 隔离 `AppStateStore` 的可变状态，确保并发访问安全。
+/// 串行读写应用支持目录中的 JSON 状态；缓存缺失或损坏时返回 nil。
 actor AppStateStore {
     static let shared = AppStateStore()
 
-    /// 定义 `SnapshotName` 使用的有限状态或选项集合。
+    /// 各快照在应用私有状态目录中的文件名，避免不同缓存互相覆盖。
     private enum SnapshotName: String {
         case media = "media-state.json"
         case mediaSizes = "media-size-index.json"
@@ -218,7 +234,7 @@ actor AppStateStore {
     private let decoder = JSONDecoder()
     private let directoryURL: URL
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 选择应用支持目录作为持久化根目录，系统未提供时回退到临时目录。
     init(fileManager: FileManager = .default) {
         let applicationSupport = fileManager.urls(
             for: .applicationSupportDirectory,
@@ -230,63 +246,70 @@ actor AppStateStore {
         )
     }
 
-    /// 加载 `loadMediaState` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 读取媒体分类快照；文件缺失或无法解码时返回 nil。
     func loadMediaState() -> MediaStateSnapshot? {
         load(MediaStateSnapshot.self, name: .media)
     }
 
-    /// 持久化 `saveMediaState` 对应的数据，并保持后续恢复所需的信息完整。
+    /// 保存媒体分类快照；传入 nil 时移除对应缓存。
     func saveMediaState(_ snapshot: MediaStateSnapshot?) {
         save(snapshot, name: .media)
     }
 
+    /// 读取资源精确大小索引，供调用方按修改时间验证。
     func loadMediaSizeIndex() -> MediaSizeIndexSnapshot? {
         load(MediaSizeIndexSnapshot.self, name: .mediaSizes)
     }
 
+    /// 保存资源大小索引；传入 nil 时移除对应缓存。
     func saveMediaSizeIndex(_ snapshot: MediaSizeIndexSnapshot?) {
         save(snapshot, name: .mediaSizes)
     }
 
+    /// 读取感知哈希缓存；版本兼容性由快照模型判断。
     func loadMediaHashCache() -> MediaHashCacheSnapshot? {
         load(MediaHashCacheSnapshot.self, name: .mediaHashes)
     }
 
+    /// 保存感知哈希缓存，以便后续相册分析复用。
     func saveMediaHashCache(_ snapshot: MediaHashCacheSnapshot) {
         save(snapshot, name: .mediaHashes)
     }
 
-    /// 加载 `loadFileState` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 读取完整文件扫描快照，并记录聚合加载耗时。
     func loadFileState() -> FileStateSnapshot? {
         let interval = StoragePerformance.begin("Storage Snapshot Load")
         defer { StoragePerformance.end("Storage Snapshot Load", id: interval) }
         return load(FileStateSnapshot.self, name: .files)
     }
 
+    /// 保存或移除完整文件扫描快照，并记录聚合写入耗时。
     func saveFileState(_ snapshot: FileStateSnapshot?) {
         let interval = StoragePerformance.begin("Storage Snapshot Save")
         defer { StoragePerformance.end("Storage Snapshot Save", id: interval) }
         save(snapshot, name: .files)
     }
 
+    /// 读取小型概览快照，使界面无需先解码完整文件索引。
     func loadStorageDashboard() -> StorageDashboardSnapshot? {
         let interval = StoragePerformance.begin("Storage Dashboard Load")
         defer { StoragePerformance.end("Storage Dashboard Load", id: interval) }
         return load(StorageDashboardSnapshot.self, name: .fileDashboard)
     }
 
+    /// 保存或移除存储概览快照。
     func saveStorageDashboard(_ snapshot: StorageDashboardSnapshot?) {
         save(snapshot, name: .fileDashboard)
     }
 
-    /// 加载 `load` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 从指定文件读取并解码快照；读取或解码失败统一返回 nil。
     private func load<T: Decodable>(_ type: T.Type, name: SnapshotName) -> T? {
         let url = directoryURL.appendingPathComponent(name.rawValue)
         guard let data = try? Data(contentsOf: url) else { return nil }
         return try? decoder.decode(type, from: data)
     }
 
-    /// 持久化 `save` 对应的数据，并保持后续恢复所需的信息完整。
+    /// 原子写入非空快照；空值移除缓存。持久化失败被忽略，不阻断业务操作。
     private func save<T: Encodable>(_ value: T?, name: SnapshotName) {
         let fileManager = FileManager.default
         let url = directoryURL.appendingPathComponent(name.rawValue)

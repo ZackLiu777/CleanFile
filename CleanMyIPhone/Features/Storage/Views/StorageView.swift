@@ -1,17 +1,18 @@
+// 存储扫描概览、目录导航与文件选择界面。
+// 用户选择来源后由扫描模型提供结果；选择和删除确认保持分离，删除结果可包含部分失败。
+// 无可用来源或功能锁定时展示示例概览；真实统计和文件列表来自扫描状态。
+// 选择来源与删除操作均经过独立交互，实际文件访问和状态更新由底层模型负责。
+
 //
 //  StorageView.swift
 //  CleanMyIPhone
 //
 
-//
-//  文件职责：声明 Storage 界面结构、交互入口与展示状态。
-//  所属模块：CleanMyIPhone。
-//
 
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// 定义 `StorageView` 的值语义数据与相关行为。
+/// 展示所选来源的扫描状态、分类汇总和文件详情入口。
 struct StorageView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appTheme) private var theme
@@ -267,7 +268,7 @@ struct StorageView: View {
         .storageCard()
     }
 
-    /// 封装 `sunburstCard` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 展示目录旭日图及打开完整目录地图的入口。
     private func sunburstCard(root: FileNode) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -295,7 +296,7 @@ struct StorageView: View {
         .storageCard()
     }
 
-    /// 封装 `summaryCard` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 展示扫描文件数量、容量和各类型占用概览。
     private func summaryCard(_ summary: StorageSummary) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Storage Summary")
@@ -369,6 +370,7 @@ struct StorageView: View {
     }
 
     @ViewBuilder
+    /// 预览状态引导选择目录；已有扫描结果时打开指定分类的文件列表。
     private func fileDetailsLink<Label: View>(
         category: FileCategory? = nil,
         @ViewBuilder label: () -> Label
@@ -382,6 +384,7 @@ struct StorageView: View {
         }
     }
 
+    /// 检查存储功能权限后打开目录选择器，否则展示高级功能页面。
     private func chooseFolder() {
         guard !isStorageLocked else {
             showsPremium = true
@@ -390,6 +393,7 @@ struct StorageView: View {
         isImporterPresented = true
     }
 
+    /// 检查存储功能权限后打开来源选择器，否则展示高级功能页面。
     private func chooseSources() {
         guard !isStorageLocked else {
             showsPremium = true
@@ -398,7 +402,7 @@ struct StorageView: View {
         isSourceImporterPresented = true
     }
 
-    /// 封装 `metric` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 以标题和值展示一项存储统计指标。
     private func metric(title: LocalizedStringKey, value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
@@ -411,12 +415,12 @@ struct StorageView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// 封装 `storageColor` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 从存储可视化调色板获取文件分类颜色。
     private func storageColor(_ category: FileCategory) -> Color {
         StorageVisualizationPalette.color(for: category)
     }
 
-    /// 解析 `categorySymbol` 对应的业务语义，并返回稳定的分类或映射结果。
+    /// 为每种文件分类选择系统图标。
     private func categorySymbol(_ category: FileCategory) -> String {
         switch category {
         case .video: "film"
@@ -429,7 +433,7 @@ struct StorageView: View {
         }
     }
 
-    /// 封装 `storageCategoryBar` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 按分类占比和动画进度绘制容量条，非零分类保留最小可见宽度。
     private func storageCategoryBar(_ category: StorageCategorySummary) -> some View {
         GeometryReader { proxy in
             let naturalWidth = proxy.size.width
@@ -476,7 +480,7 @@ struct StorageView: View {
         .accessibilityHidden(true)
     }
 
-    /// 启动 `animateStorageDashboardIfNeeded` 动画，并确保展示状态与当前页面生命周期一致。
+    /// 页面活跃时展开旭日图和容量条；动画禁用时直接显示完成状态，代次用于丢弃过期任务。
     private func animateStorageDashboardIfNeeded() {
         guard isTabActive, displayedSummary != nil else { return }
         animationGeneration += 1
@@ -511,14 +515,14 @@ struct StorageView: View {
         }
     }
 
-    /// 重置 `resetStorageAnimations` 管理的状态，避免旧任务或旧数据影响下一次操作。
+    /// 推进动画代次并重置展开进度，使尚未开始的旧动画失效。
     private func resetStorageAnimations() {
         animationGeneration += 1
         sunburstRevealProgress = 0
         summaryBarProgress = 0
     }
 
-    /// 处理 `handleImport` 输入，并根据结果推进当前业务状态。
+    /// 处理单目录选择结果，将用户取消和选择失败交给扫描模型区分。
     private func handleImport(_ result: Result<[URL], Error>) {
         guard !isStorageLocked else { return }
         switch result {
@@ -533,6 +537,7 @@ struct StorageView: View {
         }
     }
 
+    /// 处理多来源选择结果，并将实际选中的 URL 交给扫描模型。
     private func handleSourceImport(_ result: Result<[URL], Error>) {
         guard !isStorageLocked else { return }
         switch result {
@@ -547,18 +552,18 @@ struct StorageView: View {
         }
     }
 
-    /// 计算 `byteCountText` 所需的派生值，避免展示层重复实现相同规则。
+    /// 按文件大小格式化字节数。
     private func byteCountText(_ byteCount: Int64) -> String {
         ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
     }
 
-    /// 计算 `fileCountText` 所需的派生值，避免展示层重复实现相同规则。
+    /// 按照当前语言格式化文件数量。
     private func fileCountText(_ count: Int) -> String {
         String.localizedStringWithFormat(AppL10n.string("%lld files"), Int64(count))
     }
 }
 
-/// 定义 `StorageBarStripeTexture` 的值语义数据与相关行为。
+/// 为存储容量条绘制重复的细条纹理。
 private struct StorageBarStripeTexture: View {
     private let stripePattern: [(position: CGFloat, width: CGFloat, opacity: Double)] = [
         (0.46, 0.8, 0.08), (0.55, 1.0, 0.10), (0.61, 0.6, 0.07),
@@ -588,7 +593,7 @@ private struct StorageBarStripeTexture: View {
     }
 }
 
-/// 定义 `FolderMapView` 的值语义数据与相关行为。
+/// 展示可交互的目录旭日图及相关说明。
 private struct FolderMapView: View {
     let root: FileNode
     let isPreview: Bool
@@ -633,7 +638,7 @@ private struct FolderMapView: View {
     }
 }
 
-/// 定义 `ScannedFilesView` 的值语义数据与相关行为。
+/// 提供扫描文件列表、选择汇总和删除操作入口。
 private struct ScannedFilesView: View {
     @Environment(\.appTheme) private var theme
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
@@ -645,7 +650,7 @@ private struct ScannedFilesView: View {
     @State private var displayedFiles: [ScannedFile] = []
     @State private var isPreparingDisplayedFiles = true
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 连接扫描状态，并可将文件列表限制为指定分类。
     init(viewModel: FileScannerViewModel, category: FileCategory? = nil) {
         self.viewModel = viewModel
         self.category = category
@@ -812,6 +817,7 @@ private struct ScannedFilesView: View {
         }
     }
 
+    /// 在后台按分类筛选并按大小排序；取消后不发布结果，再同步有效选择和容量。
     @MainActor
     private func prepareDisplayedFiles() async {
         let sourceFiles = viewModel.files
@@ -841,6 +847,7 @@ private struct ScannedFilesView: View {
         isPreparingDisplayedFiles = false
     }
 
+    /// 切换单项选择，并仅对已知大小增量更新所选容量。
     private func toggleSelection(of file: ScannedFile) {
         if selectedURLs.remove(file.url) != nil {
             if file.hasKnownByteCount {
@@ -854,6 +861,7 @@ private struct ScannedFilesView: View {
         }
     }
 
+    /// 只汇总已知大小的选中文件，未知大小不会被误报为已知容量。
     private func recalculateSelectedKnownByteCount() {
         selectedKnownByteCount = displayedFiles.reduce(into: Int64.zero) { total, file in
             if selectedURLs.contains(file.url), file.hasKnownByteCount {
@@ -884,14 +892,15 @@ private struct ScannedFilesView: View {
     }
 }
 
+/// 以文件修订号和分类标识一次列表展示请求，便于识别需要刷新的输入。
 private struct FileDisplayRequest: Hashable {
     let filesRevision: Int
     let category: FileCategory?
 }
 
-/// 扩展 `View`，集中实现当前文件所需的附加能力。
+/// 提供存储页面共用的卡片样式。
 private extension View {
-    /// 封装 `storageCard` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 为内容添加存储卡片内边距并应用主题样式。
     func storageCard() -> some View {
         padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -1,8 +1,14 @@
+// 逐张审阅媒体的手势界面。
+// 手势先记录本次会话中的保留或待删除决定；实际删除需要单独确认并由相册模型执行。
+// 页面持有一次固定资源清单的审阅会话，允许保留、跳过、撤销并检查待删除清单。
+// 受保护资源不能标记删除；取消或退出时的会话选择与相册实际内容分离。
+
 import Photos
 import SwiftUI
 
 /// Optional, deliberate review flow. Swipes update a local selection, not the photo library.
 struct MediaSwipeReviewView: View {
+    /// 区分退出时丢弃决定和提交删除两种确认场景。
     private enum Confirmation {
         case discard
         case delete
@@ -26,6 +32,7 @@ struct MediaSwipeReviewView: View {
     @State private var deletedCount: Int?
     @State private var decisionFeedbackCount = 0
 
+    /// 以固定资源清单、保护集合和可选起点建立本次审阅会话。
     init(
         assetIDs: [String],
         protectedAssetIDs: Set<String>,
@@ -230,6 +237,7 @@ struct MediaSwipeReviewView: View {
         .padding(.vertical, 12)
     }
 
+    /// 展示当前资源并将水平手势转为保留或待删除决定；受保护资源不能左滑标记删除。
     private func reviewCard(asset: PHAsset) -> some View {
         ReviewAssetCard(asset: asset, photoLibrary: photoLibrary) { assetID, isReady in
             guard session.currentAssetID == assetID else { return }
@@ -269,6 +277,7 @@ struct MediaSwipeReviewView: View {
         )
     }
 
+    /// 将当前卡片的手势决定记录到审阅会话，尚不修改相册。
     private func decide(_ decision: MediaSwipeReviewSession.Decision) {
         guard session.decide(decision) else { return }
         decisionFeedbackCount += 1
@@ -277,6 +286,7 @@ struct MediaSwipeReviewView: View {
         isShowingSummary = session.isComplete
     }
 
+    /// 跳过当前资源，重置手势和预览状态并在审阅结束时显示汇总。
     private func skip() {
         session.skip()
         previewIsReady = false
@@ -404,6 +414,7 @@ struct MediaSwipeReviewView: View {
         .padding(24)
     }
 
+    /// 展示成功移入最近删除的数量及空间释放提示。
     private func completionView(deletedCount: Int) -> some View {
         VStack(spacing: 18) {
             Image(systemName: "checkmark.circle.fill")
@@ -422,6 +433,7 @@ struct MediaSwipeReviewView: View {
         .padding(24)
     }
 
+    /// 存在未提交决定时先确认丢弃，否则直接关闭审阅。
     private func close() {
         if deletedCount == nil && session.hasDecisions {
             confirmation = .discard
@@ -430,6 +442,7 @@ struct MediaSwipeReviewView: View {
         }
     }
 
+    /// 在用户确认后提交会话中标记的资源，并根据相册模型结果展示完成状态。
     private func deleteMarkedMedia() {
         let ids = session.pendingDeletionIDs
         guard !ids.isEmpty else { return }
@@ -445,6 +458,7 @@ struct MediaSwipeReviewView: View {
     }
 }
 
+/// 显示审阅队列缩略图，并在离开时取消图片请求。
 private struct ReviewThumbnail: View {
     let asset: PHAsset?
     @ObservedObject var photoLibrary: PhotoLibraryViewModel
@@ -482,6 +496,7 @@ private struct ReviewThumbnail: View {
     }
 }
 
+/// 加载当前审阅资源预览，并向父视图报告是否可进行手势操作。
 private struct ReviewAssetCard: View {
     let asset: PHAsset
     @ObservedObject var photoLibrary: PhotoLibraryViewModel

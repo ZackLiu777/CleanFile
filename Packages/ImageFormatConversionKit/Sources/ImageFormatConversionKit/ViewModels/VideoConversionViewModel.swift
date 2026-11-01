@@ -1,14 +1,15 @@
-//
-//  文件职责：协调 VideoConversion 页面状态、用户操作与底层服务。
-//  所属模块：ImageFormatConversionKit。
-//
+// 视频导入、容量估算与批量转换状态。
+// 输入暂存后可按设置估算输出大小；批次顺序转换并分别记录结果。
+// 新估算取消旧请求，原件替换后的工作区清理也单独报告失败。
+// 视频页面通过该对象提交导入、设置和转换请求，并观察进度与结果。
+// 视频引擎负责编码，工作区负责输入副本和清单；状态对象协调两者。
 
 import Foundation
 import Observation
 
+/// 协调视频导入、输出设置、估算、顺序转换与工作区状态恢复。
 @MainActor
 @Observable
-/// 封装 `VideoConversionViewModel` 的引用语义、状态与业务行为。
 public final class VideoConversionViewModel {
     public private(set) var items: [VideoConversionItem] = []
     public private(set) var isConverting = false
@@ -45,7 +46,7 @@ public final class VideoConversionViewModel {
     @ObservationIgnored private var task: Task<Void, Never>?
     @ObservationIgnored private var estimateTask: Task<Void, Never>?
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 指定输出目录和视频引擎，并异步恢复之前保存的工作区。
     public init(
         outputDirectory: URL? = nil,
         engine: VideoConversionEngine = VideoConversionEngine()
@@ -74,6 +75,7 @@ public final class VideoConversionViewModel {
 
     public var replaceableOriginalCount: Int { replacementCandidates.count }
 
+    /// 仅将具有照片来源标识、已完成且输出文件存在的视频纳入原件替换审阅。
     var replacementCandidates: [ConversionReplacementCandidate] {
         items.compactMap { item in
             guard let identifier = item.photoAssetIdentifier,
@@ -90,6 +92,7 @@ public final class VideoConversionViewModel {
         }
     }
 
+    /// 清除已替换项的照片关联并清理工作区；只移除清理成功项，失败时保留并提示。
     func finishReplacement(_ replacedIDs: Set<UUID>) async -> Bool {
         let records = items.filter { replacedIDs.contains($0.id) }.map(record)
         for index in items.indices where replacedIDs.contains(items[index].id) {
@@ -113,7 +116,7 @@ public final class VideoConversionViewModel {
         }
     }
 
-    /// 封装 `addFiles` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 过滤支持的扩展名并去重，逐项暂存视频；返回成功导入的原始 URL 并刷新大小估算。
     @discardableResult
     public func addFiles(
         _ urls: [URL],
@@ -184,7 +187,7 @@ public final class VideoConversionViewModel {
         return importedURLs
     }
 
-    /// 执行 `remove` 移除流程，并同步更新受影响的业务状态。
+    /// 清理指定项目的工作区文件；清理成功才移除并更新大小估算。
     public func remove(_ id: UUID) {
         guard !isConverting else { return }
         guard let item = items.first(where: { $0.id == id }) else { return }
@@ -202,7 +205,7 @@ public final class VideoConversionViewModel {
         }
     }
 
-    /// 执行 `removeAll` 移除流程，并同步更新受影响的业务状态。
+    /// 批量清理工作区，仅移除清理成功的项目，并在部分失败时提示。
     public func removeAll() {
         guard !isConverting else { return }
         let removedItems = items
@@ -222,16 +225,17 @@ public final class VideoConversionViewModel {
         }
     }
 
-    /// 记录 `reportImportFailure` 产生的结果，并通知依赖该状态的调用方。
+    /// 将导入失败信息转换为界面提示。
     public func reportImportFailure(_ message: String) {
         notice = L10n.format("notice.import_failed", message)
     }
 
-    /// 启动 `start` 对应流程，并初始化本轮任务需要的状态。
+    /// 以快捷预设发起转换，不改写界面中保存的专业设置。
     public func startQuickCompression(usagePolicy: ConversionUsagePolicy = .unrestricted) {
         start(usagePolicy: usagePolicy, usingQuickPreset: true)
     }
 
+    /// 为可转换项目申请使用许可，并在调度批次前同步标记运行状态。
     public func start(usagePolicy: ConversionUsagePolicy = .unrestricted, usingQuickPreset: Bool = false) {
         guard canConvert else { return }
         let count = items.filter { item in
@@ -248,13 +252,13 @@ public final class VideoConversionViewModel {
         task = Task { await run(permit: permit, usingQuickPreset: usingQuickPreset) }
     }
 
-    /// 取消 `cancel` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 请求取消当前任务并通知视频引擎停止进行中的操作。
     public func cancel() {
         task?.cancel()
         Task { await engine.cancelAll() }
     }
 
-    /// 封装 `run` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 顺序转换候选视频，按项目记录结果与使用成功次数；取消后剩余项目标记为已取消。
     private func run(permit: ConversionUsagePermit, usingQuickPreset: Bool) async {
         defer { permit.finish() }
         isConverting = true
@@ -313,7 +317,7 @@ public final class VideoConversionViewModel {
         persist()
     }
 
-    /// 加载 `restore` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 仅在没有新导入或转换时恢复工作区；缺失输出不会被当作已完成结果。
     private func restore() async {
         guard items.isEmpty, !isConverting else { return }
         let records = await workspace.load(.video)
@@ -342,6 +346,7 @@ public final class VideoConversionViewModel {
         scheduleSizeEstimate()
     }
 
+    /// 取消旧估算并等待设置稳定，再按当前输入和参数估算；取消或失败时不发布过期数值。
     private func scheduleSizeEstimate() {
         estimateTask?.cancel()
         sizeEstimate = nil
@@ -392,13 +397,13 @@ public final class VideoConversionViewModel {
         }
     }
 
-    /// 持久化 `persist` 对应的数据，并保持后续恢复所需的信息完整。
+    /// 将当前项目状态映射为工作区记录并异步保存。
     private func persist() {
         let records = items.map(record)
         Task { await workspace.save(records, kind: .video) }
     }
 
-    /// 记录 `record` 产生的结果，并通知依赖该状态的调用方。
+    /// 将视频项目的状态、文件路径和照片来源映射为持久化记录。
     private func record(_ item: VideoConversionItem) -> PersistedConversionItem {
         let persistedState = item.status.persistedState
         return PersistedConversionItem(

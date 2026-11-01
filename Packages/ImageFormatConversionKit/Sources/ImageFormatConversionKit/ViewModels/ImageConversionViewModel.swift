@@ -1,12 +1,13 @@
-//
-//  文件职责：协调 ImageConversion 页面状态、用户操作与底层服务。
-//  所属模块：ImageFormatConversionKit。
-//
+// 图片导入、检查、批量转换及结果状态。
+// 输入先暂存，检查与转换使用有界并发；单张结果分别记录成功、失败和取消。
+// 照片原件替换后的工作区清理与转换本身分开，避免把清理失败当作完全成功。
+// 图片页面通过该对象更新输出选项、启动批处理及读取每个项目的展示状态。
+// 源文件的暂存与恢复交由工作区，具体解码编码交给图片引擎。
 
 import Foundation
 import Observation
 
-/// 定义 `ImageConversionItem` 的值语义数据与相关行为。
+/// 保存暂存源文件、检查信息、转换状态及可选的照片资源标识。
 public struct ImageConversionItem: Identifiable, Hashable, Sendable {
     public let id: UUID
     public let sourceURL: URL
@@ -14,7 +15,7 @@ public struct ImageConversionItem: Identifiable, Hashable, Sendable {
     public var status: ImageConversionItemStatus
     public internal(set) var photoAssetIdentifier: String?
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 保存图片源地址、可选检查结果、当前状态和照片资源标识。
     public init(
         id: UUID = UUID(),
         sourceURL: URL,
@@ -30,7 +31,7 @@ public struct ImageConversionItem: Identifiable, Hashable, Sendable {
     }
 }
 
-/// 定义 `ImageConversionItemStatus` 使用的有限状态或选项集合。
+/// 区分检查、就绪、转换中、完成、失败和取消，供列表展示和重试判断使用。
 public enum ImageConversionItemStatus: Hashable, Sendable {
     case inspecting
     case ready
@@ -40,9 +41,9 @@ public enum ImageConversionItemStatus: Hashable, Sendable {
     case cancelled
 }
 
+/// 协调图片暂存、资源检查、有界批量转换、使用许可和持久化状态。
 @MainActor
 @Observable
-/// 封装 `ImageConversionViewModel` 的引用语义、状态与业务行为。
 public final class ImageConversionViewModel {
     public private(set) var items: [ImageConversionItem] = []
     public private(set) var availableFormats: [ImageOutputFormat]
@@ -82,7 +83,7 @@ public final class ImageConversionViewModel {
     @ObservationIgnored
     private var conversionTask: Task<Void, Never>?
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 选择可用输出格式，配置输出目录及引擎，并异步恢复工作区。
     public init(
         outputDirectory: URL? = nil,
         engine: ImageConversionEngine = ImageConversionEngine()
@@ -112,6 +113,7 @@ public final class ImageConversionViewModel {
         replacementCandidates.count
     }
 
+    /// 仅将具有照片来源标识、已完成且输出文件存在的图片纳入原件替换审阅。
     var replacementCandidates: [ConversionReplacementCandidate] {
         items.compactMap { item in
             guard let identifier = item.photoAssetIdentifier,
@@ -128,6 +130,7 @@ public final class ImageConversionViewModel {
         }
     }
 
+    /// 记录已替换项不再关联照片原件，再清理对应工作区文件；清理失败时保留未删除项并提示。
     func finishReplacement(_ replacedIDs: Set<UUID>) async -> Bool {
         let records = items.filter { replacedIDs.contains($0.id) }.map(record)
         for index in items.indices where replacedIDs.contains(items[index].id) {
@@ -152,7 +155,7 @@ public final class ImageConversionViewModel {
         )
     }
 
-    /// 封装 `addFiles` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 去重并逐项暂存输入，按热状态限制并发检查；返回成功暂存的原始 URL，单项失败不阻止其他项。
     @discardableResult
     public func addFiles(
         _ urls: [URL],
@@ -303,6 +306,7 @@ public final class ImageConversionViewModel {
         return importedURLs
     }
 
+    /// 根据设备热状态限制并发检查数量，避免大量图片同时占用资源。
     private static var inspectionConcurrencyLimit: Int {
         switch ProcessInfo.processInfo.thermalState {
         case .serious, .critical: 1
@@ -311,7 +315,7 @@ public final class ImageConversionViewModel {
         }
     }
 
-    /// 执行 `removeItem` 移除流程，并同步更新受影响的业务状态。
+    /// 清理指定项目的工作区文件；清理成功才从列表移除，失败时提示。
     public func removeItem(id: UUID) {
         guard !isConverting else { return }
         guard let item = items.first(where: { $0.id == id }) else { return }
@@ -328,7 +332,7 @@ public final class ImageConversionViewModel {
         }
     }
 
-    /// 执行 `removeAll` 移除流程，并同步更新受影响的业务状态。
+    /// 批量清理工作区，仅移除清理成功的记录，并在部分失败时保留其余项目。
     public func removeAll() {
         guard !isConverting else { return }
         let removedItems = items
@@ -348,7 +352,7 @@ public final class ImageConversionViewModel {
         }
     }
 
-    /// 重置 `clearCompleted` 管理的状态，避免旧任务或旧数据影响下一次操作。
+    /// 只清理已完成项目，保留未成功删除的记录并提示失败。
     public func clearCompleted() {
         guard !isConverting else { return }
         let completedItems = items.filter {
@@ -368,11 +372,12 @@ public final class ImageConversionViewModel {
         }
     }
 
-    /// 启动 `startConversion` 对应流程，并初始化本轮任务需要的状态。
+    /// 使用快捷压缩预设发起同一转换流程，不覆盖用户保留的专业设置。
     public func startQuickCompression(usagePolicy: ConversionUsagePolicy = .unrestricted) {
         startConversion(usagePolicy: usagePolicy, usingQuickPreset: true)
     }
 
+    /// 根据可转换项申请使用许可，调度任务前先锁定状态，防止重复启动批次。
     public func startConversion(usagePolicy: ConversionUsagePolicy = .unrestricted, usingQuickPreset: Bool = false) {
         guard canStartConversion else { return }
         let count = items.filter(Self.isConvertible).count
@@ -385,17 +390,17 @@ public final class ImageConversionViewModel {
         conversionTask = Task { await runConversion(permit: permit, usingQuickPreset: usingQuickPreset) }
     }
 
-    /// 取消 `cancelConversion` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 请求取消图片批次；最终逐项状态由批量转换结果决定。
     public func cancelConversion() {
         conversionTask?.cancel()
     }
 
-    /// 记录 `reportImportFailure` 产生的结果，并通知依赖该状态的调用方。
+    /// 将导入失败信息转换为界面提示。
     public func reportImportFailure(_ message: String) {
         notice = L10n.format("notice.import_failed", message)
     }
 
-    /// 封装 `runConversion` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 生成不覆盖现有输出的请求并执行有界批处理，再按源 URL 对应更新成功、失败和取消状态。
     private func runConversion(permit: ConversionUsagePermit, usingQuickPreset: Bool) async {
         defer { permit.finish() }
         isConverting = true
@@ -475,13 +480,13 @@ public final class ImageConversionViewModel {
         persist()
     }
 
-    /// 更新 `apply` 对应的数据，使界面状态与底层结果保持一致。
+    /// 发布批次进度并按新增成功数量记入使用许可。
     private func apply(progress: ImageBatchProgress, permit: ConversionUsagePermit) {
         permit.recordSuccess(progress.succeeded - permit.successfulCount)
         self.progress = progress
     }
 
-    /// 重置 `resetProgress` 管理的状态，避免旧任务或旧数据影响下一次操作。
+    /// 清空上一轮批次的进度统计。
     private func resetProgress() {
         progress = ImageBatchProgress(
             completed: 0,
@@ -492,7 +497,7 @@ public final class ImageConversionViewModel {
         )
     }
 
-    /// 加载 `restore` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 重新检查已保存源文件，仅恢复仍存在的完成输出；恢复期间若已有新导入则不覆盖当前列表。
     private func restore() async {
         guard items.isEmpty, !isConverting else { return }
         let records = await workspace.load(.image)
@@ -529,13 +534,13 @@ public final class ImageConversionViewModel {
         persist()
     }
 
-    /// 持久化 `persist` 对应的数据，并保持后续恢复所需的信息完整。
+    /// 将当前项目状态映射为工作区记录并异步保存。
     private func persist() {
         let records = items.map(record)
         Task { await workspace.save(records, kind: .image) }
     }
 
-    /// 记录 `record` 产生的结果，并通知依赖该状态的调用方。
+    /// 将图片项目的状态、文件路径和照片来源映射为持久化记录。
     private func record(_ item: ImageConversionItem) -> PersistedConversionItem {
         let persistedState = item.status.persistedState
         return PersistedConversionItem(
@@ -548,7 +553,7 @@ public final class ImageConversionViewModel {
         )
     }
 
-    /// 判断 `isConvertible` 条件是否成立，供调用方选择正确的处理分支。
+    /// 仅允许检查为单帧且处于就绪、失败或取消状态的项目进入批次。
     private static func isConvertible(_ item: ImageConversionItem) -> Bool {
         guard item.info?.frameCount == 1 else { return false }
         switch item.status {
@@ -561,7 +566,7 @@ public final class ImageConversionViewModel {
 
 }
 
-/// 定义 `InspectionOutcome` 使用的有限状态或选项集合。
+/// 携带图片检查成功或失败及项目标识，便于并发完成后更新正确的列表项。
 private enum InspectionOutcome: Sendable {
     case success(id: UUID, info: ImageAssetInfo)
     case failure(id: UUID, message: String)

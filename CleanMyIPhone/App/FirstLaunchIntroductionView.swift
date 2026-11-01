@@ -1,3 +1,8 @@
+// 首次启动介绍页与示意画面。
+// 展示状态由持久化标记控制，示意内容使用样例而非用户文件。
+// 容器根据首次介绍完成标记决定显示介绍还是应用内容，并支持从设置重新预览。
+// 介绍页通过完成回调结束，示例卡片和图片不读取或修改用户相册。
+
 import ImageFormatConversionKit
 import SwiftUI
 
@@ -6,6 +11,7 @@ struct FirstLaunchIntroductionContainer<Content: View>: View {
     @AppStorage("hasCompletedFirstLaunchIntroduction") private var hasCompletedIntroduction = false
     private let content: Content
 
+    /// 保存介绍完成后展示的内容。
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
     }
@@ -28,6 +34,7 @@ struct FirstLaunchIntroductionContainer<Content: View>: View {
     }
 }
 
+/// 定义介绍页顺序及每页对应的文案和图标。
 private enum IntroductionPage: Int, CaseIterable {
     case media, appearance, compress, files
 
@@ -59,6 +66,7 @@ private enum IntroductionPage: Int, CaseIterable {
     }
 }
 
+/// 展示可分页的首次使用介绍，并通过回调结束介绍。
 struct FirstLaunchIntroductionView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -153,6 +161,7 @@ struct FirstLaunchIntroductionView: View {
     }
 }
 
+/// 使用内置样例构造当前介绍页的示意卡片，不访问用户数据。
 private struct IntroductionArtwork: View {
     @Environment(\.appTheme) private var theme
     let page: IntroductionPage
@@ -198,6 +207,7 @@ private struct IntroductionArtwork: View {
         }
     }
 
+    /// 绘制示意分类及格式化后的样例大小。
     private func sampleRow(_ title: LocalizedStringKey, symbol: String, bytes: Int64) -> some View {
         HStack(spacing: 12) {
             Image(systemName: symbol)
@@ -231,6 +241,7 @@ private struct IntroductionArtwork: View {
         }
     }
 
+    /// 根据保留或待清理角色标记同一张内置示例图片。
     private func samplePhoto(keeper: Bool) -> some View {
         Color.clear
             .overlay {

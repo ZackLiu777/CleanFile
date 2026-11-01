@@ -1,4 +1,11 @@
 //
+//  基于元数据的文件扫描
+//
+//  在后台枚举用户选择的来源，流式报告进度并构造汇总和文件树。
+//  扫描只读取必要元数据；各来源独立获取访问权限，失败和取消通过结果或错误表达。
+//
+
+//
 //  MetadataFileScanner.swift
 //  CleanMyIPhone
 //
@@ -11,7 +18,7 @@
 import Dispatch
 import Foundation
 
-/// 定义 `MetadataFileScanner` 的值语义数据与相关行为。
+/// 基于必要元数据扫描用户所选来源，并通过异步流报告进度、失败和最终结果。
 struct MetadataFileScanner: Sendable {
     // Type identifiers are intentionally omitted from the recursive walk.
     // File Provider may need an additional metadata round-trip to resolve them;
@@ -25,6 +32,7 @@ struct MetadataFileScanner: Sendable {
     private let progressInterval: Int
     private let metadataKeySet: Set<URLResourceKey>
 
+    /// 保存一次目录遍历累积的文件、失败与统计；完成协调读取后再生成最终展示结构。
     private struct DirectoryEnumeration: Sendable {
         let files: [ScannedFile]
         let failures: [FileScanFailure]
@@ -36,7 +44,7 @@ struct MetadataFileScanner: Sendable {
         let maximumRelativeDepth: Int
     }
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 注入文件访问策略并限制进度间隔至少为一，便于不同来源共享扫描流程。
     nonisolated init(
         fileAccess: any FileAccessProviding = SecurityScopedFileAccess(),
         progressInterval: Int = 50
@@ -46,7 +54,7 @@ struct MetadataFileScanner: Sendable {
         metadataKeySet = Set(Self.metadataKeys)
     }
 
-    /// 执行 `scan` 分析流程，在遵守文件访问边界的前提下生成结果。
+    /// 在独立任务扫描一个目录并发送进度与结果；消费端终止时取消后台任务。
     nonisolated func scan(directory: URL) -> AsyncThrowingStream<FileScanEvent, Error> {
         AsyncThrowingStream { continuation in
             let worker = Task.detached(priority: .userInitiated) {
@@ -74,6 +82,7 @@ struct MetadataFileScanner: Sendable {
     /// independent security scope so File Provider locations are never assumed
     /// to share a common root. Sources are processed serially to avoid forcing
     /// several cloud providers to hydrate content at the same time.
+    /// 串行扫描多个独立授权来源，通过流返回合并进度和结果，避免并发触发多个云端提供方。
     nonisolated func scan(sources: [URL]) -> AsyncThrowingStream<FileScanEvent, Error> {
         AsyncThrowingStream { continuation in
             let worker = Task.detached(priority: .userInitiated) {
@@ -95,6 +104,8 @@ struct MetadataFileScanner: Sendable {
         }
     }
 
+    /// 逐个处理文件或目录来源，按标准化 URL 去重并为多来源构造虚拟根。
+    /// 单个来源不可访问时记录失败继续，其余来源仍可生成汇总。
     private nonisolated func scanSourcesSynchronously(
         sources: [URL],
         continuation: AsyncThrowingStream<FileScanEvent, Error>.Continuation
@@ -184,6 +195,7 @@ struct MetadataFileScanner: Sendable {
         )
     }
 
+    /// 在所选文件的访问作用域内读取大小和类型所需元数据，不读取文件内容。
     private nonisolated func scanSingleFile(_ file: URL) throws -> ScannedFile {
         try fileAccess.withAccess(to: file) {
             try Task.checkCancellation()
@@ -200,6 +212,7 @@ struct MetadataFileScanner: Sendable {
         }
     }
 
+    /// 在授权范围内解析来源并判断是否为目录；元数据缺失时使用 URL 的目录提示。
     private nonisolated func isDirectorySource(_ source: URL) throws -> Bool {
         try fileAccess.withAccess(to: source) {
             try Task.checkCancellation()
@@ -209,7 +222,8 @@ struct MetadataFileScanner: Sendable {
         }
     }
 
-    /// 执行 `scanSynchronously` 分析流程，在遵守文件访问边界的前提下生成结果。
+    /// 在安全作用域和文件协调读取期间遍历目录，协调结束后再完成树与汇总。
+    /// File Provider 返回的协调 URL 仅用于本次读取，后续访问仍基于用户选择的根。
     private nonisolated func scanSynchronously(
         directory: URL,
         continuation: AsyncThrowingStream<FileScanEvent, Error>.Continuation,
@@ -287,7 +301,8 @@ struct MetadataFileScanner: Sendable {
         }
     }
 
-    /// 执行 `enumerateDirectory` 分析流程，在遵守文件访问边界的前提下生成结果。
+    /// 递归读取文件的必要元数据并增量更新统计、树和最大文件候选。
+    /// 按数量与时间节流进度，记录不可访问项，周期性检查取消。
     private nonisolated func enumerateDirectory(
         at directory: URL,
         selectedDirectory: URL,
@@ -434,7 +449,7 @@ struct MetadataFileScanner: Sendable {
         )
     }
 
-    /// 判断 `isDirectory` 条件是否成立，供调用方选择正确的处理分支。
+    /// 优先使用资源元数据判断目录，缺失时回退到文件系统查询和 URL 提示。
     private nonisolated func isDirectory(
         at url: URL,
         resourceValues: URLResourceValues,
@@ -455,9 +470,9 @@ struct MetadataFileScanner: Sendable {
     }
 }
 
-/// 定义 `FileScanDiagnostics` 使用的有限状态或选项集合。
+/// 汇总扫描结构诊断，避免将文件名或完整路径写入日志。
 private enum FileScanDiagnostics: Sendable {
-    /// 封装 `log` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 仅输出文件数和目录层级等聚合信息，不记录文件名或路径。
     nonisolated static func log(
         fileCount: Int,
         fileTree: FileNode,

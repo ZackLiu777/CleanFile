@@ -1,6 +1,9 @@
 //
-//  文件职责：实现 ImageConversion 底层处理流程，并向上层提供稳定入口。
-//  所属模块：ImageFormatConversionKit。
+//  图片转换入口负责校验请求、预留输出路径，并把解码和编码交给后台任务。
+//  工作层通过 Image I/O 检查格式、调整尺寸与元数据，最后提交临时文件。
+//  路径冲突、取消和安全范围访问均在各自边界处理，不预先覆盖目标。
+//  批量转换器与图片状态对象通过此入口提交请求和检查输出。
+//  并发请求通过路径预留避免互相占用目标；调用方仍需处理源文件不可读等错误。
 //
 
 import CoreGraphics
@@ -8,11 +11,11 @@ import Foundation
 import ImageIO
 import UniformTypeIdentifiers
 
-/// 使用 Actor 隔离 `ImageConversionEngine` 的可变状态，确保并发访问安全。
+/// 隔离输出路径预留状态，避免同一引擎内的并发请求选择相同目标。
 public actor ImageConversionEngine {
     private var reservedDestinations = Set<URL>()
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 创建图片转换引擎；初始化时不访问输入文件。
     public init() {}
 
     public static var supportedOutputFormats: [ImageOutputFormat] {
@@ -27,7 +30,7 @@ public actor ImageConversionEngine {
         ImageConversionWorker.supportedInputContentTypes
     }
 
-    /// 执行 `inspect` 分析流程，在遵守文件访问边界的前提下生成结果。
+    /// 在独立任务读取图片属性，并将调用任务的取消转发给该任务。
     public func inspect(_ sourceURL: URL) async throws -> ImageAssetInfo {
         let worker = Task.detached(priority: .utility) {
             try ImageConversionWorker.inspect(sourceURL)
@@ -43,7 +46,8 @@ public actor ImageConversionEngine {
         }
     }
 
-    /// 执行 `convert` 转换流程，并按当前配置生成输出结果。
+    /// 校验并预留输出路径，在独立任务中转换，结束时释放预留。
+    /// 错误统一转换为 ImageConversionError，调用方取消也会传递给工作任务。
     public func convert(_ request: ImageConversionRequest) async throws -> ImageConversionResult {
         try validate(request)
         let destinationURL = try reserveDestination(for: request)
@@ -66,7 +70,7 @@ public actor ImageConversionEngine {
         }
     }
 
-    /// 验证 `validate` 所需条件，并阻止无效状态继续进入后续流程。
+    /// 在分配输出路径前检查透明背景、质量、尺寸和系统格式支持。
     private func validate(_ request: ImageConversionRequest) throws {
         guard request.background != .transparent || request.outputFormat.supportsTransparentBackground else {
             throw ImageConversionError.unsupportedOutputFormat(request.outputFormat)
@@ -85,7 +89,7 @@ public actor ImageConversionEngine {
         }
     }
 
-    /// 封装 `reserveDestination` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 按冲突策略选择路径并在 Actor 内预留；文件系统仍可能被外部进程改变。
     private func reserveDestination(for request: ImageConversionRequest) throws -> URL {
         let fileManager = FileManager()
         let directory = request.destinationDirectory.standardizedFileURL
@@ -151,7 +155,7 @@ public actor ImageConversionEngine {
         }
     }
 
-    /// 封装 `sanitizedBaseName` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 移除路径分隔等非法字符及首尾空白、点号，空名称使用默认值。
     private static func sanitizedBaseName(_ value: String) -> String {
         let invalidCharacters = CharacterSet(charactersIn: "/\\:\0")
         let components = value.components(separatedBy: invalidCharacters)
@@ -161,7 +165,7 @@ public actor ImageConversionEngine {
         return withoutTrailingDots.isEmpty ? "converted-image" : withoutTrailingDots
     }
 
-    /// 封装 `normalized` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 保留已知转换错误，将任务取消和其他错误映射为公开错误类型。
     private static func normalized(_ error: Error) -> ImageConversionError {
         if let conversionError = error as? ImageConversionError {
             return conversionError
@@ -173,7 +177,7 @@ public actor ImageConversionEngine {
     }
 }
 
-/// 定义 `ImageConversionWorker` 使用的有限状态或选项集合。
+/// 执行同步 Image I/O 工作；调用方负责放入独立任务和预留目标路径。
 private enum ImageConversionWorker {
     private static let inputDefinitions: [(name: String, type: UTType)] = [
         ("JPG", .jpeg),
@@ -209,7 +213,7 @@ private enum ImageConversionWorker {
         }
     }
 
-    /// 判断 `supportsInput` 条件是否成立，供调用方选择正确的处理分支。
+    /// 按实际内容类型而非扩展名检查输入是否属于允许的图片格式。
     private static func supportsInput(_ identifier: String?) -> Bool {
         guard let identifier, let type = UTType(identifier) else { return false }
         return inputDefinitions.contains { type.conforms(to: $0.type) }
@@ -224,7 +228,7 @@ private enum ImageConversionWorker {
         }
     }
 
-    /// 执行 `inspect` 分析流程，在遵守文件访问边界的前提下生成结果。
+    /// 在安全范围内读取首帧属性、尺寸和内容类型，不缓存解码图像。
     static func inspect(_ sourceURL: URL) throws -> ImageAssetInfo {
         try Task.checkCancellation()
 
@@ -273,7 +277,8 @@ private enum ImageConversionWorker {
         )
     }
 
-    /// 执行 `convert` 转换流程，并按当前配置生成输出结果。
+    /// 解码单帧图片并写入临时文件，再按冲突策略提交到预留路径。
+    /// 在主要阶段检查取消，并在退出时清理未提交的临时文件。
     static func convert(
         _ request: ImageConversionRequest,
         destinationURL: URL
@@ -455,12 +460,12 @@ private enum ImageConversionWorker {
         )
     }
 
-    /// 封装 `properties` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 读取首帧属性；转换只接受单帧图片。
     private static func properties(for source: CGImageSource) -> [CFString: Any]? {
         CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any]
     }
 
-    /// 封装 `number` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将缺失或非数字属性视为零，由上层校验必需尺寸。
     private static func number(_ value: Any?) -> NSNumber {
         if let number = value as? NSNumber {
             return number
@@ -468,7 +473,7 @@ private enum ImageConversionWorker {
         return NSNumber(value: 0)
     }
 
-    /// 封装 `destinationProperties` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 根据隐私策略保留或移除元数据，并更新旋转后的方向和像素尺寸。
     private static func destinationProperties(
         sourceProperties: [CFString: Any],
         request: ImageConversionRequest,
@@ -510,7 +515,7 @@ private enum ImageConversionWorker {
         return properties
     }
 
-    /// Preserve the entire oriented image instead of stretching or silently cropping it.
+    /// 在 1024 像素方形画布中等比例居中，保留完整图像而不裁切。
     private static func squareCanvas(_ image: CGImage, color: ImageFlattenColor?) throws -> CGImage {
         guard let context = CGContext(
             data: nil, width: 1024, height: 1024, bitsPerComponent: 8, bytesPerRow: 0,
@@ -532,7 +537,7 @@ private enum ImageConversionWorker {
         return output
     }
 
-    /// 封装 `flattened` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 以指定颜色填充透明区域，供不支持透明像素的输出格式使用。
     private static func flattened(
         _ image: CGImage,
         color: ImageFlattenColor

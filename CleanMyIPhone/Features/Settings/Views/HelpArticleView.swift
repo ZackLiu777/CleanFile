@@ -1,3 +1,8 @@
+// 帮助文章详情页。
+// 展示本地文章的步骤与延伸链接，不依赖在线内容来呈现正文。
+// 帮助目录传入文章模型，页面渲染段落、编号步骤、提醒和可选的官方延伸链接。
+// 正文来自本地目录；打开外部链接是用户主动操作，不触发清理或文件访问。
+
 //
 //  HelpArticleView.swift
 //  CleanMyIPhone
@@ -8,6 +13,7 @@
 import Foundation
 import SwiftUI
 
+/// 按文章模型展示正文、步骤和相关链接。
 struct HelpArticleView: View {
     @Environment(\.appTheme) private var theme
 
@@ -68,6 +74,7 @@ struct HelpArticleView: View {
         .appContentCard(cornerRadius: 22)
     }
 
+    /// 按提示类型展示图标、颜色和说明文本。
     private func noticeCard(_ notice: HelpNotice) -> some View {
         let color = noticeColor(for: notice.tone)
 
@@ -99,6 +106,7 @@ struct HelpArticleView: View {
         }
     }
 
+    /// 展示帮助文章中的标题、说明和步骤。
     private func sectionCard(_ section: HelpArticleSection) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(section.title)
@@ -128,6 +136,7 @@ struct HelpArticleView: View {
         .appContentCard(cornerRadius: 20)
     }
 
+    /// 按顺序展示单个帮助步骤及其编号。
     private func stepRow(_ step: HelpStep, number: Int) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Text(verbatim: "\(number)")
@@ -199,6 +208,7 @@ struct HelpArticleView: View {
         .appContentCard(cornerRadius: 20)
     }
 
+    /// 将提示语气映射到主题中的语义颜色。
     private func noticeColor(for tone: HelpNotice.Tone) -> Color {
         switch tone {
         case .information:
@@ -210,6 +220,7 @@ struct HelpArticleView: View {
         }
     }
 
+    /// 为不同提示语气选择对应的系统图标。
     private func noticeSymbol(for tone: HelpNotice.Tone) -> String {
         switch tone {
         case .information:

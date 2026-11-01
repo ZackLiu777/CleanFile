@@ -1,6 +1,12 @@
+// 媒体压缩页面。
+// 展示准备进度、选择、确认以及批次结果；压缩和原件替换由状态对象及服务执行。
+// 页面按分类展示媒体和空间估算，延迟加载可见网格，并提供选择与进度反馈。
+// 用户确认前不会发起压缩；权益检查与任务取消通过状态对象和共享访问策略协调。
+
 import SwiftUI
 import ImageFormatConversionKit
 
+/// 展示压缩目录、选择和确认状态，并将批次执行交给压缩状态对象。
 struct MediaCompressionView: View {
     @Environment(\.appTheme) private var theme
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
@@ -10,6 +16,7 @@ struct MediaCompressionView: View {
     @State private var showsPremium = false
     @State private var preparationAttempt = 0
 
+    /// 连接相册，并为当前媒体分类创建独立的压缩状态对象。
     init(category: MediaCompressionCategory, library: PhotoLibraryViewModel) {
         self.library = library
         _model = StateObject(wrappedValue: MediaCompressionViewModel(category: category, library: library))
@@ -113,6 +120,7 @@ struct MediaCompressionView: View {
         .presentationDragIndicator(.visible)
     }
 
+    /// 以惰性网格展示项目，在末尾项目出现时请求显示下一批。
     private func mediaGrid(_ items: [MediaCompressionItem]) -> some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 10)], spacing: 10) {
             ForEach(items) { item in
@@ -122,6 +130,7 @@ struct MediaCompressionView: View {
         .accessibilityIdentifier("media.compression.grid")
     }
 
+    /// 展示项目缩略图、选择与处理状态，并在允许时切换选择。
     private func tile(_ item: MediaCompressionItem) -> some View {
         Button { model.toggle(item.id) } label: {
             VStack(alignment: .leading, spacing: 6) {
@@ -166,6 +175,7 @@ struct MediaCompressionView: View {
         }
     }
 
+    /// 已完成项目使用实际大小，其余展示压缩前大小与估算结果。
     private func sizeLabel(_ item: MediaCompressionItem) -> String {
         switch model.states[item.id] {
         case let .saved(original, output), let .replaced(original, output): "\(bytes(original)) → \(bytes(output))"
@@ -255,11 +265,13 @@ struct MediaCompressionView: View {
         .accessibilityIdentifier("media.compression.start")
     }
 
+    /// 可用时展示已保存副本，否则继续使用原资源缩略图。
     private func thumbnailID(_ item: MediaCompressionItem) -> String {
         if let id = model.copyAssetIDs[item.id], library.asset(withIdentifier: id) != nil { return id }
         return item.id
     }
 
+    /// 按文件大小格式化字节数。
     private func bytes(_ value: Int64) -> String {
         ByteCountFormatter.string(fromByteCount: value, countStyle: .file)
     }

@@ -1,18 +1,19 @@
+// 应用设置入口及相关系统操作。
+// 页面将主题、帮助及其他设置导航连接到共享状态，系统权限仍由系统管理。
+// 汇集外观、帮助、首次介绍与 Premium 等入口，并读取当前相册授权状态。
+// 返回前台后重新读取系统授权；更改系统权限需由用户在系统界面完成。
+
 //
 //  SettingsView.swift
 //  CleanMyIPhone
 //
 
-//
-//  文件职责：声明 Settings 界面结构、交互入口与展示状态。
-//  所属模块：CleanMyIPhone。
-//
 
 import SwiftUI
 import Photos
 import UIKit
 
-/// 定义 `SettingsView` 的值语义数据与相关行为。
+/// 组织外观、帮助和高级功能等设置入口。
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     var showsCloseButton = false

@@ -1,16 +1,18 @@
+// 存储扫描、恢复、删除与持久化状态的协调。
+// 大量快照重建工作在后台进行；安全作用域访问随来源切换维护，删除只更新实际成功的结果。
+// 页面通过此模型发起扫描、恢复和用户确认后的删除，并订阅进度与错误状态。
+// 持久化恢复和删除后的派生统计在后台准备；释放模型时取消任务并释放授权访问。
+
 //
 //  FileScannerViewModel.swift
 //  CleanMyIPhone
 //
 
-//
-//  文件职责：协调 FileScanner 页面状态、用户操作与底层服务。
-//  所属模块：CleanMyIPhone。
-//
 
 import Combine
 import Foundation
 
+/// 后台恢复完成后一次性交付给主线程的扫描状态及其派生汇总。
 nonisolated struct PreparedFileState: Sendable {
     let rootURL: URL
     let selectedDirectoryName: String
@@ -23,7 +25,9 @@ nonisolated struct PreparedFileState: Sendable {
     let largestFiles: [ScannedFile]
 }
 
+/// 从持久化书签和文件快照重建目录、汇总与最大文件列表，不依赖主线程状态。
 nonisolated enum FileStateRestorer {
+    /// 解析书签并重建文件、统计和目录树；取消或书签失效时不发布部分结果。
     static func prepare(_ snapshot: FileStateSnapshot) -> PreparedFileState? {
         guard !Task.isCancelled else { return nil }
 
@@ -101,6 +105,7 @@ nonisolated enum FileStateRestorer {
     }
 }
 
+/// 删除后重算的剩余文件、统计和文件树，供界面一次性更新。
 nonisolated struct PreparedDerivedFileState: Sendable {
     let files: [ScannedFile]
     let summary: StorageSummary
@@ -108,6 +113,7 @@ nonisolated struct PreparedDerivedFileState: Sendable {
     let largestFiles: [ScannedFile]
 }
 
+/// 在后台根据实际删除结果重建剩余文件及其派生展示状态。
 nonisolated enum DerivedFileStateBuilder {
     /// Rebuilds deletion results independently from MainActor because a selected
     /// category may contain tens of thousands of files. The stages deliberately
@@ -137,8 +143,8 @@ nonisolated enum DerivedFileStateBuilder {
     }
 }
 
+/// 协调扫描来源、状态恢复、文件删除和持久化，并发布供存储页面使用的结果。
 @MainActor
-/// 封装 `FileScannerViewModel` 的引用语义、状态与业务行为。
 final class FileScannerViewModel: ObservableObject {
     @Published private(set) var state: ScanState = .idle
     @Published private(set) var files: [ScannedFile] = []
@@ -173,7 +179,7 @@ final class FileScannerViewModel: ObservableObject {
     private var skippedFileCount = 0
     private var restoredDashboardAvailable = false
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 注入元数据扫描器和存储功能权限检查，供后续扫描与删除流程使用。
     init(scanner: MetadataFileScanner = MetadataFileScanner(), canUseStorage: @escaping () -> Bool = { true }) {
         self.scanner = scanner
         self.canUseStorage = canUseStorage
@@ -187,6 +193,7 @@ final class FileScannerViewModel: ObservableObject {
         activeSourceAccessURLs.forEach { $0.stopAccessingSecurityScopedResource() }
     }
 
+    /// 先获取新来源的安全作用域访问，再释放旧来源，避免重扫同一目录时出现访问间隙。
     private func retainSourceAccess(to sources: [URL]) {
         // Acquire the next grants before releasing old ones, including when
         // rescanning the same folder. Keep the original picker/bookmark URLs.
@@ -229,7 +236,7 @@ final class FileScannerViewModel: ObservableObject {
         }
     }
 
-    /// 执行 `scan` 分析流程，在遵守文件访问边界的前提下生成结果。
+    /// 取消旧扫描和恢复任务，记录单目录书签，清空旧结果并开始接收新扫描事件。
     func scan(directory: URL) {
         guard canUseStorage() else { return }
         retainSourceAccess(to: [directory])
@@ -267,9 +274,7 @@ final class FileScannerViewModel: ObservableObject {
         consume(events)
     }
 
-    /// Starts a session-scoped analysis of explicitly selected files and
-    /// folders. The original single-folder flow and its persisted snapshot are
-    /// intentionally left unchanged.
+    /// 去重用户选中的文件和文件夹并启动会话扫描；多来源不生成单目录持久化快照。
     func scan(sources: [URL]) {
         guard canUseStorage() else { return }
         let uniqueSources = StorageSelectionAlgorithms.sources(sources)
@@ -313,6 +318,7 @@ final class FileScannerViewModel: ObservableObject {
         consume(scanner.scan(sources: uniqueSources))
     }
 
+    /// 消费扫描进度与完成事件；区分用户取消、已知扫描错误和其他枚举失败。
     private func consume(_ events: AsyncThrowingStream<FileScanEvent, Error>) {
         scanTask = Task { [weak self] in
             do {
@@ -331,7 +337,7 @@ final class FileScannerViewModel: ObservableObject {
         }
     }
 
-    /// 取消 `cancelScan` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 仅在扫描中取消当前任务，并将页面状态置为已取消。
     func cancelScan() {
         guard state.isScanning else { return }
         scanTask?.cancel()
@@ -339,7 +345,7 @@ final class FileScannerViewModel: ObservableObject {
         state = .cancelled
     }
 
-    /// 记录 `reportSelectionFailure` 产生的结果，并通知依赖该状态的调用方。
+    /// 区分系统选择器取消与选择失败，向界面发布对应状态。
     func reportSelectionFailure(error: Error? = nil) {
         if let error, (error as NSError).code == NSUserCancelledError {
             state = .cancelled
@@ -348,7 +354,7 @@ final class FileScannerViewModel: ObservableObject {
         }
     }
 
-    /// 执行 `deleteFiles` 移除流程，并同步更新受影响的业务状态。
+    /// 重新校验权限、来源和当前扫描中的全部目标，再交给删除服务；失败和取消分别反馈。
     func deleteFiles(withURLs selectedURLs: Set<URL>) async {
         guard canUseStorage() else { return }
         guard !selectedURLs.isEmpty else {
@@ -385,13 +391,13 @@ final class FileScannerViewModel: ObservableObject {
         }
     }
 
-    /// 重置 `clearDeletionResult` 管理的状态，避免旧任务或旧数据影响下一次操作。
+    /// 仅在没有删除操作进行时清除上次删除结果。
     func clearDeletionResult() {
         guard !deletionState.isDeleting else { return }
         deletionState = .idle
     }
 
-    /// 处理 `handle` 输入，并根据结果推进当前业务状态。
+    /// 将扫描进度或完整结果映射为界面状态；有跳过项时保留部分失败信息。
     private func handle(_ event: FileScanEvent) {
         switch event {
         case .progress(let progress):
@@ -415,7 +421,7 @@ final class FileScannerViewModel: ObservableObject {
         }
     }
 
-    /// 更新 `applyDeletion` 对应的数据，使界面状态与底层结果保持一致。
+    /// 后台重建删除后的统计和文件树，只移除确认删除的 URL，并区分成功、失败和部分成功。
     private func applyDeletion(_ result: FileDeletionResult) async {
         guard !selectedSourceURLs.isEmpty else {
             deletionState = .failure(.folderAccessUnavailable)
@@ -519,7 +525,7 @@ final class FileScannerViewModel: ObservableObject {
         StoragePerformance.event("Storage Dashboard Published")
     }
 
-    /// 持久化 `persistStableState` 对应的数据，并保持后续恢复所需的信息完整。
+    /// 将稳定的单目录结果保存为仪表盘和完整快照；代次与取消机制阻止过期快照覆盖新结果。
     private func persistStableState() {
         guard let selectedDirectoryName, let selectedDirectoryBookmark else { return }
         let files = files
@@ -562,6 +568,7 @@ final class FileScannerViewModel: ObservableObject {
         }
     }
 
+    /// 仅保存已有目录名称和汇总，供下次打开时先展示轻量结果。
     private func persistDashboardState() {
         guard let selectedDirectoryName, let summary else { return }
         let dashboard = StorageDashboardSnapshot(

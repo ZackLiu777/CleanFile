@@ -1,5 +1,12 @@
+// 界面测试共用的导航辅助方法。
+//
+// 应用入口位于媒体首页；这些方法先关闭已打开的页面或返回上一级，再定位目标入口。
+// 返回次数和滚动次数均有上限，避免导航状态异常时测试无限等待。
+// 各入口以无障碍标识定位；返回首页失败会由 XCTest 明确报告。
+
 import XCTest
 
+/// 关闭当前子页面或逐级返回媒体首页，并断言首页设置入口最终可用。
 @MainActor
 func returnToMedia(in app: XCUIApplication) {
     for closeID in ["storage.close", "settings.close"] {
@@ -19,6 +26,7 @@ func returnToMedia(in app: XCUIApplication) {
     XCTAssertTrue(app.buttons["media.settings"].waitForExistence(timeout: 5))
 }
 
+/// 先回到媒体首页，再按入口标识查找目标；转换入口必要时向下滚动。
 @MainActor
 func appNavigationEntry(in app: XCUIApplication, id: String, label: String) -> XCUIElement {
     returnToMedia(in: app)

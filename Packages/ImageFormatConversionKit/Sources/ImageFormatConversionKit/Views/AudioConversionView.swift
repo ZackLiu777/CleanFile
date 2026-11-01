@@ -1,15 +1,16 @@
-//
-//  文件职责：声明 AudioConversion 界面结构、交互入口与展示状态。
-//  所属模块：ImageFormatConversionKit。
-//
+// 音频转换与视频提取音轨的用户界面。
+// 从文件或照片选择器接收用户选择，展示导入进度、格式设置、批次进度及输出。
+// 文件暂存、检查和转换由音频状态对象协调；页面本身不直接处理编码。
+// 页面使用转换主题与共享文件展示组件，并将用户操作转交音频状态对象。
+// 音频格式和视频音轨来源通过模型表达，输出文件由底层流程管理。
 
 import SwiftUI
 import StoreKit
 import PhotosUI
 import UniformTypeIdentifiers
 
+/// 展示音频转换设置、导入进度及结果，用户操作交由状态对象处理。
 @MainActor
-/// 定义 `AudioConversionView` 的值语义数据与相关行为。
 struct AudioConversionView: View {
     @Environment(\.requestReview) private var requestReview
     @Environment(\.scenePhase) private var scenePhase
@@ -22,7 +23,7 @@ struct AudioConversionView: View {
     @State private var selectedVideoItems: [PhotosPickerItem] = []
     @State private var isClearAllConfirmationPresented = false
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 注入音频转换状态与导入会话，由页面持有其展示生命周期。
     init(
         viewModel: AudioConversionViewModel = AudioConversionViewModel(),
         importSession: ConversionImportSession = ConversionImportSession()
@@ -160,6 +161,7 @@ struct AudioConversionView: View {
         .converterCard()
     }
 
+    /// 从照片选择器逐项取得视频并记录资源标识；用会话标识忽略迟到的进度回调。
     private func importVideos(_ selections: [PhotosPickerItem]) async {
         let sessionID = UUID()
         importSession.librarySessionID = sessionID
@@ -224,7 +226,7 @@ struct AudioConversionView: View {
         )
     }
 
-    /// 处理 `importMediaFiles` 导入流程，并将用户选择安全地交给后续处理。
+    /// 按扩展名区分视频与音频来源，再交由状态对象分别导入。
     private func importMediaFiles(_ urls: [URL]) async {
         let videoExtensions = Set(["mov", "mp4", "m4v"])
         let videoURLs = urls.filter {
@@ -242,7 +244,7 @@ struct AudioConversionView: View {
         }
     }
 
-    /// 处理 `importFiles` 导入流程，并将用户选择安全地交给后续处理。
+    /// 在导入期间展示待处理文件，结束后清理临时预览状态。
     private func importFiles(_ urls: [URL]) async {
         importSession.pendingCount = urls.count
         importSession.previewURLs = urls
@@ -331,7 +333,7 @@ struct AudioConversionView: View {
         .disabled(viewModel.isConverting)
     }
 
-    /// 封装 `audioFormatTitle` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将音频输出格式映射为本地化设置名称。
     private func audioFormatTitle(_ format: AudioOutputFormat) -> String {
         switch format {
         case .mp3: L10n.string("audio.format.mp3")
@@ -412,7 +414,7 @@ struct AudioConversionView: View {
         )
     }
 
-    /// 封装 `sourceDescription` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 优先展示源与输出文件大小，再附上来源类型和可用时长。
     private func audioSubtitle(_ item: AudioConversionItem, outputURL: URL?) -> String {
         let sizes = ConversionFileSizePresentation.description(
             sourceBytes: item.sourceBytes,
@@ -423,6 +425,7 @@ struct AudioConversionView: View {
         return "\(sizes) · \(sourceDescription(item))"
     }
 
+    /// 为音频来源构造展示说明，帮助区分导入项目。
     private func sourceDescription(_ item: AudioConversionItem) -> String {
         let kind = item.sourceKind == .video
             ? L10n.string("audio.source.video")

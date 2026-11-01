@@ -1,3 +1,8 @@
+// 快捷指令媒体导入入口。
+// 先将支持的媒体暂存为独立批次并写入清单，再通知前台应用处理；复制并发数受限且允许跳过失败项。
+// 快捷指令接收图片或视频，成功暂存后发布批次清单并通知主应用。
+// 文件类型、可读取性和安全作用域均在暂存时处理；前台应用负责后续导航与转换。
+
 import AppIntents
 import Foundation
 import UniformTypeIdentifiers
@@ -19,6 +24,7 @@ struct ImportMediaIntent: AppIntent {
         Summary("Import \(\.$files) to Filevra")
     }
 
+    /// 为输入建立独立暂存批次；最多并行处理三个文件，并按原输入顺序写入成功项。
     @MainActor
     func perform() async throws -> some IntentResult {
         guard !files.isEmpty else { throw ImportError.noSupportedFiles }
@@ -57,6 +63,7 @@ struct ImportMediaIntent: AppIntent {
         return .result()
     }
 
+    /// 校验支持的媒体类型并暂存；失败时清理不完整副本，允许其他条目继续。
     private static func stage(_ file: IntentFile, in directory: URL) async -> ShareImportInbox.Entry? {
         let filenameType = UTType(filenameExtension: (file.filename as NSString).pathExtension)
         let type = file.type ?? filenameType
@@ -94,12 +101,14 @@ struct ImportMediaIntent: AppIntent {
         }
     }
 
+    /// 复制期间获取可用的安全作用域访问，并在结束时释放。
     private static func copyFile(at source: URL, to destination: URL) throws {
         let scoped = source.startAccessingSecurityScopedResource()
         defer { if scoped { source.stopAccessingSecurityScopedResource() } }
         try FileManager.default.copyItem(at: source, to: destination)
     }
 
+    /// 表示本次输入没有任何可成功暂存的受支持媒体。
     private enum ImportError: LocalizedError {
         case noSupportedFiles
 
@@ -115,6 +124,7 @@ extension Notification.Name {
     static let cleanFileShareImportReady = Notification.Name("cleanFileShareImportReady")
 }
 
+/// 向快捷指令注册媒体导入入口及其唤起短语。
 struct CleanFileAppShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(

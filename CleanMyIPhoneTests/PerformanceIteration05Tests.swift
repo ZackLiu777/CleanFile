@@ -1,10 +1,21 @@
+//
+//  性能迭代 05
+//
+//  比较稠密哈希桶、文件树构造和快照编码读取的候选实现。
+//  检查结果等价、损坏数据及取消，同时保留计时记录。
+//  覆盖稠密哈希候选、树快照及编码读取的新旧路径。
+//  文件与快照使用测试构造的数据，取消和损坏输入需按预期失败。
+//
+
 import Foundation
 import Dispatch
 import Testing
 @testable import CleanMyIPhone
 
+/// 检查哈希、文件树和快照优化候选的等价性及读取边界。
 @Suite("Performance iteration 05", .serialized)
 struct PerformanceIteration05Tests {
+    /// 比较稠密哈希桶剪枝前后在不同结果与计算限制下的候选对。
     @Test func denseBuckets() throws {
         for n in [0, 1, 40, 300, 2_000] {
             for shape in 0..<3 {
@@ -30,6 +41,7 @@ struct PerformanceIteration05Tests {
         }
     }
 
+    /// 验证释放中间存储的树构造和逐项快照编码与原实现语义相同。
     @Test func treeAndSnapshot() throws {
         for n in [0, 1, 1_000, 10_000] {
             let root = URL(fileURLWithPath: "/tmp/synthetic")
@@ -61,6 +73,7 @@ struct PerformanceIteration05Tests {
             print("PERF05 storage count=\(n) tree_old_ns=\(middle-start) tree_new_ns=\(end-middle) encode_old_ns=\(t1-t0) encode_new_ns=\(t2-t1)")
         }
     }
+    /// 检查快照正常读取、损坏数据抛错及已取消任务的取消传播。
     @Test func snapshotReadAndCancellation() async throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: url) }
@@ -80,6 +93,7 @@ struct PerformanceIteration05Tests {
         #expect(cancelled)
     }
 
+    /// 交替测量快照、树和哈希路径，减轻固定执行顺序对结果的影响。
     @Test func repeatedComparison() throws {
         let root = URL(fileURLWithPath: "/tmp/synthetic")
         let files = (0..<10_000).map { i in
@@ -115,7 +129,9 @@ struct PerformanceIteration05Tests {
         }
     }
 
+    /// 交替测量新旧路径并输出本轮耗时；任一闭包失败时向测试抛出。
     private func measure(_ name: String, _ round: Int, _ old: () throws -> Void, _ new: () throws -> Void) throws {
+        /// 执行可抛错闭包并返回单调时钟纳秒耗时。
         func clock(_ body: () throws -> Void) rethrows -> UInt64 {
             let start = DispatchTime.now().uptimeNanoseconds
             try body()

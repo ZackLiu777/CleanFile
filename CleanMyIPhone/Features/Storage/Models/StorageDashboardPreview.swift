@@ -1,3 +1,10 @@
+//
+//  存储概览示例数据
+//
+//  构造不含用户 URL 的示例分类汇总与多层文件树。
+//  示例只供界面预览，不进入扫描器、授权书签或持久化索引。
+//
+
 import Foundation
 
 /// A URL-free example, never inserted into the scanner, bookmarks, or persisted user index.
@@ -6,6 +13,7 @@ struct StorageDashboardPreview {
     let fileTree: FileNode
     static let example = make()
 
+    /// 构造固定分类和不均匀层级的示例树，大小汇总与示例文件保持一致。
     static func make() -> Self {
         let examples: [(category: FileCategory, count: Int, bytes: Int64, fileExtension: String)] = [
             (.video, 12, 6_800_000_000, "mov"),
@@ -80,6 +88,7 @@ struct StorageDashboardPreview {
         )
     }
 
+    /// 从子节点汇总目录大小，并用最大子节点的类别作为目录展示类别。
     private static func directory(id: String, name: String, children: [FileNode]) -> FileNode {
         FileNode(
             id: id,

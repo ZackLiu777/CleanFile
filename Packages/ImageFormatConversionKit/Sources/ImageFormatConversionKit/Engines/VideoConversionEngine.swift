@@ -1,20 +1,24 @@
 //
-//  文件职责：实现 VideoConversion 底层处理流程，并向上层提供稳定入口。
-//  所属模块：ImageFormatConversionKit。
+//  视频转换使用系统导出器或自定义码率编码器处理不同请求。
+//  输出先写入临时文件，完成并检查取消后再移动到目标路径。
+//  Actor 跟踪活动导出器以支持取消，并提供与转换配置相匹配的体积估算。
+//  视频状态对象通过此入口发起转换、读取进度和估算输出大小。
+//  系统导出与自定义编码采用各自的取消入口，错误需要由调用方呈现。
 //
 
 import AVFoundation
 import Foundation
 
-/// 使用 Actor 隔离 `VideoConversionEngine` 的可变状态，确保并发访问安全。
+/// 协调系统导出与自定义码率编码，并跟踪可取消的活动操作。
 public actor VideoConversionEngine {
     private var activeExporters: [UUID: AVAssetExportSession] = [:]
     private var activeBitrateEncoders: [UUID: VideoBitrateEncoder] = [:]
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 创建视频转换引擎；初始化时不访问输入文件。
     public init() {}
 
-    /// 执行 `convert` 转换流程，并按当前配置生成输出结果。
+    /// 检查容器和编码设置后导出到临时文件，成功时移动到唯一目标路径。
+    /// 取消会转发给当前导出器，失败或取消时清理临时文件。
     public func convert(
         _ request: VideoConversionRequest,
         progress: @escaping @Sendable (Double) async -> Void
@@ -129,13 +133,14 @@ public actor VideoConversionEngine {
         )
     }
 
-    /// 取消 `cancelAll` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 请求取消当前引擎中所有活动的导出器和码率编码器。
     public func cancelAll() {
         activeExporters.values.forEach { $0.cancelExport() }
         activeBitrateEncoders.values.forEach { $0.cancel() }
     }
 
-    /// Uses the same export preset as conversion so estimates follow codec and resolution changes.
+    /// 使用与转换一致的预设估算输出大小；自定义码率按时长和轨道码率估计。
+    /// 系统无法估算 ProRes 时使用尺寸和帧率的后备估算。
     public func estimateOutputBytes(_ request: VideoConversionRequest) async throws -> Int64 {
         let asset = AVURLAsset(url: request.sourceURL.standardizedFileURL)
         if let fraction = request.bitRateFraction {
@@ -184,6 +189,7 @@ public actor VideoConversionEngine {
         throw VideoConversionError.cannotCreateExporter
     }
 
+    /// 使用变换后的尺寸、时长和帧率估算 ProRes，非 ProRes 返回 nil。
     private func proResFallbackOutputBytes(asset: AVAsset, codec: VideoCodec) async throws -> Int64? {
         guard codec == .proRes422 || codec == .proRes4444 else { return nil }
         let duration = try await asset.load(.duration).seconds
@@ -204,7 +210,7 @@ public actor VideoConversionEngine {
         )
     }
 
-    /// 执行 `exportPreset` 转换流程，并按当前配置生成输出结果。
+    /// 将编码器与分辨率组合映射到 AVFoundation 导出预设。
     private func exportPreset(codec: VideoCodec, resolution: VideoResolutionPreset) -> String {
         if codec == .proRes422 { return AVAssetExportPresetAppleProRes422LPCM }
         if codec == .proRes4444 { return AVAssetExportPresetAppleProRes4444LPCM }
@@ -225,7 +231,7 @@ public actor VideoConversionEngine {
         }
     }
 
-    /// 计算 `fileType` 所需的派生值，避免展示层重复实现相同规则。
+    /// 将公开容器选项映射为 AVFoundation 文件类型。
     private func fileType(_ container: VideoOutputContainer) -> AVFileType {
         switch container {
         case .mp4: .mp4
@@ -234,7 +240,7 @@ public actor VideoConversionEngine {
         }
     }
 
-    /// 封装 `uniqueDestination` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 在目标目录寻找未占用名称，避免有意覆盖现有文件。
     private func uniqueDestination(source: URL, directory: URL, extension ext: String) -> URL {
         let base = source.deletingPathExtension().lastPathComponent
         for suffix in 0 ... 9_999 {
@@ -248,20 +254,21 @@ public actor VideoConversionEngine {
 
 // AVAssetExportSession predates Swift concurrency. This wrapper is only used
 // to forward the thread-safe cancellation method from a cancellation handler.
-/// 封装 `ExporterCancellation` 的引用语义、状态与业务行为。
+/// 桥接导出器的取消与进度观察；取消处理器可从其他执行上下文调用。
 private final class ExporterCancellation: @unchecked Sendable {
     private let exporter: AVAssetExportSession
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 保存当前导出会话，以便转发取消并观察进度。
     init(_ exporter: AVAssetExportSession) {
         self.exporter = exporter
     }
 
-    /// 取消 `cancel` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 将取消请求转发给 AVAssetExportSession。
     func cancel() {
         exporter.cancelExport()
     }
 
+    /// 在支持的系统上观察导出状态，旧系统定期读取进度直到任务取消。
     func observeProgress(
         _ report: @escaping @Sendable (Double) async -> Void
     ) async {

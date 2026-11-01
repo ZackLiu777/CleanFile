@@ -1,3 +1,11 @@
+//
+//  使用生成的图片素材验证图片检查、转换、元数据和批量处理。
+//  覆盖透明背景、方形画布、方向、命名冲突、动画输入及部分失败。
+//  附带视频音轨模型兼容性检查；测试文件置于临时工作区。
+//  测试真实编码结果、像素尺寸及元数据，同时检查多项转换的成功和失败隔离。
+//  素材由测试生成并保存在独立临时工作区，不使用用户照片。
+//
+
 import CoreGraphics
 import Foundation
 import ImageIO
@@ -5,9 +13,11 @@ import Testing
 import UniformTypeIdentifiers
 @testable import ImageFormatConversionKit
 
+/// 验证图片输出的像素、尺寸、元数据与文件安全行为。
 @Suite("Image conversion engine")
 struct ImageConversionEngineTests {
     // Required: fixed transparent fixture, decoded pixel contract (not UI snapshots).
+    /// 检查透明源在各背景及普通、方形尺寸策略下编码后的像素。
     @Test("Selected background is encoded into transparent pixels and square padding",
           arguments: ImageBackground.allCases, [ImageResizePolicy.original, .square1024])
     func backgroundPixels(background: ImageBackground, resize: ImageResizePolicy) async throws {
@@ -41,6 +51,7 @@ struct ImageConversionEngineTests {
         }
     }
 
+    /// 请求透明 JPEG 时检查引擎直接拒绝该组合，而不静默填充背景。
     @Test("Transparent JPEG is rejected rather than silently flattened")
     func rejectsTransparentJPEG() async throws {
         let workspace = try TestImageWorkspace()
@@ -54,6 +65,7 @@ struct ImageConversionEngineTests {
     }
 
     // Required: fixed fixtures verify exact dimensions and preserved source bytes.
+    /// 用不同宽高比检查方形输出尺寸，并验证源文件未被改变。
     @Test("Square preset produces exactly 1024 pixels for every aspect ratio", arguments: [
         [400, 200], [200, 400], [80, 80], [2048, 1024]
     ])
@@ -76,6 +88,7 @@ struct ImageConversionEngineTests {
         #expect(try JSONDecoder().decode(ImageResizePolicy.self, from: encoded) == .square1024)
     }
 
+    /// 检查带透明度的 PNG 转为 JPEG 后的扩展名、尺寸、大小及可读取性。
     @Test("PNG converts to JPEG and remains inspectable")
     func convertsPNGToJPEG() async throws {
         let workspace = try TestImageWorkspace()
@@ -113,6 +126,7 @@ struct ImageConversionEngineTests {
         #expect(outputInfo.frameCount == 1)
     }
 
+    /// 将 400×200 的源图限制到 100 像素长边，检查等比例输出。
     @Test("Fit resize preserves the aspect ratio")
     func resizesProportionally() async throws {
         let workspace = try TestImageWorkspace()
@@ -140,6 +154,7 @@ struct ImageConversionEngineTests {
         #expect(result.pixelHeight == 50)
     }
 
+    /// 检查 EXIF 方向已应用到输出像素。
     @Test("EXIF orientation is baked into the output pixels")
     func normalizesOrientation() async throws {
         let workspace = try TestImageWorkspace()
@@ -168,6 +183,7 @@ struct ImageConversionEngineTests {
         #expect(result.pixelHeight == 80)
     }
 
+    /// 并发转换相同源时检查输出名称互不冲突。
     @Test("Concurrent conversions reserve different output names")
     func reservesUniqueNames() async throws {
         let workspace = try TestImageWorkspace()
@@ -198,6 +214,7 @@ struct ImageConversionEngineTests {
         #expect(FileManager.default.fileExists(atPath: secondResult.outputURL.path))
     }
 
+    /// 检查删除位置元数据时仍保留转换结果。
     @Test("Remove GPS keeps the conversion but strips location metadata")
     func removesGPSMetadata() async throws {
         let workspace = try TestImageWorkspace()
@@ -235,6 +252,7 @@ struct ImageConversionEngineTests {
         #expect(outputProperties[kCGImagePropertyGPSDictionary] == nil)
     }
 
+    /// 检查多帧输入被拒绝且不留下部分输出。
     @Test("Animated input is rejected without partial output")
     func rejectsAnimatedInput() async throws {
         let workspace = try TestImageWorkspace()
@@ -264,6 +282,7 @@ struct ImageConversionEngineTests {
         #expect(outputFiles.isEmpty)
     }
 
+    /// 检查单项失败不会丢弃批次中的成功结果。
     @Test("Batch conversion keeps successful items when another item fails")
     func batchIsolatesFailures() async throws {
         let workspace = try TestImageWorkspace()
@@ -297,13 +316,16 @@ struct ImageConversionEngineTests {
     }
 }
 
+/// 检查视频作为音频源时的输入格式和旧清单兼容性。
 @Suite("Video to audio conversion models")
 struct VideoAudioConversionModelTests {
+    /// 检查从视频提取音频允许的输入扩展名集合。
     @Test("Video inputs are limited to native movie containers")
     func supportedVideoInputsAreExplicit() {
         #expect(AudioConversionEngine.supportedVideoInputExtensions == ["mov", "mp4", "m4v"])
     }
 
+    /// 检查缺少来源类型和时长字段的旧清单仍可解码。
     @Test("Existing audio manifests decode as audio file sources")
     func legacyAudioManifestRemainsCompatible() throws {
         let id = UUID()
@@ -327,6 +349,7 @@ struct VideoAudioConversionModelTests {
         #expect(records[0].duration == nil)
     }
 
+    /// 未显式指定来源类型时，音频请求默认使用音频文件来源。
     @Test("Audio conversion requests default to audio file sources")
     func requestDefaultsToAudioSource() {
         let request = AudioConversionRequest(
@@ -340,10 +363,12 @@ struct VideoAudioConversionModelTests {
     }
 }
 
+/// 管理测试生成图片使用的临时目录。
 private struct TestImageWorkspace {
     let root: URL
     let output: URL
 
+    /// 创建唯一临时目录及输出子目录，隔离各图片转换测试。
     init() throws {
         root = FileManager.default.temporaryDirectory
             .appendingPathComponent("ImageFormatConversionKitTests-\(UUID().uuidString)")
@@ -355,12 +380,15 @@ private struct TestImageWorkspace {
         )
     }
 
+    /// 测试结束后尽力删除生成的图片和输出目录。
     func remove() {
         try? FileManager.default.removeItem(at: root)
     }
 }
 
+/// 生成静态和动画图片，并读取测试断言所需的属性。
 private enum TestImageFactory {
+    /// 读取测试图片首帧属性，供元数据断言使用。
     static func properties(at url: URL) -> [CFString: Any]? {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else {
             return nil
@@ -368,6 +396,7 @@ private enum TestImageFactory {
         return CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any]
     }
 
+    /// 按指定参数生成静态图片素材。
     static func writeStillImage(
         to url: URL,
         type: UTType,
@@ -394,6 +423,7 @@ private enum TestImageFactory {
         }
     }
 
+    /// 生成多帧 GIF，供动画输入拒绝路径使用。
     static func writeAnimatedGIF(to url: URL, width: Int, height: Int) throws {
         guard let destination = CGImageDestinationCreateWithURL(
             url as CFURL,
@@ -427,6 +457,7 @@ private enum TestImageFactory {
         }
     }
 
+    /// 构造测试图片的像素内容。
     private static func makeImage(
         width: Int,
         height: Int,
@@ -453,6 +484,7 @@ private enum TestImageFactory {
     }
 }
 
+/// 测试素材无法创建时使用的错误。
 private enum TestImageFactoryError: Error {
     case cannotCreateImage
     case cannotCreateDestination

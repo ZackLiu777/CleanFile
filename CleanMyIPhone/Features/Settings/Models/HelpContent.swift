@@ -3,6 +3,8 @@
 //  CleanMyIPhone
 //
 //  帮助中心的静态展示模型与内容目录。所有说明均可离线阅读，外链仅指向 Apple 支持。
+//  分类、文章、章节和步骤分开建模，界面根据目录呈现本地化内容。
+//  提醒与资源链接为可选内容，不负责请求文件权限或执行任何清理操作。
 //
 
 import SwiftUI
@@ -32,6 +34,7 @@ struct HelpArticleSection: Identifiable {
     let paragraphs: [LocalizedStringKey]
     let steps: [HelpStep]
 
+    /// 创建文章章节；没有步骤时可只展示正文段落。
     init(
         id: String,
         title: LocalizedStringKey,
@@ -54,6 +57,7 @@ struct HelpStep: Identifiable {
 
 /// 文章开头的边界、风险或隐私提醒。
 struct HelpNotice {
+    /// 区分一般信息、操作风险与隐私说明，供界面选择相应的呈现方式。
     enum Tone {
         case information
         case caution

@@ -1,14 +1,15 @@
-//
-//  文件职责：协调 AudioConversion 页面状态、用户操作与底层服务。
-//  所属模块：ImageFormatConversionKit。
-//
+// 音频转换及视频提取音轨的状态协调。
+// 将输入暂存并检查音轨信息，管理选择、导入进度、顺序转换和工作区恢复。
+// 取消会通知转换引擎；删除列表项时仅在工作区清理成功后移除对应状态。
+// 音频界面通过该状态对象提交导入与转换操作，并展示每项结果和总体进度。
+// 音频引擎、导入调度器和工作区分别负责编码、许可协调及持久化。
 
 import Foundation
 import Observation
 
+/// 管理音频输入、转换设置、导入进度和批次结果，并协调工作区与编码引擎。
 @MainActor
 @Observable
-/// 封装 `AudioConversionViewModel` 的引用语义、状态与业务行为。
 final class AudioConversionViewModel {
     private(set) var items: [AudioConversionItem] = []
     private(set) var isConverting = false
@@ -27,7 +28,7 @@ final class AudioConversionViewModel {
     private let workspace = ConversionWorkspace.shared
     @ObservationIgnored private var task: Task<Void, Never>?
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 配置音频引擎与默认输出目录，并异步恢复先前工作区。
     init(engine: AudioConversionEngine = AudioConversionEngine()) {
         self.engine = engine
         outputDirectory = ConversionOutputDirectory.url(for: .audio)
@@ -51,7 +52,7 @@ final class AudioConversionViewModel {
         )
     }
 
-    /// 封装 `addFiles` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 按来源过滤格式并去重，逐项暂存和检查；检查失败时清理暂存副本，其他输入仍可继续。
     func addFiles(
         _ urls: [URL],
         sourceKind: AudioSourceKind = .audioFile,
@@ -142,7 +143,7 @@ final class AudioConversionViewModel {
         persist()
     }
 
-    /// 执行 `remove` 移除流程，并同步更新受影响的业务状态。
+    /// 删除对应工作区记录和文件；只有清理成功后才从列表移除，失败时显示提示。
     func remove(_ id: UUID) {
         guard !isConverting else { return }
         guard let item = items.first(where: { $0.id == id }) else { return }
@@ -159,7 +160,7 @@ final class AudioConversionViewModel {
         }
     }
 
-    /// 执行 `removeAll` 移除流程，并同步更新受影响的业务状态。
+    /// 批量清理工作区，仅移除清理成功的记录，并在部分失败时保留其余项目。
     func removeAll() {
         guard !isConverting else { return }
         let removedItems = items
@@ -178,12 +179,12 @@ final class AudioConversionViewModel {
         }
     }
 
-    /// 记录 `reportImportFailure` 产生的结果，并通知依赖该状态的调用方。
+    /// 将导入失败信息转换为界面提示。
     func reportImportFailure(_ message: String) {
         notice = L10n.format("notice.import_failed", message)
     }
 
-    /// 启动 `start` 对应流程，并初始化本轮任务需要的状态。
+    /// 先为待转换项目申请使用许可，再同步标记运行状态并启动批次。
     func start(usagePolicy: ConversionUsagePolicy = .unrestricted) {
         guard canConvert else { return }
         let count = items.filter { item in
@@ -200,13 +201,13 @@ final class AudioConversionViewModel {
         task = Task { await run(permit: permit) }
     }
 
-    /// 取消 `cancel` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 请求取消当前任务并通知转换引擎停止进行中的操作。
     func cancel() {
         task?.cancel()
         Task { await engine.cancelAll() }
     }
 
-    /// 封装 `run` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 顺序转换可重试项目，逐项记录进度与结果；结束时释放许可并保存状态。
     private func run(permit: ConversionUsagePermit) async {
         defer { permit.finish() }
         isConverting = true
@@ -261,7 +262,7 @@ final class AudioConversionViewModel {
         persist()
     }
 
-    /// 加载 `restore` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 仅在列表仍为空且没有导入或转换时恢复工作区；输出不存在时不保留已完成状态。
     private func restore() async {
         guard items.isEmpty, !isConverting else { return }
         let records = await workspace.load(.audio)
@@ -290,13 +291,13 @@ final class AudioConversionViewModel {
         persist()
     }
 
-    /// 持久化 `persist` 对应的数据，并保持后续恢复所需的信息完整。
+    /// 将当前项目状态映射为工作区记录并异步保存。
     private func persist() {
         let records = items.map(record)
         Task { await workspace.save(records, kind: .audio) }
     }
 
-    /// 记录 `record` 产生的结果，并通知依赖该状态的调用方。
+    /// 将界面项目转换为持久化记录，保留源文件、输出及照片来源信息。
     private func record(_ item: AudioConversionItem) -> PersistedConversionItem {
         let persistedState = item.status.persistedState
         return PersistedConversionItem(

@@ -1,10 +1,19 @@
+// 免费用户与高级功能入口的界面测试。
+//
+// 覆盖未购买时的导航、离线购买界面、不同语言布局以及各功能的访问边界。
+// 测试使用受控启动状态，不依赖真实商店购买，也不对真实用户媒体执行删除。
+// 同时检查付费墙的退出路径、离线价格状态，以及免费与高级入口的差异。
+
 import XCTest
 
+/// 验证免费用户的导航、购买入口与功能访问边界。
 final class PremiumFreeTierUITests: XCTestCase {
+    /// 在断言失败时停止当前用例，避免后续操作掩盖最初失败。
     override func setUpWithError() throws {
         continueAfterFailure = false
     }
 
+    /// 验证免费状态下主要导航可用，且不出现相关配额文案。
     @MainActor
     func testFreeUserCanReachPrimaryAndSecondaryNavigationWithoutPurchasing() {
         let app = launchFreeApp()
@@ -22,6 +31,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertTrue(app.buttons["settings.appearance"].exists)
     }
 
+    /// 离线时验证购买页的关闭和继续免费使用入口均能返回设置。
     @MainActor
     func testPaywallHasTopRightCloseAndContinueFreeWithoutStoreConnectivity() {
         let app = launchFreeApp()
@@ -45,6 +55,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertTrue(premium.waitForExistence(timeout: 5))
     }
 
+    /// 检查离线时所有方案仍可访问，但不可发起缺少商店信息的购买。
     @MainActor
     func testCustomPaywallShowsAllPlansOfflineWithoutOfferingInventedPrices() {
         let app = launchFreeApp()
@@ -74,6 +85,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertTrue(premium.waitForExistence(timeout: 5))
     }
 
+    /// 使用简体中文启动，验证购买页控件采用应用本地化文案。
     @MainActor
     func testPaywallWordingUsesAppLanguageInsteadOfStoreProductNames() {
         let app = launchFreeApp(language: "zh-Hans")
@@ -91,6 +103,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertFalse(annual.label.contains("Annual Subscription"))
     }
 
+    /// 检查多语言下高级功能操作按钮的宽度、对齐和间距。
     @MainActor
     func testPremiumActionsAreFullWidthAlignedAndSeparatedInMultipleLanguages() {
         for language in ["en", "zh-Hans", "de", "ar"] {
@@ -123,6 +136,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         }
     }
 
+    /// 检查固定操作区上方的方案和条款内容可通过滚动到达。
     @MainActor
     func testPremiumPlansAndTermsRemainReachableAboveTheFixedActions() {
         let app = launchFreeApp()
@@ -165,6 +179,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertTrue(app.buttons["premium.continueFree"].isHittable)
     }
 
+    /// 检查存储功能的权益入口及关闭购买页后的免费导航。
     @MainActor
     func testStorageRequiresPremiumAndClosingPaywallKeepsFreeNavigationAvailable() {
         let app = launchFreeApp()
@@ -189,6 +204,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertFalse(app.buttons["premium.close"].exists)
     }
 
+    /// 验证免费状态下示例存储图可展开、进入子层级并返回。
     @MainActor
     func testStorageExampleMapCanExpandDrillDownAndGoBackWithoutPremium() {
         let app = launchFreeApp()
@@ -225,6 +241,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertTrue(chart.waitForExistence(timeout: 5))
     }
 
+    /// 验证快速清理的权益提示可关闭，关闭后仍可使用媒体页面。
     @MainActor
     func testQuickCleanupRequiresPremiumButCanBeDismissedWithoutBlockingMedia() {
         let app = launchFreeApp()
@@ -242,6 +259,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertTrue(app.buttons["conversion.home.video"].waitForExistence(timeout: 5))
     }
 
+    /// 验证缺少高级权益和照片权限时仍可进入快速视频压缩分类。
     @MainActor
     func testQuickVideoCompressionOpensCategoryWithoutPremiumOrPhotoPermission() {
         let app = launchFreeApp()
@@ -258,6 +276,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertFalse(app.descendants(matching: .any)["conversion.settings"].exists)
     }
 
+    /// 检查视频、图片和音频转换入口的既定权益边界。
     @MainActor
     func testVideoIsFreeWhileImageAndAudioEntriesRequirePremium() {
         let app = launchFreeApp()
@@ -278,6 +297,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["quota.media.remaining"].exists)
     }
 
+    /// 检查预设浅色主题与自定义颜色入口的既定权益边界。
     @MainActor
     func testPresetLightThemeIsFreeAndCustomColorRequiresPremium() {
         let app = launchFreeApp()
@@ -301,6 +321,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertTrue(app.buttons["premium.close"].waitForExistence(timeout: 5))
     }
 
+    /// 滚动购买页内容，避开固定操作区域以访问屏幕外的方案。
     @MainActor
     private func scrollPaywallContent(_ scrollView: XCUIElement) {
         // safeAreaInset actions lie within the scroll view's accessibility frame.
@@ -310,6 +331,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         start.press(forDuration: 0.05, thenDragTo: end)
     }
 
+    /// 使用受控的免费用户状态及指定语言启动应用。
     @MainActor
     private func launchFreeApp(language: String = "en") -> XCUIApplication {
         let app = XCUIApplication()
@@ -318,6 +340,7 @@ final class PremiumFreeTierUITests: XCTestCase {
         return app
     }
 
+    /// 通过共用导航辅助方法定位目标入口。
     @MainActor
     private func tab(in app: XCUIApplication, id: String, label: String) -> XCUIElement {
         appNavigationEntry(in: app, id: id, label: label)

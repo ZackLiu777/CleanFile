@@ -1,10 +1,21 @@
+//
+//  快速清理选择索引
+//
+//  对照保留的集合合并基线检查所有选择组合、边界和溢出。
+//  单独的性能实验比较构建与重复查询；输入均为合成资源标识。
+//  覆盖空快照、无效选择位、九类边界、整数溢出和快照重建。
+//  比较时使用可重复的重叠分类，并分别记录首次构建和后续查询。
+//
+
 import Dispatch
 import Foundation
 import Testing
 @testable import CleanMyIPhone
 
+/// 对照集合基线验证预计算选择索引的正确性和构建边界。
 @Suite("Quick-clean selection index candidate")
 struct MediaQuickCleanSelectionIndexTests {
+    /// 枚举所有分类组合，比较索引汇总与直接集合并集及字节求和。
     @Test("Every category combination matches the retained union and reduction")
     func allSelectionCombinationsMatchBaseline() throws {
         let categories: [Set<String>] = [
@@ -46,6 +57,7 @@ struct MediaQuickCleanSelectionIndexTests {
         #expect(index.uniqueAssetCount == 8)
     }
 
+    /// 空分类快照和超出当前分类范围的选择位不会产生选中资源。
     @Test("Empty snapshots and out-of-snapshot selection bits remain empty")
     func emptyAndUnavailableCategories() throws {
         let empty = try MediaQuickCleanSelectionIndex(categoryAssetIDs: [], estimatedByteCountsByID: [:])
@@ -60,6 +72,7 @@ struct MediaQuickCleanSelectionIndexTests {
         #expect(index.summary(forSelectionMask: UInt16.max) == .init(selectedCount: 2, estimatedByteCount: 0))
     }
 
+    /// 保留 Int64 的符号和精度，避免经过浮点转换或擅自截断。
     @Test("Signed Int64 inputs retain their value without clamping or Double conversion")
     func signedAndLargeEstimates() throws {
         let categories: [Set<String>] = [["large", "negative"], ["negative", "zero"]]
@@ -75,6 +88,7 @@ struct MediaQuickCleanSelectionIndexTests {
         }
     }
 
+    /// 验证第九个分类对应的位不会在掩码中丢失。
     @Test("Ninth category participates in selection without truncating its mask")
     func ninthCategorySelection() throws {
         var categories = Array(repeating: Set<String>(), count: 9)
@@ -89,6 +103,7 @@ struct MediaQuickCleanSelectionIndexTests {
         #expect(index.summary(forCategoryAt: 8).selectedCount == 2)
     }
 
+    /// 分类过多或字节累加溢出必须返回构建错误，而不是产生错误汇总。
     @Test("Invalid construction reports failure instead of wrapping byte totals")
     func constructionLimitsAndOverflow() {
         #expect(throws: MediaQuickCleanSelectionIndex.BuildError.tooManyCategories) {
@@ -111,6 +126,7 @@ struct MediaQuickCleanSelectionIndexTests {
         }
     }
 
+    /// 大小或成员变化需要新快照；旧索引保持原有值语义。
     @Test("Exact-size or availability changes require a new immutable snapshot")
     func changedSizeAndMembershipRebuild() throws {
         let originalCategories: [Set<String>] = [["estimated", "removed"], ["estimated"]]
@@ -140,8 +156,10 @@ struct MediaQuickCleanSelectionIndexTests {
 /// Core microbenchmarks use frozen per-ID Int64 estimates. They intentionally do
 /// not time PhotoKit, calibration sample sorting, view rendering, or refreshing an
 /// index after new exact sizes. A warm-query win cannot approve a production swap.
+/// 比较不同资源规模下冷构建和多次查询的成本。
 @Suite("Quick-clean selection performance candidate", .serialized)
 struct MediaQuickCleanSelectionIndexPerformanceTests {
+    /// 比较不同资源规模下索引冷构建和重复查询，并核对结果与基线一致。
     @Test("Compare cold and repeated selection costs", arguments: [1_000, 10_000, 100_000])
     func compareWithRetainedBaseline(assetCount: Int) throws {
         let fixture = QuickCleanStatisticsFixture(assetCount: assetCount)
@@ -199,6 +217,7 @@ struct MediaQuickCleanSelectionIndexPerformanceTests {
         }
     }
 
+    /// 交替基线与候选的执行顺序，返回两侧结果与耗时供等价性比较。
     private func compare<Baseline, Candidate>(
         sample: Int,
         baseline: () throws -> Baseline,
@@ -218,12 +237,14 @@ struct MediaQuickCleanSelectionIndexPerformanceTests {
         }
     }
 
+    /// 测量一次闭包执行的单调时钟耗时，并保留返回值。
     private func measure<Value>(_ body: () throws -> Value) rethrows -> (value: Value, nanoseconds: UInt64) {
         let start = DispatchTime.now().uptimeNanoseconds
         let value = try body()
         return (value, DispatchTime.now().uptimeNanoseconds - start)
     }
 
+    /// 输出场景、输入规模、查询次数、耗时和结果等价性的结构化记录。
     private func report(
         scenario: String, sample: Int, fixture: QuickCleanStatisticsFixture,
         baseline: UInt64, candidate: UInt64, equivalent: Bool, queryCount: Int
@@ -251,6 +272,7 @@ private struct LegacyQuickCleanSelectionBaseline {
     let categories: [Set<String>]
     let estimates: [String: Int64]
 
+    /// 按所选分类构造资源并集，并使用估算值计算对照汇总。
     func summary(for selection: QuickCleanSelection) -> MediaQuickCleanSelectionIndex.Summary {
         let selectedIDs = categories.enumerated()
             .filter { selection.categoryIndices.contains($0.offset) }
@@ -264,20 +286,24 @@ private struct LegacyQuickCleanSelectionBaseline {
     }
 }
 
+/// 同时保存选择位掩码与其对应的分类索引，方便分别调用两条比较路径。
 private struct QuickCleanSelection {
     let mask: UInt8
     let categoryIndices: Set<Int>
 
+    /// 根据分类数量展开有效选择位，不把范围外的位当成分类。
     init(mask: UInt8, categoryCount: Int) {
         self.mask = mask
         categoryIndices = Set((0 ..< categoryCount).filter { mask & UInt8(1 << $0) != 0 })
     }
 }
 
+/// 保存性能比较使用的分类成员集合与资源字节估算。
 private struct QuickCleanStatisticsFixture {
     let categories: [Set<String>]
     let estimates: [String: Int64]
 
+    /// 生成指定数量的合成资源和重叠分类，供基线与索引共享相同输入。
     init(assetCount: Int) {
         var categories = Array(repeating: Set<String>(), count: 8)
         var estimates: [String: Int64] = [:]
@@ -295,6 +321,7 @@ private struct QuickCleanStatisticsFixture {
     }
 }
 
+/// 封装快速清理索引的性能比较结果与实验范围。
 private struct QuickCleanCandidateTiming: Encodable {
     let experiment: String
     let scenario: String
@@ -309,6 +336,7 @@ private struct QuickCleanCandidateTiming: Encodable {
     let inputPreparationIncluded: Bool
     let scope: String
 
+    /// 将性能记录的 Swift 字段映射到输出使用的键名。
     enum CodingKeys: String, CodingKey {
         case experiment, scenario, sample, equivalent, scope
         case assetCount = "asset_count"

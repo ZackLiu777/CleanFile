@@ -1,5 +1,9 @@
+// Premium 订阅页：展示功能、商品价格、恢复购买与服务条款。
+// 商品和权益由对应的状态对象提供，页面不自行推断价格或试用资格。
+// 大字号或紧凑窗口使用可滚动操作区，避免底部控件遮挡内容。
 import SwiftUI
 
+/// 展示订阅方案并将购买、恢复和核验重试交给状态对象处理。
 struct PremiumSubscriptionView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.dismiss) private var dismiss
@@ -11,6 +15,7 @@ struct PremiumSubscriptionView: View {
     let allowsDismiss: Bool
     let requiredFeature: PremiumFeature?
 
+    /// 配置关闭入口，以及从具体功能进入时需要显示的功能提示。
     init(allowsDismiss: Bool = true, requiredFeature: PremiumFeature? = nil) {
         self.allowsDismiss = allowsDismiss
         self.requiredFeature = requiredFeature
@@ -76,6 +81,7 @@ struct PremiumSubscriptionView: View {
         purchaseModel.priceDescription(for: purchaseModel.selectedPlan) == nil
     }
 
+    /// 标识触发本次升级页面的功能。
     private func featureNotice(_ feature: PremiumFeature) -> some View {
         Label(AppL10n.string(feature.titleKey), systemImage: "lock.fill")
             .font(.headline)
@@ -141,6 +147,7 @@ struct PremiumSubscriptionView: View {
         .accessibilityIdentifier("premium.features")
     }
 
+    /// 组合一项 Premium 功能说明，图标不重复进入无障碍朗读。
     private func feature(title: String, detail: String, symbol: String) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: symbol)
@@ -171,6 +178,7 @@ struct PremiumSubscriptionView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    /// 展示方案选择、StoreKit 价格和当前用户可用的试用说明。
     private func planCard(_ plan: PremiumPlan) -> some View {
         let selected = purchaseModel.selectedPlan == plan
         return Button { purchaseModel.selectedPlan = plan } label: {

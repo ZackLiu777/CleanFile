@@ -1,6 +1,9 @@
 //
-//  文件职责：实现 VideoAudioExtraction 底层处理流程，并向上层提供稳定入口。
-//  所属模块：ImageFormatConversionKit。
+//  从视频读取音频轨道，并流式写入中间 PCM 文件供音频转换使用。
+//  处理受保护内容、缺少音轨、读取和写入失败，以及任务取消。
+//  Actor 跟踪活动 reader 和 writer，使调用方能取消正在进行的提取。
+//  音频转换引擎在视频输入路径调用它，提取结果随后进入普通音频编码。
+//  媒体读取与写入按样本推进，取消和失败会停止活动的媒体处理对象。
 //
 
 import AVFoundation
@@ -8,12 +11,12 @@ import AudioToolbox
 import CoreMedia
 import Foundation
 
-/// 使用 Actor 隔离 `VideoAudioExtractionEngine` 的可变状态，确保并发访问安全。
+/// 管理视频音轨提取期间的 reader 和 writer，供上层协调取消。
 actor VideoAudioExtractionEngine {
     private var activeReaders: [UUID: AVAssetReader] = [:]
     private var activeWriters: [UUID: AVAssetWriter] = [:]
 
-    /// 执行 `inspect` 分析流程，在遵守文件访问边界的前提下生成结果。
+    /// 验证视频未受保护且包含音轨，并返回非负有限时长。
     func inspect(_ sourceURL: URL) async throws -> TimeInterval {
         let asset = AVURLAsset(url: sourceURL)
         if try await asset.load(.hasProtectedContent) {
@@ -25,7 +28,8 @@ actor VideoAudioExtractionEngine {
         return duration.seconds.isFinite ? max(duration.seconds, 0) : 0
     }
 
-    /// 封装 `extractPCM` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将音轨分样本写入 CAF PCM；写入不可用时让出执行权。
+    /// 失败或取消时停止 reader 和 writer，并向调用方传播错误。
     func extractPCM(
         from sourceURL: URL,
         to destinationURL: URL,
@@ -125,13 +129,13 @@ actor VideoAudioExtractionEngine {
         }
     }
 
-    /// 取消 `cancelAll` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 请求停止所有活动提取的 reader 和 writer。
     func cancelAll() {
         activeReaders.values.forEach { $0.cancelReading() }
         activeWriters.values.forEach { $0.cancelWriting() }
     }
 
-    /// 封装 `pcmStreamSettings` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 从首条音轨读取采样率，并将输出声道数限制为一至两声道。
     private func pcmStreamSettings(for track: AVAssetTrack) async throws -> (
         sampleRate: Double,
         channelCount: Int

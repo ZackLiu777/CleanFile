@@ -1,3 +1,8 @@
+// 媒体分类详情的 UIKit 网格与 SwiftUI 桥接。
+// 负责日期分组、缩略图、密度切换、预览和批量选择；交互状态与 PhotoKit 删除相互独立。
+// SwiftUI 提供分组与选择绑定，UICollectionView 协调缩略图请求、可见单元格和手势。
+// 密度切换使用有限档位；删除视觉快照只用于成功操作后的反馈，不执行删除。
+
 //
 //  MediaInteractiveGrid.swift
 //  CleanMyIPhone
@@ -443,6 +448,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             return token
         }
 
+        /// 取出并移除令牌对应快照，再在当前窗口播放；令牌只能消费一次。
         func playDeletionEffect(_ token: MediaDeletionEffectToken, animated: Bool) async {
             guard
                 let snapshots = deletionSnapshots.removeValue(forKey: token),
@@ -455,6 +461,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             )
         }
 
+        /// 丢弃指定快照，不修改网格选择或照片资源。
         func discardDeletionEffect(_ token: MediaDeletionEffectToken) {
             deletionSnapshots[token] = nil
         }
@@ -591,6 +598,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         }
 
         /// 从手指位置构造归一化单元格锚点，用于布局尺寸变化后的视口补偿。
+        /// 计算缩放手势附近的资源锚点，为密度切换后的滚动位置提供参考。
         private func makePinchAnchor(
             at location: CGPoint,
             in collectionView: UICollectionView
@@ -627,6 +635,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         }
 
         /// 根据过渡布局中的插值 frame 调整滚动偏移，减少网格重排时的纵向跳动。
+        /// 布局切换后调整偏移，尽可能让手势附近的资源留在原位置。
         private func preservePinchAnchor(
             at touchLocation: CGPoint,
             in collectionView: UICollectionView
@@ -749,6 +758,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         }
 
         /// 使用平移量和速度建立初始门槛；激活后改由连续轨迹决定每一段的选择语义。
+        /// 根据拖动范围更新批量选择，保持本次手势的选择方向一致。
         private func updateBatchSelection(
             gesture: UIPanGestureRecognizer,
             at location: CGPoint,
@@ -889,6 +899,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         }
 
         /// 结束批选并释放触觉对象，下一次手势重新判断横向或纵向意图。
+        /// 结束本次批量选择并清理手势状态，避免影响下一次交互。
         private func resetBatchSelection() {
             batchSelectionStartIndexPath = nil
             batchSelectionStartLocation = nil
@@ -942,6 +953,7 @@ private final class MediaDensityFlowLayout: UICollectionViewFlowLayout {
         super.prepare()
     }
 
+    /// 仅在日期标题可见性变化时使布局失效，重新计算标题高度。
     func setShowsDateHeaders(_ isVisible: Bool) {
         guard showsDateHeaders != isVisible else { return }
         showsDateHeaders = isVisible

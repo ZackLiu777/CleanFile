@@ -1,7 +1,15 @@
+// 转换结果替换照片原件前的审阅和确认界面。
+// 按图片、视频类别展示可替换项及选择，用户确认后调用注入的替换操作。
+// 替换失败和后续清理失败分别提示；动画不作为删除成功的依据。
+// 页面维护待选类别和项目，并在确认时固定本次提交的目标集合。
+// 底层替换与清理由注入的操作处理，页面分别展示失败或完成反馈。
+
 import SwiftUI
 
+/// 让用户按类别或项目审阅并确认替换；替换操作和工作区清理分别反馈结果。
 @MainActor
 struct ConversionReplacementReviewView: View {
+    /// 标识原件替换审阅中可选择的媒体分类。
     private enum Category: String, CaseIterable, Hashable {
         case image, video
 
@@ -30,6 +38,7 @@ struct ConversionReplacementReviewView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.conversionTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    // 首页按类别选择，详情页可单独调整项目；确认时另存本次待替换标识。
     @State private var selectedIDs: Set<UUID>
     @State private var selectedCategories: Set<Category>
     @State private var visibleCandidates: [ConversionReplacementCandidate]
@@ -43,6 +52,7 @@ struct ConversionReplacementReviewView: View {
     @State private var categoryFrames: [String: CGRect] = [:]
     @State private var hiddenCategories: Set<Category> = []
 
+    /// 初始化时选择所有候选项及其非空类别；不会在此阶段执行替换。
     init(
         candidates: [ConversionReplacementCandidate],
         replace: @escaping ([ConversionReplacementCandidate]) async throws -> Bool
@@ -110,10 +120,12 @@ struct ConversionReplacementReviewView: View {
         }
     }
 
+    /// 从当前可见候选中筛选指定媒体类型。
     private func candidates(in category: Category) -> [ConversionReplacementCandidate] {
         visibleCandidates.filter { $0.kind == category.kind }
     }
 
+    /// 展示分类摘要和进入该分类的操作入口。
     private func categoryCard(_ category: Category) -> some View {
         let items = candidates(in: category)
         let bytes = items.reduce(Int64(0)) { $0 + max(0, $1.sourceBytes - $1.outputBytes) }
@@ -170,6 +182,7 @@ struct ConversionReplacementReviewView: View {
         .accessibilityIdentifier("conversion.replace.category.\(category.rawValue)")
     }
 
+    /// 首页汇总所选类别的全部候选；点击后冻结本次确认使用的标识集合。
     private var collectionReplacementBar: some View {
         let selected = visibleCandidates.filter { candidate in
             selectedCategories.contains { $0.kind == candidate.kind }
@@ -202,12 +215,14 @@ struct ConversionReplacementReviewView: View {
         .padding(.bottom, 4)
     }
 
+    /// 根据已选类别重建项目选择；再次切换类别时会覆盖此前逐项调整。
     private func syncSelectedIDs() {
         selectedIDs = Set(visibleCandidates.filter { candidate in
             selectedCategories.contains { $0.kind == candidate.kind }
         }.map(\.id))
     }
 
+    /// 在单一类别内支持逐项选择或全选；仅将本类别的选择交给其确认入口。
     private func categoryDetail(_ category: Category) -> some View {
         ScrollView {
             LazyVStack(spacing: 12) {
@@ -255,6 +270,7 @@ struct ConversionReplacementReviewView: View {
         visibleCandidates.filter { selectedIDs.contains($0.id) }
     }
 
+    /// 只累加输出小于原件的节省量，避免单项变大时产生负数。
     private var selectedSavings: Int64 {
         selectedCandidates.reduce(0) { $0 + max(0, $1.sourceBytes - $1.outputBytes) }
     }
@@ -279,6 +295,7 @@ struct ConversionReplacementReviewView: View {
         .converterCard()
     }
 
+    /// 仅切换当前项目的选择状态；替换仍需通过底部操作和确认弹窗。
     private func candidateCard(_ candidate: ConversionReplacementCandidate) -> some View {
         let selected = selectedIDs.contains(candidate.id)
         return Button {
@@ -324,6 +341,7 @@ struct ConversionReplacementReviewView: View {
         .disabled(isReplacing)
     }
 
+    /// 统计当前类别中选中的项目，并在确认前保存本次目标标识。
     private func replacementBar(category: Category) -> some View {
         let categoryIDs = Set(candidates(in: category).map(\.id))
         let selectedCount = selectedIDs.intersection(categoryIDs).count
@@ -357,12 +375,14 @@ struct ConversionReplacementReviewView: View {
         .padding(.bottom, 4)
     }
 
+    /// 格式化候选项大小信息，用于审阅时比较。
     private func sizeDetail(_ candidate: ConversionReplacementCandidate) -> String {
         let source = ByteCountFormatter.string(fromByteCount: candidate.sourceBytes, countStyle: .file)
         let output = ByteCountFormatter.string(fromByteCount: candidate.outputBytes, countStyle: .file)
         return "\(source) → \(output)"
     }
 
+    /// 根据分类和数量生成本地化统计文本。
     private func categoryCount(_ category: Category, count: Int) -> String {
         switch category {
         case .image: L10n.format("files.title", count)
@@ -370,6 +390,7 @@ struct ConversionReplacementReviewView: View {
         }
     }
 
+    /// 只提交待替换候选项；成功后展示反馈并关闭页面，替换或后续清理失败分别提示。
     private func performReplacement() {
         let selected = visibleCandidates.filter { pendingReplacementIDs.contains($0.id) }
         guard !selected.isEmpty else { return }
@@ -391,6 +412,7 @@ struct ConversionReplacementReviewView: View {
         }
     }
 
+    /// 操作成功后按类别播放卡片反馈，减少动态效果时使用简化表现。
     private func animateRemovedCategories(_ kinds: Set<ConversionMediaKind>) async {
 #if os(iOS)
         guard let window = UIApplication.shared.connectedScenes
@@ -413,6 +435,7 @@ struct ConversionReplacementReviewView: View {
 #endif
     }
 
+    /// 按项目播放移除反馈并更新可见候选项，动画依赖可取得的窗口与卡片快照。
     private func animateRemoved(_ ids: [UUID]) async {
 #if os(iOS)
         guard let window = UIApplication.shared.connectedScenes
@@ -440,7 +463,9 @@ struct ConversionReplacementReviewView: View {
 
 #if DEBUG
 @MainActor
+/// 为界面自动化提供可独立启动的替换审阅页面。
 public struct ConversionReplacementReviewUITestHarness: View {
+    /// 创建使用默认测试数据的审阅页面入口。
     public init() {}
 
     public var body: some View {

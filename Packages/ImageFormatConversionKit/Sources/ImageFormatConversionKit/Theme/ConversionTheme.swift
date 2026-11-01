@@ -1,14 +1,19 @@
 //
-//  文件职责：集中定义 ConversionTheme 相关的生产逻辑与共享能力。
-//  所属模块：ImageFormatConversionKit。
+//  定义转换界面可由宿主注入的颜色、背景、字体和卡片效果配置。
+//  统一渲染纯色、线性渐变与网格渐变，并为旧系统提供渐变回退。
+//  未指定主题或字体时保持系统默认，兼容既有调用方式。
+//  宿主可通过主题和 SwiftUI 环境提供颜色、背景与字体给转换组件。
+//  卡片材质与背景根据系统能力选择实现；本文件不管理转换业务状态。
 //
 
 import SwiftUI
 
+/// 宿主未指定字体名称时沿用每个控件的原始字体。
 private struct ConversionFontNameKey: EnvironmentKey {
     static let defaultValue: String? = nil
 }
 
+/// 通过 SwiftUI 环境传递转换界面的可选自定义字体名称。
 public extension EnvironmentValues {
     var conversionFontName: String? {
         get { self[ConversionFontNameKey.self] }
@@ -16,7 +21,7 @@ public extension EnvironmentValues {
     }
 }
 
-/// Preserves the original font when no named family is selected.
+/// 根据环境中的字体名称应用可随文字大小设置缩放的字体，否则使用后备字体。
 public struct ConversionTypefaceModifier: ViewModifier {
     @Environment(\.conversionFontName) private var name
     let fallback: Font
@@ -24,6 +29,7 @@ public struct ConversionTypefaceModifier: ViewModifier {
     let style: Font.TextStyle
     let weight: Font.Weight
 
+    /// 保存回退字体、尺寸和文字样式，用于按环境应用字体。
     public init(_ fallback: Font, size: CGFloat, relativeTo style: Font.TextStyle, weight: Font.Weight = .regular) {
         self.fallback = fallback
         self.size = size
@@ -31,12 +37,15 @@ public struct ConversionTypefaceModifier: ViewModifier {
         self.weight = weight
     }
 
+    /// 根据环境字体设置修饰内容，保留调用方提供的回退字体。
     public func body(content: Content) -> some View {
         content.font(name.map { Font.custom($0, size: size, relativeTo: style).weight(weight) } ?? fallback)
     }
 }
 
+/// 提供转换组件共用的字体视图修饰入口。
 extension View {
+    /// 为转换界面统一应用宿主字体和给定的后备字体。
     func appTypeface(_ fallback: Font, size: CGFloat, relativeTo style: Font.TextStyle, weight: Font.Weight = .regular) -> some View {
         modifier(ConversionTypefaceModifier(fallback, size: size, relativeTo: style, weight: weight))
     }
@@ -47,17 +56,19 @@ import UIKit
 import AppKit
 #endif
 
-/// 定义 `ConversionBackground` 使用的有限状态或选项集合。
+/// 线性渐变色标；位置限制在零到一之间。
 public struct ConversionGradientStop: Sendable {
     public let color: Color
     public let location: Double
 
+    /// 保存渐变色，并将位置限制在零到一之间。
     public init(color: Color, location: Double) {
         self.color = color
         self.location = min(max(location, 0), 1)
     }
 }
 
+/// 宿主可选的纯色、线性渐变和网格渐变背景。
 public enum ConversionBackground: Sendable {
     case solid(Color)
     /// Legacy color-only case kept for source compatibility with existing package clients.
@@ -67,7 +78,7 @@ public enum ConversionBackground: Sendable {
     case meshGradient(colors: [Color])
 }
 
-/// One renderer prevents the package's five screens from drifting apart as background modes grow.
+/// 集中渲染转换页面背景；不支持网格渐变的系统回退到线性渐变。
 struct ConversionBackgroundView: View {
     let background: ConversionBackground
 
@@ -114,13 +125,14 @@ struct ConversionBackgroundView: View {
         }
     }
 
+    /// 网格要求九个颜色，不足时重复末色或透明色，多余颜色截断。
     private func normalizedMeshColors(_ colors: [Color]) -> [Color] {
         let fallback = colors.last ?? .clear
         return Array((colors + Array(repeating: fallback, count: 9)).prefix(9))
     }
 }
 
-/// 定义 `ConversionTheme` 的值语义数据与相关行为。
+/// 宿主注入的背景、表面、文字、强调色及玻璃效果配置。
 public struct ConversionTheme: Sendable {
     public let background: ConversionBackground
     public let cardSurface: Color
@@ -134,7 +146,7 @@ public struct ConversionTheme: Sendable {
     public let liquidGlassEnabled: Bool
     public let liquidGlassCardsEnabled: Bool
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 保存转换界面使用的背景、颜色和材质配置。
     public init(
         background: ConversionBackground,
         cardSurface: Color,
@@ -199,12 +211,12 @@ public struct ConversionTheme: Sendable {
     )
 }
 
-/// 定义 `ConversionThemeEnvironmentKey` 的值语义数据与相关行为。
+/// 环境未注入主题时使用系统主题。
 private struct ConversionThemeEnvironmentKey: EnvironmentKey {
     static let defaultValue = ConversionTheme.system
 }
 
-/// 扩展 `EnvironmentValues`，集中实现当前文件所需的附加能力。
+/// 通过 SwiftUI 环境向转换界面传递主题。
 extension EnvironmentValues {
     var conversionTheme: ConversionTheme {
         get { self[ConversionThemeEnvironmentKey.self] }

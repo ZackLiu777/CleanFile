@@ -1,3 +1,8 @@
+// 设置中的帮助目录。
+// 使用本地帮助内容构建分类和文章导航。
+// 页面按 HelpCatalog 分类生成文章入口，选择后导航到对应的文章详情。
+// 目录和正文不需要联网；页面仅负责内容呈现，不执行帮助中描述的操作。
+
 //
 //  HelpView.swift
 //  CleanMyIPhone
@@ -7,6 +12,7 @@
 
 import SwiftUI
 
+/// 将本地帮助文章组织为可导航的目录。
 struct HelpView: View {
     @Environment(\.appTheme) private var theme
 
@@ -96,6 +102,7 @@ struct HelpView: View {
         .appContentCard(cornerRadius: 22)
     }
 
+    /// 展示帮助文章的图标、标题和摘要，作为文章入口。
     private func articleLabel(_ article: HelpArticle) -> some View {
         HStack(alignment: .center, spacing: 12) {
             Image(systemName: article.systemImage)

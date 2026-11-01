@@ -1,7 +1,8 @@
-//
-//  文件职责：集中定义 ConversionFormatWheelPicker 相关的生产逻辑与共享能力。
-//  所属模块：ImageFormatConversionKit。
-//
+// 转换设置的多列滚轮与弹出面板。
+// 泛型列通过绑定传递选中值，UIKit 滚轮负责循环显示并同步外部选择。
+// 具体格式和取值由各转换页面提供，不在此组件中修改转换任务。
+// 每列根据选项循环显示逻辑行，并在绑定或选项变化时同步当前位置。
+// 滚轮仅回写用户选择，不检查编码器是否支持最终的参数组合。
 
 import SwiftUI
 import UIKit
@@ -58,11 +59,11 @@ struct ConversionSettingsWheelPicker<WheelContent: View>: View {
     }
 }
 
-/// 定义 `ConversionSettingsTriggerButtonStyle` 的值语义数据与相关行为。
+/// 定义设置滚轮入口的按压高亮样式。
 private struct ConversionSettingsTriggerButtonStyle: ButtonStyle {
     let accent: Color
 
-    /// 创建 `makeBody` 所需的值或资源，统一封装构造细节。
+    /// 在按压时以主题强调色突出按钮区域。
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .padding(.horizontal, 4)
@@ -76,13 +77,14 @@ private struct ConversionSettingsTriggerButtonStyle: ButtonStyle {
     }
 }
 
-/// 定义 `ConversionWheelColumn` 的值语义数据与相关行为。
+/// 将一组可选值和绑定选择包装为滚轮列，标题由调用方提供。
 struct ConversionWheelColumn<Selection: Hashable>: View {
     let title: String
     @Binding var selection: Selection
     let options: [Selection]
     let optionTitle: (Selection) -> String
 
+    /// 设置列标题、选中值绑定、可选项与标题格式化方式。
     init(
         title: String,
         selection: Binding<Selection>,
@@ -127,10 +129,12 @@ private struct VirtualizedLoopingWheel<Selection: Hashable>: UIViewRepresentable
     let options: [Selection]
     let optionTitle: (Selection) -> String
 
+    /// 创建桥接 SwiftUI 绑定与 UIKit 滚轮代理的协调器。
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
     }
 
+    /// 创建滚轮并连接数据源、代理、无障碍标签和初始选中状态。
     func makeUIView(context: Context) -> UIPickerView {
         let picker = UIPickerView()
         picker.dataSource = context.coordinator
@@ -142,6 +146,7 @@ private struct VirtualizedLoopingWheel<Selection: Hashable>: UIViewRepresentable
         return picker
     }
 
+    /// 使用父布局建议的列宽及固定高度，避免 UIKit 固有宽度挤压相邻列。
     func sizeThatFits(
         _ proposal: ProposedViewSize,
         uiView: UIPickerView,
@@ -155,6 +160,7 @@ private struct VirtualizedLoopingWheel<Selection: Hashable>: UIViewRepresentable
         )
     }
 
+    /// 同步最新绑定和选项；选项变化时重新加载并定位选中值。
     func updateUIView(_ picker: UIPickerView, context: Context) {
         let previousOptions = context.coordinator.parent.options
         context.coordinator.parent = self
@@ -165,23 +171,29 @@ private struct VirtualizedLoopingWheel<Selection: Hashable>: UIViewRepresentable
         )
     }
 
+    /// 提供循环滚轮的数据源、选中回写和边界重定位。
     final class Coordinator: NSObject, UIPickerViewDataSource, UIPickerViewDelegate {
         var parent: VirtualizedLoopingWheel
 
+        /// 保存当前 SwiftUI 滚轮配置，后续更新时由代表视图替换。
         init(parent: VirtualizedLoopingWheel) {
             self.parent = parent
         }
 
+        /// 每个滚轮实例只展示一列。
         func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
 
+        /// 根据滚轮实际宽度计算列宽，并预留左右空间。
         func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
             max(pickerView.bounds.width - 16, 0)
         }
 
+        /// 将选项重复为大量逻辑行，供 UIKit 按需显示以模拟循环。
         func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
             parent.options.count * VirtualizedLoopingWheel.cycleCount
         }
 
+        /// 复用标签显示对应选项，并适配系统文字大小。
         func pickerView(
             _ pickerView: UIPickerView,
             viewForRow row: Int,
@@ -199,6 +211,7 @@ private struct VirtualizedLoopingWheel<Selection: Hashable>: UIViewRepresentable
             return label
         }
 
+        /// 将逻辑行映射回选项并更新绑定；靠近边界时无动画移回中间周期。
         func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
             guard !parent.options.isEmpty else { return }
             let offset = row % parent.options.count
@@ -214,6 +227,7 @@ private struct VirtualizedLoopingWheel<Selection: Hashable>: UIViewRepresentable
             }
         }
 
+        /// 在选项或绑定变化后刷新并将滚轮定位到对应值。
         func reloadAndSynchronize(_ picker: UIPickerView, forceReload: Bool) {
             guard !parent.options.isEmpty else {
                 if forceReload { picker.reloadAllComponents() }
@@ -233,10 +247,12 @@ private struct VirtualizedLoopingWheel<Selection: Hashable>: UIViewRepresentable
             picker.selectRow(centeredRow(for: selectedOffset), inComponent: 0, animated: false)
         }
 
+        /// 计算指定选项在中间周期中的行号，保留两个方向的滚动余量。
         private func centeredRow(for offset: Int) -> Int {
             (VirtualizedLoopingWheel.cycleCount / 2) * parent.options.count + offset
         }
 
+        /// 通过取模将逻辑行映射到实际选项，空列表返回空标题。
         private func title(for row: Int) -> String {
             guard !parent.options.isEmpty else { return "" }
             return parent.optionTitle(parent.options[row % parent.options.count])

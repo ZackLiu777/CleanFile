@@ -1,3 +1,8 @@
+// 主题、强调色和系统外观设置页面。
+// 用户可在预览中比较选项，实际偏好通过共享主题设置维护。
+// 页面读写共享主题设置，并根据权益决定高级主题和自定义颜色是否可选。
+// 颜色节点按稳定标识编辑；系统版本和减少动态效果设置影响可用的显示效果。
+
 //
 //  AppearanceThemeView.swift
 //  CleanMyIPhone
@@ -494,6 +499,7 @@ struct AppearanceThemeView: View {
         )
     }
 
+    /// 按稳定色标身份读写颜色，避免编辑时依赖可能变化的数组位置。
     private func customColorBinding(for stop: AppBackgroundColorStop) -> Binding<Color> {
         Binding(
             get: {
@@ -504,6 +510,7 @@ struct AppearanceThemeView: View {
         )
     }
 
+    /// 按稳定色标身份读写渐变位置，使插入和删除色标后绑定仍指向正确对象。
     private func customLocationBinding(for stop: AppBackgroundColorStop) -> Binding<Double> {
         Binding(
             get: {

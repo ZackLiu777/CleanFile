@@ -1,3 +1,8 @@
+// 媒体删除后的视觉反馈基础设施。
+// 网格先捕获可见项目的视觉快照，删除成功后才播放效果；动画令牌不代表实际删除结果。
+// SwiftUI 页面经控制器请求 UIKit 网格捕获快照，再按真实删除结果播放或丢弃令牌。
+// 画面只涉及已显示缩略图，减少动态效果时采用简化反馈，不参与文件或相册操作。
+
 //
 //  MediaDeletionEffect.swift
 //  CleanMyIPhone
@@ -10,13 +15,19 @@ import QuartzCore
 import Combine
 import UIKit
 
+/// 由网格实现的快照生命周期：删除前捕获，成功后播放，失败或取消后丢弃。
+/// 令牌只关联视觉快照，无法证明 PhotoKit 操作已成功。
 @MainActor
 protocol MediaDeletionEffectRendering: AnyObject {
+    /// 尝试捕获目标资源当前可见的画面；没有可用画面时返回 nil。
     func captureDeletionEffect(for assetIDs: Set<String>) -> MediaDeletionEffectToken?
+    /// 消费令牌对应的快照并展示反馈；调用方负责先确认删除成功。
     func playDeletionEffect(_ token: MediaDeletionEffectToken, animated: Bool) async
+    /// 释放无需播放的快照，供删除失败或用户取消时使用。
     func discardDeletionEffect(_ token: MediaDeletionEffectToken)
 }
 
+/// 区分每次捕获的视觉快照，不携带或持久化照片资源。
 struct MediaDeletionEffectToken: Hashable {
     fileprivate let id = UUID()
 }
@@ -26,21 +37,25 @@ struct MediaDeletionEffectToken: Hashable {
 final class MediaDeletionEffectController: ObservableObject {
     weak var renderer: (any MediaDeletionEffectRendering)?
 
+    /// 转发捕获请求；网格未连接或没有可用快照时返回 nil。
     func capture(assetIDs: Set<String>) -> MediaDeletionEffectToken? {
         renderer?.captureDeletionEffect(for: assetIDs)
     }
 
+    /// 有令牌时转发播放请求；调用方应只在删除成功后调用。
     func play(_ token: MediaDeletionEffectToken?, animated: Bool) async {
         guard let token else { return }
         await renderer?.playDeletionEffect(token, animated: animated)
     }
 
+    /// 放弃未使用的令牌，不改变照片或删除状态。
     func discard(_ token: MediaDeletionEffectToken?) {
         guard let token else { return }
         renderer?.discardDeletionEffect(token)
     }
 }
 
+/// 记录动画所需的可见缩略图和窗口坐标，不包含文件操作。
 struct MediaDeletionSnapshot {
     let image: UIImage
     let frameInWindow: CGRect
@@ -52,6 +67,7 @@ enum MediaDeletionEffectAnimator {
     private static let duration: TimeInterval = 0.58
     private static let maximumStagger: TimeInterval = 0.12
 
+    /// 在临时覆盖层播放快照，结束后移除覆盖层；减少动态效果时改用简化淡出。
     static func play(
         snapshots: [MediaDeletionSnapshot],
         in window: UIWindow,
@@ -127,6 +143,7 @@ enum MediaDeletionEffectAnimator {
         overlay.removeFromSuperview()
     }
 
+    /// 把快照分为沿同一裂口裁切的上下两片，并组装裂线和粒子层。
     private static func makeTornPhoto(
         snapshot: MediaDeletionSnapshot
     ) -> (
@@ -171,6 +188,7 @@ enum MediaDeletionEffectAnimator {
         return (container, topHalf, bottomHalf, tearLine, emitter)
     }
 
+    /// 创建承载快照的图像视图，并用指定路径限制可见区域。
     private static func makeImageView(
         image: UIImage,
         bounds: CGRect,
@@ -185,6 +203,7 @@ enum MediaDeletionEffectAnimator {
         return imageView
     }
 
+    /// 按卡片尺寸生成可重复的锯齿裂口坐标。
     private static func makeTearPoints(in bounds: CGRect) -> [CGPoint] {
         let offsets: [CGFloat] = [-0.01, 0.045, -0.035, 0.025, -0.055, 0.04, -0.02, 0.03, -0.015]
         let baseY = bounds.height * 0.52
@@ -196,6 +215,7 @@ enum MediaDeletionEffectAnimator {
         }
     }
 
+    /// 使用裂口坐标闭合上半张快照的裁切路径。
     private static func makeTopMask(
         in bounds: CGRect,
         tearPoints: [CGPoint]
@@ -208,6 +228,7 @@ enum MediaDeletionEffectAnimator {
         return path
     }
 
+    /// 使用相同裂口坐标闭合下半张快照的裁切路径。
     private static func makeBottomMask(
         in bounds: CGRect,
         tearPoints: [CGPoint]
@@ -222,6 +243,7 @@ enum MediaDeletionEffectAnimator {
         return path
     }
 
+    /// 沿裂口平均高度放置碎片粒子发射器。
     private static func makeEmitter(
         in bounds: CGRect,
         tearPoints: [CGPoint]
@@ -255,6 +277,7 @@ enum MediaDeletionEffectAnimator {
         return emitter
     }
 
+    /// 绘制粒子使用的小型白色矩形纹理。
     private static func particleImage() -> UIImage? {
         let size = CGSize(width: 7, height: 5)
         return UIGraphicsImageRenderer(size: size).image { context in

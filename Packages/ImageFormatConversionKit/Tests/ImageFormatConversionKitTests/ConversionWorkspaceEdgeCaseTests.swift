@@ -1,9 +1,19 @@
+//
+//  验证工作区文件暂存、清单恢复和受限范围清理。
+//  覆盖已暂存、空文件、缺失源文件以及输出删除等边界。
+//  使用临时目录与记录器检查文件内容、进度及清理结果。
+//  清单恢复忽略已消失的源文件，删除记录只能清理允许范围内的暂存及输出。
+//  所有文件均由测试工作区创建；字节进度由隔离记录器收集。
+//
+
 import Foundation
 import Testing
 @testable import ImageFormatConversionKit
 
+/// 检查暂存与清理在文件缺失和目录边界下的行为。
 @Suite("Conversion workspace edge cases")
 struct ConversionWorkspaceEdgeCaseTests {
+    /// 检查外部源文件复制到工作区并报告字节进度。
     @Test("Staging copies external files and reports byte progress")
     func stagingCopiesExternalFile() async throws {
         let fixture = try WorkspaceFixture()
@@ -31,6 +41,7 @@ struct ConversionWorkspaceEdgeCaseTests {
         #expect(progress.last?.total == 32_768)
     }
 
+    /// 重复暂存工作区内文件时检查复用原路径。
     @Test("Staging an already-imported file is idempotent")
     func stagingImportedFileReturnsSameURL() async throws {
         let fixture = try WorkspaceFixture()
@@ -62,6 +73,7 @@ struct ConversionWorkspaceEdgeCaseTests {
         #expect(progress.first?.total == 3)
     }
 
+    /// 空文件暂存后仍存在，返回零字节且内容为空。
     @Test("Empty files stage successfully with a zero-byte result")
     func stagingEmptyFileProducesZeroBytes() async throws {
         let fixture = try WorkspaceFixture()
@@ -82,6 +94,7 @@ struct ConversionWorkspaceEdgeCaseTests {
         #expect(stagedData.isEmpty)
     }
 
+    /// 源文件不存在时检查不留下部分导入目录。
     @Test("Missing source errors do not leave a partial import directory")
     func missingSourceCleansPartialDirectory() async throws {
         let fixture = try WorkspaceFixture()
@@ -103,6 +116,7 @@ struct ConversionWorkspaceEdgeCaseTests {
         #expect(!FileManager.default.fileExists(atPath: itemDirectory.path))
     }
 
+    /// 检查恢复清单时过滤源文件已消失的记录。
     @Test("Workspace manifests ignore records whose source has disappeared")
     func loadingManifestFiltersMissingSources() async throws {
         let fixture = try WorkspaceFixture()
@@ -134,6 +148,7 @@ struct ConversionWorkspaceEdgeCaseTests {
         #expect(loaded.first?.sourcePath == existing.path)
     }
 
+    /// 检查删除只影响允许的暂存源和输出目录。
     @Test("Deleting a workspace record removes only authorized imported and output files")
     func deletingRecordStaysInsideWorkspaceRoots() async throws {
         let fixture = try WorkspaceFixture()
@@ -167,7 +182,9 @@ struct ConversionWorkspaceEdgeCaseTests {
     }
 }
 
+/// 在异步暂存回调中安全收集进度样本，供测试检查首末值。
 private actor ProgressRecorder {
+    /// 记录一次回调的已复制字节数和总字节数。
     struct Value: Equatable, Sendable {
         let copied: Int64
         let total: Int64
@@ -175,15 +192,18 @@ private actor ProgressRecorder {
 
     private(set) var values: [Value] = []
 
+    /// 将本次进度加入按回调顺序排列的样本列表。
     func append(copied: Int64, total: Int64) {
         values.append(Value(copied: copied, total: total))
     }
 }
 
+/// 为每个测试创建独立临时根目录和工作区路径。
 private struct WorkspaceFixture {
     let root: URL
     let workspaceRoot: URL
 
+    /// 创建临时根目录；工作区目录由被测对象按需创建。
     init() throws {
         let fileManager = FileManager.default
         root = fileManager.temporaryDirectory
@@ -192,6 +212,7 @@ private struct WorkspaceFixture {
         try fileManager.createDirectory(at: root, withIntermediateDirectories: true)
     }
 
+    /// 测试结束时尽力删除临时根目录及其内容。
     func remove() {
         try? FileManager.default.removeItem(at: root)
     }

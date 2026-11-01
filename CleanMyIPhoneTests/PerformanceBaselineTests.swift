@@ -1,3 +1,12 @@
+//
+//  文件处理性能基线
+//
+//  以合成记录和临时文件记录扫描、聚合、持久化及展示处理成本。
+//  对照不同实现并验证结果；性能记录不是运行结果或固定速度承诺。
+//  同时记录两万真实临时文件、一百万条合成元数据及不同规模快照的阶段成本。
+//  测试校验输出和分类统计；临时工作区由用例自行创建并清理。
+//
+
 import Dispatch
 import Foundation
 import Testing
@@ -6,8 +15,10 @@ import Testing
 /// Performance baselines intentionally report timings without enforcing a
 /// device-specific deadline. CI and simulator load are too variable for a
 /// stable wall-clock assertion; the correctness assertions remain mandatory.
+/// 序列化采样扫描、快照、汇总和显示路径的基线成本。
 @Suite("Performance baselines", .serialized)
 struct PerformanceBaselineTests {
+    /// 用两万条合成元数据记录衡量汇总、树和大文件等阶段并检查结果。
     @Test("Twenty-thousand file metadata aggregation remains measurable")
     func twentyThousandFileAggregation() throws {
         let root = URL(fileURLWithPath: "/performance-baseline", isDirectory: true)
@@ -50,6 +61,7 @@ struct PerformanceBaselineTests {
         #expect(resultLargest.first?.byteCount == 20_000)
     }
 
+    /// 以临时目录中的实际文件采样元数据扫描吞吐。
     @Test("Twenty-thousand real files expose metadata scan throughput")
     func twentyThousandRealFileScan() async throws {
         let fileManager = FileManager()
@@ -96,6 +108,7 @@ struct PerformanceBaselineTests {
         #expect(result.largestFiles.count == 10)
     }
 
+    /// 构造临时快照并分阶段记录两万条文件记录的恢复成本。
     @Test("Twenty-thousand persisted files expose restore-stage costs")
     func twentyThousandFileRestore() throws {
         let fileManager = FileManager()
@@ -163,6 +176,7 @@ struct PerformanceBaselineTests {
         #expect(restored.largestFiles.count == 10)
     }
 
+    /// 记录大规模快照的构建与恢复开销，观察数据规模影响。
     @Test("One-hundred-thousand persisted files expose snapshot scaling")
     func oneHundredThousandFileSnapshotScaling() throws {
         let fileManager = FileManager()
@@ -258,6 +272,7 @@ struct PerformanceBaselineTests {
         #expect(legacyDecoded.files == decoded.files)
     }
 
+    /// 保留未采用的分块持久化实验，与现有编码路径比较缓冲和编解码成本。
     @Test("Rejected chunked persistence experiment compares buffer and codec costs")
     func chunkedPersistenceComparison() throws {
         // This remains as evidence only. Production reverted to the compact
@@ -341,6 +356,7 @@ struct PerformanceBaselineTests {
         #expect(chunkData.count == 10)
     }
 
+    /// 逐项累积一百万条合成元数据，检查汇总和有限数量的大文件候选。
     @Test("One-million metadata records keep bounded summary aggregation")
     func oneMillionMetadataAggregation() {
         let root = URL(fileURLWithPath: "/million-record-baseline", isDirectory: true)
@@ -376,6 +392,7 @@ struct PerformanceBaselineTests {
         #expect(resultLargest.first?.byteCount == 1_000_000)
     }
 
+    /// 对照删除后前台重建与后台准备路径，同时核对输出。
     @Test("Deletion rebuild compares foreground baseline and background preparation paths")
     func deletionRebuildComparison() throws {
         let root = URL(fileURLWithPath: "/deletion-comparison", isDirectory: true)
@@ -428,6 +445,7 @@ struct PerformanceBaselineTests {
         #expect(optimized.fileTree == legacyTree)
     }
 
+    /// 对比重复排序与复用展示顺序的工作量，同时核对结果。
     @Test("File selection compares repeated body sorting and cached display order")
     func fileSelectionDisplayOrderComparison() {
         let root = URL(fileURLWithPath: "/file-list-comparison", isDirectory: true)
@@ -481,6 +499,7 @@ struct PerformanceBaselineTests {
         #expect(optimizedChecksum == baselineChecksum)
     }
 
+    /// 对照重复遍历与增量计算选中大小的结果和耗时。
     @Test("Selected size compares repeated reduction and incremental accounting")
     func selectedSizeAccountingComparison() {
         let root = URL(fileURLWithPath: "/selected-size-comparison", isDirectory: true)
@@ -538,10 +557,12 @@ struct PerformanceBaselineTests {
         #expect(optimizedByteCount == baselineByteCount)
     }
 
+    /// 将单调时钟起点至当前时刻的差值换算为毫秒。
     private static func milliseconds(since started: UInt64) -> Double {
         Double(DispatchTime.now().uptimeNanoseconds - started) / 1_000_000
     }
 
+    /// 格式化文件数、耗时及吞吐量，零耗时时吞吐量记为零。
     private static func report(
         name: String,
         fileCount: Int,
@@ -558,6 +579,7 @@ struct PerformanceBaselineTests {
         )
     }
 
+    /// 格式化快照阶段的文件数、编码字节数和耗时。
     private static func stageReport(
         name: String,
         fileCount: Int,
@@ -574,6 +596,7 @@ struct PerformanceBaselineTests {
     }
 }
 
+/// 模拟版本二快照字段，用于比较历史格式的恢复与编码成本。
 private struct LegacyPerformanceFileStateSnapshot: Encodable {
     let schemaVersion = 2
     let directoryBookmark: Data
@@ -582,6 +605,7 @@ private struct LegacyPerformanceFileStateSnapshot: Encodable {
     let skippedFileCount: Int
 }
 
+/// 模拟旧格式使用完整字段名保存的文件元数据。
 private struct LegacyPerformancePersistedFile: Encodable {
     let name: String
     let relativePathComponents: [String]
@@ -591,6 +615,7 @@ private struct LegacyPerformancePersistedFile: Encodable {
     let creationDate: Date?
     let modificationDate: Date?
 
+    /// 从合成扫描记录提取旧格式字段，不读取磁盘内容。
     init(_ file: ScannedFile) {
         name = file.name
         relativePathComponents = file.relativePathComponents

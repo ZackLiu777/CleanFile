@@ -1,3 +1,9 @@
+// 分段式质量滑块的布局、手势与动态效果。
+// 绑定值由父视图持有；手势将位置映射到滑块范围，并提供分段吸附反馈。
+// 显示颜色来自转换主题，具体数值含义由调用方定义。
+// 手势与无障碍调整操作共享数值范围和步长，父视图接收选择结果。
+// 开启减少动态效果时暂停流光展示；滑块本身不触发编码。
+
 //
 //  SegmentedStreamSlider.swift
 //  ImageFormatConversionKit
@@ -18,6 +24,7 @@ struct SegmentedStreamSlider: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.conversionTheme) private var theme
 
+    /// 设置绑定值、范围、步长及分段数量；至少保留两个显示分段。
     init(
         value: Binding<Double>,
         in range: ClosedRange<Double> = 0.1 ... 1,
@@ -94,6 +101,7 @@ struct SegmentedStreamSlider: View {
         return min(Int((percentage * Double(totalSegments)).rounded()), totalSegments)
     }
 
+    /// 绘制一个分段，并根据激活状态和减少动态效果设置调整视觉反馈。
     private func segment(index: Int, streamOffset: CGFloat) -> some View {
         let isActive = index < activeSegment
 
@@ -132,12 +140,14 @@ struct SegmentedStreamSlider: View {
         .animation(.spring(response: 0.25, dampingFraction: 0.72), value: isActive)
     }
 
+    /// 将时间映射为循环流光偏移，不改变实际滑块值。
     private func streamOffset(at date: Date) -> CGFloat {
         let duration = 1.8
         let elapsed = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: duration)
         return -0.35 + CGFloat(elapsed / duration) * 1.6
     }
 
+    /// 将拖动位置映射到滑块值，使选择随手势连续更新。
     private func dragGesture(width: CGFloat) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { gesture in
@@ -148,6 +158,7 @@ struct SegmentedStreamSlider: View {
             }
     }
 
+    /// 限制并更新绑定值，使用分段间隔吸附到可选位置。
     private func setValue(_ newValue: Double) {
         let clamped = min(max(newValue, range.lowerBound), range.upperBound)
         let stepped = ((clamped - range.lowerBound) / step).rounded() * step + range.lowerBound

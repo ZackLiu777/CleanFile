@@ -1,7 +1,11 @@
+// Premium 商品目录、购买与恢复操作的界面状态。
+// 价格和试用资格来自 StoreKit；目录不可用时不伪造商品信息。
+// 加载任务使用代次与取消机制，防止过期请求覆盖较新的商品结果。
 import Combine
 import Foundation
 import StoreKit
 
+/// 可展示的订阅或终身方案，以及对应的 StoreKit 商品身份和类型。
 enum PremiumPlan: String, CaseIterable, Identifiable {
     case annual, monthly, lifetime
 
@@ -29,8 +33,11 @@ enum PremiumPlan: String, CaseIterable, Identifiable {
 }
 
 @MainActor
+/// 管理方案选择、商品加载和互斥的购买/恢复交互。
 final class PremiumPurchaseViewModel: ObservableObject {
+    /// 商品目录的加载状态，与购买操作状态分开维护。
     enum CatalogueState: Equatable { case idle, loading, available, unavailable }
+    /// 正在执行的商店操作；购买和恢复不会同时提交。
     enum Activity: Equatable { case idle, purchasing, restoring }
 
     @Published var selectedPlan: PremiumPlan = .annual
@@ -46,6 +53,7 @@ final class PremiumPurchaseViewModel: ObservableObject {
     private var timeoutTask: Task<Void, Never>?
     private var loadGeneration = 0
 
+    /// 注入商品和试用资格查询；默认实现使用 StoreKit。
     init(
         productLookup: @escaping @MainActor () async throws -> [Product] = {
             guard PremiumConfiguration.purchasesEnabled,
@@ -110,6 +118,7 @@ final class PremiumPurchaseViewModel: ObservableObject {
         return task
     }
 
+    /// 取消当前目录查询并推进代次，忽略可能迟到的旧结果。
     func cancelProductLoading() {
         loadGeneration &+= 1
         loadTask?.cancel()
@@ -121,11 +130,13 @@ final class PremiumPurchaseViewModel: ObservableObject {
         }
     }
 
+    /// 结束旧查询后重新请求价格和试用资格。
     func retryProducts() {
         cancelProductLoading()
         loadProducts()
     }
 
+    /// 根据真实商品价格与周期生成文案；商品或周期不可用时返回 nil。
     func priceDescription(for plan: PremiumPlan) -> String? {
         guard let product = products[plan] else { return nil }
         if plan == .lifetime {
@@ -136,6 +147,7 @@ final class PremiumPurchaseViewModel: ObservableObject {
         return String(format: AppL10n.string("premium.price.recurring"), product.displayPrice, period)
     }
 
+    /// 仅为已确认有资格的免费试用生成说明，并包含后续价格。
     func offerDescription(for plan: PremiumPlan) -> String? {
         guard eligibleIntroOffers.contains(plan),
               let offer = products[plan]?.subscription?.introductoryOffer,
@@ -145,6 +157,7 @@ final class PremiumPurchaseViewModel: ObservableObject {
         return String(format: AppL10n.string("premium.offer.free"), period, price)
     }
 
+    /// 发起购买并交由权益对象处理交易；返回是否已有或成功获得访问权。
     func purchase(using entitlementStore: PremiumEntitlementStore) async -> Bool {
         guard !isBusy else { return false }
         if entitlementStore.accessState == .entitled { return true }
@@ -174,6 +187,7 @@ final class PremiumPurchaseViewModel: ObservableObject {
         }
     }
 
+    /// 用户主动恢复时同步 App Store，再按核验结果更新反馈。
     func restore(using entitlementStore: PremiumEntitlementStore) async -> Bool {
         guard !isBusy else { return false }
         activity = .restoring
@@ -197,6 +211,7 @@ final class PremiumPurchaseViewModel: ObservableObject {
         return false
     }
 
+    /// 只接收 ID 与预期商品类型同时匹配的结果。
     private func installProducts(_ fetched: [Product]) {
         var catalogue: [PremiumPlan: Product] = [:]
         for plan in PremiumPlan.allCases {
@@ -207,6 +222,7 @@ final class PremiumPurchaseViewModel: ObservableObject {
         catalogueState = catalogue.isEmpty ? .unavailable : .available
     }
 
+    /// 清理属于当前代次的加载任务，不影响已开始的新请求。
     private func finishLoading(generation: Int) {
         guard generation == loadGeneration else { return }
         timeoutTask?.cancel()
@@ -214,6 +230,7 @@ final class PremiumPurchaseViewModel: ObservableObject {
         loadTask = nil
     }
 
+    /// 按应用语言格式化订阅周期，并拒绝溢出或无法识别的周期。
     private static func periodDescription(_ period: Product.SubscriptionPeriod, count: Int = 1) -> String? {
         let (value, overflow) = period.value.multipliedReportingOverflow(by: count)
         guard !overflow, value > 0 else { return nil }
@@ -234,6 +251,7 @@ final class PremiumPurchaseViewModel: ObservableObject {
         return formatter.string(from: components)
     }
 
+    /// 识别系统与网络取消，避免把用户取消显示为购买失败。
     private static func isCancellation(_ error: Error) -> Bool {
         if error is CancellationError { return true }
         if let error = error as? StoreKitError, case .userCancelled = error { return true }

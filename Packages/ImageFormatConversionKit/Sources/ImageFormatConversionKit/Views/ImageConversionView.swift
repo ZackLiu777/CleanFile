@@ -1,7 +1,8 @@
-//
-//  文件职责：声明 ImageConversion 界面结构、交互入口与展示状态。
-//  所属模块：ImageFormatConversionKit。
-//
+// 图片转换入口、设置和文件列表界面。
+// 协调照片及文件导入、输出选项、转换进度、结果操作和快捷压缩展示。
+// 图片检测、转换和工作区文件管理由状态对象与底层引擎执行。
+// 页面通过图片状态对象接收导入和转换结果，并复用共享文件列表和操作栏。
+// 可显示专业设置或快捷压缩入口；取消、失败和结果清理仍由对应业务流程处理。
 
 import SwiftUI
 import StoreKit
@@ -13,8 +14,8 @@ import UIKit
 import AppKit
 #endif
 
+/// 图片转换入口，负责组装主题与内容页面。
 @MainActor
-/// 定义 `ImageConversionView` 的值语义数据与相关行为。
 public struct ImageConversionView: View {
     private let theme: ConversionTheme
     @AppStorage("conversion.selectedMode") private var mode: ConversionMode = .image
@@ -22,7 +23,7 @@ public struct ImageConversionView: View {
     @State private var transitionDirection: CGFloat = 1
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 使用指定主题创建图片转换入口。
     public init(theme: ConversionTheme = .system) {
         self.theme = theme
     }
@@ -128,7 +129,7 @@ public struct ImageConversionView: View {
     }
 }
 
-/// 定义 `ConversionMode` 使用的有限状态或选项集合。
+/// 标识图片、视频和音频转换模式，并提供对应的显示位置。
 private enum ConversionMode: String, Hashable {
     case image
     case video
@@ -143,7 +144,7 @@ private enum ConversionMode: String, Hashable {
     }
 }
 
-/// 定义 `SupportedFormatsSheet` 的值语义数据与相关行为。
+/// 按转换模式展示支持的导入、导出格式和视频编码。
 private struct SupportedFormatsSheet: View {
     let mode: ConversionMode
     @Environment(\.dismiss) private var dismiss
@@ -214,13 +215,13 @@ private struct SupportedFormatsSheet: View {
         ImageConversionEngine.supportedInputFormatNames
     }
 
-    /// 生成 `formatName` 使用的展示文本，保持格式与本地化规则一致。
+    /// 读取图片输出格式的显示名称，供格式列表展示。
     private func formatName(_ format: ImageOutputFormat) -> String {
         format.displayName
     }
 }
 
-/// 定义 `FormatChipSection` 的值语义数据与相关行为。
+/// 将一组格式名称以自适应网格展示。
 private struct FormatChipSection: View {
     let title: String
     let formats: [String]
@@ -252,8 +253,8 @@ private struct FormatChipSection: View {
     }
 }
 
+/// 协调图片导入、输出设置、文件列表、转换进度和确认交互。
 @MainActor
-/// 定义 `ImageConversionContentView` 的值语义数据与相关行为。
 struct ImageConversionContentView: View {
     let isQuickCompression: Bool
     @Environment(\.requestReview) private var requestReview
@@ -266,7 +267,7 @@ struct ImageConversionContentView: View {
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var isClearAllConfirmationPresented = false
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 注入图片转换状态与导入会话，并记录是否从快捷压缩入口进入。
     init(
         viewModel: ImageConversionViewModel = ImageConversionViewModel(),
         importSession: ConversionImportSession = ConversionImportSession(),
@@ -417,7 +418,7 @@ struct ImageConversionContentView: View {
         .converterCard()
     }
 
-    /// 处理 `importPhotos` 导入流程，并将用户选择安全地交给后续处理。
+    /// 从照片选择器逐项取得图片和资源标识；按会话过滤迟到的进度回调，再交由模型暂存。
     private func importPhotos(_ selections: [PhotosPickerItem]) async {
         let sessionID = UUID()
         importSession.librarySessionID = sessionID
@@ -479,7 +480,7 @@ struct ImageConversionContentView: View {
         )
     }
 
-    /// 处理 `importFiles` 导入流程，并将用户选择安全地交给后续处理。
+    /// 在文件导入期间维护待处理数量与临时预览，结束后清理这些展示状态。
     private func importFiles(_ urls: [URL]) async {
         importSession.pendingCount = urls.count
         importSession.previewURLs = urls
@@ -541,7 +542,7 @@ struct ImageConversionContentView: View {
         }
     }
 
-    /// 封装 `imageSubtitle` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 检查信息可用时显示源文件与输出大小；否则显示当前状态。
     private func imageSubtitle(_ item: ImageConversionItem) -> String {
         guard let info = item.info else { return item.status.conversionPresentation.label }
         return ConversionFileSizePresentation.description(
@@ -575,6 +576,7 @@ struct ImageConversionContentView: View {
 
 }
 
+/// 集中展示导入、清理和转换等主要动作，并根据状态控制可用性。
 @MainActor
 struct ConversionNeoBrutalistActionBar: View {
     @Environment(\.conversionTheme) private var theme
@@ -648,6 +650,7 @@ struct ConversionNeoBrutalistActionBar: View {
         .padding(.bottom, 8)
     }
 
+    /// 按传入的状态、标题和回调构造操作栏按钮。
     private func actionButton(
         title: String,
         systemImage: String,
@@ -666,9 +669,11 @@ struct ConversionNeoBrutalistActionBar: View {
 
 #if DEBUG
 @MainActor
+/// 为界面自动化单独展示转换操作栏。
 public struct ConversionActionBarUITestHarness: View {
     private let theme: ConversionTheme
 
+    /// 使用指定主题创建操作栏测试入口。
     public init(theme: ConversionTheme = .system) {
         self.theme = theme
     }
@@ -691,8 +696,10 @@ public struct ConversionActionBarUITestHarness: View {
 }
 #endif
 
+/// 为转换操作栏提供统一的表面样式。
 private struct ConversionActionBarSurfaceModifier: ViewModifier {
     @Environment(\.conversionTheme) private var theme
+    /// 将对应卡片或按钮表面样式应用于内容。
     func body(content: Content) -> some View {
         content.background(
             theme.cardSurface,
@@ -701,12 +708,14 @@ private struct ConversionActionBarSurfaceModifier: ViewModifier {
     }
 }
 
+/// 定义转换操作按钮的按压外观。
 struct ConversionPhysicalActionButtonStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     let faceColor: Color
     let edgeColor: Color
 
+    /// 根据按压状态绘制按钮并提供视觉反馈。
     func makeBody(configuration: Configuration) -> some View {
         let isPressed = configuration.isPressed
 
@@ -736,8 +745,10 @@ struct ConversionPhysicalActionButtonStyle: ButtonStyle {
     }
 }
 
+/// 为按钮内容添加实体按钮表面效果。
 private struct ConversionPhysicalButtonFaceModifier: ViewModifier {
     let color: Color
+    /// 将对应卡片或按钮表面样式应用于内容。
     func body(content: Content) -> some View {
         content.background(
             color,
@@ -746,6 +757,7 @@ private struct ConversionPhysicalButtonFaceModifier: ViewModifier {
     }
 }
 
+/// 展示转换页面的导入按钮标签。
 struct ConversionImportButtonLabel: View {
     let title: String
     let systemImage: String
@@ -763,8 +775,8 @@ struct ConversionImportButtonLabel: View {
     }
 }
 
+/// 组合图片格式、质量、尺寸与元数据设置控件。
 @MainActor
-/// 定义 `ImageConversionSettingsCard` 的值语义数据与相关行为。
 private struct ImageConversionSettingsCard: View {
     @Environment(\.conversionTheme) private var theme
     @Bindable var viewModel: ImageConversionViewModel
@@ -882,6 +894,7 @@ private struct ImageConversionSettingsCard: View {
         ].joined(separator: " · ")
     }
 
+    /// 为紧凑布局构造带绑定选项的选择行。
     private func compactPickerRow<Option: Hashable>(
         title: String,
         selection: Binding<Option>,
@@ -913,7 +926,7 @@ private struct ImageConversionSettingsCard: View {
         }
     }
 
-    /// 封装 `metadataTitle` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将元数据保留策略映射为本地化设置名称。
     private func metadataTitle(_ policy: ImageMetadataPolicy) -> String {
         switch policy {
         case .preserve: L10n.string("metadata.preserve")
@@ -922,7 +935,7 @@ private struct ImageConversionSettingsCard: View {
         }
     }
 
-    /// 封装 `resizeTitle` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将图片缩放预设映射为完整的本地化设置名称。
     private func resizeTitle(_ preset: ImageResizePreset) -> String {
         switch preset {
         case .original: L10n.string("resize.original")
@@ -935,8 +948,8 @@ private struct ImageConversionSettingsCard: View {
 
 }
 
+/// 根据单个图片项目的状态展示文件信息和可用操作。
 @MainActor
-/// 定义 `ImageConversionFileRow` 的值语义数据与相关行为。
 private struct ImageConversionFileRow: View {
     @Environment(\.conversionTheme) private var theme
 
@@ -1043,7 +1056,7 @@ private struct ImageConversionFileRow: View {
     }
 }
 
-/// 定义 `NoticeView` 的值语义数据与相关行为。
+/// 以提示图标和文本展示转换页面中的说明信息。
 struct NoticeView: View {
     let message: String
 
@@ -1060,8 +1073,8 @@ struct NoticeView: View {
     }
 }
 
+/// 展示主转换操作按钮，根据可用状态控制交互并适配主题材质。
 @MainActor
-/// 定义 `PrimaryConversionButton` 的值语义数据与相关行为。
 struct PrimaryConversionButton: View {
     @Environment(\.conversionTheme) private var theme
 
@@ -1102,13 +1115,13 @@ struct PrimaryConversionButton: View {
     }
 }
 
-/// 定义 `ConverterCardModifier` 的值语义数据与相关行为。
+/// 按主题和系统能力选择玻璃材质或普通卡片背景。
 private struct ConverterCardModifier: ViewModifier {
     @Environment(\.conversionTheme) private var theme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let cornerRadius: CGFloat
 
-    /// 封装 `body` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 根据系统版本、主题及减少透明度设置选择卡片外观。
     @ViewBuilder
     func body(content: Content) -> some View {
         #if os(iOS)
@@ -1122,6 +1135,7 @@ private struct ConverterCardModifier: ViewModifier {
         #endif
     }
 
+    /// 在系统材质不可用的路径中绘制卡片背景。
     private func fallbackCard(_ content: Content) -> some View {
         content
             .background(
@@ -1135,12 +1149,14 @@ private struct ConverterCardModifier: ViewModifier {
     }
 }
 
+/// 提供转换界面强调卡片样式。
 private struct ConverterAccentCardModifier: ViewModifier {
     @Environment(\.conversionTheme) private var theme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let cornerRadius: CGFloat
 
     @ViewBuilder
+    /// 将对应卡片或按钮表面样式应用于内容。
     func body(content: Content) -> some View {
         #if os(iOS)
         if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
@@ -1156,6 +1172,7 @@ private struct ConverterAccentCardModifier: ViewModifier {
         #endif
     }
 
+    /// 在系统材质不可用的路径中绘制卡片背景。
     private func fallbackCard(_ content: Content) -> some View {
         content
             .background(
@@ -1173,12 +1190,14 @@ private struct ConverterAccentCardModifier: ViewModifier {
     }
 }
 
+/// 提供转换界面内凹卡片样式。
 private struct ConverterInsetCardModifier: ViewModifier {
     @Environment(\.conversionTheme) private var theme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let cornerRadius: CGFloat
 
     @ViewBuilder
+    /// 将对应卡片或按钮表面样式应用于内容。
     func body(content: Content) -> some View {
         #if os(iOS)
         if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
@@ -1192,31 +1211,33 @@ private struct ConverterInsetCardModifier: ViewModifier {
     }
 }
 
-/// 扩展 `View`，集中实现当前文件所需的附加能力。
+/// 为转换页面提供统一的卡片和滚动边缘样式。
 extension View {
-    /// 执行 `converterCard` 转换流程，并按当前配置生成输出结果。
+    /// 将标准转换卡片样式应用于视图。
     func converterCard(cornerRadius: CGFloat = 14) -> some View {
         modifier(ConverterCardModifier(cornerRadius: cornerRadius))
     }
 
+    /// 将强调卡片样式应用于当前视图。
     func converterAccentCard(cornerRadius: CGFloat = 20) -> some View {
         modifier(ConverterAccentCardModifier(cornerRadius: cornerRadius))
     }
 
+    /// 将内凹卡片样式应用于当前视图。
     func converterInsetCard(cornerRadius: CGFloat = 14) -> some View {
         modifier(ConverterInsetCardModifier(cornerRadius: cornerRadius))
     }
 
-    /// 执行 `converterSoftScrollEdge` 转换流程，并按当前配置生成输出结果。
+    /// 在系统支持时为垂直滚动内容应用柔和边缘效果。
     func converterSoftScrollEdge() -> some View {
         modifier(ConverterSoftScrollEdgeModifier())
     }
 }
 
-/// 定义 `ConverterSoftScrollEdgeModifier` 的值语义数据与相关行为。
+/// 为支持该能力的系统启用柔和滚动边缘，旧系统保留原视图。
 private struct ConverterSoftScrollEdgeModifier: ViewModifier {
+    /// 按系统版本选择滚动边缘效果。
     @ViewBuilder
-    /// 封装 `body` 对应的局部行为，供当前类型在统一入口下复用。
     func body(content: Content) -> some View {
         if #available(iOS 26.0, macOS 26.0, *) {
             content.scrollEdgeEffectStyle(.soft, for: .vertical)

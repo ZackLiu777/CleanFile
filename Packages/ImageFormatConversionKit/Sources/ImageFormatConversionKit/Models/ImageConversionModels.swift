@@ -1,12 +1,15 @@
 //
-//  文件职责：定义 ImageConversion 领域使用的数据模型与状态语义。
-//  所属模块：ImageFormatConversionKit。
+//  定义图片转换的格式能力、尺寸、背景、元数据与名称冲突策略。
+//  请求保存转换选项，检查信息和结果分别描述源图与已提交的输出。
+//  批量结果保留逐项成功、失败和取消状态；引擎负责实际验证与文件处理。
+//  图片引擎使用请求选择编码和输出策略，页面使用检查结果与批次进度展示状态。
+//  类型本身不访问文件；实际格式支持、错误和取消由引擎在执行时判断。
 //
 
 import Foundation
 import UniformTypeIdentifiers
 
-/// 定义 `ImageOutputFormat` 使用的有限状态或选项集合。
+/// 图片输出格式及其扩展名、类型标识和编码能力。
 public enum ImageOutputFormat: String, CaseIterable, Codable, Identifiable, Sendable {
     case jpeg
     case png
@@ -67,6 +70,7 @@ public enum ImageOutputFormat: String, CaseIterable, Codable, Identifiable, Send
     }
 }
 
+/// 指定不透明填充色或保留透明背景；实际支持情况由引擎验证。
 public enum ImageBackground: String, CaseIterable, Identifiable, Sendable {
     case white, black, transparent
     public var id: Self { self }
@@ -79,7 +83,7 @@ public enum ImageBackground: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// 定义 `ImageMetadataPolicy` 使用的有限状态或选项集合。
+/// 控制输出保留全部元数据、移除 GPS 或移除全部元数据。
 public enum ImageMetadataPolicy: String, CaseIterable, Codable, Identifiable, Sendable {
     case preserve
     case removeGPS
@@ -88,7 +92,7 @@ public enum ImageMetadataPolicy: String, CaseIterable, Codable, Identifiable, Se
     public var id: Self { self }
 }
 
-/// 定义 `ImageResizePolicy` 使用的有限状态或选项集合。
+/// 指定原始尺寸、最长边限制或完整显示图像的方形画布。
 public enum ImageResizePolicy: Hashable, Codable, Sendable {
     case original
     case fit(maxPixelDimension: Int)
@@ -96,20 +100,20 @@ public enum ImageResizePolicy: Hashable, Codable, Sendable {
     case square1024
 }
 
-/// 定义 `ImageNameCollisionPolicy` 使用的有限状态或选项集合。
+/// 目标名称冲突时选择生成唯一名称、覆盖或报错。
 public enum ImageNameCollisionPolicy: String, Codable, Sendable {
     case makeUnique
     case overwrite
     case fail
 }
 
-/// 定义 `ImageFlattenColor` 的值语义数据与相关行为。
+/// 不透明背景的 RGB 颜色；分量限制在零到一之间。
 public struct ImageFlattenColor: Hashable, Codable, Sendable {
     public let red: Double
     public let green: Double
     public let blue: Double
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 保存 RGB 分量；非有限数值和越界值会被限制到有效颜色范围。
     public init(red: Double, green: Double, blue: Double) {
         self.red = Self.clamped(red)
         self.green = Self.clamped(green)
@@ -119,14 +123,14 @@ public struct ImageFlattenColor: Hashable, Codable, Sendable {
     public static let white = ImageFlattenColor(red: 1, green: 1, blue: 1)
     public static let black = ImageFlattenColor(red: 0, green: 0, blue: 0)
 
-    /// 封装 `clamped` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将非有限分量视为零，其余分量限制在有效颜色范围内。
     private static func clamped(_ value: Double) -> Double {
         guard value.isFinite else { return 0 }
         return min(max(value, 0), 1)
     }
 }
 
-/// 定义 `ImageConversionRequest` 的值语义数据与相关行为。
+/// 图片转换的源、目标和编码选项，包含隐私与文件名冲突策略。
 public struct ImageConversionRequest: Hashable, Sendable {
     public let sourceURL: URL
     public let destinationDirectory: URL
@@ -139,7 +143,7 @@ public struct ImageConversionRequest: Hashable, Sendable {
     public let collisionPolicy: ImageNameCollisionPolicy
     public let preferredBaseName: String?
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 保存源地址、目标目录及编码、元数据、缩放和重名处理选项，不在初始化时执行转换。
     public init(
         sourceURL: URL,
         destinationDirectory: URL,
@@ -171,7 +175,7 @@ public struct ImageConversionRequest: Hashable, Sendable {
     }
 }
 
-/// 定义 `ImageAssetInfo` 的值语义数据与相关行为。
+/// 源图片检查结果，包括类型、尺寸、帧数、文件大小及透明度。
 public struct ImageAssetInfo: Hashable, Identifiable, Sendable {
     public var id: URL { sourceURL }
 
@@ -183,7 +187,7 @@ public struct ImageAssetInfo: Hashable, Identifiable, Sendable {
     public let fileSizeBytes: Int64
     public let hasAlpha: Bool
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 记录源图片类型、尺寸、帧数、文件大小与透明度等检查结果。
     public init(
         sourceURL: URL,
         typeIdentifier: String?,
@@ -203,7 +207,7 @@ public struct ImageAssetInfo: Hashable, Identifiable, Sendable {
     }
 }
 
-/// 定义 `ImageConversionResult` 的值语义数据与相关行为。
+/// 成功提交的图片输出及其尺寸、大小和处理耗时。
 public struct ImageConversionResult: Hashable, Identifiable, Sendable {
     public var id: URL { outputURL }
 
@@ -216,7 +220,7 @@ public struct ImageConversionResult: Hashable, Identifiable, Sendable {
     public let pixelHeight: Int
     public let duration: Duration
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 记录源文件、输出文件、格式、大小、像素尺寸和转换耗时。
     public init(
         sourceURL: URL,
         outputURL: URL,
@@ -238,7 +242,7 @@ public struct ImageConversionResult: Hashable, Identifiable, Sendable {
     }
 }
 
-/// 定义 `ImageConversionError` 使用的有限状态或选项集合。
+/// 图片检查、解码、编码、路径冲突、提交及取消的可区分错误。
 public enum ImageConversionError: Error, Hashable, Sendable {
     case sourceNotReachable(URL)
     case cannotOpenSource(URL)
@@ -260,7 +264,7 @@ public enum ImageConversionError: Error, Hashable, Sendable {
     case unexpected(String)
 }
 
-/// 扩展 `ImageConversionError`，集中实现当前文件所需的附加能力。
+/// 将转换错误映射为本地化描述；涉及路径时只展示文件名。
 extension ImageConversionError: LocalizedError {
     public var errorDescription: String? {
         switch self {
@@ -304,28 +308,28 @@ extension ImageConversionError: LocalizedError {
     }
 }
 
-/// 定义 `ImageConversionFailure` 的值语义数据与相关行为。
+/// 将一次失败与其源文件关联，供批量结果展示。
 public struct ImageConversionFailure: Hashable, Identifiable, Sendable {
     public var id: URL { sourceURL }
 
     public let sourceURL: URL
     public let error: ImageConversionError
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 将源文件与转换错误关联，供批量结果逐项报告。
     public init(sourceURL: URL, error: ImageConversionError) {
         self.sourceURL = sourceURL
         self.error = error
     }
 }
 
-/// 定义 `ImageBatchConversionResult` 的值语义数据与相关行为。
+/// 批量转换的成功项、失败项、请求总数和取消标记。
 public struct ImageBatchConversionResult: Hashable, Sendable {
     public let successes: [ImageConversionResult]
     public let failures: [ImageConversionFailure]
     public let totalRequested: Int
     public let wasCancelled: Bool
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 保存成功项、失败项、请求总数和取消标志，保留部分成功结果。
     public init(
         successes: [ImageConversionResult],
         failures: [ImageConversionFailure],
@@ -339,7 +343,7 @@ public struct ImageBatchConversionResult: Hashable, Sendable {
     }
 }
 
-/// 定义 `ImageBatchProgress` 的值语义数据与相关行为。
+/// 一次批量转换的完成计数及最近完成的源文件。
 public struct ImageBatchProgress: Hashable, Sendable {
     public let completed: Int
     public let total: Int
@@ -347,12 +351,13 @@ public struct ImageBatchProgress: Hashable, Sendable {
     public let failed: Int
     public let lastSourceURL: URL?
 
+    /// 按完成项数计算进度；空批次返回零。
     public var fractionCompleted: Double {
         guard total > 0 else { return 0 }
         return Double(completed) / Double(total)
     }
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 记录批处理完成数、总数、成功与失败数量以及最近完成的源文件。
     public init(
         completed: Int,
         total: Int,
@@ -368,7 +373,7 @@ public struct ImageBatchProgress: Hashable, Sendable {
     }
 }
 
-/// 定义 `ImageResizePreset` 使用的有限状态或选项集合。
+/// 展示层使用的尺寸预设，并映射为引擎接受的尺寸策略。
 public enum ImageResizePreset: Int, CaseIterable, Identifiable, Sendable {
     case original = 0
     case ultraHD = 4096

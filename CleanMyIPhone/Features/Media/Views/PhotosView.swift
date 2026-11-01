@@ -1,19 +1,20 @@
+// 照片首页、容量概览和分类详情。
+// 根据授权、分析与删除状态展示内容；媒体数据与实际操作由相册状态对象提供。
+// 首页将相册授权、容量和分类结果连接到快速清理、压缩、预览与审阅入口。
+// 详情视图维护当前选择，并通过相册模型提交用户确认的操作；部分分析结果可单独展示。
+
 //
 //  PhotosView.swift
 //  CleanMyIPhone
 //
 
-//
-//  文件职责：声明 Photos 界面结构、交互入口与展示状态。
-//  所属模块：CleanMyIPhone。
-//
 
 import Photos
 import ImageFormatConversionKit
 import SwiftUI
 //import UIKit
 
-/// 定义 `PhotosView` 的值语义数据与相关行为。
+/// 照片首页根据授权、资源分析和容量状态展示概览及分类入口。
 struct PhotosView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -28,6 +29,7 @@ struct PhotosView: View {
     @State private var showsQuickClean = false
     @State private var swipeReviewRequest: SwipeReviewRequest?
 
+    /// 冻结一次审阅所需的资源清单及建议删除集合。
     private struct SwipeReviewRequest: Identifiable {
         let id = UUID()
         let assetIDs: [String]
@@ -142,6 +144,7 @@ struct PhotosView: View {
         }
     }
 
+    /// 收集当前照片标识和可用建议，在进入时固定本次审阅清单。
     private func openAllPhotosSwipeReview() {
         // Freeze the review inventory once at entry, rather than rebuilding it for each swipe.
         let identifiers = viewModel.assets.compactMap { asset in
@@ -343,6 +346,7 @@ struct PhotosView: View {
         }
     }
 
+    /// 将指定资源集合的估算大小格式化为文件大小文案。
     private func sizeText(_ ids: Set<String>) -> String {
         ByteCountFormatter.string(fromByteCount: viewModel.estimatedByteCount(for: ids), countStyle: .file)
     }
@@ -381,7 +385,7 @@ struct PhotosView: View {
         }
     }
 
-    /// 启动 `animateStorageBarIfNeeded` 动画，并确保展示状态与当前页面生命周期一致。
+    /// 页面活跃时更新容量条；关闭动画或启用减少动态效果时直接显示最终值。
     private func animateStorageBarIfNeeded() {
         guard isTabActive, let storage = viewModel.storageSnapshot else { return }
         guard themeSettings.interfaceAnimationsEnabled, !reduceMotion else {
@@ -400,7 +404,7 @@ struct PhotosView: View {
         }
     }
 
-    /// 执行 `analysisTitle` 分析流程，在遵守文件访问边界的前提下生成结果。
+    /// 将当前分析阶段映射为界面进度文案。
     private func analysisTitle(for phase: MediaAnalysisPhase) -> LocalizedStringKey {
         switch phase {
         case .discovering: "Classifying videos…"
@@ -409,7 +413,7 @@ struct PhotosView: View {
         }
     }
 
-    /// 封装 `permissionView` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 展示授权状态说明及可选操作按钮。
     private func permissionView(
         title: LocalizedStringKey,
         message: LocalizedStringKey,
@@ -440,7 +444,7 @@ struct PhotosView: View {
     }
 }
 
-/// 定义 `MediaDashboardResultsView` 的值语义数据与相关行为。
+/// 将完整或部分媒体分类结果展示为首页分类入口。
 private struct MediaDashboardResultsView: View {
     let result: MediaClassificationResult
     let isPartial: Bool
@@ -534,7 +538,7 @@ private struct MediaDashboardResultsView: View {
         ]
     }
 
-    /// 解析 `categoryLink` 对应的业务语义，并返回稳定的分类或映射结果。
+    /// 创建分类详情入口，并传递资源、保护项和建议删除项。
     private func categoryLink(_ category: MediaCategorySummary) -> some View {
         NavigationLink {
             MediaCategoryDetailView(
@@ -559,17 +563,17 @@ private struct MediaDashboardResultsView: View {
         .disabled(category.assetIDs.isEmpty)
     }
 
-    /// 封装 `itemCount` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 按照当前语言格式化资源数量。
     private func itemCount(_ count: Int) -> String {
         String.localizedStringWithFormat(AppL10n.string("%lld items"), Int64(count))
     }
 
-    /// 解析 `categoryDetail` 对应的业务语义，并返回稳定的分类或映射结果。
+    /// 组合分类的资源数量与估算大小。
     private func categoryDetail(_ assetIDs: [String]) -> String {
         "\(itemCount(assetIDs.count)) · \(estimatedSizeText(for: assetIDs))"
     }
 
-    /// 封装 `estimatedSizeText` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 按去重后的资源标识估算占用空间并格式化。
     private func estimatedSizeText(for assetIDs: [String]) -> String {
         let byteCount = viewModel.estimatedByteCount(for: Set(assetIDs))
         return ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
@@ -578,7 +582,7 @@ private struct MediaDashboardResultsView: View {
 
 }
 
-/// 定义 `MediaStorageOverview` 的值语义数据与相关行为。
+/// 展示设备容量与照片、视频等占用比例。
 struct MediaStorageOverview: View {
     @Environment(\.appTheme) private var theme
     let storage: DeviceStorageSnapshot
@@ -674,7 +678,7 @@ struct MediaStorageOverview: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// 计算 `fraction` 所需的派生值，避免展示层重复实现相同规则。
+    /// 计算字节数占设备总容量的比例，并限制在零到一之间。
     private func fraction(for bytes: Int64) -> Double {
         guard storage.totalBytes > 0 else { return 0 }
         return min(max(Double(bytes) / Double(storage.totalBytes), 0), 1)
@@ -685,7 +689,7 @@ struct MediaStorageOverview: View {
         return min(max(animatedUsedFraction / storage.usedFraction, 0), 1)
     }
 
-    /// 封装 `displayWidths` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 按容量占比和动画进度计算各色段宽度，并保持少量占用可见。
     private func displayWidths(totalWidth: CGFloat) -> [CGFloat] {
         guard totalWidth > 0 else { return Array(repeating: 0, count: segments.count) }
 
@@ -708,20 +712,20 @@ struct MediaStorageOverview: View {
         return widths
     }
 
-    /// 计算 `byteCountText` 所需的派生值，避免展示层重复实现相同规则。
+    /// 按文件大小格式化字节数。
     private func byteCountText(_ byteCount: Int64) -> String {
         ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
     }
 }
 
-/// 定义 `MediaStorageSegment` 的值语义数据与相关行为。
+/// 保存容量图中一段的名称、字节数及颜色。
 private struct MediaStorageSegment {
     let title: String
     let bytes: Int64
     let color: Color
 }
 
-/// 定义 `MediaCategorySummary` 的值语义数据与相关行为。
+/// 保存分类展示与审阅需要的资源、保护项和建议删除项。
 private struct MediaCategorySummary: Identifiable {
     let showsDateGroups: Bool
     let title: String
@@ -730,6 +734,7 @@ private struct MediaCategorySummary: Identifiable {
     let protectedAssetIDs: Set<String>
     let suggestedDeletionIDs: Set<String>
 
+    /// 创建媒体分类展示数据，并携带审阅时的保护与建议删除集合。
     init(title: String, assetIDs: [String], systemImage: String, showsDateGroups: Bool = false,
          protectedAssetIDs: Set<String> = [], suggestedDeletionIDs: Set<String> = []) {
         self.showsDateGroups = showsDateGroups
@@ -743,7 +748,7 @@ private struct MediaCategorySummary: Identifiable {
     var id: String { title }
 }
 
-/// 定义 `MediaCategoryCard` 的值语义数据与相关行为。
+/// 展示分类名称、摘要和代表性缩略图。
 private struct MediaCategoryCard: View {
     let title: String
     let detail: String
@@ -798,7 +803,7 @@ private struct MediaCategoryCard: View {
     }
 }
 
-/// 定义 `MediaCategoryDetailView` 的值语义数据与相关行为。
+/// 展示单个分类中的媒体，协调选择、预览和删除确认。
 private struct MediaCategoryDetailView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -922,6 +927,7 @@ private struct MediaCategoryDetailView: View {
         }
     }
 
+    /// 展示相似照片组中的单张资源，标记保留项并允许打开预览。
     private func groupPhoto(_ id: String, keeper: Bool, height: CGFloat) -> some View {
         Button { previewAssetID = id } label: {
             Color.clear
@@ -1267,7 +1273,7 @@ private struct MediaCategoryDetailView: View {
     }
 }
 
-/// 定义 `MediaAssetThumbnailView` 的值语义数据与相关行为。
+/// 展示单个资源的缩略图，并在需要时请求图片。
 struct MediaAssetThumbnailView: View {
     let assetID: String
     @ObservedObject var viewModel: PhotoLibraryViewModel
@@ -1300,7 +1306,7 @@ struct MediaAssetThumbnailView: View {
         }
     }
 
-    /// 加载 `loadImage` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 先使用缓存缩略图，未命中时为当前资源请求适合屏幕倍率的图片。
     private func loadImage() {
         guard image == nil else { return }
         if let cachedImage = viewModel.cachedThumbnail(for: assetID) {
@@ -1318,9 +1324,9 @@ struct MediaAssetThumbnailView: View {
     }
 }
 
-/// 扩展 `View`，集中实现当前文件所需的附加能力。
+/// 提供媒体分析区域共用的卡片样式。
 private extension View {
-    /// 封装 `mediaAnalysisCard` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 添加内边距并应用主题内容卡片样式。
     func mediaAnalysisCard() -> some View {
         padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)

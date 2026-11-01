@@ -1,3 +1,10 @@
+//
+//  快速清理选择索引
+//
+//  按分类成员位掩码预计算数量和预估字节，供重复选择查询复用。
+//  同一资源属于多个已选分类时只计一次；资源或估算发生变化后须重建。
+//
+
 import Foundation
 
 /// Immutable summary index prepared off MainActor for repeated quick-clean selection queries.
@@ -8,6 +15,7 @@ import Foundation
 /// asset availability, exact sizes, or size calibration changes; queries do not
 /// consult PhotoKit or automatically update estimates.
 nonisolated struct MediaQuickCleanSelectionIndex: Sendable {
+    /// 一个选择组合对应的去重资源数与预估字节数。
     struct Summary: Equatable, Sendable {
         let selectedCount: Int
         let estimatedByteCount: Int64
@@ -15,6 +23,7 @@ nonisolated struct MediaQuickCleanSelectionIndex: Sendable {
         static let empty = Summary(selectedCount: 0, estimatedByteCount: 0)
     }
 
+    /// 索引不能表示过多分类，或字节汇总溢出时返回的构建错误。
     enum BuildError: Error, Equatable {
         case tooManyCategories
         case byteCountOverflow
@@ -27,6 +36,7 @@ nonisolated struct MediaQuickCleanSelectionIndex: Sendable {
 
     var storedSelectionCount: Int { summaries.count }
 
+    /// 根据分类成员关系建立全部选择组合的汇总，周期性检查取消并检测字节溢出。
     init(
         categoryAssetIDs: [Set<String>],
         estimatedByteCountsByID: [String: Int64]
@@ -91,6 +101,7 @@ nonisolated struct MediaQuickCleanSelectionIndex: Sendable {
         summaries[Int(UInt16(truncatingIfNeeded: selectedMask) & validSelectionMask)]
     }
 
+    /// 查询单一分类的汇总；无效索引返回空汇总。
     func summary(forCategoryAt index: Int) -> Summary {
         guard (0 ..< categoryCount).contains(index) else { return .empty }
         return summary(forSelectionMask: UInt16(1 << index))

@@ -1,10 +1,19 @@
+// 主要功能入口与设置界面的集成式界面测试。
+//
+// 覆盖媒体、存储、转换工具、帮助目录和外观设置，包含滚动发现控件与状态恢复。
+// 辅助方法通过限定次数的滚动和等待处理异步布局，避免遗漏屏幕外的入口。
+// 转换页面检查空状态和返回路径；外观用例检查控件状态及可恢复性。
+
 import XCTest
 
+/// 覆盖主要功能入口、转换指南、外观设置和帮助目录。
 final class FeatureCoverageUITests: XCTestCase {
+    /// 在断言失败时停止当前用例，避免后续操作掩盖最初失败。
     override func setUpWithError() throws {
         continueAfterFailure = false
     }
 
+    /// 确认媒体设置入口以及存储页面的状态和文件夹选择入口可见。
     @MainActor
     func testMediaAndStorageExposeTheirPrimaryActions() throws {
         let app = launchEnglishApp()
@@ -20,6 +29,7 @@ final class FeatureCoverageUITests: XCTestCase {
         XCTAssertTrue(app.buttons["storage.chooseFolder.toolbar"].exists)
     }
 
+    /// 逐一打开图片、视频和音频工具，验证空状态导入入口及返回路径。
     @MainActor
     func testEveryConversionToolCanOpenAndReturnHome() throws {
         let app = launchEnglishApp()
@@ -52,6 +62,7 @@ final class FeatureCoverageUITests: XCTestCase {
         }
     }
 
+    /// 检查转换指南中的三个工具说明和音频替换限制，并验证关闭操作。
     @MainActor
     func testConversionGuideCoversImagesVideoAndAudio() throws {
         let app = launchEnglishApp()
@@ -88,6 +99,7 @@ final class FeatureCoverageUITests: XCTestCase {
         XCTAssertFalse(app.navigationBars["Media Conversion Guide"].waitForExistence(timeout: 2))
     }
 
+    /// 验证外观开关可改变状态，并恢复初始值以减少对后续用例的影响。
     @MainActor
     func testLiquidGlassToggleChangesStateAndCanBeRestored() throws {
         let app = launchAppearance(in: launchEnglishApp())
@@ -112,6 +124,7 @@ final class FeatureCoverageUITests: XCTestCase {
         )
     }
 
+    /// 检查启用玻璃外观时转换操作栏的展示约束。
     @MainActor
     func testConversionActionBarStaysSolidWithLiquidGlassEnabled() throws {
         let app = launchEnglishApp(additionalArguments: [
@@ -125,6 +138,7 @@ final class FeatureCoverageUITests: XCTestCase {
         XCTAssertTrue(app.buttons["conversion.actionButton"].exists)
     }
 
+    /// 检查替换审核入口仅列出支持原件替换的媒体集合。
     @MainActor
     func testReplacementReviewContainsOnlyImageAndVideoCollections() throws {
         let app = launchEnglishApp(
@@ -143,6 +157,7 @@ final class FeatureCoverageUITests: XCTestCase {
         )
     }
 
+    /// 验证自定义背景支持多个渐变颜色的界面操作。
     @MainActor
     func testCustomBackgroundSupportsAtLeastFiveGradientColors() throws {
         let app = launchAppearance(in: launchEnglishApp())
@@ -174,6 +189,7 @@ final class FeatureCoverageUITests: XCTestCase {
         XCTAssertTrue(reveal(app.staticTexts["Color 5"], in: appearanceScroll).exists)
     }
 
+    /// 验证外观可在系统、浅色和深色模式之间切换。
     @MainActor
     func testAppearanceCanSwitchBetweenSystemLightAndDark() throws {
         let app = launchAppearance(
@@ -201,6 +217,7 @@ final class FeatureCoverageUITests: XCTestCase {
         }
     }
 
+    /// 逐项验证帮助目录中的文章入口可到达。
     @MainActor
     func testHelpCatalogExposesEveryArticle() throws {
         let app = launchEnglishApp()
@@ -222,6 +239,7 @@ final class FeatureCoverageUITests: XCTestCase {
         }
     }
 
+    /// 以英文及重置后的状态启动应用，保证文案与导航断言可复现。
     @MainActor
     private func launchEnglishApp(additionalArguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
@@ -234,6 +252,7 @@ final class FeatureCoverageUITests: XCTestCase {
         return app
     }
 
+    /// 从当前应用进入外观设置，并返回同一个应用实例。
     @MainActor
     private func launchAppearance(in app: XCUIApplication) -> XCUIApplication {
         tab(in: app, id: "tab.settings", label: "Settings").tap()
@@ -244,6 +263,7 @@ final class FeatureCoverageUITests: XCTestCase {
         return app
     }
 
+    /// 进入设置后打开帮助目录。
     @MainActor
     private func openHelp(in app: XCUIApplication) {
         tab(in: app, id: "tab.settings", label: "Settings").tap()
@@ -253,16 +273,19 @@ final class FeatureCoverageUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Help"].waitForExistence(timeout: 5))
     }
 
+    /// 通过共用导航辅助方法定位目标入口。
     @MainActor
     private func tab(in app: XCUIApplication, id: String, label: String) -> XCUIElement {
         appNavigationEntry(in: app, id: id, label: label)
     }
 
+    /// 返回媒体首页后定位设置按钮。
     @MainActor
     private func mediaSettingsButton(in app: XCUIApplication) -> XCUIElement {
         app.buttons["media.settings"]
     }
 
+    /// 在限定滚动次数内尝试让目标元素可见并返回该元素。
     @MainActor
     private func reveal(
         _ element: XCUIElement,
@@ -275,6 +298,7 @@ final class FeatureCoverageUITests: XCTestCase {
         return element
     }
 
+    /// 在限定滚动次数内尝试让目标元素可见并返回该元素。
     @MainActor
     private func reveal(
         _ element: XCUIElement,
@@ -287,6 +311,7 @@ final class FeatureCoverageUITests: XCTestCase {
         return element
     }
 
+    /// 操作开关，使测试能够检查状态变化。
     @MainActor
     private func tapSwitch(_ element: XCUIElement) {
         element.coordinate(
@@ -294,16 +319,19 @@ final class FeatureCoverageUITests: XCTestCase {
         ).tap()
     }
 
+    /// 在期限内等待开关值满足指定条件。
     @MainActor
     private func waitForSwitch(_ element: XCUIElement, toDifferFrom value: String) -> Bool {
         waitForSwitch(element) { $0 != value }
     }
 
+    /// 在期限内等待开关值满足指定条件。
     @MainActor
     private func waitForSwitch(_ element: XCUIElement, toEqual value: String) -> Bool {
         waitForSwitch(element) { $0 == value }
     }
 
+    /// 在期限内等待开关值满足指定条件。
     @MainActor
     private func waitForSwitch(
         _ element: XCUIElement,
@@ -322,6 +350,7 @@ final class FeatureCoverageUITests: XCTestCase {
         ) == .completed
     }
 
+    /// 等待元素暴露预期的无障碍值。
     @MainActor
     private func waitForValue(_ value: String, of element: XCUIElement) -> Bool {
         let predicate = NSPredicate { object, _ in

@@ -1,18 +1,26 @@
 //
+//  为图片、音频和视频提供转换前的输出大小估算。
+//  算法使用格式、尺寸、时长、码率及源文件信息，返回可能值和范围。
+//  变码率与内容复杂度使结果无法保证精确，展示层应将其作为估算。
+//  调用方可以使用估计区间展示可能的文件大小，而不必先执行完整转换。
+//  本文件计算展示数据，不创建输出文件，也不保证实际节省空间。
+//
+
+//
 //  ConversionSizeEstimate.swift
 //  ImageFormatConversionKit
 //
 
 import Foundation
 
-/// A deliberately bounded estimate: variable-rate codecs cannot promise an exact size
-/// before encoding, so callers present a range instead of false precision.
+/// 记录原始大小、可能输出大小及估算上下界；变码率编码无法预先保证精确值。
 public struct ConversionSizeEstimate: Equatable, Sendable {
     public let originalBytes: Int64
     public let likelyBytes: Int64
     public let lowerBoundBytes: Int64
     public let upperBoundBytes: Int64
 
+    /// 将大小限制为非负，并确保上下界顺序正确。
     init(originalBytes: Int64, likelyBytes: Int64, lowerBoundBytes: Int64, upperBoundBytes: Int64) {
         self.originalBytes = max(originalBytes, 0)
         self.likelyBytes = max(likelyBytes, 0)
@@ -20,6 +28,8 @@ public struct ConversionSizeEstimate: Equatable, Sendable {
         self.upperBoundBytes = max(max(lowerBoundBytes, upperBoundBytes), 0)
     }
 
+    /// 按目标像素、格式、质量、元数据及源内容复杂度估算图片批次大小。
+    /// 没有图片信息时返回 nil；估算不读取或编码图片内容。
     public static func image(
         infos: [ImageAssetInfo],
         format: ImageOutputFormat,
@@ -87,6 +97,7 @@ public struct ConversionSizeEstimate: Equatable, Sendable {
         )
     }
 
+    /// 按已知时长、目标格式和码率或 PCM 参数估算音频；无有效时长时返回 nil。
     static func audio(
         items: [AudioConversionItem],
         format: AudioOutputFormat,
@@ -133,6 +144,7 @@ public struct ConversionSizeEstimate: Equatable, Sendable {
         )
     }
 
+    /// 以引擎提供的视频大小估算为中心生成上下浮动范围。
     static func video(originalBytes: Int64, estimatedBytes: Int64) -> Self {
         Self(
             originalBytes: originalBytes,
@@ -180,6 +192,7 @@ public struct ConversionSizeEstimate: Equatable, Sendable {
         return Int64((payloadBytes * 1.005).rounded())
     }
 
+    /// 按尺寸策略估计输出像素数，普通最长边限制不会放大源图片。
     private static func imageTargetPixels(info: ImageAssetInfo, resize: ImageResizePreset) -> Double {
         if resize == .square1024 { return 1_024 * 1_024 }
         guard resize != .original else {
@@ -193,11 +206,13 @@ public struct ConversionSizeEstimate: Equatable, Sendable {
         return pixelCount(width: info.pixelWidth, height: info.pixelHeight) * scale * scale
     }
 
+    /// 在浮点转换后相乘，避免不可信尺寸先以整数相乘溢出。
     private static func pixelCount(width: Int, height: Int) -> Double {
         // Convert each dimension before multiplying so untrusted metadata cannot overflow Int.
         Double(max(width, 1)) * Double(max(height, 1))
     }
 
+    /// 按源类型提供内容复杂度估算的参考值，未知类型使用默认值。
     private static func expectedImageBitsPerPixel(typeIdentifier: String?) -> Double {
         let identifier = typeIdentifier?.lowercased() ?? ""
         if identifier.contains("jpeg") { return 1.5 }

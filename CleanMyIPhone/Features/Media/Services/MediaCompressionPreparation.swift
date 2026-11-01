@@ -1,7 +1,15 @@
+//
+//  压缩清单准备
+//
+//  筛选资源、先发布有限预览，再根据精确大小样本校准估算并构建索引。
+//  精确值优先于校准或回退估算；整个准备过程支持取消且不修改相册。
+//
+
 import Foundation
 import Photos
 
 /// Immutable metadata and indexes are prepared once, off the UI executor.
+/// 不可变压缩清单：Live Photo 排在前面，同时提供按标识查询的索引和字节汇总。
 nonisolated struct MediaCompressionCatalog: Sendable {
     let items: [MediaCompressionItem]
     private let liveCount: Int
@@ -11,6 +19,7 @@ nonisolated struct MediaCompressionCatalog: Sendable {
     let originalBytes: Int64
     let outputBytes: Int64
 
+    /// 建立排序后的索引与汇总；展示估算限制在零和原始大小之间。
     init(items: [MediaCompressionItem]) {
         let live = items.filter(\.isLivePhoto)
         liveCount = live.count
@@ -30,7 +39,10 @@ nonisolated struct MediaCompressionCatalog: Sendable {
     }
 }
 
+/// 在后台准备压缩候选、预览及大小校准数据，不对相册资源执行写操作。
 actor MediaCompressionPreparation {
+    /// 先发布最多 60 项预览，再按资源类型汇总至少三个精确大小样本的中位数，构造完整清单。
+    /// 循环和预览回调之后检查取消，避免继续处理已失效的请求。
     func prepare(
         category: MediaCompressionCategory,
         assets: [PHAsset],
@@ -76,6 +88,7 @@ actor MediaCompressionPreparation {
         return MediaCompressionCatalog(items: items)
     }
 
+    /// 按当前分类筛选视频、Live Photo 或符合快速清理条件的图片。
     private func includes(_ asset: PHAsset, category: MediaCompressionCategory, photoIDs: Set<String>) -> Bool {
         switch category {
         case .video: asset.mediaType == .video
@@ -85,6 +98,7 @@ actor MediaCompressionPreparation {
         }
     }
 
+    /// 优先使用精确大小，其次使用同类校准系数，最后使用回退估算生成展示项。
     private func item(_ asset: PHAsset, category: MediaCompressionCategory,
                       exactSizes: [String: Int64], calibration: [String: Double]) -> MediaCompressionItem {
         let original: Int64

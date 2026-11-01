@@ -1,26 +1,27 @@
+// 图片、视频和实况照片的全屏预览。
+// 按当前页面协调资源请求、缩放和视频播放；视图切换时停止不再需要的工作。
+// 预览页按资源类型请求图片、视频或实况照片，并提供缩略图导航和审阅入口。
+// 图片缩放使用原生滚动视图；视频由共享播放协调器限制为当前选中页面。
+
 //
 //  MediaPreviewGallery.swift
 //  CleanMyIPhone
 //
 
-//
-//  文件职责：集中定义 MediaPreviewGallery 相关的生产逻辑与共享能力。
-//  所属模块：CleanMyIPhone。
-//
 
 import AVKit
 import Photos
 import PhotosUI
 import SwiftUI
 
-/// 定义 `MediaPreviewState` 使用的有限状态或选项集合。
+/// 区分媒体预览加载中、可用和不可用状态。
 private enum MediaPreviewState: Equatable {
     case loading
     case ready
     case unavailable
 }
 
-/// 定义 `MediaPreviewGallery` 的值语义数据与相关行为。
+/// 协调全屏页面选择、资源预览与播放，并支持返回和选择操作。
 struct MediaPreviewGallery: View {
     let assetIDs: [String]
     let initialAssetID: String
@@ -39,7 +40,7 @@ struct MediaPreviewGallery: View {
     @State private var selectedAssetID: String
     @State private var isSwipeReviewPresented = false
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 建立预览资源清单、初始页面、审阅配置和关闭回调。
     init(
         assetIDs: [String],
         initialAssetID: String,
@@ -156,6 +157,7 @@ struct MediaPreviewGallery: View {
         })
     }
 
+    /// 按当前页面和展示状态同步视频播放权限，避免相邻预加载页面同时播放。
     private func updatePlaybackAvailability() {
         playback.setEnabled(isGalleryVisible && scenePhase == .active && !isSwipeReviewPresented)
     }
@@ -197,6 +199,7 @@ struct MediaPreviewGallery: View {
     }
 }
 
+/// 展示底部媒体缩略图，随视图生命周期管理图片请求。
 private struct GalleryThumbnail: View {
     let asset: PHAsset?
     @ObservedObject var viewModel: PhotoLibraryViewModel
@@ -233,7 +236,7 @@ private struct GalleryThumbnail: View {
     }
 }
 
-/// 定义 `MediaPreviewPage` 的值语义数据与相关行为。
+/// 根据资源类型选择图片、视频或实况照片的预览方式。
 private struct MediaPreviewPage: View {
     let assetID: String
     let isActive: Bool
@@ -266,7 +269,7 @@ private struct MediaPreviewPage: View {
     }
 }
 
-/// 定义 `ZoomablePhotoPreview` 的值语义数据与相关行为。
+/// 请求并展示可缩放的照片预览，视图生命周期结束时取消请求。
 private struct ZoomablePhotoPreview: View {
     let asset: PHAsset
     @ObservedObject var viewModel: PhotoLibraryViewModel
@@ -307,7 +310,7 @@ private struct ZoomablePhotoPreview: View {
             .foregroundStyle(theme.textPrimary)
     }
 
-    /// 封装 `requestImage` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 取消旧请求后按显示尺寸和屏幕倍率请求图片，并更新加载状态。
     private func requestImage(for size: CGSize) {
         cancelRequest()
         state = .loading
@@ -323,7 +326,7 @@ private struct ZoomablePhotoPreview: View {
         }
     }
 
-    /// 取消 `cancelRequest` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 取消当前图片请求，防止页面切换后继续接收不需要的预览。
     private func cancelRequest() {
         if let requestID { viewModel.cancelThumbnail(requestID) }
         requestID = nil
@@ -334,10 +337,12 @@ private struct ZoomablePhotoPreview: View {
 private struct NativeZoomableImage: UIViewRepresentable {
     let image: UIImage
 
+    /// 创建负责滚动缩放、布局与双击手势的协调对象。
     func makeCoordinator() -> Coordinator {
         Coordinator()
     }
 
+    /// 配置原生缩放容器、图像视图和双击手势，并连接布局回调。
     func makeUIView(context: Context) -> ZoomScrollView {
         let scrollView = ZoomScrollView()
         scrollView.backgroundColor = .clear
@@ -373,6 +378,7 @@ private struct NativeZoomableImage: UIViewRepresentable {
         return scrollView
     }
 
+    /// 图片改变时重置缩放，并依据当前容器尺寸更新布局。
     func updateUIView(_ scrollView: ZoomScrollView, context: Context) {
         if context.coordinator.imageView?.image !== image {
             context.coordinator.imageView?.image = image
@@ -381,19 +387,23 @@ private struct NativeZoomableImage: UIViewRepresentable {
         context.coordinator.layoutContent(in: scrollView.bounds)
     }
 
+    /// 协调原生滚动视图的缩放目标、内容居中和尺寸变化。
     final class Coordinator: NSObject, UIScrollViewDelegate {
         weak var scrollView: UIScrollView?
         weak var imageView: UIImageView?
         private var laidOutSize: CGSize = .zero
 
+        /// 指定承载图像的内容视图作为原生缩放目标。
         func viewForZooming(in scrollView: UIScrollView) -> UIView? {
             (scrollView as? ZoomScrollView)?.zoomContentView
         }
 
+        /// 缩放过程中重新计算内容边距，使较小内容保持居中。
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
             centerZoomedContent(in: scrollView)
         }
 
+        /// 仅在尺寸变化时恢复初始缩放并重设内容尺寸，避免修改变换后的 frame。
         func layoutContent(in bounds: CGRect) {
             guard bounds.width > 0, bounds.height > 0,
                   let scrollView,
@@ -411,6 +421,7 @@ private struct NativeZoomableImage: UIViewRepresentable {
             centerZoomedContent(in: scrollView)
         }
 
+        /// 双击已放大图片时复位；否则以触点为中心放大到目标比例。
         @objc func handleDoubleTap(_ recognizer: UITapGestureRecognizer) {
             guard let scrollView else { return }
             if scrollView.zoomScale > scrollView.minimumZoomScale + 0.01 {
@@ -435,6 +446,7 @@ private struct NativeZoomableImage: UIViewRepresentable {
             )
         }
 
+        /// 以对称内边距居中小于视口的缩放内容。
         private func centerZoomedContent(in scrollView: UIScrollView) {
             let horizontal = max(0, (scrollView.bounds.width - scrollView.contentSize.width) / 2)
             let vertical = max(0, (scrollView.bounds.height - scrollView.contentSize.height) / 2)
@@ -454,15 +466,18 @@ private final class ZoomScrollView: UIScrollView {
     var onLayout: ((CGRect) -> Void)?
     private var previousBoundsSize: CGSize = .zero
 
+    /// 以代码创建滚动容器，并安装可缩放的内容视图。
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(zoomContentView)
     }
 
+    /// 该滚动容器仅通过代码创建，不支持从归档解码。
     required init?(coder: NSCoder) {
         nil
     }
 
+    /// 只在边界尺寸变化时通知协调器重新布局内容。
     override func layoutSubviews() {
         super.layoutSubviews()
         guard bounds.size != previousBoundsSize else { return }
@@ -471,7 +486,7 @@ private final class ZoomScrollView: UIScrollView {
     }
 }
 
-/// 定义 `VideoAssetPreview` 的值语义数据与相关行为。
+/// 获取视频播放资源，并依据当前页面状态同步播放。
 private struct VideoAssetPreview: View {
     let asset: PHAsset
     let isActive: Bool
@@ -507,7 +522,7 @@ private struct VideoAssetPreview: View {
         }
     }
 
-    /// 加载 `loadPlayer` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 异步获取视频播放资源，并与当前预览页的生命周期协调。
     private func loadPlayer() async {
         guard player == nil else {
             synchronizePlayback()
@@ -530,6 +545,7 @@ private struct VideoAssetPreview: View {
             playback.activate(loadedPlayer, for: asset.localIdentifier)
         }
     }
+    /// 依据当前页面是否激活，向共享协调器请求播放或暂停。
     private func synchronizePlayback() {
         guard let player else { return }
         if isActive {
@@ -541,7 +557,7 @@ private struct VideoAssetPreview: View {
 
 }
 
-/// 定义 `LivePhotoAssetPreview` 的值语义数据与相关行为。
+/// 请求并展示实况照片资源，依赖系统视图完成播放。
 private struct LivePhotoAssetPreview: View {
     let asset: PHAsset
     @ObservedObject var viewModel: PhotoLibraryViewModel
@@ -594,7 +610,7 @@ private struct LivePhotoAssetPreview: View {
         }
     }
 
-    /// 封装 `requestLivePhoto` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 请求适合当前显示尺寸的实况照片，并更新预览状态。
     private func requestLivePhoto(for size: CGSize) {
         state = .loading
         requestID = viewModel.requestLivePhoto(
@@ -608,22 +624,22 @@ private struct LivePhotoAssetPreview: View {
     }
 }
 
-/// 定义 `LivePhotoPlayerView` 的值语义数据与相关行为。
+/// 将系统实况照片视图包装给 SwiftUI，并根据播放触发值启动播放。
 private struct LivePhotoPlayerView: UIViewRepresentable {
     let livePhoto: PHLivePhoto
     let playbackTrigger: Int
 
-    /// 创建 `makeCoordinator` 所需的值或资源，统一封装构造细节。
+    /// 创建协调器以记录上一次已处理的播放触发值。
     func makeCoordinator() -> Coordinator { Coordinator() }
 
-    /// 创建 `makeUIView` 所需的值或资源，统一封装构造细节。
+    /// 创建用于展示实况照片的系统视图。
     func makeUIView(context: Context) -> PHLivePhotoView {
         let view = PHLivePhotoView()
         view.contentMode = .scaleAspectFit
         return view
     }
 
-    /// 更新 `updateUIView` 对应的数据，使界面状态与底层结果保持一致。
+    /// 更新实况照片，并只在播放触发值变化时重新播放。
     func updateUIView(_ view: PHLivePhotoView, context: Context) {
         view.livePhoto = livePhoto
         guard context.coordinator.lastPlaybackTrigger != playbackTrigger else { return }
@@ -631,7 +647,7 @@ private struct LivePhotoPlayerView: UIViewRepresentable {
         view.startPlayback(with: .full)
     }
 
-    /// 封装 `Coordinator` 的引用语义、状态与业务行为。
+    /// 记录已处理的触发值，避免普通视图更新重复启动播放。
     final class Coordinator {
         var lastPlaybackTrigger = -1
     }

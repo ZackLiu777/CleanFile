@@ -1,9 +1,18 @@
+// 文件删除的安全边界测试。
+//
+// 用例覆盖目录别名、逃离所选根目录的符号链接、空选择和无效目标，
+// 以及成功与部分失败的结果表示。涉及真实文件系统的检查只使用独立
+// 临时目录，并在用例结束时清理；其他验证不需要删除实际文件。
+
 import Foundation
 import Testing
 @testable import CleanMyIPhone
 
+/// 确保删除目标受所选目录约束，且结果能够表达部分成功。
 @Suite("File deletion safety boundaries")
 struct FileDeletionEdgeCaseTests {
+    /// 别名和真实目录应视为同一边界，但指向目录外部的链接不能通过校验。
+    /// 根目录本身也不是可删除的子项，避免误删整个选择范围。
     @Test("Directory aliases match, but links escaping the root remain rejected")
     func canonicalDirectoryBoundaries() throws {
         let manager = FileManager.default
@@ -29,6 +38,7 @@ struct FileDeletionEdgeCaseTests {
         #expect(!FileDeletionService.contains(alias, root: alias))
     }
 
+    /// 空选择应在访问文件系统前返回明确错误。
     @Test("Deleting an empty selection is rejected before touching the file system")
     func emptySelectionIsRejected() async {
         let service = FileDeletionService()
@@ -46,6 +56,7 @@ struct FileDeletionEdgeCaseTests {
         #expect((receivedError as? FileDeletionError) == .noItemsSelected)
     }
 
+    /// 名称有共同前缀的相邻目录并不属于所选根目录。
     @Test("A selection outside the analyzed folder is rejected atomically")
     func outsideSelectionIsRejected() async {
         let root = URL(fileURLWithPath: "/tmp/Root", isDirectory: true)
@@ -68,6 +79,7 @@ struct FileDeletionEdgeCaseTests {
         #expect((receivedError as? FileDeletionError) == .invalidSelection)
     }
 
+    /// 防止将根目录自身当作扫描出的普通文件删除。
     @Test("Selection validation rejects the root folder itself")
     func rootItselfCannotBeDeleted() async {
         let root = URL(fileURLWithPath: "/tmp/Root", isDirectory: true)
@@ -90,6 +102,7 @@ struct FileDeletionEdgeCaseTests {
         #expect((receivedError as? FileDeletionError) == .invalidSelection)
     }
 
+    /// 上层需要同时保留已删除 URL 和失败数量，以正确更新部分成功的状态。
     @Test("Deletion result can represent complete and partial outcomes")
     func deletionResultRepresentsOutcomeShape() {
         let first = URL(fileURLWithPath: "/tmp/Root/first.txt")
@@ -103,6 +116,7 @@ struct FileDeletionEdgeCaseTests {
         #expect(partial.failedFileCount == 1)
     }
 
+    /// 空闲和各种终态均不应继续显示删除进行中。
     @Test("Deletion state activity is false for all terminal and idle states")
     func deletionStateTerminalStatesAreInactive() {
         let states: [FileDeletionState] = [

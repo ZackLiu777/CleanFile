@@ -1,3 +1,8 @@
+// 快速清理分类、选择与删除协调。
+// 不同分类可能包含同一资源，汇总按标识去重；可复用索引用于降低重复交互成本。
+// 从相册分析结果构建分类，维护用户选择并计算数量与估算占用。
+// 执行删除时重新检查功能权限，只有相册报告成功后才清除选择并刷新分类。
+
 //
 //  MediaQuickCleanViewModel.swift
 //  CleanMyIPhone
@@ -7,9 +12,12 @@ import Combine
 import Foundation
 import Photos
 
+/// 将相册分类转换为可选择的清理类别，并协调汇总估算及用户确认后的删除。
 @MainActor
 final class MediaQuickCleanViewModel: ObservableObject {
+    /// 保存分类标识、展示信息和对应资源标识；多个分类可以指向同一资源。
     struct Category: Identifiable, Equatable {
+        /// 稳定标识可供快速清理选择的媒体分类。
         enum ID: String, CaseIterable {
             case similarPhotos
             case screenshots
@@ -39,12 +47,14 @@ final class MediaQuickCleanViewModel: ObservableObject {
     private var indexPreparation: Task<Void, Never>?
 
 
+    /// 连接相册及权限检查，并从当前分析结果生成初始分类。
     init(photoLibrary: PhotoLibraryViewModel, canUseQuickClean: @escaping () -> Bool) {
         self.photoLibrary = photoLibrary
         self.canUseQuickClean = canUseQuickClean
         refreshCategories()
     }
 
+    /// 合并所选分类的资源标识并去重，防止交叉分类重复计数或重复删除。
     var selectedAssetIDs: Set<String> {
         categories
             .filter { selectedCategoryIDs.contains($0.id) }
@@ -61,6 +71,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
         indexedSelectionSummary?.estimatedByteCount ?? photoLibrary.estimatedByteCount(for: selectedAssetIDs)
     }
 
+    /// 仅在大小修订号匹配时使用索引；位掩码对应当前分类顺序。
     private var indexedSelectionSummary: MediaQuickCleanSelectionIndex.Summary? {
         guard indexedSizeRevision == photoLibrary.mediaSizeRevision, let selectionIndex else { return nil }
         var mask: UInt16 = 0
@@ -74,6 +85,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
         !categories.isEmpty && selectedCategoryIDs.count == categories.count
     }
 
+    /// 优先使用与当前大小修订号匹配的索引，否则按分类资源估算。
     func estimatedByteCount(for category: Category) -> Int64 {
         if indexedSizeRevision == photoLibrary.mediaSizeRevision,
            let selectionIndex, let position = categories.firstIndex(where: { $0.id == category.id }) {
@@ -82,10 +94,12 @@ final class MediaQuickCleanViewModel: ObservableObject {
         return photoLibrary.estimatedByteCount(for: category.assetIDs)
     }
 
+    /// 查询分类是否在当前选择集合中。
     func isSelected(_ category: Category) -> Bool {
         selectedCategoryIDs.contains(category.id)
     }
 
+    /// 切换单个分类的选中状态。
     func toggle(_ category: Category) {
         if selectedCategoryIDs.contains(category.id) {
             selectedCategoryIDs.remove(category.id)
@@ -94,10 +108,12 @@ final class MediaQuickCleanViewModel: ObservableObject {
         }
     }
 
+    /// 将建议选择限定为相似照片分类；无该分类时清空选择。
     func selectSuggestions() {
         selectedCategoryIDs = categories.contains { $0.id == .similarPhotos } ? [.similarPhotos] : []
     }
 
+    /// 全部已选时清空，否则选中当前所有可用分类。
     func toggleAllCategories() {
         if allCategoriesSelected {
             selectedCategoryIDs.removeAll()
@@ -106,6 +122,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
         }
     }
 
+    /// 执行前重新检查功能权限并合并资源；仅在删除成功后清除选择和刷新分类。
     @discardableResult
     func deleteSelection() async -> Bool {
         // Recheck at execution: a trial can expire while this screen or its confirmation is open.
@@ -120,6 +137,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
         return succeeded
     }
 
+    /// 从最新分析重建可用分类、保留仍有效的选择，并为未覆盖的图片生成其他照片分类。
     func refreshCategories() {
         defer { refreshSelectionIndex() }
         guard let result = analysisResult else {
@@ -231,6 +249,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
         }
     }
 
+    /// 取消索引准备并递增代次，阻止迟到的后台结果被安装。
     func cancelSelectionIndexPreparation() {
         indexGeneration &+= 1
         indexPreparation?.cancel()
@@ -246,6 +265,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
         }
     }
 
+    /// 根据视频的分类标签收集资源，再复用通用分类过滤规则。
     private func makeVideoCategory(
         id: Category.ID,
         title: String,
@@ -261,6 +281,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
         )
     }
 
+    /// 跳过空分类；除截图类别外排除建议保留的相似照片。
     private func makeCategory(
         id: Category.ID,
         title: String,

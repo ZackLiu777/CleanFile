@@ -1,9 +1,20 @@
+//
+//  转换导入进度
+//
+//  覆盖多文件汇总百分比和大文件暂存时的增量进度。
+//  使用临时数据与隔离的记录器验证过程，不依赖用户文件。
+//  大文件暂存用例验证开始、中间及最终字节回调，而非只检查最终结果。
+//  记录器以 actor 隔离回调状态；测试文件位于单独创建并清理的临时目录。
+//
+
 import Foundation
 import Testing
 @testable import ImageFormatConversionKit
 
+/// 验证导入进度的合并计算和大文件分段反馈。
 @Suite("Conversion import progress")
 struct ConversionImportProgressTests {
+    /// 检查多文件的已完成字节与总字节合并后得到的百分比。
     @Test("Combined file progress reaches an accurate percentage")
     func percentageCalculation() {
         let halfwayThroughSecondFile = ConversionImportProgress(
@@ -24,6 +35,7 @@ struct ConversionImportProgressTests {
         #expect(completed.percentage == 100)
     }
 
+    /// 使用较大临时文件确认复制完成前会收到中间字节进度。
     @Test("Large file staging reports intermediate byte progress before completion")
     func largeFileReportsIncrementalProgress() async throws {
         let fileManager = FileManager.default
@@ -61,7 +73,9 @@ struct ConversionImportProgressTests {
     }
 }
 
+/// 隔离异步进度回调，保存测试中观察到的字节进度。
 private actor ImportProgressRecorder {
+    /// 保存一次回调中的累计复制字节与目标总字节，供异步测试检查进度序列。
     struct Sample: Sendable {
         let copiedBytes: Int64
         let totalBytes: Int64
@@ -69,6 +83,7 @@ private actor ImportProgressRecorder {
 
     private(set) var samples: [Sample] = []
 
+    /// 将回调快照追加到 actor 隔离的序列，避免并发回调竞争测试状态。
     func append(copiedBytes: Int64, totalBytes: Int64) {
         samples.append(Sample(copiedBytes: copiedBytes, totalBytes: totalBytes))
     }

@@ -1,3 +1,9 @@
+// 转换指南中各工具的格式与设置说明。
+// 将图片、视频、音频工具的展示数据组织为格式列表、设置和提示。
+// 文案用于解释当前能力与边界；实际转换由引擎和状态对象负责。
+// 详情页由转换指南导航到具体工具，使用共享卡片和主题组织内容。
+// 支持格式和设置说明应与实际模型和引擎能力保持一致。
+
 //
 //  ConversionGuideToolDetailView.swift
 //
@@ -7,6 +13,7 @@
 
 import SwiftUI
 
+/// 定义各转换工具的指南文案、格式和设置说明。
 enum ConversionGuideTool: String, CaseIterable, Identifiable, Hashable {
     case video
     case image
@@ -208,6 +215,7 @@ enum ConversionGuideTool: String, CaseIterable, Identifiable, Hashable {
 #endif
     }
 
+    /// 返回音频输出格式在介绍页面使用的标题。
     private static func audioFormatTitle(_ format: AudioOutputFormat) -> String {
         switch format {
         case .mp3: L10n.string("audio.format.mp3")
@@ -222,6 +230,7 @@ enum ConversionGuideTool: String, CaseIterable, Identifiable, Hashable {
     }
 }
 
+/// 呈现单个工具支持的格式、设置和使用提示。
 struct ConversionGuideToolDetailView: View {
     @Environment(\.conversionTheme) private var theme
     let tool: ConversionGuideTool
@@ -328,6 +337,7 @@ struct ConversionGuideToolDetailView: View {
         .accessibilityElement(children: .combine)
     }
 
+    /// 以统一标题和内容构造工具详情分区。
     private func detailSection<Content: View>(
         _ title: String,
         @ViewBuilder content: () -> Content
@@ -347,6 +357,7 @@ struct ConversionGuideToolDetailView: View {
     }
 }
 
+/// 保存指南中的一种格式及其展示说明。
 struct ConversionGuideFormat: Identifiable {
     let title: String
     let detail: String
@@ -354,6 +365,7 @@ struct ConversionGuideFormat: Identifiable {
     var id: String { title }
 }
 
+/// 保存指南中的一个设置项及其展示说明。
 struct ConversionGuideSetting: Identifiable {
     let symbol: String
     let title: String
@@ -362,6 +374,7 @@ struct ConversionGuideSetting: Identifiable {
     var id: String { title }
 }
 
+/// 以网格展示工具支持的标签。
 private struct ConversionGuideTagGrid: View {
     @Environment(\.conversionTheme) private var theme
     let values: [String]
@@ -382,6 +395,7 @@ private struct ConversionGuideTagGrid: View {
     }
 }
 
+/// 展示工具支持的格式及其说明。
 private struct ConversionGuideFormatList: View {
     @Environment(\.conversionTheme) private var theme
     let formats: [ConversionGuideFormat]
@@ -410,6 +424,7 @@ private struct ConversionGuideFormatList: View {
     }
 }
 
+/// 列出工具设置项及对应说明。
 private struct ConversionGuideSettingList: View {
     @Environment(\.conversionTheme) private var theme
     let settings: [ConversionGuideSetting]
@@ -447,6 +462,7 @@ private struct ConversionGuideSettingList: View {
     }
 }
 
+/// 展示工具详情中的强调提示。
 private struct ConversionGuideCallout: View {
     @Environment(\.conversionTheme) private var theme
     let symbol: String
@@ -471,6 +487,7 @@ private struct ConversionGuideCallout: View {
     }
 }
 
+/// 展示工具详情中的隐私说明。
 private struct ConversionGuideDetailPrivacyCard: View {
     @Environment(\.conversionTheme) private var theme
 

@@ -1,3 +1,8 @@
+// 应用开屏画面及其容器。
+// 容器根据启动状态切换内容，并通过环境值通知下游开屏是否完成；减少动态效果和场景状态影响画面动画。
+// 开屏容器始终保留底层内容，遮罩存在时禁止底层点击和无障碍访问。
+// 用户启用减少动态效果时缩短过渡；UI 测试启动参数可跳过开屏动画。
+
 import SwiftUI
 
 /// Hosts the opening artwork without mixing it into application navigation state.
@@ -55,6 +60,7 @@ extension EnvironmentValues {
     }
 }
 
+/// 协调开屏与目标内容的显示，并在遮罩存在时屏蔽底层交互和无障碍访问。
 struct AppOpeningContainer<Content: View>: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var launchState: AppLaunchState
@@ -62,6 +68,7 @@ struct AppOpeningContainer<Content: View>: View {
     private let destination: AppLaunchState.Destination
     private let content: Content
 
+    /// 保存目标和内容；UI 测试启动参数会跳过开屏动画。
     init(destination: AppLaunchState.Destination, @ViewBuilder content: () -> Content) {
         self.content = content()
         self.destination = destination

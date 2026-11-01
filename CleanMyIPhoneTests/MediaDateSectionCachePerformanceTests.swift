@@ -1,3 +1,12 @@
+//
+//  日期分组缓存性能比较
+//
+//  比较不同规模下原始分组与缓存候选的工作量及输出。
+//  该文件记录性能实验，不将具体耗时等同于设备性能保证。
+//  区分首次构建、预热查询和包含初始化的多次交互，并检查分组与校验值一致。
+//  每种规模共用确定性合成输入，轮换两条路径的计时顺序。
+//
+
 import Dispatch
 import Foundation
 import Testing
@@ -5,8 +14,10 @@ import Testing
 
 /// CI comparisons report cold, warm, and complete interaction costs separately.
 /// No timing assertion or automatic promotion changes the production baseline.
+/// 序列化比较分组缓存与原有构建路径的行为和耗时。
 @Suite("Media date section cache performance candidate", .serialized)
 struct MediaDateSectionCachePerformanceTests {
+    /// 比较不同数据规模下原始分组与缓存路径，并消费结果以保证比较具有实际工作量。
     @Test("Compare preserved builder and cache across dataset sizes")
     func compareDateSectionCandidate() throws {
         var calendar = Calendar(identifier: .gregorian)
@@ -55,6 +66,7 @@ struct MediaDateSectionCachePerformanceTests {
         }
     }
 
+    /// 区分冷构建、预热后单次查询和包含首次构建的交互总成本。
     private enum Scenario: String, CaseIterable {
         case coldBuild = "cold-build"
         case warmQuery = "warm-query"
@@ -63,6 +75,7 @@ struct MediaDateSectionCachePerformanceTests {
         var queryCount: Int { self == .interactionsTotal ? 5 : 1 }
     }
 
+    /// 保存单次路径的耗时、分组结果、消费校验值和输入构造次数。
     private struct Measurement {
         let nanoseconds: UInt64
         let sections: [MediaDateSection]
@@ -70,6 +83,7 @@ struct MediaDateSectionCachePerformanceTests {
         let inputBuilds: Int
     }
 
+    /// 用于输出两种实现耗时及等价性的结构化实验记录。
     private struct Comparison: Encodable {
         let experiment: String
         let scenario: String
@@ -80,6 +94,7 @@ struct MediaDateSectionCachePerformanceTests {
         let equivalent: Bool
     }
 
+    /// 在计时区间内按场景重复执行原始分组，并累计消费结果。
     private static func baseline(
         assets: [MediaDatedAsset],
         calendar: Calendar,
@@ -101,6 +116,7 @@ struct MediaDateSectionCachePerformanceTests {
         )
     }
 
+    /// 仅在预热查询场景将首次构建排除在计时外，并统计缓存闭包调用次数。
     private static func candidate(
         assets: [MediaDatedAsset],
         revision: MediaDateSectionCacheCandidate.Revision,
@@ -136,10 +152,12 @@ struct MediaDateSectionCachePerformanceTests {
         )
     }
 
+    /// 消费首尾分组和总组数，使比较包含对结果的实际读取。
     private static func consumedValue(_ sections: [MediaDateSection]) -> Int {
         sections.count + (sections.first?.assetIDs.count ?? 0) + (sections.last?.assetIDs.count ?? 0)
     }
 
+    /// 生成可重复的跨日期资源及少量缺失日期，供两个路径共享同一输入。
     private static func fixture(count: Int) -> [MediaDatedAsset] {
         let referenceDate = Date(timeIntervalSince1970: 1_773_036_000)
         return (0 ..< count).map { index in

@@ -1,12 +1,21 @@
+// 分享扩展的入口控制器。
+//
+// 宿主应用通过 NSItemProvider 提供临时文件；扩展将支持的图片和视频复制到
+// 共享收件箱，并以清单记录同一批次的顺序。主应用随后读取清单并继续导入流程。
+// 单个附件失败不会阻止其他附件导入；界面会在无法打开主应用时保留处理结果。
+// 此文件负责扩展界面和导入协调，收件箱路径及清单格式由 ShareImportInbox 定义。
+
 import UIKit
 import UniformTypeIdentifiers
 
+/// 展示分享导入进度，并将可用附件交给主应用继续处理。
 final class ShareViewController: UIViewController {
     private let titleLabel = UILabel()
     private let detailLabel = UILabel()
     private let spinner = UIActivityIndicatorView(style: .medium)
     private let doneButton = UIButton(type: .system)
 
+    /// 建立进度界面并在扩展加载后启动本次附件导入。
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -35,6 +44,11 @@ final class ShareViewController: UIViewController {
         Task { await importAttachments() }
     }
 
+    /// 分批复制附件、保存清单，并尝试打开主应用。
+    ///
+    /// 同时最多处理三个附件以限制资源占用；任务完成顺序可能不同于分享顺序，
+    /// 因此写入清单前按原始索引排序。没有成功项时清理批次目录，部分失败则
+    /// 保留成功项并告知用户；只有清单写入完成后才通知主应用。
     private func importAttachments() async {
         let providers = (extensionContext?.inputItems as? [NSExtensionItem] ?? [])
             .flatMap { $0.attachments ?? [] }
@@ -99,6 +113,8 @@ final class ShareViewController: UIViewController {
         doneButton.isHidden = false
     }
 
+    /// 将一个支持的附件复制到批次目录，并返回清单条目。
+    /// 复制失败时清理可能产生的不完整文件，调用方可继续处理其余附件。
     private static func importAttachment(_ provider: NSItemProvider, into directory: URL) async
         -> ShareImportInbox.Entry? {
         guard let representation = representation(for: provider) else { return nil }
@@ -116,6 +132,8 @@ final class ShareViewController: UIViewController {
         }
     }
 
+    /// 从提供者声明的类型中选择受支持的图片或视频表示。
+    /// 仅接受这里列出的扩展名，避免为主应用生成不能识别的清单项。
     private static func representation(for provider: NSItemProvider)
         -> (typeIdentifier: String, kind: ShareImportInbox.Kind, extensionName: String)? {
         for identifier in provider.registeredTypeIdentifiers {
@@ -132,6 +150,8 @@ final class ShareViewController: UIViewController {
         return nil
     }
 
+    /// 在提供者的回调内完成文件复制，并将异步回调转换为可抛错操作。
+    /// 临时 URL 的生命周期仅覆盖回调，不能将复制推迟到回调返回之后。
     private static func copy(_ provider: NSItemProvider, typeIdentifier: String, to destination: URL)
         async throws {
         try await withCheckedThrowingContinuation { continuation in
@@ -149,6 +169,7 @@ final class ShareViewController: UIViewController {
         }
     }
 
+    /// 结束扩展请求；适用于导入完成后用户手动关闭扩展的路径。
     @objc private func finish() {
         extensionContext?.completeRequest(returningItems: nil)
     }

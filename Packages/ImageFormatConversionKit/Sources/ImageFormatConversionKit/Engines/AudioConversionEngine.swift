@@ -1,6 +1,9 @@
 //
-//  文件职责：实现 AudioConversion 底层处理流程，并向上层提供稳定入口。
-//  所属模块：ImageFormatConversionKit。
+//  音频转换入口使用 AVFoundation 处理系统支持的格式，并以 LAME 流式编码 MP3。
+//  视频输入先提取 PCM，再编码为目标格式；进度按两个阶段合并。
+//  输出先写入临时文件，编码完成后才提交，访问权限和临时资源在结束时释放。
+//  音频 ViewModel 通过此入口检查输入及启动转换，视频音轨由专门的提取器处理。
+//  进度经合并与节流后交给调用方；异常或取消不应留下未提交的输出。
 //
 
 import AVFAudio
@@ -9,8 +12,9 @@ import AudioToolbox
 import Foundation
 import LAME
 
-/// 使用 Actor 隔离 `AudioConversionEngine` 的可变状态，确保并发访问安全。
+/// 协调音频文件或视频音轨的检查、编码及中间文件清理。
 public actor AudioConversionEngine {
+    /// 检查得到的时长、采样率和声道数；视频输入使用提取路径的默认音频参数。
     public struct Inspection: Sendable {
         public let duration: TimeInterval
         public let sampleRate: Double
@@ -21,14 +25,15 @@ public actor AudioConversionEngine {
 
     private let videoExtractor = VideoAudioExtractionEngine()
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 创建使用系统媒体框架的音频转换引擎；初始化时不读取文件。
     public init() {}
 
-    /// 执行 `inspect` 分析流程，在遵守文件访问边界的前提下生成结果。
+    /// 返回可用时长；视频检查会拒绝受保护或没有音轨的媒体。
     public func inspect(_ sourceURL: URL, sourceKind: AudioSourceKind) async throws -> TimeInterval {
         try await inspectDetails(sourceURL, sourceKind: sourceKind).duration
     }
 
+    /// 检查音频处理格式，或检查视频是否包含可提取音轨。
     public func inspectDetails(_ sourceURL: URL, sourceKind: AudioSourceKind) async throws -> Inspection {
         switch sourceKind {
         case .audioFile:
@@ -49,7 +54,8 @@ public actor AudioConversionEngine {
         }
     }
 
-    /// 执行 `convert` 转换流程，并按当前配置生成输出结果。
+    /// 分块转换音频，成功后提交临时文件；视频输入先提取 PCM。
+    /// 源文件和目标目录的安全范围访问覆盖整个转换，失败时清理临时文件。
     public func convert(
         _ request: AudioConversionRequest,
         progress: @escaping @Sendable (Double) async -> Void
@@ -230,12 +236,12 @@ public actor AudioConversionEngine {
         return output
     }
 
-    /// 取消 `cancelAll` 对应的进行中任务，并收敛到可继续操作的状态。
+    /// 请求停止进行中的视频音轨提取；音频编码依靠调用任务的取消检查停止。
     public func cancelAll() async {
         await videoExtractor.cancelAll()
     }
 
-    /// 封装 `outputSettings` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将输出格式映射为系统编码设置，并将声道限制为一至两声道。
     private func outputSettings(
         _ format: AudioOutputFormat,
         bitRate: AudioBitRate,
@@ -280,7 +286,8 @@ public actor AudioConversionEngine {
         }
     }
 
-    /// Streams decoded PCM frames into LAME without loading the source file into memory.
+    /// 分块向 LAME 输入 PCM，写入编码数据并在结束时刷新编码器。
+    /// 每块之间检查取消；资源由 defer 释放，避免将整段音频载入内存。
     private func encodeMP3(
         input: AVAudioFile,
         bitRate: AudioBitRate,
@@ -361,7 +368,7 @@ public actor AudioConversionEngine {
         }
     }
 
-    /// 封装 `pcmSettings` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 生成 16 位交错 PCM 设置；字节序由目标容器决定。
     private func pcmSettings(
         sampleRate: Double,
         channelCount: Int,
@@ -378,7 +385,7 @@ public actor AudioConversionEngine {
         ]
     }
 
-    /// 封装 `uniqueDestination` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 按递增后缀寻找未占用文件名，耗尽候选后使用 UUID。
     private func uniqueDestination(source: URL, directory: URL, extension ext: String) -> URL {
         let base = source.deletingPathExtension().lastPathComponent
         for suffix in 0 ... 9_999 {
@@ -397,6 +404,7 @@ private final class AudioInputSupply: @unchecked Sendable {
     private let lock = NSLock()
     private var isAvailable = true
 
+    /// 每次转换调用只允许一次输入供应，锁用于保护并发回调中的状态。
     func claim() -> Bool {
         lock.withLock {
             guard isAvailable else { return false }

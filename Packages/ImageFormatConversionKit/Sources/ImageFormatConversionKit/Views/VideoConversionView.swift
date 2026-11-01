@@ -1,15 +1,16 @@
-//
-//  文件职责：声明 VideoConversion 界面结构、交互入口与展示状态。
-//  所属模块：ImageFormatConversionKit。
-//
+// 视频转换页面及导入交互。
+// 展示容器、编码、分辨率、大小估算、进度和结果，支持文件与照片选择器输入。
+// 工作区暂存和视频编码交由状态对象及引擎，不在页面中直接操作原件。
+// 页面把导入、估算和转换请求交给视频状态对象，并使用共享文件组件展示结果。
+// 不同容器与编码选项的实际兼容性仍由底层视频处理流程检查。
 
 import SwiftUI
 import StoreKit
 import PhotosUI
 import UniformTypeIdentifiers
 
+/// 展示视频导入、转换选项、进度和结果，并将转换操作交给状态对象。
 @MainActor
-/// 定义 `VideoConversionView` 的值语义数据与相关行为。
 struct VideoConversionView: View {
     let isQuickCompression: Bool
     @Environment(\.requestReview) private var requestReview
@@ -24,7 +25,7 @@ struct VideoConversionView: View {
     @State private var isClearAllConfirmationPresented = false
     @State private var isAdvancedExpanded = false
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 注入视频转换状态与导入会话，并记录是否从快捷压缩入口进入。
     init(
         viewModel: VideoConversionViewModel = VideoConversionViewModel(),
         importSession: ConversionImportSession = ConversionImportSession(),
@@ -160,7 +161,7 @@ struct VideoConversionView: View {
         .converterCard()
     }
 
-    /// 处理 `importVideos` 导入流程，并将用户选择安全地交给后续处理。
+    /// 从照片选择器取得视频并保留资源标识；会话标识防止旧进度回调更新新导入。
     private func importVideos(_ selections: [PhotosPickerItem]) async {
         let sessionID = UUID()
         importSession.librarySessionID = sessionID
@@ -226,7 +227,7 @@ struct VideoConversionView: View {
         )
     }
 
-    /// 处理 `importFiles` 导入流程，并将用户选择安全地交给后续处理。
+    /// 在导入期间显示文件预览，结束后清理临时状态。
     private func importFiles(_ urls: [URL]) async {
         importSession.pendingCount = urls.count
         importSession.previewURLs = urls
@@ -347,6 +348,7 @@ struct VideoConversionView: View {
         }
     }
 
+    /// 返回视频编码格式对应的本地化显示名称。
     private func videoCodecTitle(_ codec: VideoCodec) -> String {
         switch codec {
         case .h264: "H.264"
@@ -363,6 +365,7 @@ struct VideoConversionView: View {
         ].joined(separator: " · ")
     }
 
+    /// 为视频设置构造紧凑选择行并绑定选中值。
     private func compactPickerRow<Option: Hashable>(
         title: String,
         selection: Binding<Option>,
@@ -454,7 +457,7 @@ struct VideoConversionView: View {
         )
     }
 
-    /// 封装 `resolutionTitle` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将视频分辨率预设映射为本地化设置名称。
     private func resolutionTitle(_ preset: VideoResolutionPreset) -> String {
         switch preset {
         case .original: L10n.string("resize.original")

@@ -1,3 +1,8 @@
+// 主导航及外部分享导入的协调入口。
+// 该页面在各标签之间共享相册和访问状态，并跟踪不同作用域对标签栏的隐藏请求。
+// 主界面承载照片首页，并协调存储、转换及设置页面的呈现。
+// 外部文档与分享批次经收件箱交给转换组件；只移除确认导入成功的暂存条目。
+
 //
 //  ContentView.swift
 //  CleanMyIPhone
@@ -5,19 +10,16 @@
 //  Created by Zane Liao on 8/18/26.
 //
  
-//
-//  文件职责：声明 Content 界面结构、交互入口与展示状态。
-//  所属模块：CleanMyIPhone。
-//
 
 import ImageFormatConversionKit
 import Combine
 import StoreKit
 import SwiftUI
 
-/// 协调详情页面对自定义 Tab Bar 的可见性，避免未激活 Tab 的导航栈影响当前页面。
+/// 按页面作用域协调自定义 Tab Bar 的隐藏请求，避免其他标签或嵌套页面影响当前界面。
 @MainActor
 final class TabBarVisibilityCoordinator: ObservableObject {
+    /// 标识独立导航区域，使隐藏请求只影响当前区域。
     enum Scope: String {
         case media
         case storage
@@ -29,11 +31,13 @@ final class TabBarVisibilityCoordinator: ObservableObject {
     private var activeScope: Scope = .media
     private var hiddenSources = Set<String>()
 
+    /// 切换当前标签作用域并重新计算标签栏可见性。
     func setActiveScope(_ scope: Scope) {
         activeScope = scope
         updateVisibility()
     }
 
+    /// 按来源记录或移除隐藏请求，允许同一作用域内多个页面独立控制。
     func setHidden(_ hidden: Bool, source: String, scope: Scope) {
         let key = "\(scope.rawValue):\(source)"
         if hidden {
@@ -44,6 +48,7 @@ final class TabBarVisibilityCoordinator: ObservableObject {
         updateVisibility()
     }
 
+    /// 根据当前作用域中是否存在隐藏来源，更新标签栏状态。
     private func updateVisibility() {
         let scopePrefix = "\(activeScope.rawValue):"
         let shouldHide = hiddenSources.contains { $0.hasPrefix(scopePrefix) }
@@ -52,7 +57,7 @@ final class TabBarVisibilityCoordinator: ObservableObject {
     }
 }
 
-/// 定义 `ContentView` 的值语义数据与相关行为。
+/// 组装照片首页及存储、转换、设置入口，并协调外部导入和共享状态。
 struct ContentView: View {
     @Environment(\.requestReview) private var requestReview
     @Environment(\.appTheme) private var theme
@@ -70,6 +75,7 @@ struct ContentView: View {
     @State private var incomingDocumentURLs: [URL] = []
     @State private var documentImportTask: Task<Void, Never>?
 
+    /// 共享权益状态，并向扫描模型注入存储功能权限检查。
     init(accessStore: PremiumFeatureAccessStore) {
         self.accessStore = accessStore
         _fileViewModel = StateObject(wrappedValue: FileScannerViewModel(canUseStorage: {
@@ -175,6 +181,7 @@ struct ContentView: View {
         .environmentObject(tabBarVisibility)
     }
 
+    /// 合并短时间内多次文档回调，再作为一个分享批次导入。
     private func receiveDocument(_ url: URL) {
         incomingDocumentURLs.append(url)
         documentImportTask?.cancel()
@@ -189,6 +196,7 @@ struct ContentView: View {
         }
     }
 
+    /// 空闲时优先处理指定批次；单类型直接导入，混合类型先让用户选择。
     private func showPendingShareBatchIfNeeded(preferredID: UUID? = nil) {
         guard pendingShareBatch == nil, activeShareImport == nil else { return }
         guard let batches = try? ShareImportInbox.batches(),
@@ -202,6 +210,7 @@ struct ContentView: View {
         }
     }
 
+    /// 仅收集指定类型且仍存在的暂存文件，并协调选择弹窗与转换页面的呈现顺序。
     private func startShareImport(_ batch: ShareImportInbox.Batch, kind: ShareImportInbox.Kind) {
         let files = batch.entries.filter { $0.kind == kind }.compactMap { entry -> ShareImportRequest.File? in
             guard let url = try? ShareImportInbox.fileURL(for: entry, in: batch),
@@ -218,6 +227,7 @@ struct ContentView: View {
         if !wasChoosingImportKind { showsConversion = true }
     }
 
+    /// 仅移除已成功导入的条目；失败项及其他类型保留在收件箱供后续处理。
     private func finishShareImport(batchID: UUID, importedIDs: Set<UUID>) {
         if let batch = try? ShareImportInbox.batches().first(where: { $0.id == batchID }),
            !importedIDs.isEmpty {
@@ -229,7 +239,7 @@ struct ContentView: View {
 
 }
 
-/// 扩展 `Theme`，集中实现当前文件所需的附加能力。
+/// 将应用主题适配为转换组件使用的主题配置。
 extension Theme {
     var conversionTheme: ConversionTheme {
         ConversionTheme(

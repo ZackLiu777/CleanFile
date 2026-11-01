@@ -1,3 +1,8 @@
+// 应用图标资源生成脚本。
+//
+// 脚本使用 Core Graphics 绘制固定几何图形，输出浅色、深色和着色三种 PNG。
+// 第一个命令行参数是目标 AppIcon.appiconset 目录；图形不依赖外部图片或网络。
+
 // Reproducible flat vector artwork. No image input or external dependencies.
 // Run: swift Scripts/generate-app-icon.swift <AppIcon.appiconset directory>
 import CoreGraphics

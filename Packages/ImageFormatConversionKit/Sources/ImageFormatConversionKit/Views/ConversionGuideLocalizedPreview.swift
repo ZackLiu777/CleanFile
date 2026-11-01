@@ -1,3 +1,9 @@
+// 转换指南中随语言和字号变化的界面示意。
+// 通过 SwiftUI 绘制图片、视频和音频工具的样例，避免静态截图固定文案。
+// 示意只用于说明界面，不导入或转换用户文件。
+// 指南页面根据工具名称选择图标、本地化标题和简短设置示意。
+// 预览使用界面组件生成，仅供说明，不依赖用户的真实媒体内容。
+
 import SwiftUI
 
 /// A live, localized representation of the conversion screens. Unlike a bitmap
@@ -49,6 +55,7 @@ struct ConversionGuideLocalizedPreview: View {
     }
 
     @ViewBuilder
+    /// 根据工具类型组合本地化预览内容。
     private func toolPreview(_ tool: String) -> some View {
         previewRow(
             symbol: toolSymbol(tool),
@@ -65,6 +72,7 @@ struct ConversionGuideLocalizedPreview: View {
         }
     }
 
+    /// 以图标、标题和说明组成预览行。
     private func previewRow(symbol: String, title: String, detail: String) -> some View {
         HStack(alignment: .top, spacing: 11) {
             Image(systemName: symbol)
@@ -85,6 +93,7 @@ struct ConversionGuideLocalizedPreview: View {
         }
     }
 
+    /// 构造预览中使用的简短标签。
     private func previewTag(_ title: String) -> some View {
         Text(title)
             .appTypeface(.caption2.weight(.semibold), size: 11, relativeTo: .caption2, weight: .semibold)
@@ -94,10 +103,12 @@ struct ConversionGuideLocalizedPreview: View {
             .background(theme.accent.opacity(0.10), in: Capsule())
     }
 
+    /// 获取指定工具的本地化标题。
     private func toolTitle(_ tool: String) -> String {
         L10n.dynamicString("conversion.home.\(tool).title")
     }
 
+    /// 获取指定工具对应的系统图标名称。
     private func toolSymbol(_ tool: String) -> String {
         switch tool {
         case "image": "photo.on.rectangle.angled"

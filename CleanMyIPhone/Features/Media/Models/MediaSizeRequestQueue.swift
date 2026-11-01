@@ -1,3 +1,10 @@
+//
+//  媒体大小请求队列
+//
+//  以 FIFO 顺序管理资源标识，并为长队列延迟清理已消费前缀。
+//  对比实现保留用于衡量队列策略，队列本身不访问 PhotoKit 或读取文件。
+//
+
 import Foundation
 
 /// Long-request backlog FIFO; short backlogs keep the ViewModel’s original array.
@@ -8,8 +15,10 @@ nonisolated struct MediaSizeRequestQueue {
     var count: Int { storage.count - head }
     var isEmpty: Bool { count == 0 }
 
+    /// 将资源标识追加到队尾，保持请求顺序。
     mutating func append(_ identifier: String) { storage.append(identifier) }
 
+    /// 移除队首；长队列通过移动头指针减少反复搬移，并在合适时机压缩存储。
     mutating func popFirst() -> String? {
         // Compaction always resets head; a short backing array therefore has no consumed prefix.
         if storage.count <= 32 { return storage.isEmpty ? nil : storage.removeFirst() }
@@ -27,6 +36,7 @@ nonisolated struct MediaSizeRequestQueue {
         return identifier
     }
 
+    /// 清空队列和消费位置，使实例可安全复用。
     mutating func removeAll() {
         storage.removeAll()
         head = 0
@@ -34,7 +44,9 @@ nonisolated struct MediaSizeRequestQueue {
 }
 
 /// Both timed paths live in the same module and include enqueue/dequeue work.
+/// 保留原数组与新队列的相同工作量入口，以便比较长队列的处理成本。
 nonisolated enum MediaSizeRequestQueueComparison {
+    /// 以数组移除首项的方式完成指定轮次并返回校验和。
     static func original(_ identifiers: [String], cycles: Int) -> Int {
         var checksum = 0
         for _ in 0..<cycles {
@@ -45,6 +57,7 @@ nonisolated enum MediaSizeRequestQueueComparison {
         return checksum
     }
 
+    /// 使用队列完成相同轮次并返回校验和，供比较调用方校验结果。
     static func proposed(_ identifiers: [String], cycles: Int) -> Int {
         var checksum = 0
         for _ in 0..<cycles {

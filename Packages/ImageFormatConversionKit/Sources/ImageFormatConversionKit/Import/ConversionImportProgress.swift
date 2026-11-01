@@ -1,20 +1,23 @@
 //
-//  文件职责：集中定义 ConversionImportProgress 相关的生产逻辑与共享能力。
-//  所属模块：ImageFormatConversionKit。
+//  定义转换导入进度、跨页面保留的会话状态和进度展示视图。
+//  单文件进度与已完成数量合成为总进度，并支持映射到多阶段区间。
+//  调试构建额外提供确定性界面宿主，用于验证进度呈现。
+//  各转换页面通过会话对象保留导入展示状态，视图将数值呈现为进度和文件名。
+//  进度对象只描述当前工作，不拥有导入任务，也不负责取消或清理文件。
 //
 
 import Foundation
 import Observation
 import SwiftUI
 
-/// 定义 `ConversionImportProgress` 的值语义数据与相关行为。
+/// 表示批量导入已完成项数、总数和当前文件的可选进度。
 struct ConversionImportProgress: Equatable, Sendable {
     let completed: Int
     let total: Int
     let currentFileName: String?
     let currentFileFraction: Double?
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 记录已完成项目数、总数、当前文件名及可选的文件内进度。
     init(
         completed: Int,
         total: Int,
@@ -27,17 +30,19 @@ struct ConversionImportProgress: Equatable, Sendable {
         self.currentFileFraction = currentFileFraction
     }
 
+    /// 将当前文件进度加入已完成项，并将结果限制在零到一之间。
     var fractionCompleted: Double {
         guard total > 0 else { return 0 }
         let current = min(max(currentFileFraction ?? 0, 0), 1)
         return min(max((Double(completed) + current) / Double(total), 0), 1)
     }
 
+    /// 向下取整为展示用百分比，避免未完成时提前显示 100%。
     var percentage: Int {
         Int((fractionCompleted * 100).rounded(.down))
     }
 
-    /// 解析 `mapped` 对应的业务语义，并返回稳定的分类或映射结果。
+    /// 将整体进度映射到阶段区间，供多阶段导入合并展示。
     func mapped(to range: ClosedRange<Double>) -> ConversionImportProgress {
         let lower = min(max(range.lowerBound, 0), 1)
         let upper = min(max(range.upperBound, lower), 1)
@@ -54,7 +59,7 @@ struct ConversionImportProgress: Equatable, Sendable {
 /// page is temporarily removed from the navigation stack.
 @MainActor
 @Observable
-/// 封装 `ConversionImportSession` 的引用语义、状态与业务行为。
+/// 在详情页临时离开导航栈时保留图库导入的展示状态。
 final class ConversionImportSession {
     var libraryProgress: ConversionImportProgress?
     var librarySessionID: UUID?
@@ -62,7 +67,7 @@ final class ConversionImportSession {
     var previewURLs: [URL] = []
 }
 
-/// 定义 `AnimatedImportPercentage` 的值语义数据与相关行为。
+/// 插值展示百分比，同时使用等宽数字和无障碍标识。
 private struct AnimatedImportPercentage: View, Animatable {
     var value: Double
 
@@ -79,7 +84,7 @@ private struct AnimatedImportPercentage: View, Animatable {
     }
 }
 
-/// 定义 `ConversionImportProgressView` 的值语义数据与相关行为。
+/// 展示总进度和当前文件名，并为辅助功能提供百分比值。
 struct ConversionImportProgressView: View {
     @Environment(\.conversionTheme) private var theme
     let progress: ConversionImportProgress
@@ -128,7 +133,7 @@ public struct ConversionImportProgressUITestHarness: View {
         currentFileFraction: 0
     )
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 创建导入进度的界面自动化展示入口。
     public init() {}
 
     public var body: some View {

@@ -1,27 +1,30 @@
 //
+//  文件访问作用域
+//
+//  定义在受控访问生命周期中执行文件操作的接口及其实现。
+//  安全作用域在操作结束或抛错时均释放；不受限实现供无需授权的调用场景使用。
+//
+
+//
 //  FileAccess.swift
 //  CleanMyIPhone
 //
 
-//
-//  文件职责：集中定义 FileAccess 相关的生产逻辑与共享能力。
-//  所属模块：CleanMyIPhone。
-//
-
 import Foundation
 
-/// 定义 `FileAccessProviding` 必须提供的统一能力与调用约束。
+/// 抽象单次同步文件操作的访问生命周期，让扫描逻辑无需决定授权获取方式。
 protocol FileAccessProviding: Sendable {
-    /// 封装 `withAccess` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 在 URL 的访问期内执行闭包，返回闭包结果并向调用方传播错误。
+    /// 闭包结束后不得假设安全作用域仍然有效。
     nonisolated func withAccess<T>(to url: URL, operation: () throws -> T) throws -> T
 }
 
-/// 定义 `SecurityScopedFileAccess` 的值语义数据与相关行为。
+/// 获取系统安全作用域后执行操作，无论成功或抛错都在退出时释放。
 struct SecurityScopedFileAccess: FileAccessProviding, Sendable {
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 此实现不保存访问状态；每次操作单独获取作用域。
     nonisolated init() {}
 
-    /// 封装 `withAccess` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 获取失败时抛出安全作用域错误；闭包结束或抛错时均释放已获取的作用域。
     nonisolated func withAccess<T>(to url: URL, operation: () throws -> T) throws -> T {
         guard url.startAccessingSecurityScopedResource() else {
             throw FileScanError.securityScopeUnavailable
@@ -35,12 +38,12 @@ struct SecurityScopedFileAccess: FileAccessProviding, Sendable {
     }
 }
 
-/// 定义 `UnrestrictedFileAccess` 的值语义数据与相关行为。
+/// 直接执行闭包的实现，适用于本身无需安全作用域的文件访问场景。
 struct UnrestrictedFileAccess: FileAccessProviding, Sendable {
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 此实现不保存访问状态，也不请求安全作用域。
     nonisolated init() {}
 
-    /// 封装 `withAccess` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 直接执行闭包并传播其返回值或错误，由调用方保证文件本身可访问。
     nonisolated func withAccess<T>(to url: URL, operation: () throws -> T) throws -> T {
         try operation()
     }

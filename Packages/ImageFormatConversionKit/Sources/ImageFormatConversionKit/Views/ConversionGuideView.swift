@@ -1,3 +1,9 @@
+// 转换功能的可浏览介绍页面。
+// 使用步骤、工具示意和隐私说明帮助用户了解入口与操作流程。
+// 指南展示样例内容，不发起文件导入或转换。
+// 用户可从指南浏览工具、操作步骤和对应详情，示意内容随界面语言呈现。
+// 展示状态与导航由页面负责，真实媒体处理仍由转换功能入口完成。
+
 //
 //  ConversionGuideView.swift
 //
@@ -7,12 +13,14 @@
 
 import SwiftUI
 
+/// 组织转换指南的介绍、操作步骤、工具入口和隐私说明。
 @MainActor
 struct ConversionGuideView: View {
     @Environment(\.conversionTheme) private var theme
     @Environment(\.dismiss) private var dismiss
     @State private var navigationPath: [ConversionGuideTool]
 
+    /// 初始化引导页所需的展示状态。
     init() {
         _navigationPath = State(initialValue: ConversionGuideTool.initialDebugPath)
     }
@@ -173,6 +181,7 @@ struct ConversionGuideView: View {
     }
 }
 
+/// 展示引导首页的主视觉和产品介绍。
 private struct ConversionGuideHero: View {
     @Environment(\.conversionTheme) private var theme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
@@ -243,11 +252,13 @@ private struct ConversionGuideHero: View {
     }
 }
 
+/// 统一引导页主视觉卡片的外观。
 private struct ConversionGuideHeroCardModifier: ViewModifier {
     @Environment(\.conversionTheme) private var theme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     @ViewBuilder
+    /// 将主视觉卡片样式应用于内容。
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
             content.glassEffect(
@@ -263,10 +274,12 @@ private struct ConversionGuideHeroCardModifier: ViewModifier {
     }
 }
 
+/// 为引导内容提供统一的分区标题和布局。
 private struct ConversionGuideSection<Content: View>: View {
     let title: String
     @ViewBuilder let content: Content
 
+    /// 保存分区标题、说明与内容构造闭包。
     init(
         title: String,
         @ViewBuilder content: () -> Content
@@ -286,6 +299,7 @@ private struct ConversionGuideSection<Content: View>: View {
     }
 }
 
+/// 展示引导流程中的单个步骤。
 private struct ConversionGuideStep: View {
     @Environment(\.conversionTheme) private var theme
     let number: Int
@@ -316,6 +330,7 @@ private struct ConversionGuideStep: View {
     }
 }
 
+/// 展示引导页面中的截图卡片。
 private struct ConversionGuideScreenshotCard: View {
     @Environment(\.conversionTheme) private var theme
     let imageName: String
@@ -385,6 +400,7 @@ private struct ConversionGuideScreenshotCard: View {
     }
 }
 
+/// 展示一项转换功能的图标与说明。
 private struct ConversionGuideFeature: View {
     @Environment(\.conversionTheme) private var theme
     let symbol: String
@@ -415,6 +431,7 @@ private struct ConversionGuideFeature: View {
     }
 }
 
+/// 展示引导页中的隐私说明。
 private struct ConversionGuidePrivacyCard: View {
     @Environment(\.conversionTheme) private var theme
 

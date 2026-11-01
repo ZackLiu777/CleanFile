@@ -1,11 +1,21 @@
+//
+//  覆盖转换模型的边界输入、格式能力和进度计算。
+//  包括非有限颜色值、空批次、持久化枚举及无效尺寸和质量。
+//  校验错误可在访问源文件前暴露，并保持关联状态值。
+//  进度在空任务和异常范围内保持有效；批处理状态及媒体来源可编码恢复。
+//  参数校验使用构造的请求，错误不依赖实际媒体解码。
+//
+
 import Foundation
 import SwiftUI
 import Testing
 import UniformTypeIdentifiers
 @testable import ImageFormatConversionKit
 
+/// 验证转换选项、状态和进度在边界条件下的契约。
 @Suite("Conversion model edge cases")
 struct ConversionModelEdgeCaseTests {
+    /// 输出扩展名非空且不重复，并固定 JPEG 使用 jpg。
     @Test("Image output formats expose unique, non-empty extensions")
     func imageOutputFormatsHaveStableExtensions() {
         let extensions = ImageOutputFormat.allCases.map(\.fileExtension)
@@ -15,6 +25,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(ImageOutputFormat.jpeg.fileExtension == "jpg")
     }
 
+    /// 逐项检查有损质量参数与不透明像素要求，防止格式能力误判。
     @Test("Quality support and transparency requirements match format capabilities")
     func imageFormatCapabilitiesAreExplicit() {
         #expect(ImageOutputFormat.jpeg.supportsQuality)
@@ -26,6 +37,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(!ImageOutputFormat.png.requiresOpaquePixels)
     }
 
+    /// 无穷大与 NaN 色彩分量被归一到安全数值，避免生成无效颜色。
     @Test("Flatten colors clamp infinities and NaN to safe values")
     func flattenColorClampsNonFiniteValues() {
         let color = ImageFlattenColor(red: -.infinity, green: .infinity, blue: .nan)
@@ -35,6 +47,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(color.blue == 0)
     }
 
+    /// 原尺寸保持不变，其他预设映射到各自的最长边像素上限。
     @Test("Resize presets map to original or bounded fit policies")
     func resizePresetsMapToPolicies() {
         #expect(ImageResizePreset.original.policy == .original)
@@ -43,6 +56,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(ImageResizePreset.medium.policy == .fit(maxPixelDimension: 1_280))
     }
 
+    /// 负进度及超出总量的进度分别限制在 0% 和 100%。
     @Test("Conversion progress clamps fractions and percentages to completion")
     func importProgressClampsFractions() {
         let beforeStart = ConversionImportProgress(
@@ -64,6 +78,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(pastEnd.percentage == 100)
     }
 
+    /// 总数为零时显示零进度，映射到范围后仍保持有效分母。
     @Test("Zero-total progress remains zero and maps safely into a range")
     func emptyImportProgressIsSafe() {
         let empty = ConversionImportProgress(completed: 0, total: 0, currentFileName: nil)
@@ -75,6 +90,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(mapped.fractionCompleted == 0)
     }
 
+    /// 验证常用音频容器扩展名以及有损、无损标记。
     @Test("Audio formats expose lossless semantics and expected extensions")
     func audioFormatMetadataIsStable() {
         #expect(AudioOutputFormat.mp3.fileExtension == "mp3")
@@ -86,6 +102,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(AudioOutputFormat.wav.isLossless)
     }
 
+    /// 音视频项目状态分别保留成功输出 URL 和失败原因。
     @Test("Audio and video item status values preserve associated output data")
     func conversionStatusesPreserveAssociatedValues() {
         let output = URL(fileURLWithPath: "/tmp/output.m4a")
@@ -105,6 +122,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(audio.status == .failed("codec"))
     }
 
+    /// 用户输入的渐变位置被限制在零到一之间。
     @Test("Conversion gradient stops clamp user-edited locations")
     func conversionGradientStopClampsLocation() {
         let start = ConversionGradientStop(color: .red, location: -2)
@@ -114,6 +132,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(end.location == 1)
     }
 
+    /// 空批次的进度为零，不会因总数为零产生无效比例。
     @Test("Batch progress reports zero for an empty workload")
     func emptyBatchProgressIsZero() {
         let progress = ImageBatchProgress(
@@ -127,6 +146,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(progress.fractionCompleted == 0)
     }
 
+    /// 空输入即使给出零并发度，也返回无成功、无失败且未取消的结果。
     @Test("Empty batch conversion returns no phantom successes or failures")
     func emptyBatchConversionIsNoOp() async {
         let result = await ImageBatchConverter().convert([], maxConcurrentConversions: 0)
@@ -137,6 +157,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(!result.wasCancelled)
     }
 
+    /// 从视频提取音频时保留源类型与用户指定的比特率。
     @Test("Audio requests preserve the explicit video source kind")
     func audioRequestPreservesVideoSourceKind() {
         let request = AudioConversionRequest(
@@ -151,6 +172,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(request.bitRate == .veryHigh)
     }
 
+    /// 有损格式提供最高 320 kbps 选项，无损格式不提供比特率设置。
     @Test("Lossy formats expose 320 kbps while lossless formats ignore bitrate")
     func audioFormatsExposeRelevantBitRates() {
         #expect(AudioOutputFormat.mp3.availableBitRates.contains(.maximum))
@@ -163,12 +185,14 @@ struct ConversionModelEdgeCaseTests {
         #expect(AudioOutputFormat.cafALAC.isLossless)
     }
 
+    /// 原生视频输入限制为 MOV、MP4 和 M4V，不将 AVI 视为受支持。
     @Test("Native video input extensions remain intentionally narrow")
     func nativeVideoExtensionsAreStable() {
         #expect(AudioConversionEngine.supportedVideoInputExtensions == ["mov", "mp4", "m4v"])
         #expect(!AudioConversionEngine.supportedVideoInputExtensions.contains("avi"))
     }
 
+    /// 已保存的转换状态与媒体类型经编码解码后保持不变。
     @Test("Persisted conversion statuses and media kinds round-trip")
     func persistedEnumsRoundTrip() throws {
         let statuses = [PersistedConversionStatus.ready, .completed, .failed, .cancelled]
@@ -183,6 +207,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(decodedKinds == kinds)
     }
 
+    /// 使用不存在的源文件确认质量参数先于文件读取校验。
     @Test("Image conversion rejects quality outside the closed unit interval")
     func invalidQualityIsRejectedBeforeFileAccess() async {
         let request = ImageConversionRequest(
@@ -204,6 +229,7 @@ struct ConversionModelEdgeCaseTests {
         #expect(receivedError == .invalidQuality(1.01))
     }
 
+    /// 使用不存在的源文件确认非正尺寸先于文件读取校验。
     @Test("Image conversion rejects non-positive resize dimensions")
     func invalidResizeDimensionIsRejectedBeforeFileAccess() async {
         let request = ImageConversionRequest(

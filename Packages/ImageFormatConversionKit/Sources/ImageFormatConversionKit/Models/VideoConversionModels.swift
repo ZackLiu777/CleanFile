@@ -1,12 +1,15 @@
 //
-//  文件职责：定义 VideoConversion 领域使用的数据模型与状态语义。
-//  所属模块：ImageFormatConversionKit。
+//  定义视频转换的容器、编码、分辨率、请求、结果和错误。
+//  请求可选择系统预设或自定义码率，并可保留 Live Photo 所需的时间元数据。
+//  列表状态与源资源信息由调用方维护，模型本身不执行文件操作。
+//  视频状态对象构造请求并展示各项转换状态，视频引擎使用配置执行导出。
+//  类型描述目标容器和编码选项，不保证每种组合都受当前设备或源媒体支持。
 //
 
 import Foundation
 import UniformTypeIdentifiers
 
-/// 定义 `VideoOutputContainer` 使用的有限状态或选项集合。
+/// 视频输出容器；扩展名与原始值一致。
 public enum VideoOutputContainer: String, CaseIterable, Identifiable, Sendable {
     case mp4
     case mov
@@ -16,7 +19,7 @@ public enum VideoOutputContainer: String, CaseIterable, Identifiable, Sendable {
     public var fileExtension: String { rawValue }
 }
 
-/// 定义 `VideoCodec` 使用的有限状态或选项集合。
+/// 视频转换可请求的 H.264、HEVC 和 ProRes 编码。
 public enum VideoCodec: String, CaseIterable, Identifiable, Sendable {
     case h264
     case hevc
@@ -26,7 +29,7 @@ public enum VideoCodec: String, CaseIterable, Identifiable, Sendable {
     public var id: Self { self }
 }
 
-/// 定义 `VideoResolutionPreset` 使用的有限状态或选项集合。
+/// 视频导出可选分辨率；实际支持情况由引擎验证。
 public enum VideoResolutionPreset: String, CaseIterable, Identifiable, Sendable {
     case original
     case ultraHD
@@ -37,7 +40,7 @@ public enum VideoResolutionPreset: String, CaseIterable, Identifiable, Sendable 
     public var id: Self { self }
 }
 
-/// 定义 `VideoConversionStatus` 使用的有限状态或选项集合。
+/// 列表项状态；完成时携带输出 URL，失败时携带展示消息。
 public enum VideoConversionStatus: Hashable, Sendable {
     case ready
     case converting
@@ -46,7 +49,7 @@ public enum VideoConversionStatus: Hashable, Sendable {
     case cancelled
 }
 
-/// 定义 `VideoConversionItem` 的值语义数据与相关行为。
+/// 视频列表项关联源文件、字节数、状态及可选照片资源标识。
 public struct VideoConversionItem: Identifiable, Hashable, Sendable {
     public let id: UUID
     public let sourceURL: URL
@@ -54,7 +57,7 @@ public struct VideoConversionItem: Identifiable, Hashable, Sendable {
     public var status: VideoConversionStatus
     public internal(set) var photoAssetIdentifier: String?
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 保存视频源地址、文件大小、当前状态及可选照片资源标识。
     public init(
         id: UUID = UUID(),
         sourceURL: URL,
@@ -70,7 +73,7 @@ public struct VideoConversionItem: Identifiable, Hashable, Sendable {
     }
 }
 
-/// 定义 `VideoConversionRequest` 的值语义数据与相关行为。
+/// 交给视频引擎的源、目标和导出配置；引擎负责验证组合。
 public struct VideoConversionRequest: Sendable {
     public let sourceURL: URL
     public let destinationDirectory: URL
@@ -83,7 +86,7 @@ public struct VideoConversionRequest: Sendable {
     /// Preserve global and timed metadata when compressing a paired Live Photo movie.
     public let preservesTimedMetadata: Bool
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 保存输入输出位置、容器、编码器、分辨率、码率比例及定时元数据选项。
     public init(
         sourceURL: URL,
         destinationDirectory: URL,
@@ -103,7 +106,7 @@ public struct VideoConversionRequest: Sendable {
     }
 }
 
-/// 定义 `VideoConversionResult` 的值语义数据与相关行为。
+/// 成功导出后的源与输出路径及各自字节数。
 public struct VideoConversionResult: Sendable {
     public let sourceURL: URL
     public let outputURL: URL
@@ -111,7 +114,7 @@ public struct VideoConversionResult: Sendable {
     public let outputBytes: Int64
 }
 
-/// 定义 `VideoConversionError` 使用的有限状态或选项集合。
+/// 区分设置不支持、HDR 限制、导出、提交和取消等错误。
 public enum VideoConversionError: Error, LocalizedError, Hashable, Sendable {
     case sourceNotReachable
     case unsupportedSettings

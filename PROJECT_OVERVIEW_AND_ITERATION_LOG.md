@@ -874,3 +874,18 @@ Packages/ImageFormatConversionKit/
 - 重跑：17 个测试、2 个套件全部通过，** TEST SUCCEEDED **。包含原 canonicalDirectoryBoundaries、selectedRootNamespaceIsPreserved 及新增目录别名混合来源回归。
 - Build: Passed；Local Tests: Passed（用户本轮授权）。GitHub Actions: 待验证，原 CI 取消原因仍未知。
 - 首轮结果：/tmp/CleanFile-DirectoryAlias-Authorized.xcresult；最终结果：/tmp/CleanFile-DirectoryAlias-Authorized-Retry.xcresult；最终日志：/tmp/CleanFile-DirectoryAlias-Authorized-Retry.log。
+
+## 2026-10-30 — Premium 全链路代码审查
+
+- 审查订阅配置、权益查询/交易更新/未完成交易、购买/恢复、商品重试、开屏弹窗、功能执行权限、既有 StoreKit 测试和测试绕过边界。
+- 发现：已验证撤销/失效与查询失败组合可保留旧 entitled；未验证状态可被折叠为 notEntitled；缺少前台订阅状态专用监听；核验超时仅修改提示，挂起请求仍阻塞重试。详见 docs/PREMIUM_AUDIT_2026-10-30.md，明确区分代码可推导问题与待集成验证风险。
+- 本轮为检查任务，未修改订阅业务逻辑。没有执行真实购买/恢复/退款、打开 Docker 或启动模拟器。
+- Build / 测试 target compile: Passed（/tmp/CleanFile-PremiumAudit-testcompile.log）。Tests: 未在本地执行（项目规则；此前路径回归授权不扩大到本轮订阅测试）。GitHub Actions: 待验证。
+
+## 2026-10-31 — Premium P1 权益证据修复
+
+- 按已授予权益的交易身份处理退款/失效，查询失败不再保留已撤销权益，并继续检查其他有效订阅或终身购买。
+- 未验证交易及订阅状态保留为未知，使用现有核验/重试状态，避免误判为免费用户；保留宽限期与 revision 竞态保护。
+- 新增未验证状态及退款/离线/其他有效订阅组合的 Swift Testing 回归源码。
+- Build / 测试 target 编译：Passed（/tmp/CleanFile-PremiumP1-build.log）；Tests：未在本地执行；GitHub Actions：待验证。
+- 详见 docs/PREMIUM_AUDIT_2026-10-30.md；P2 未纳入本轮。

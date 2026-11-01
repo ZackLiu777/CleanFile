@@ -1,3 +1,8 @@
+// 应用入口和根场景的组装位置。
+// 在这里建立共享状态并选择启动目标；具体功能与文件操作由各自模块负责。
+// 根场景向下游注入主题、字体与权益对象，并依次组合开屏、首次介绍和应用主界面。
+// 启动时清理旧语言覆盖；调试构建中的启动参数仅用于重置状态或展示指定预览。
+
 //
 //  CleanMyIPhoneApp.swift
 //  CleanMyIPhone
@@ -5,20 +10,17 @@
 //  Created by Zane Liao on 8/18/26.
 //
 
-//
-//  文件职责：集中定义 CleanMyIPhoneApp 相关的生产逻辑与共享能力。
-//  所属模块：CleanMyIPhone。
-//
 
 import ImageFormatConversionKit
 import SwiftUI
 
 @main
-/// 定义 `CleanMyIPhoneApp` 的值语义数据与相关行为。
+/// 创建应用共享外观和权益状态，并组装根场景与启动流程。
 struct CleanMyIPhoneApp: App {
     @StateObject private var themeSettings: ThemeSettings
     @StateObject private var premiumEntitlementStore: PremiumEntitlementStore
 
+    /// 创建全局外观和权益状态，并清理旧语言偏好；调试启动参数可重置指定状态。
     init() {
         let defaults = UserDefaults.standard
         // The app now follows iOS language exclusively. Remove any legacy override.

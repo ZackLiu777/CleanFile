@@ -1,13 +1,22 @@
+//
+//  日期分组缓存
+//
+//  以相册修订号和日历环境作为缓存键，避免详情页重复构造日期分组。
+//  调用方必须在资源成员、日期或可用性变化时推进 generation；界面选择变化不影响缓存。
+//
+
 import Foundation
 import Combine
 
 /// Reuses date sections until asset membership, metadata or calendar settings change.
 nonisolated struct MediaDateSectionCacheCandidate: Sendable {
+    /// 区分输入来源与修订代次；成员或日期元数据发生变化时调用方须更新代次。
     struct Revision: Equatable, Sendable {
         let sourceID: String
         let generation: UInt64
     }
 
+    /// 将修订号和日历环境共同作为缓存键，防止地区或时区变化后误用旧分组。
     private struct Key: Equatable, Sendable {
         let revision: Revision
         let calendar: Calendar
@@ -17,6 +26,7 @@ nonisolated struct MediaDateSectionCacheCandidate: Sendable {
         let minimumDaysInFirstWeek: Int
         let comparisonLocale: Locale
 
+        /// 快照化修订号与日历的关键设置，避免自动更新环境使旧键随之改变。
         init(revision: Revision, calendar: Calendar) {
             self.revision = revision
             self.calendar = calendar
@@ -72,6 +82,7 @@ final class MediaDateSectionStore: ObservableObject {
     private var libraryRevision: UInt64?
     private var generation: UInt64 = 0
 
+    /// 资源标识或相册修订号变化时推进代次；缓存命中时不调用资源构造闭包。
     func sections(assetIDs: [String], libraryRevision: UInt64,
                   assets: () -> [MediaDatedAsset]) -> [MediaDateSection] {
         if self.libraryRevision != libraryRevision || self.assetIDs != assetIDs {

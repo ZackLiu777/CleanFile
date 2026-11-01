@@ -1,6 +1,9 @@
 //
-//  文件职责：集中定义 ConversionImportScheduler 相关的生产逻辑与共享能力。
-//  所属模块：ImageFormatConversionKit。
+//  协调各转换页面共用的照片传输与文件导入许可。
+//  常态最多两项，高温状态下降为一项；等待者按先进先出顺序恢复。
+//  操作结束或抛错都会归还许可，等待期间取消会在取得许可后检查。
+//  照片传输和相关文件导入通过共享 actor 申请许可，避免多个页面叠加过多工作。
+//  热状态改变会影响后续唤醒时的上限；当前已经执行的操作不会因此自动终止。
 //
 
 import Foundation
@@ -15,7 +18,8 @@ actor ConversionImportScheduler {
     private var waiters: [CheckedContinuation<Void, Never>] = []
     private var longWaiters: ConversionFIFOQueueCandidate<CheckedContinuation<Void, Never>>?
 
-    /// 封装 `withPermit` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 取得许可后检查取消并执行操作，无论成功还是抛错都归还许可。
+    /// 排队期间的取消不会立即移除等待者，而是在恢复后阻止操作开始。
     func withPermit<T: Sendable>(
         _ operation: @escaping @Sendable () async throws -> T
     ) async throws -> T {
@@ -31,7 +35,7 @@ actor ConversionImportScheduler {
         }
     }
 
-    /// 封装 `acquire` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 有空位时立即取得许可，否则按顺序排队；长队列切换到 FIFO 存储。
     private func acquire() async {
         if activeOperations < currentLimit {
             activeOperations += 1
@@ -52,7 +56,7 @@ actor ConversionImportScheduler {
         }
     }
 
-    /// 封装 `release` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 归还许可并按当前热状态上限唤醒等待者。
     private func release() {
         activeOperations = max(activeOperations - 1, 0)
         while activeOperations < currentLimit {

@@ -1,7 +1,8 @@
-//
-//  文件职责：集中定义 AppTheme 相关的生产逻辑与共享能力。
-//  所属模块：CleanMyIPhone。
-//
+// 应用主题、外观偏好与公共视图样式。
+// 集中定义颜色、背景、字体和环境注入，供业务界面复用；主题设置负责保存和恢复用户选择。
+// Theme 将背景、前景与语义颜色提供给页面，ThemeSettings 管理持久化偏好及权益限制。
+// 自定义背景保存可编码颜色值；视图修饰器按系统版本和无障碍设置选择可用材质。
+
 
 import Combine
 import Foundation
@@ -10,21 +11,24 @@ import UIKit
 import ImageFormatConversionKit
 
 extension View {
+    /// 按系统版本应用可用的玻璃或边框按钮样式。
     func appGlassButtonStyle() -> some View {
         modifier(AppGlassButtonStyleModifier())
     }
 
+    /// 应用可随文字大小调整的项目字体，并为不可用字体保留回退样式。
     func appTypeface(_ fallback: Font, size: CGFloat, relativeTo style: Font.TextStyle, weight: Font.Weight = .regular) -> some View {
         modifier(ConversionTypefaceModifier(fallback, size: size, relativeTo: style, weight: weight))
     }
 
+    /// 向后代传递所选字体名称，同时设置默认正文字体。
     func appFontFamily(_ name: String?) -> some View {
         environment(\.conversionFontName, name)
             .font(name.map { Font.custom($0, size: 17, relativeTo: .body) })
     }
 }
 
-/// 定义 `AppAppearance` 使用的有限状态或选项集合。
+/// 表示跟随系统、浅色或深色外观及其对应的颜色方案。
 enum AppAppearance: String, CaseIterable, Identifiable, Sendable {
     case system, light, dark
 
@@ -45,7 +49,7 @@ enum AppAppearance: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// 定义 `AppThemeID` 使用的有限状态或选项集合。
+/// 标识可选预设主题，并映射到其展示名称和主题值。
 enum AppThemeID: String, CaseIterable, Identifiable, Sendable {
     case filevra, system, cream, porcelain, sage, graphite
 
@@ -85,6 +89,7 @@ struct AppThemeColor: Codable, Equatable, Sendable {
     static let black = AppThemeColor(red: 0, green: 0, blue: 0)
     static let white = AppThemeColor(red: 1, green: 1, blue: 1)
 
+    /// 固定持久化颜色所用的 RGB 字段名。
     private enum CodingKeys: String, CodingKey {
         case red
         case green
@@ -245,6 +250,7 @@ struct AppBackgroundColorStop: Identifiable, Codable, Equatable, Sendable {
     var color: AppThemeColor
     var location: Double
 
+    /// 创建具有稳定身份的色标，并将位置限制在渐变有效范围内。
     init(id: UUID = UUID(), color: AppThemeColor, location: Double) {
         self.id = id
         self.color = color
@@ -260,6 +266,7 @@ struct AppCustomBackgroundStyle: Codable, Equatable, Sendable {
     var stops: [AppBackgroundColorStop]
     var direction: AppLinearGradientDirection
 
+    /// 用单个色标构造纯色背景配置。
     static func solid(_ color: AppThemeColor) -> AppCustomBackgroundStyle {
         AppCustomBackgroundStyle(
             kind: .solid,
@@ -270,6 +277,7 @@ struct AppCustomBackgroundStyle: Codable, Equatable, Sendable {
 
     var primaryColor: AppThemeColor { stops.first?.color ?? .cream }
 
+    /// 仅返回当前背景类型使用的颜色节点；保留的其他节点仍可用于切换回原类型。
     var activeStops: [AppBackgroundColorStop] {
         switch kind {
         case .solid: Array(stops.prefix(1))
@@ -278,7 +286,8 @@ struct AppCustomBackgroundStyle: Codable, Equatable, Sendable {
         }
     }
 
-    /// Repairs incomplete or future/corrupt values without allowing unbounded view state.
+    /// 修复空节点、重复标识和非法位置，限制节点数量，并为当前类型补齐必要颜色。
+    /// 线性渐变会按位置排序；间距过小时重新均分位置，避免编辑控件重叠。
     func sanitized() -> AppCustomBackgroundStyle {
         var result = self
         if result.stops.isEmpty {
@@ -315,7 +324,8 @@ struct AppCustomBackgroundStyle: Codable, Equatable, Sendable {
         return result
     }
 
-    /// Preserves earlier edits when switching modes and only creates missing color slots.
+    /// 切换背景类型时保留已有颜色，并仅在目标类型需要时补充节点。
+    /// 线性渐变因补充节点而改变数量时重新均分位置。
     func prepared(for kind: AppCustomBackgroundKind) -> AppCustomBackgroundStyle {
         var result = sanitized()
         result.kind = kind
@@ -328,6 +338,7 @@ struct AppCustomBackgroundStyle: Codable, Equatable, Sendable {
         return result
     }
 
+    /// 为指定类型补足颜色，新增节点不超过九个；新颜色由首个颜色与预设目标混合生成。
     private mutating func ensureMinimumColors(
         for kind: AppCustomBackgroundKind,
         preferredLinearCount: Int
@@ -364,6 +375,7 @@ struct AppCustomBackgroundStyle: Codable, Equatable, Sendable {
         }
     }
 
+    /// 将多个节点均匀分布在 0 到 1；仅有一个节点时将其放在起点。
     mutating func redistributeLocations() {
         guard stops.count > 1 else {
             stops[0].location = 0
@@ -419,20 +431,21 @@ enum AppAccentPaletteID: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// 定义 `ThemeBackground` 使用的有限状态或选项集合。
+/// 表示纯色、线性渐变或网格渐变背景。
 enum ThemeBackground: Sendable {
     case solid(Color)
     case linearGradient(stops: [AppBackgroundColorStop], startPoint: UnitPoint, endPoint: UnitPoint)
     case meshGradient(colors: [Color])
 }
 
+/// 保存解析后的背景及其用于派生前景的代表颜色。
 private struct ResolvedCustomBackground {
     let background: ThemeBackground
     let representativeColor: AppThemeColor
     let foregroundColor: AppThemeColor
 }
 
-/// 定义 `Theme` 的值语义数据与相关行为。
+/// 汇集背景、文字、强调色等语义颜色与界面样式。
 struct Theme: Sendable {
     let background: ThemeBackground
     let backgroundPrimary: Color
@@ -458,7 +471,7 @@ struct Theme: Sendable {
     var liquidGlassCardsEnabled: Bool
     let preferredColorScheme: ColorScheme?
 
-    /// 计算 `fileCategoryColor` 所需的派生值，避免展示层重复实现相同规则。
+    /// 为文件分类选择主题语义色或固定辅助色。
     func fileCategoryColor(_ category: FileCategory?) -> Color {
         switch category {
         case .video: accentPrimary
@@ -782,6 +795,7 @@ struct Theme: Sendable {
         )
     }
 
+    /// 逐级查找使所有背景颜色与前景达到 4.5 对比度所需的最小混合比例。
     private static func requiredWash(
         for colors: [AppThemeColor],
         foreground: AppThemeColor,
@@ -800,7 +814,7 @@ struct Theme: Sendable {
 
 }
 
-/// 定义 `AppThemeEnvironmentKey` 的值语义数据与相关行为。
+/// 列出字体样式，并在字体不可用时回退到系统样式。
 enum AppFontStyle: String, CaseIterable, Identifiable {
     case system, rounded, serif, monospaced
     case avenirNext, helveticaNeue, georgia, palatino
@@ -845,11 +859,12 @@ enum AppFontStyle: String, CaseIterable, Identifiable {
     }
 }
 
+/// 为未显式注入主题的视图提供系统默认主题。
 private struct AppThemeEnvironmentKey: EnvironmentKey {
     static let defaultValue = Theme.system
 }
 
-/// 扩展 `EnvironmentValues`，集中实现当前文件所需的附加能力。
+/// 通过 SwiftUI 环境向后代视图提供当前主题。
 extension EnvironmentValues {
     var appTheme: Theme {
         get { self[AppThemeEnvironmentKey.self] }
@@ -858,7 +873,7 @@ extension EnvironmentValues {
 }
 
 @MainActor
-/// 封装 `ThemeSettings` 的引用语义、状态与业务行为。
+/// 管理并持久化用户外观偏好，结合权益计算当前可用主题。
 final class ThemeSettings: ObservableObject {
     @Published var fontStyle: AppFontStyle {
         didSet { userDefaults.set(fontStyle.rawValue, forKey: "appearance.fontStyle") }
@@ -888,6 +903,7 @@ final class ThemeSettings: ObservableObject {
             )
         }
     }
+    /// 背景变更同时保存完整配置和旧版主色，使旧版本仍能恢复主要颜色。
     @Published private(set) var customBackgroundStyle: AppCustomBackgroundStyle {
         didSet {
             Self.persist(
@@ -939,6 +955,7 @@ final class ThemeSettings: ObservableObject {
     }
     var isUsingCustomBackground: Bool { premiumAppearanceAllowed && usesCustomBackground }
 
+    /// 更新高级外观的使用许可，保留已保存偏好以便权益恢复后重新使用。
     func setPremiumAppearanceAllowed(_ allowed: Bool) {
         guard premiumAppearanceAllowed != allowed else { return }
         // Keep persisted preferences so restored purchases recover the user's original design.
@@ -990,7 +1007,7 @@ final class ThemeSettings: ObservableObject {
         }
     }
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 从用户偏好恢复外观设置，并迁移旧主题标识及缺省值。
     init(userDefaults: UserDefaults = .standard) {
         fontStyle = AppFontStyle(rawValue: userDefaults.string(forKey: "appearance.fontStyle") ?? "") ?? .georgia
         self.userDefaults = userDefaults
@@ -1089,6 +1106,7 @@ final class ThemeSettings: ObservableObject {
         usesCustomBackground = true
     }
 
+    /// 按稳定标识更新一个颜色节点；无权益或节点不存在时忽略操作。
     func updateCustomBackgroundColor(_ color: Color, stopID: UUID) {
         guard premiumAppearanceAllowed else { return }
         guard let index = customBackgroundStyle.stops.firstIndex(where: { $0.id == stopID }) else {
@@ -1103,6 +1121,7 @@ final class ThemeSettings: ObservableObject {
         usesCustomBackground = true
     }
 
+    /// 只调整线性渐变节点，并将位置限制在相邻节点之间，保留至少 0.02 的间距。
     func updateCustomGradientLocation(_ location: Double, stopID: UUID) {
         guard premiumAppearanceAllowed else { return }
         guard customBackgroundStyle.kind == .linear,
@@ -1123,6 +1142,7 @@ final class ThemeSettings: ObservableObject {
         usesCustomBackground = true
     }
 
+    /// 更新渐变方向并启用自定义背景；未获外观权限时保留原设置。
     func updateCustomGradientDirection(_ direction: AppLinearGradientDirection) {
         guard premiumAppearanceAllowed else { return }
         var style = customBackgroundStyle
@@ -1131,6 +1151,7 @@ final class ThemeSettings: ObservableObject {
         usesCustomBackground = true
     }
 
+    /// 在线性渐变的最大间隔中插入混合色；达到九个节点或找不到间隔时不修改。
     func addCustomGradientColor() {
         guard premiumAppearanceAllowed else { return }
         guard customBackgroundStyle.kind == .linear,
@@ -1155,6 +1176,7 @@ final class ThemeSettings: ObservableObject {
         usesCustomBackground = true
     }
 
+    /// 按标识移除线性渐变节点，并保留至少两个节点以维持渐变。
     func removeCustomGradientColor(stopID: UUID) {
         guard premiumAppearanceAllowed else { return }
         guard customBackgroundStyle.kind == .linear,
@@ -1168,7 +1190,7 @@ final class ThemeSettings: ObservableObject {
         usesCustomBackground = true
     }
 
-    /// 封装 `migratedThemeID` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 将旧版主题标识映射到现有预设，未知值使用默认主题。
     private static func migratedThemeID(from rawValue: String?) -> AppThemeID {
         if let rawValue, let currentTheme = AppThemeID(rawValue: rawValue) {
             return currentTheme
@@ -1198,6 +1220,8 @@ final class ThemeSettings: ObservableObject {
         return color
     }
 
+    /// 从 UserDefaults 解码自定义背景；数据缺失或损坏时使用调用方提供的回退值。
+    /// 解码成功后修复节点数量、标识和位置，避免旧数据破坏编辑状态。
     private static func restoreBackgroundStyle(
         forKey key: String,
         from userDefaults: UserDefaults,
@@ -1222,6 +1246,7 @@ final class ThemeSettings: ObservableObject {
     }
 
 
+    /// 清理并编码背景配置后写入 UserDefaults；编码失败时不覆盖现有值。
     private static func persist(
         _ style: AppCustomBackgroundStyle,
         forKey key: String,
@@ -1232,7 +1257,7 @@ final class ThemeSettings: ObservableObject {
     }
 }
 
-/// 定义 `AppBackground` 的值语义数据与相关行为。
+/// 从环境主题绘制覆盖安全区域的应用背景。
 struct AppBackground: View {
     @Environment(\.appTheme) private var theme
 
@@ -1284,19 +1309,20 @@ struct ThemeBackgroundLayer: View {
         }
     }
 
+    /// 将颜色补齐或截断为网格需要的九个节点；空数组使用透明色。
     private func normalizedMeshColors(_ colors: [Color]) -> [Color] {
         let fallback = colors.last ?? .clear
         return Array((colors + Array(repeating: fallback, count: 9)).prefix(9))
     }
 }
 
-/// 定义 `AppContentCardModifier` 的值语义数据与相关行为。
+/// 根据主题、系统版本与减少透明度设置绘制内容卡片。
 private struct AppContentCardModifier: ViewModifier {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let cornerRadius: CGFloat
 
-    /// 封装 `body` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 根据支持情况选择玻璃效果或主题背景和边框。
     @ViewBuilder
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
@@ -1318,10 +1344,12 @@ private struct AppContentCardModifier: ViewModifier {
     }
 }
 
+/// 为列表行设置主题卡片背景，并根据系统版本和减少透明度设置选择材质。
 private struct AppListCardModifier: ViewModifier {
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
+    /// 在列表行背景使用完整玻璃材质，其他情况下使用主题卡片底色。
     @ViewBuilder
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *), theme.liquidGlassCardsEnabled, !reduceTransparency {
@@ -1339,9 +1367,9 @@ private struct AppListCardModifier: ViewModifier {
     }
 }
 
-/// 扩展 `View`，集中实现当前文件所需的附加能力。
+/// 提供内容卡片、列表卡片和滚动边缘的公共样式入口。
 extension View {
-    /// 封装 `appContentCard` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 应用带指定圆角的主题内容卡片样式。
     func appContentCard(cornerRadius: CGFloat = 20) -> some View {
         modifier(AppContentCardModifier(cornerRadius: cornerRadius))
     }
@@ -1351,16 +1379,16 @@ extension View {
         modifier(AppListCardModifier())
     }
 
-    /// 封装 `appSoftScrollEdge` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 在支持的系统上应用柔和的纵向滚动边缘效果。
     func appSoftScrollEdge() -> some View {
         modifier(AppSoftScrollEdgeModifier())
     }
 }
 
-/// 定义 `AppSoftScrollEdgeModifier` 的值语义数据与相关行为。
+/// 兼容不同系统版本地设置纵向滚动边缘效果。
 private struct AppSoftScrollEdgeModifier: ViewModifier {
     @ViewBuilder
-    /// 封装 `body` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 支持时设置柔和纵向滚动边缘，旧系统保留原内容。
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {
             content.scrollEdgeEffectStyle(.soft, for: .vertical)
@@ -1370,7 +1398,9 @@ private struct AppSoftScrollEdgeModifier: ViewModifier {
     }
 }
 
+/// 将玻璃按钮样式限制在支持的系统版本，其余系统使用边框样式。
 private struct AppGlassButtonStyleModifier: ViewModifier {
+    /// 按系统支持情况选择玻璃按钮或边框按钮。
     @ViewBuilder
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {

@@ -1,3 +1,8 @@
+// 开屏标志与波纹画面的绘制。
+// 画面根据传入时间计算进度，主题颜色由环境提供，不管理导航或启动任务。
+// AppOpeningView 驱动画面时间与尺寸，标志路径按目标区域等比缩放。
+// 静态帧与动态帧使用同一绘图逻辑；动画是否运行由调用方决定。
+
 import SwiftUI
 
 /// Production artwork is independent of the optional animation design gallery.
@@ -37,6 +42,7 @@ struct RippleOpeningArtwork: View {
 
 /// Uses the app icon's two planes, cropped to their shared artwork bounds.
 private struct OpeningAppMark: Shape {
+    /// 将标志的两块原始轮廓等比缩放并居中到给定矩形。
     func path(in rect: CGRect) -> Path {
         let planes: [[CGPoint]] = [
             [CGPoint(x: 0, y: 0), CGPoint(x: 512, y: 0),

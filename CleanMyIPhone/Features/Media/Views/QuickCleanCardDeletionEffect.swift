@@ -1,3 +1,8 @@
+// 快速清理卡片删除成功后的视觉效果。
+// 卡片快照和窗口坐标仅用于动画，真实删除由 PhotoKit 操作决定。
+// 调用方按可见卡片顺序截取窗口快照，再在覆盖层播放碎片或简化淡出。
+// 位置偏好仅传递卡片坐标；无快照或动画关闭不改变真实删除结果。
+
 //
 //  QuickCleanCardDeletionEffect.swift
 //  CleanMyIPhone
@@ -8,12 +13,14 @@
 import SwiftUI
 import UIKit
 
+/// 保存分类卡片的屏幕快照与窗口坐标，供删除反馈使用。
 struct QuickCleanCardSnapshot {
     let image: UIImage
     let frameInWindow: CGRect
 }
 
 @MainActor
+/// 负责捕获和播放卡片消散反馈，不执行实际媒体删除。
 enum QuickCleanCardDeletionEffect {
     /// 从当前窗口截取单张分类卡片。每轮动画前重新截取，以匹配上一张移除后的新位置。
     static func capture(frame: CGRect, in window: UIWindow) -> QuickCleanCardSnapshot? {
@@ -90,6 +97,7 @@ enum QuickCleanCardDeletionEffect {
         overlay.removeFromSuperview()
     }
 
+    /// 按卡片宽高比分割快照，并将每片图像放到动画覆盖层。
     private static func makeFragments(
         snapshot: QuickCleanCardSnapshot,
         in overlay: UIView
@@ -124,9 +132,11 @@ enum QuickCleanCardDeletionEffect {
     }
 }
 
+/// 汇总分类卡片在窗口中的位置，供逐张捕获动画使用。
 struct QuickCleanCategoryFramePreferenceKey: PreferenceKey {
     static var defaultValue: [MediaQuickCleanViewModel.Category.ID: CGRect] = [:]
 
+    /// 合并子视图提供的位置；同一分类采用较新的坐标。
     static func reduce(
         value: inout [MediaQuickCleanViewModel.Category.ID: CGRect],
         nextValue: () -> [MediaQuickCleanViewModel.Category.ID: CGRect]

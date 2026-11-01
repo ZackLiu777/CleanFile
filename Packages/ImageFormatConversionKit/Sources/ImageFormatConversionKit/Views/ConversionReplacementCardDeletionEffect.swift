@@ -1,14 +1,23 @@
+// 原件替换审阅页的卡片消失效果。
+// 捕获窗口中卡片的视觉快照并播放碎片效果；坐标由页面偏好值提供。
+// 效果仅呈现已完成操作的反馈，不负责执行照片删除或文件替换。
+// 审阅页面提供卡片位置和截图，效果完成后移除临时覆盖视图。
+// 减少动态效果时使用简化淡出；动画结果不改变文件操作结果。
+
 #if os(iOS)
 import SwiftUI
 import UIKit
 
+/// 保存卡片截图与窗口坐标，供后续视觉反馈使用。
 struct ConversionReplacementCardSnapshot {
     let image: UIImage
     let frameInWindow: CGRect
 }
 
+/// 负责捕获和播放审阅卡片的视觉效果，不执行实际文件或照片删除。
 @MainActor
 enum ConversionReplacementCardDeletionEffect {
+    /// 截取指定窗口区域；无法取得有效画面时返回空值。
     static func capture(frame: CGRect, in window: UIWindow) -> ConversionReplacementCardSnapshot? {
         let clippedFrame = frame.intersection(window.bounds)
         guard clippedFrame.width > 1, clippedFrame.height > 1 else { return nil }
@@ -22,6 +31,7 @@ enum ConversionReplacementCardDeletionEffect {
         return ConversionReplacementCardSnapshot(image: image, frameInWindow: clippedFrame)
     }
 
+    /// 按动态效果设置播放或简化反馈，并通过回调隐藏原始卡片。
     static func play(
         snapshot: ConversionReplacementCardSnapshot,
         in window: UIWindow,
@@ -69,6 +79,7 @@ enum ConversionReplacementCardDeletionEffect {
         overlay.removeFromSuperview()
     }
 
+    /// 将快照划分为网格并放入覆盖层，供后续动画独立移动和淡出。
     private static func makeFragments(
         snapshot: ConversionReplacementCardSnapshot,
         in overlay: UIView
@@ -102,15 +113,19 @@ enum ConversionReplacementCardDeletionEffect {
 }
 #endif
 
+/// 收集各候选卡片在窗口中的位置。
 struct ConversionReplacementFramePreferenceKey: PreferenceKey {
     static let defaultValue: [UUID: CGRect] = [:]
+    /// 合并子视图上报的位置；同一键出现多次时使用最新值。
     static func reduce(value: inout [UUID: CGRect], nextValue: () -> [UUID: CGRect]) {
         value.merge(nextValue(), uniquingKeysWith: { _, latest in latest })
     }
 }
 
+/// 收集分类卡片在窗口中的位置。
 struct ConversionReplacementCategoryFramePreferenceKey: PreferenceKey {
     static let defaultValue: [String: CGRect] = [:]
+    /// 合并子视图上报的位置；同一键出现多次时使用最新值。
     static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
         value.merge(nextValue(), uniquingKeysWith: { _, latest in latest })
     }

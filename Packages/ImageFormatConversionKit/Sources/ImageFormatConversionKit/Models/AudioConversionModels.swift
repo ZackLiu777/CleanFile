@@ -1,17 +1,20 @@
 //
-//  文件职责：定义 AudioConversion 领域使用的数据模型与状态语义。
-//  所属模块：ImageFormatConversionKit。
+//  定义音频与视频音轨转换使用的格式、码率、请求、状态和错误。
+//  列表项目保留源文件信息及可选照片资源标识，供界面展示和恢复。
+//  错误描述在模型边界本地化，实际编码与文件操作由引擎负责。
+//  音频引擎读取请求中的来源类型和编码参数，状态对象维护各项的处理进度。
+//  输出地址仅在完成状态中出现，读取失败或取消由对应状态和错误传递。
 //
 
 import Foundation
 
-/// 定义 `AudioSourceKind` 使用的有限状态或选项集合。
+/// 区分直接读取音频文件与先从视频提取音轨。
 public enum AudioSourceKind: String, Codable, Sendable {
     case audioFile
     case video
 }
 
-/// 定义 `AudioOutputFormat` 使用的有限状态或选项集合。
+/// 音频输出编码与容器；扩展名和是否无损由格式决定。
 public enum AudioOutputFormat: String, CaseIterable, Identifiable, Sendable {
     case mp3
     case aac
@@ -43,7 +46,7 @@ public enum AudioOutputFormat: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// 定义 `AudioBitRate` 使用的有限状态或选项集合。
+/// 有损音频编码可选的目标码率，单位为每秒比特数。
 public enum AudioBitRate: Int, CaseIterable, Identifiable, Sendable {
     case compact = 96_000
     case standard = 128_000
@@ -54,13 +57,15 @@ public enum AudioBitRate: Int, CaseIterable, Identifiable, Sendable {
     public var id: Self { self }
 }
 
+/// 提供各音频格式可选的目标码率。
 extension AudioOutputFormat {
+    /// 无损格式不使用目标码率；有损格式提供全部码率选项。
     var availableBitRates: [AudioBitRate] {
         isLossless ? [] : AudioBitRate.allCases
     }
 }
 
-/// 定义 `AudioConversionStatus` 使用的有限状态或选项集合。
+/// 列表项状态；完成时携带输出 URL，失败时携带展示消息。
 public enum AudioConversionStatus: Hashable, Sendable {
     case ready
     case converting
@@ -69,7 +74,7 @@ public enum AudioConversionStatus: Hashable, Sendable {
     case cancelled
 }
 
-/// 定义 `AudioConversionItem` 的值语义数据与相关行为。
+/// 音频转换列表项，包含源信息、可选音频属性及当前状态。
 public struct AudioConversionItem: Identifiable, Hashable, Sendable {
     public let id: UUID
     public let sourceURL: URL
@@ -81,7 +86,7 @@ public struct AudioConversionItem: Identifiable, Hashable, Sendable {
     public var status: AudioConversionStatus
     public let photoAssetIdentifier: String?
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 保存音频源地址、大小、来源类型、可用媒体属性、状态和可选照片资源标识。
     public init(
         id: UUID = UUID(),
         sourceURL: URL,
@@ -105,7 +110,7 @@ public struct AudioConversionItem: Identifiable, Hashable, Sendable {
     }
 }
 
-/// 定义 `AudioConversionRequest` 的值语义数据与相关行为。
+/// 交给音频引擎的输入、目标目录和编码参数。
 public struct AudioConversionRequest: Sendable {
     public let sourceURL: URL
     public let destinationDirectory: URL
@@ -113,7 +118,7 @@ public struct AudioConversionRequest: Sendable {
     public let bitRate: AudioBitRate
     public let sourceKind: AudioSourceKind
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 保存音频源、输出目录、输出格式、目标码率及来源类型。
     public init(
         sourceURL: URL,
         destinationDirectory: URL,
@@ -129,7 +134,7 @@ public struct AudioConversionRequest: Sendable {
     }
 }
 
-/// 定义 `AudioConversionError` 使用的有限状态或选项集合。
+/// 区分源不可访问、音轨不可用、编码、提交及取消等错误。
 public enum AudioConversionError: Error, LocalizedError, Hashable, Sendable {
     case sourceUnavailable
     case unsupportedInput

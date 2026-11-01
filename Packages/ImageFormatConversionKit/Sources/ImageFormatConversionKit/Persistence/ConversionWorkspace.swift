@@ -1,18 +1,21 @@
 //
-//  文件职责：集中定义 ConversionWorkspace 相关的生产逻辑与共享能力。
-//  所属模块：ImageFormatConversionKit。
+//  维护转换工作区中的导入副本、各媒体类型清单及恢复所需状态。
+//  导入优先复用安全的本地副本或移动临时文件，否则分块复制并支持取消。
+//  清理限制在指定目录内；删除输出失败时保留源副本，便于恢复和重试。
+//  各媒体状态对象使用工作区暂存输入、保存清单，并在恢复时过滤不可用来源。
+//  工作区管理其受限范围内的副本与输出；实际照片原件替换由单独服务处理。
 //
 
 import Foundation
 
-/// 定义 `ConversionMediaKind` 使用的有限状态或选项集合。
+/// 工作区按媒体种类划分导入文件和清单。
 enum ConversionMediaKind: String, Codable, Hashable, Sendable {
     case image
     case video
     case audio
 }
 
-/// 定义 `PersistedConversionStatus` 使用的有限状态或选项集合。
+/// 跨启动恢复所需的稳定状态；运行中的任务恢复为 ready。
 enum PersistedConversionStatus: String, Codable, Sendable {
     case ready
     case completed
@@ -28,10 +31,12 @@ struct PersistedConversionState {
     let outputPath: String?
 }
 
+/// 将媒体专属运行状态转换为清单可保存的共同表示。
 protocol ConversionStatusPersistable {
     var persistedState: PersistedConversionState { get }
 }
 
+/// 将图片转换状态映射为可持久化状态，并在恢复时重建对应值。
 extension ImageConversionItemStatus: ConversionStatusPersistable {
     var persistedState: PersistedConversionState {
         switch self {
@@ -47,6 +52,7 @@ extension ImageConversionItemStatus: ConversionStatusPersistable {
     }
 }
 
+/// 将音频转换状态映射为可持久化状态，并在恢复时重建对应值。
 extension AudioConversionStatus: ConversionStatusPersistable {
     var persistedState: PersistedConversionState {
         switch self {
@@ -62,6 +68,7 @@ extension AudioConversionStatus: ConversionStatusPersistable {
     }
 }
 
+/// 将视频转换状态映射为可持久化状态，并在恢复时重建对应值。
 extension VideoConversionStatus: ConversionStatusPersistable {
     var persistedState: PersistedConversionState {
         switch self {
@@ -79,12 +86,14 @@ extension VideoConversionStatus: ConversionStatusPersistable {
 
 /// Owns the filesystem naming convention for converted media directories.
 enum ConversionOutputDirectory {
+    /// 获取对应输出目录路径；无法取得文稿目录时使用临时目录。
     static func url(for kind: ConversionMediaKind, fileManager: FileManager = .default) -> URL {
         let baseURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
             ?? fileManager.temporaryDirectory
         return baseURL.appendingPathComponent(name(for: kind), isDirectory: true)
     }
 
+    /// 保持各媒体输出目录名称与已有文件兼容。
     private static func name(for kind: ConversionMediaKind) -> String {
         switch kind {
         case .image: "Converted Images"
@@ -94,7 +103,7 @@ enum ConversionOutputDirectory {
     }
 }
 
-/// 定义 `PersistedConversionItem` 的值语义数据与相关行为。
+/// 保存一项转换的源路径、状态、可选输出路径及恢复所需元数据。
 struct PersistedConversionItem: Codable, Sendable {
     let id: UUID
     let sourcePath: String
@@ -110,7 +119,7 @@ struct PersistedConversionItem: Codable, Sendable {
     var channelCount: Int? = nil
 }
 
-/// 使用 Actor 隔离 `ConversionWorkspace` 的可变状态，确保并发访问安全。
+/// 隔离工作区文件与清单操作，并限制导入和清理的路径范围。
 actor ConversionWorkspace {
     static let shared = ConversionWorkspace()
 
@@ -121,7 +130,7 @@ actor ConversionWorkspace {
     private let legacyPhotoImportsURL: URL
     private let sharedImportsURL: URL?
 
-    /// 创建当前类型实例，并保存后续流程所需的依赖与初始状态。
+    /// 使用指定文件管理器和可选根目录配置导入、清单及旧目录位置。
     init(fileManager: FileManager = .default, rootURL customRootURL: URL? = nil) {
         self.fileManager = fileManager
         let support = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
@@ -139,7 +148,7 @@ actor ConversionWorkspace {
         )?.appendingPathComponent("Share Imports", isDirectory: true)
     }
 
-    /// 封装 `stage` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 经共享导入调度器取得许可后，将源文件暂存到工作区并报告字节进度。
     func stage(
         _ sourceURL: URL,
         id: UUID,
@@ -156,7 +165,8 @@ actor ConversionWorkspace {
         }
     }
 
-    /// 封装 `stageWithoutScheduling` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 复用已有暂存文件，或选择复制、移动和分块读取路径。
+    /// 分块复制期间检查取消，失败时清理该项目录并传播错误。
     private func stageWithoutScheduling(
         _ sourceURL: URL,
         id: UUID,
@@ -260,7 +270,7 @@ actor ConversionWorkspace {
         return (destination, stagedBytes)
     }
 
-    /// 加载 `load` 所需的数据，并将结果转换为当前层可消费的状态。
+    /// 读取媒体清单并过滤源文件已不存在的记录；缺失或损坏的清单返回空数组。
     func load(_ kind: ConversionMediaKind) -> [PersistedConversionItem] {
         let performanceID = ConversionPerformance.begin("Conversion Manifest Load")
         defer { ConversionPerformance.end("Conversion Manifest Load", id: performanceID) }
@@ -271,7 +281,7 @@ actor ConversionWorkspace {
         return records.filter { fileManager.fileExists(atPath: $0.sourcePath) }
     }
 
-    /// 持久化 `save` 对应的数据，并保持后续恢复所需的信息完整。
+    /// 原子写入媒体清单；持久化失败不会中断正在进行的转换。
     func save(_ records: [PersistedConversionItem], kind: ConversionMediaKind) {
         let performanceID = ConversionPerformance.begin("Conversion Manifest Save")
         defer { ConversionPerformance.end("Conversion Manifest Save", id: performanceID) }
@@ -284,7 +294,8 @@ actor ConversionWorkspace {
         }
     }
 
-    /// 执行 `delete` 移除流程，并同步更新受影响的业务状态。
+    /// 仅删除指定输出根目录内的输出及工作区内的暂存源。
+    /// 输出删除失败时保留源并返回 false，以便调用方保留记录和重试。
     func delete(
         _ record: PersistedConversionItem,
         kind: ConversionMediaKind,
@@ -311,8 +322,7 @@ actor ConversionWorkspace {
         return succeeded
     }
 
-    /// Deletes records sequentially and reports exactly which items succeeded.
-    /// Sequential deletion preserves the existing bounded file-system behavior.
+    /// 顺序清理多条记录，返回实际成功的 ID，允许调用方保留失败项。
     func delete(
         _ records: [PersistedConversionItem],
         kind: ConversionMediaKind,
@@ -325,17 +335,17 @@ actor ConversionWorkspace {
         return deletedIDs
     }
 
-    /// 封装 `manifestURL` 对应的局部行为，供当前类型在统一入口下复用。
+    /// 按媒体种类生成独立的 JSON 清单路径。
     private func manifestURL(_ kind: ConversionMediaKind) -> URL {
         manifestsURL.appendingPathComponent("\(kind.rawValue).json")
     }
 
-    /// 计算 `fileSize` 所需的派生值，避免展示层重复实现相同规则。
+    /// 获取文件大小；元数据不可用时返回零。
     private func fileSize(_ url: URL) -> Int64 {
         Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
     }
 
-    /// 判断 `isDescendant` 条件是否成立，供调用方选择正确的处理分支。
+    /// 按标准化路径组件检查严格子路径，避免字符串前缀造成目录误判。
     private func isDescendant(_ candidate: URL, of root: URL) -> Bool {
         let rootComponents = root.standardizedFileURL.pathComponents
         let candidateComponents = candidate.standardizedFileURL.pathComponents
