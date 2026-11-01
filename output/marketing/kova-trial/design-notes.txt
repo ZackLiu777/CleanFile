@@ -1,8 +1,0 @@
-Reference: https://appscreens.com/template/app-store-screenshots/kova/tRiGP
-First-slide visual adaptation; manually observed reference, not a pixel-exact template export.
-Generated with built-in image_gen. Output resized to 1206 x 2622.
-Headline: Free Up / 30GB+ / Space
-Layout: left-aligned three-line heavy headline, wavy underline, upper-right sparkles, large front-facing black iPhone below heading; pale blue organic background shapes.
-Palette: icy sky blue #EBF4FF to #C6E0FF, cobalt #1A73E8.
-UI content reference: existing Filevra Quick Cleanup marketing screen, 32.6 GB.
-Constraints: no subtitle, no ratings, no brand/logo, no watermark; retain coherent cleanup totals and blue action button.
