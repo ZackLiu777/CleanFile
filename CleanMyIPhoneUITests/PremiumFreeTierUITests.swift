@@ -297,9 +297,9 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["quota.media.remaining"].exists)
     }
 
-    /// 检查预设浅色主题与自定义颜色入口的既定权益边界。
+    /// 检查浅色和深色预设免费，自定义颜色仍需高级权益。
     @MainActor
-    func testPresetLightThemeIsFreeAndCustomColorRequiresPremium() {
+    func testPresetThemesAreFreeAndCustomColorRequiresPremium() {
         let app = launchFreeApp()
         tab(in: app, id: "tab.settings", label: "Settings").tap()
         app.buttons["settings.appearance"].tap()
@@ -318,7 +318,8 @@ final class PremiumFreeTierUITests: XCTestCase {
         for _ in 0..<5 where !graphite.isHittable { palette.swipeLeft() }
         XCTAssertTrue(graphite.isHittable)
         graphite.tap()
-        XCTAssertTrue(app.buttons["premium.close"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["premium.close"].exists)
+        XCTAssertTrue(graphite.isSelected)
     }
 
     /// 滚动购买页内容，避开固定操作区域以访问屏幕外的方案。

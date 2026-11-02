@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "轉換圖片與音訊";
 "premium.feature.compression.detail" = "調整設定，轉換圖片與音訊檔案。";
 "premium.feature.appearance.title" = "個人化外觀";
-"premium.feature.appearance.detail" = "解鎖深色外觀、自訂 App 顏色與背景。";
+"premium.feature.appearance.detail" = "解鎖自訂 App 顏色與背景。";
 "premium.continue.free" = "繼續免費使用";
 
 "Photos" = "照片";
@@ -529,6 +529,7 @@
 "intro.next" = "繼續";
 "intro.start" = "開始使用";
 "intro.demo" = "示例";
+"intro.compress.batchExample" = "示例：批次壓縮";
 "settings.intro.title" = "功能介紹";
 "settings.intro.detail" = "瀏覽 Filevra 的四頁功能介紹。";
 "settings.intro.close" = "關閉";

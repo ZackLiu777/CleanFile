@@ -222,11 +222,14 @@ struct ThemeSettingsEdgeCaseTests {
         let defaults = isolatedDefaults()
         let settings = ThemeSettings(userDefaults: defaults)
 
+        #expect(!settings.liquidGlassCardsEnabled)
         settings.liquidGlassCardsEnabled = true
         let restored = ThemeSettings(userDefaults: defaults)
 
         #expect(restored.liquidGlassCardsEnabled)
         #expect(restored.theme.liquidGlassCardsEnabled)
+        restored.liquidGlassCardsEnabled = false
+        #expect(!ThemeSettings(userDefaults: defaults).liquidGlassCardsEnabled)
     }
 
     /// 切换预设时关闭自定义背景，但保留颜色供之后恢复。

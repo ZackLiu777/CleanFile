@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "Сжимайте изображения и аудио";
 "premium.feature.compression.detail" = "Конвертируйте изображения и аудиофайлы с настраиваемыми параметрами.";
 "premium.feature.appearance.title" = "Ваше оформление";
-"premium.feature.appearance.detail" = "Откройте тёмное оформление и свои цвета приложения и фона.";
+"premium.feature.appearance.detail" = "Откройте свои цвета приложения и фона.";
 "premium.continue.free" = "Продолжить бесплатно";
 
 "Photos" = "Фотографии";
@@ -496,6 +496,7 @@
 "intro.next" = "Продолжить";
 "intro.start" = "Начать";
 "intro.demo" = "Пример";
+"intro.compress.batchExample" = "Пример: пакет файлов";
 "premium.continueTemporarily" = "Продолжить пока";
 "premium.title" = "Больше места для важного";
 "premium.subtitle" = "Мультимедиа, файлы и конвертацию в одном месте.";

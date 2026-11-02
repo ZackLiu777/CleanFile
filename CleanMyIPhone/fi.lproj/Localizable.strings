@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "Muunna kuvia ja ääntä";
 "premium.feature.compression.detail" = "Muunna kuvia ja äänitiedostoja säädettävillä asetuksilla.";
 "premium.feature.appearance.title" = "Tee sovelluksesta omasi";
-"premium.feature.appearance.detail" = "Avaa tumma ulkoasu sekä omat sovellus- ja taustavärit.";
+"premium.feature.appearance.detail" = "Avaa omat sovellus- ja taustavärit.";
 "premium.continue.free" = "Jatka maksutta";
 
 "Photos" = "Valokuvat";
@@ -496,6 +496,7 @@
 "intro.next" = "Jatka";
 "intro.start" = "Aloita";
 "intro.demo" = "Esimerkki";
+"intro.compress.batchExample" = "Esimerkki: tiedostoerä";
 "premium.continueTemporarily" = "Jatka toistaiseksi";
 "premium.title" = "Enemmän tilaa tärkeille";
 "premium.subtitle" = "Media, tiedostot ja muunnos yhdessä paikassa.";

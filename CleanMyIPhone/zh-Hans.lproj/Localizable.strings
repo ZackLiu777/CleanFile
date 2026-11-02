@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "转换图片与音频";
 "premium.feature.compression.detail" = "调整设置，转换图片与音频文件。";
 "premium.feature.appearance.title" = "个性化外观";
-"premium.feature.appearance.detail" = "解锁深色外观、自定义应用颜色与背景。";
+"premium.feature.appearance.detail" = "解锁自定义应用颜色与背景。";
 "premium.continue.free" = "继续免费使用";
 
 "Photos" = "照片";
@@ -529,6 +529,7 @@
 "intro.next" = "继续";
 "intro.start" = "开始使用";
 "intro.demo" = "示例";
+"intro.compress.batchExample" = "示例：批量压缩";
 "settings.intro.title" = "功能介绍";
 "settings.intro.detail" = "浏览 Filevra 的四页功能介绍。";
 "settings.intro.close" = "关闭";

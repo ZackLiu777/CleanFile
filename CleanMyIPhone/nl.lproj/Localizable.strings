@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "Comprimeer afbeeldingen en audio";
 "premium.feature.compression.detail" = "Converteer afbeeldingen en audiobestanden met instelbare opties.";
 "premium.feature.appearance.title" = "Maak het persoonlijk";
-"premium.feature.appearance.detail" = "Ontgrendel de donkere weergave en aangepaste app- en achtergrondkleuren.";
+"premium.feature.appearance.detail" = "Ontgrendel aangepaste app- en achtergrondkleuren.";
 "premium.continue.free" = "Gratis doorgaan";
 
 "Photos" = "Foto's";
@@ -496,6 +496,7 @@
 "intro.next" = "Doorgaan";
 "intro.start" = "Aan de slag";
 "intro.demo" = "Voorbeeld";
+"intro.compress.batchExample" = "Voorbeeld: meerdere bestanden";
 "premium.continueTemporarily" = "Voorlopig doorgaan";
 "premium.title" = "Meer ruimte voor wat ertoe doet";
 "premium.subtitle" = "Media, bestanden en conversie op één plek.";

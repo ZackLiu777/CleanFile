@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "تحويل الصور والصوت";
 "premium.feature.compression.detail" = "حوّل الصور وملفات الصوت بإعدادات قابلة للتعديل.";
 "premium.feature.appearance.title" = "خصّص المظهر";
-"premium.feature.appearance.detail" = "افتح المظهر الداكن وألوان التطبيق والخلفية المخصصة.";
+"premium.feature.appearance.detail" = "افتح ألوان التطبيق والخلفية المخصصة.";
 "premium.continue.free" = "المتابعة مجانًا";
 
 "Photos" = "الصور";
@@ -496,6 +496,7 @@
 "intro.next" = "متابعة";
 "intro.start" = "ابدأ";
 "intro.demo" = "مثال";
+"intro.compress.batchExample" = "مثال: مجموعة ملفات";
 "premium.continueTemporarily" = "المتابعة الآن";
 "premium.title" = "مساحة أكبر لما يهم";
 "premium.subtitle" = "الوسائط والملفات والتحويل في مكان واحد.";

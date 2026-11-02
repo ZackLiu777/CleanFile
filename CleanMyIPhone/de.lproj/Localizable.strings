@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "Bilder und Audio konvertieren";
 "premium.feature.compression.detail" = "Bilder und Audiodateien mit anpassbaren Einstellungen konvertieren.";
 "premium.feature.appearance.title" = "Persönliches Design";
-"premium.feature.appearance.detail" = "Dunkles Erscheinungsbild sowie eigene App- und Hintergrundfarben freischalten.";
+"premium.feature.appearance.detail" = "Eigene App- und Hintergrundfarben freischalten.";
 "premium.continue.free" = "Kostenlos fortfahren";
 
 "Photos" = "Fotos";
@@ -496,6 +496,7 @@
 "intro.next" = "Weiter";
 "intro.start" = "Loslegen";
 "intro.demo" = "Beispiel";
+"intro.compress.batchExample" = "Beispiel: mehrere Dateien";
 "premium.continueTemporarily" = "Vorerst fortfahren";
 "premium.title" = "Mehr Raum für das Wesentliche";
 "premium.subtitle" = "Medien, Dateien und Konvertierung an einem Ort.";

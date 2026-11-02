@@ -199,23 +199,78 @@ private struct LegacyFileStateSnapshot: Codable {
 @Suite("Theme persistence")
 struct ThemePersistenceTests {
     /// 无保存值时验证默认主题、强调色、外观及展示偏好的组合。
-    @Test("Theme defaults to Filevra gradient and glass when no value exists")
-    func themeDefaultsToSystem() {
+    @Test("Theme defaults to dark graphite for free users when no value exists")
+    func themeDefaultsToGraphite() {
         let defaults = isolatedDefaults()
 
         let settings = ThemeSettings(userDefaults: defaults)
 
         #expect(settings.appearance == .system)
-        #expect(settings.selectedThemeID == .filevra)
-        #expect(settings.liquidGlassCardsEnabled)
+        #expect(settings.selectedThemeID == .graphite)
+        #expect(!settings.liquidGlassCardsEnabled)
         settings.setPremiumAppearanceAllowed(false)
-        #expect(settings.effectiveThemeID == .filevra)
-        #expect(settings.theme.liquidGlassCardsEnabled)
+        #expect(settings.effectiveThemeID == .graphite)
+        #expect(!settings.theme.liquidGlassCardsEnabled)
         #expect(settings.selectedAccentPaletteID == .sky)
-        #expect(settings.effectiveColorScheme == .light)
+        #expect(settings.effectiveColorScheme == .dark)
         #expect(settings.interfaceAnimationsEnabled)
         #expect(settings.mediaDateHeadersEnabled)
         #expect(defaults.string(forKey: "appAccentPalette") == "sky")
+    }
+
+    /// 用户明确保存的浅色主题不会被新的默认值覆盖。
+    @Test("Saved light theme remains selected for free users")
+    func savedLightThemeRemainsSelected() {
+        let defaults = isolatedDefaults()
+        defaults.set(AppThemeID.filevra.rawValue, forKey: "appTheme")
+        let settings = ThemeSettings(userDefaults: defaults)
+        settings.setPremiumAppearanceAllowed(false)
+
+        #expect(settings.selectedThemeID == .filevra)
+        #expect(settings.effectiveThemeID == .filevra)
+        #expect(settings.effectiveColorScheme == .light)
+    }
+
+    /// 免费用户选择系统主题时仍可使用深色外观。
+    @Test("Free users can use dark system appearance")
+    func freeUsersCanUseDarkSystemAppearance() {
+        let defaults = isolatedDefaults()
+        defaults.set(AppThemeID.system.rawValue, forKey: "appTheme")
+        defaults.set(AppAppearance.dark.rawValue, forKey: "appAppearance")
+        let settings = ThemeSettings(userDefaults: defaults)
+        settings.setPremiumAppearanceAllowed(false)
+
+        #expect(settings.effectiveThemeID == .system)
+        #expect(settings.effectiveColorScheme == .dark)
+    }
+
+    /// 深色主题的自动配色沿用应用蓝色，且与付费权益状态无关。
+    @Test("Graphite automatic accent uses the original blue")
+    func graphiteAutomaticAccentIsBlue() throws {
+        let defaults = isolatedDefaults()
+        defaults.set(AppThemeID.graphite.rawValue, forKey: "appTheme")
+        defaults.set(AppAccentPaletteID.automatic.rawValue, forKey: "appAccentPalette")
+        let settings = ThemeSettings(userDefaults: defaults)
+        settings.setPremiumAppearanceAllowed(false)
+        let blue = try #require(AppAccentPaletteID.sky.color)
+
+        #expect(settings.effectiveColorScheme == .dark)
+        #expect(settings.theme.accentPrimary == blue)
+        #expect(settings.theme.buttonPrimaryBackground == blue)
+    }
+
+    /// 用户明确选择的其他强调色不会被深色主题的自动配色覆盖。
+    @Test("Graphite preserves a saved accent color")
+    func graphitePreservesSavedAccent() throws {
+        let defaults = isolatedDefaults()
+        defaults.set(AppThemeID.graphite.rawValue, forKey: "appTheme")
+        defaults.set(AppAccentPaletteID.gold.rawValue, forKey: "appAccentPalette")
+        let settings = ThemeSettings(userDefaults: defaults)
+        let gold = try #require(AppAccentPaletteID.gold.color)
+
+        #expect(settings.selectedAccentPaletteID == .gold)
+        #expect(settings.theme.accentPrimary == gold)
+        #expect(settings.effectiveColorScheme == .dark)
     }
 
     /// 界面动画与媒体日期标题的设置应在重新创建设置对象后恢复。
@@ -395,7 +450,7 @@ struct ThemePersistenceTests {
             let defaults = isolatedDefaults()
             let settings = ThemeSettings(userDefaults: defaults)
 
-            #expect(settings.effectiveColorScheme == .light)
+            #expect(settings.effectiveColorScheme == .dark)
         }
 
         do {
@@ -403,7 +458,7 @@ struct ThemePersistenceTests {
             defaults.set("dark", forKey: "appAppearance")
             let settings = ThemeSettings(userDefaults: defaults)
 
-            #expect(settings.effectiveColorScheme == .light)
+            #expect(settings.effectiveColorScheme == .dark)
         }
 
         do {

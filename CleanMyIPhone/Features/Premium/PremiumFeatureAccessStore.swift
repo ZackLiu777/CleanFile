@@ -20,8 +20,8 @@ enum PremiumFeature: String, CaseIterable, Identifiable {
 
     var requiresPremium: Bool {
         switch self {
-        case .media, .videoConversion: false
-        case .quickClean, .storage, .imageConversion, .audioConversion, .darkAppearance, .customColors: true
+        case .media, .videoConversion, .darkAppearance: false
+        case .quickClean, .storage, .imageConversion, .audioConversion, .customColors: true
         }
     }
 

@@ -451,7 +451,7 @@ struct AppearanceThemeView: View {
         }
     }
 
-    /// 免费用户保持浅色；未验证的权益不能开启新的深色设置。
+    /// 读写系统、浅色或深色外观选择；预设主题仍可指定自己的颜色方案。
     private var appearanceBinding: Binding<AppAppearance> {
         Binding(
             get: { accessStore.allows(.darkAppearance) ? themeSettings.appearance : .light },

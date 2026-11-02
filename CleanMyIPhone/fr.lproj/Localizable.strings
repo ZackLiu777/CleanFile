@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "Compressez images et audio";
 "premium.feature.compression.detail" = "Convertissez vos images et fichiers audio avec des réglages ajustables.";
 "premium.feature.appearance.title" = "Personnalisez l’apparence";
-"premium.feature.appearance.detail" = "Débloquez le mode sombre et les couleurs de l’app et du fond.";
+"premium.feature.appearance.detail" = "Débloquez les couleurs personnalisées de l’app et du fond.";
 "premium.continue.free" = "Continuer gratuitement";
 
 "Photos" = "Photos";
@@ -524,6 +524,7 @@
 "intro.next" = "Continuer";
 "intro.start" = "Commencer";
 "intro.demo" = "Exemple";
+"intro.compress.batchExample" = "Exemple : lot";
 "settings.intro.title" = "Présentation";
 "settings.intro.detail" = "Découvrez les quatre pages de présentation de Filevra.";
 "settings.intro.close" = "Fermer";

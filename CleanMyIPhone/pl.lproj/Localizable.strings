@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "Konwertuj obrazy i audio";
 "premium.feature.compression.detail" = "Konwertuj obrazy i pliki audio z regulowanymi ustawieniami.";
 "premium.feature.appearance.title" = "Spersonalizuj wygląd";
-"premium.feature.appearance.detail" = "Odblokuj ciemny wygląd oraz własne kolory aplikacji i tła.";
+"premium.feature.appearance.detail" = "Odblokuj własne kolory aplikacji i tła.";
 "premium.continue.free" = "Kontynuuj bezpłatnie";
 
 "Photos" = "Zdjęcia";
@@ -524,6 +524,7 @@
 "intro.next" = "Kontynuuj";
 "intro.start" = "Rozpocznij";
 "intro.demo" = "Przykład";
+"intro.compress.batchExample" = "Przykład: zestaw plików";
 "settings.intro.title" = "Wprowadzenie";
 "settings.intro.detail" = "Poznaj cztery strony wprowadzenia do Filevra.";
 "settings.intro.close" = "Zamknij";

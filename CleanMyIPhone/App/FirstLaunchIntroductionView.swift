@@ -66,6 +66,18 @@ private enum IntroductionPage: Int, CaseIterable {
     }
 }
 
+/// 介绍页使用同一组虚构数据，保证分类、总量和压缩结果彼此一致。
+private enum IntroductionSample {
+    static let similarPhotos: Int64 = 30_000_000_000
+    static let screenshots: Int64 = 20_000_000_000
+    static let videos: Int64 = 60_000_000_000
+    static let livePhotos: Int64 = 10_000_000_000
+    static let cleanupTotal = similarPhotos + screenshots + videos + livePhotos
+    static let compressionOriginal: Int64 = 100_000_000_000
+    static let compressionResult: Int64 = 50_000_000_000
+    static let compressionSaved = compressionOriginal - compressionResult
+}
+
 /// 展示可分页的首次使用介绍，并通过回调结束介绍。
 struct FirstLaunchIntroductionView: View {
     @Environment(\.appTheme) private var theme
@@ -173,9 +185,11 @@ private struct IntroductionArtwork: View {
                     .font(.title2)
                     .foregroundStyle(theme.accentPrimary)
                 Spacer()
-                Text("intro.demo")
+                Text(LocalizedStringKey(page == .compress ? "intro.compress.batchExample" : "intro.demo"))
                     .appTypeface(.caption, size: 12, relativeTo: .caption)
                     .foregroundStyle(theme.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
             switch page {
             case .media: mediaArtwork
@@ -192,7 +206,7 @@ private struct IntroductionArtwork: View {
 
     private var mediaArtwork: some View {
         VStack(spacing: 14) {
-            Text(ByteCountFormatter.string(fromByteCount: 8_800_000_000, countStyle: .file))
+            Text(ByteCountFormatter.string(fromByteCount: IntroductionSample.cleanupTotal, countStyle: .file))
                 .appTypeface(.largeTitle.bold(), size: 48, relativeTo: .largeTitle, weight: .bold)
                 .foregroundStyle(theme.textPrimary)
                 .lineLimit(1)
@@ -200,10 +214,10 @@ private struct IntroductionArtwork: View {
             Text("intro.cleanup.total")
                 .appTypeface(.subheadline, size: 15, relativeTo: .subheadline)
                 .foregroundStyle(theme.textSecondary)
-            sampleRow("Similar Photos", symbol: "photo.stack", bytes: 2_100_000_000)
-            sampleRow("Screenshots", symbol: "iphone", bytes: 600_000_000)
-            sampleRow("Videos", symbol: "video.fill", bytes: 5_700_000_000)
-            sampleRow("Live Photos", symbol: "livephoto", bytes: 400_000_000)
+            sampleRow("Similar Photos", symbol: "photo.stack", bytes: IntroductionSample.similarPhotos)
+            sampleRow("Screenshots", symbol: "iphone", bytes: IntroductionSample.screenshots)
+            sampleRow("Videos", symbol: "video.fill", bytes: IntroductionSample.videos)
+            sampleRow("Live Photos", symbol: "livephoto", bytes: IntroductionSample.livePhotos)
         }
     }
 
@@ -296,7 +310,7 @@ private struct IntroductionArtwork: View {
                     .background(theme.backgroundSecondary, in: RoundedRectangle(cornerRadius: 16))
                 }
             }
-            sampleRow("Screenshots", symbol: "iphone", bytes: 600_000_000)
+            sampleRow("Screenshots", symbol: "iphone", bytes: IntroductionSample.screenshots)
         }
     }
 
@@ -309,10 +323,10 @@ private struct IntroductionArtwork: View {
                 .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             HStack(spacing: 12) {
-                Text(ByteCountFormatter.string(fromByteCount: 2_000_000_000, countStyle: .file))
+                Text(ByteCountFormatter.string(fromByteCount: IntroductionSample.compressionOriginal, countStyle: .file))
                 Image(systemName: "arrow.right")
                     .foregroundStyle(theme.textSecondary)
-                Text(ByteCountFormatter.string(fromByteCount: 1_100_000_000, countStyle: .file))
+                Text(ByteCountFormatter.string(fromByteCount: IntroductionSample.compressionResult, countStyle: .file))
             }
             .appTypeface(.title2.bold(), size: 26, relativeTo: .title2, weight: .bold)
             .lineLimit(1)
@@ -320,8 +334,10 @@ private struct IntroductionArtwork: View {
             VStack(spacing: 6) {
                 Text("intro.compress.saved")
                     .appTypeface(.subheadline, size: 15, relativeTo: .subheadline)
-                Text(ByteCountFormatter.string(fromByteCount: 900_000_000, countStyle: .file))
+                Text(ByteCountFormatter.string(fromByteCount: IntroductionSample.compressionSaved, countStyle: .file))
                     .appTypeface(.largeTitle.bold(), size: 36, relativeTo: .largeTitle, weight: .bold)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
             .frame(maxWidth: .infinity)
             .padding(16)

@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "Umbreytaðu myndum og hljóði";
 "premium.feature.compression.detail" = "Umbreyttu myndum og hljóðskrám með stillanlegum valkostum.";
 "premium.feature.appearance.title" = "Sérsníddu útlitið";
-"premium.feature.appearance.detail" = "Opnaðu dökkt útlit og sérsniðna app- og bakgrunnsliti.";
+"premium.feature.appearance.detail" = "Opnaðu sérsniðna app- og bakgrunnsliti.";
 "premium.continue.free" = "Halda áfram ókeypis";
 
 "Photos" = "Myndir";
@@ -496,6 +496,7 @@
 "intro.next" = "Halda áfram";
 "intro.start" = "Hefjast handa";
 "intro.demo" = "Dæmi";
+"intro.compress.batchExample" = "Dæmi: skráasafn";
 "premium.continueTemporarily" = "Halda áfram í bili";
 "premium.title" = "Meira pláss fyrir það sem skiptir máli";
 "premium.subtitle" = "Miðlar, skrár og umbreyting á einum stað.";

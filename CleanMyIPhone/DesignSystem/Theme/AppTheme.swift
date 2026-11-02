@@ -595,15 +595,15 @@ struct Theme: Sendable {
         textSecondary: Color(red: 0.647, green: 0.651, blue: 0.639),
         textTertiary: Color(red: 0.475, green: 0.482, blue: 0.475),
         textInverted: Color(red: 0.063, green: 0.067, blue: 0.071),
-        accentPrimary: Color(red: 0.776, green: 0.678, blue: 0.502),
-        accentSecondary: Color(red: 0.494, green: 0.447, blue: 0.361),
+        accentPrimary: Color(red: 0.333, green: 0.459, blue: 0.510),
+        accentSecondary: Color(red: 0.333, green: 0.459, blue: 0.510).opacity(0.38),
         positiveGreen: Color(red: 0.36, green: 0.72, blue: 0.47),
         negativeRed: Color(red: 0.92, green: 0.38, blue: 0.34),
         warningOrange: Color(red: 0.92, green: 0.62, blue: 0.27),
         divider: Color(red: 0.188, green: 0.196, blue: 0.208),
         navigationBackground: Color(red: 0.063, green: 0.067, blue: 0.071),
         emptyStateIcon: Color(red: 0.47, green: 0.48, blue: 0.47),
-        buttonPrimaryBackground: Color(red: 0.776, green: 0.678, blue: 0.502),
+        buttonPrimaryBackground: Color(red: 0.333, green: 0.459, blue: 0.510),
         buttonDisabledForeground: Color(red: 0.32, green: 0.33, blue: 0.33),
         liquidGlassEnabled: false,
         liquidGlassCardsEnabled: false,
@@ -632,7 +632,6 @@ struct Theme: Sendable {
             green: 0.5215606689453125,
             blue: 0.5215606689453125
         ).color)
-        .applyingLiquidGlassCards(true)
 
     static let cream = Theme(
         background: .solid(Color(red: 250 / 255, green: 246 / 255, blue: 233 / 255)),
@@ -947,9 +946,7 @@ final class ThemeSettings: ObservableObject {
 
     @Published private(set) var premiumAppearanceAllowed = true
 
-    var effectiveThemeID: AppThemeID {
-        !premiumAppearanceAllowed && selectedThemeID == .graphite ? .cream : selectedThemeID
-    }
+    var effectiveThemeID: AppThemeID { selectedThemeID }
     var effectiveAccentPaletteID: AppAccentPaletteID {
         !premiumAppearanceAllowed && selectedAccentPaletteID == .custom ? .automatic : selectedAccentPaletteID
     }
@@ -968,7 +965,7 @@ final class ThemeSettings: ObservableObject {
             .applyingLiquidGlassCards(liquidGlassCardsEnabled)
     }
     var effectiveColorScheme: ColorScheme? {
-        premiumAppearanceAllowed ? (theme.preferredColorScheme ?? appearance.colorScheme) : .light
+        theme.preferredColorScheme ?? appearance.colorScheme
     }
     var customBackgroundColor: AppThemeColor { customBackgroundStyle.primaryColor }
     var customBackgroundTheme: Theme { Theme.custom(backgroundStyle: customBackgroundStyle) }
@@ -1041,7 +1038,7 @@ final class ThemeSettings: ObservableObject {
         customAccentColor = storedCustomAccentColor
         customBackgroundStyle = storedCustomBackgroundStyle
         usesCustomBackground = userDefaults.bool(forKey: Self.usesCustomBackgroundKey)
-        let storedLiquidGlassCards = userDefaults.object(forKey: Self.liquidGlassCardsKey) as? Bool ?? true
+        let storedLiquidGlassCards = userDefaults.object(forKey: Self.liquidGlassCardsKey) as? Bool ?? false
         liquidGlassCardsEnabled = storedLiquidGlassCards
         customTabBarEnabled = userDefaults.bool(forKey: Self.customTabBarKey)
         interfaceAnimationsEnabled = userDefaults.object(forKey: Self.interfaceAnimationsKey) as? Bool ?? true
@@ -1078,7 +1075,6 @@ final class ThemeSettings: ObservableObject {
 
     /// 选择完整背景预设，并关闭自定义背景，但不丢弃用户已经编辑的颜色。
     func selectBackgroundTheme(_ themeID: AppThemeID) {
-        guard premiumAppearanceAllowed || themeID != .graphite else { return }
         selectedThemeID = themeID
         usesCustomBackground = false
     }
@@ -1201,7 +1197,7 @@ final class ThemeSettings: ObservableObject {
         case "forest": return .sage
         case "graphiteGold", "roseNoir": return .graphite
         case "pureBlack": return .system
-        case nil: return .filevra
+        case nil: return .graphite
         default: return .system
         }
     }

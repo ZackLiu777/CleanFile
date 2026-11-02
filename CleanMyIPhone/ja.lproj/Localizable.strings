@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "画像と音声を変換";
 "premium.feature.compression.detail" = "設定を調整して画像と音声ファイルを変換。";
 "premium.feature.appearance.title" = "自分らしい外観に";
-"premium.feature.appearance.detail" = "ダークモードとアプリ・背景のカスタムカラーを利用。";
+"premium.feature.appearance.detail" = "アプリと背景のカスタムカラーを利用。";
 "premium.continue.free" = "無料で続ける";
 
 "Photos" = "写真";
@@ -524,6 +524,7 @@
 "intro.next" = "続ける";
 "intro.start" = "使い始める";
 "intro.demo" = "サンプル";
+"intro.compress.batchExample" = "一括圧縮の例";
 "settings.intro.title" = "機能紹介";
 "settings.intro.detail" = "Filevra の4ページの機能紹介をご覧ください。";
 "settings.intro.close" = "閉じる";

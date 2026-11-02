@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "Konvertera bilder och ljud";
 "premium.feature.compression.detail" = "Konvertera bilder och ljudfiler med justerbara inställningar.";
 "premium.feature.appearance.title" = "Gör appen personlig";
-"premium.feature.appearance.detail" = "Lås upp mörkt utseende och egna app- och bakgrundsfärger.";
+"premium.feature.appearance.detail" = "Lås upp egna app- och bakgrundsfärger.";
 "premium.continue.free" = "Fortsätt gratis";
 
 "Photos" = "Foton";
@@ -496,6 +496,7 @@
 "intro.next" = "Fortsätt";
 "intro.start" = "Kom igång";
 "intro.demo" = "Exempel";
+"intro.compress.batchExample" = "Exempel: flera filer";
 "premium.continueTemporarily" = "Fortsätt tills vidare";
 "premium.title" = "Mer utrymme för det som är viktigt";
 "premium.subtitle" = "Media, filer och konvertering på ett ställe.";

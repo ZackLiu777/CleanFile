@@ -17,18 +17,18 @@ import Testing
 @Suite("Premium feature access")
 @MainActor
 struct PremiumFeatureAccessTests {
-    /// 遍历功能，确认未订阅时只有媒体与视频转换可用。
+    /// 遍历功能，确认未订阅时媒体、视频转换和深色外观可用。
     @Test("Free access is limited by feature, never by batch size", arguments: PremiumFeature.allCases)
     func freeFeatureMatrix(feature: PremiumFeature) {
         let access = PremiumFeatureAccessStore(accessState: .notEntitled)
-        #expect(access.allows(feature) == [.media, .videoConversion].contains(feature))
+        #expect(access.allows(feature) == [.media, .videoConversion, .darkAppearance].contains(feature))
     }
 
-    /// 权益待验证时保留媒体、视频转换和已保存的高级外观。
-    @Test("Pending verification keeps media and video available", arguments: PremiumFeature.allCases)
+    /// 权益待验证时保留免费功能和已保存的高级外观。
+    @Test("Pending verification keeps free features available", arguments: PremiumFeature.allCases)
     func pendingFeatureMatrix(feature: PremiumFeature) {
         let access = PremiumFeatureAccessStore()
-        #expect(access.allows(feature) == [.media, .videoConversion].contains(feature))
+        #expect(access.allows(feature) == [.media, .videoConversion, .darkAppearance].contains(feature))
         #expect(access.preservesPremiumAppearance)
     }
 
@@ -199,7 +199,7 @@ struct PremiumFeatureAccessTests {
         #expect(FileTreeDiagnostics.maximumDepth(of: preview.fileTree) >= 4)
     }
 
-    /// 无高级权益时允许免费浅色主题，拒绝高级主题及自定义颜色生效。
+    /// 无高级权益时可使用预设主题，但自定义颜色仍受限制。
     @Test("Light preset themes remain free", arguments: [AppThemeID.system, .cream, .porcelain, .sage])
     func freeLightThemes(themeID: AppThemeID) throws {
         let domain = "FilevraFreeThemesTests." + UUID().uuidString
@@ -209,9 +209,10 @@ struct PremiumFeatureAccessTests {
         settings.setPremiumAppearanceAllowed(false)
         settings.selectBackgroundTheme(themeID)
         #expect(settings.effectiveThemeID == themeID)
-        #expect(settings.effectiveColorScheme == .light)
+        #expect(settings.effectiveColorScheme == (themeID == .system ? nil : .light))
         settings.selectBackgroundTheme(.graphite)
-        #expect(settings.effectiveThemeID == themeID)
+        #expect(settings.effectiveThemeID == .graphite)
+        #expect(settings.effectiveColorScheme == .dark)
         settings.selectCustomBackground()
         settings.updateCustomAccentColor(.red)
         settings.updateCustomBackgroundColor(.black)
@@ -233,15 +234,15 @@ struct PremiumFeatureAccessTests {
         let color = settings.customAccentColor
         let background = settings.customBackgroundStyle
         settings.setPremiumAppearanceAllowed(false)
-        #expect(settings.effectiveThemeID == .cream)
-        #expect(settings.effectiveColorScheme == .light)
+        #expect(settings.effectiveThemeID == .graphite)
+        #expect(settings.effectiveColorScheme == .dark)
         #expect(!settings.isUsingCustomBackground)
         #expect(settings.effectiveAccentPaletteID == .automatic)
         #expect(settings.selectedThemeID == .graphite)
         #expect(settings.usesCustomBackground)
         let restored = ThemeSettings(userDefaults: defaults)
         restored.setPremiumAppearanceAllowed(false)
-        #expect(restored.effectiveColorScheme == .light)
+        #expect(restored.effectiveColorScheme == .dark)
         restored.setPremiumAppearanceAllowed(true)
         #expect(restored.isUsingCustomBackground)
         #expect(restored.effectiveThemeID == .graphite)
@@ -264,7 +265,7 @@ struct PremiumFeatureAccessTests {
         #expect(!access.preservesPremiumAppearance)
         access.update(.checking)
         #expect(!access.preservesPremiumAppearance)
-        #expect(!access.allows(.darkAppearance))
+        #expect(access.allows(.darkAppearance))
         #expect(!access.allows(.customColors))
         access.update(.entitled)
         #expect(access.preservesPremiumAppearance)

@@ -34,7 +34,7 @@
 "premium.feature.compression.title" = "Convert images and audio";
 "premium.feature.compression.detail" = "Convert images and audio with adjustable settings.";
 "premium.feature.appearance.title" = "Make it your own";
-"premium.feature.appearance.detail" = "Unlock dark appearance and custom app and background colors.";
+"premium.feature.appearance.detail" = "Unlock custom app and background colors.";
 "premium.continue.free" = "Continue Free";
 
 "Photos" = "Photos";
@@ -524,6 +524,7 @@
 "intro.next" = "Continue";
 "intro.start" = "Get Started";
 "intro.demo" = "Example";
+"intro.compress.batchExample" = "Example: batch";
 "settings.intro.title" = "Introduction";
 "settings.intro.detail" = "Explore Filevra's four feature pages.";
 "settings.intro.close" = "Close";
