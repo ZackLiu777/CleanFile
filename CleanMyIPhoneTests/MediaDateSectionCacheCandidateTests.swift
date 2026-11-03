@@ -14,6 +14,22 @@ import Testing
 /// 对比分组基线并检查所有会影响缓存有效性的输入。
 @Suite("Media date section cache candidate")
 struct MediaDateSectionCacheCandidateTests {
+    @Test("Flattened snapshots follow deletions and explicit invalidation")
+    func flattenedSnapshotsFollowMembership() {
+        var cache = MediaDateSectionCacheCandidate()
+        let input = [MediaDatedAsset(id: "one", creationDate: nil), MediaDatedAsset(id: "two", creationDate: nil)]
+        let initial = cache.sections(revision: .init(sourceID: "detail", generation: 1)) { input }
+        #expect(cache.orderedAssetIDs == initial.flatMap(\.assetIDs))
+        let frozen = cache.orderedAssetIDs
+        _ = cache.sections(revision: .init(sourceID: "detail", generation: 2)) { [input[1]] }
+        #expect(cache.orderedAssetIDs == ["two"])
+        #expect(cache.unsectioned.first?.assetIDs == ["two"])
+        #expect(frozen.count == 2)
+        cache.invalidate()
+        #expect(cache.orderedAssetIDs.isEmpty)
+        #expect(cache.unsectioned.isEmpty)
+    }
+
     /// 用空日期、缺失日期与相同时间等输入对照原始分组结果。
     @Test("Candidate preserves baseline dates, unknown dates, ties and identifier order")
     func matchesBaseline() {

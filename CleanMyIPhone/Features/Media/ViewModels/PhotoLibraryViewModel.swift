@@ -44,11 +44,25 @@ final class PhotoLibraryViewModel: ObservableObject {
     @Published private(set) var unavailableByteCountIdentifiers = Set<String>()
 
     private let imageManager = PHCachingImageManager()
-    private let thumbnailCache = NSCache<NSString, UIImage>()
+    private let thumbnailCache: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        cache.totalCostLimit = 16 * 1024 * 1024
+        return cache
+    }()
+    private var calibrationRevision: UInt64?
+    private var cachedCalibration: [String: Double] = [:]
+    private let sizedThumbnailCache: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        cache.totalCostLimit = 48 * 1024 * 1024
+        return cache
+    }()
     private let classificationService = MediaClassificationService()
     private let inventory = MediaLibraryInventory()
     private let stateStore = AppStateStore.shared
     private let isRunningInPreviews: Bool
+    @Published private(set) var cityPhotoIDs: [String] = []
+    private var sceneTask: Task<Void, Never>?
+    private var sceneGeneration = 0
     private var analysisTask: Task<Void, Never>?
     private var analysisGeneration = 0
     private var hasLoadedLibrary = false
@@ -89,6 +103,9 @@ final class PhotoLibraryViewModel: ObservableObject {
 
         refreshStorageSnapshot()
 
+        sceneGeneration &+= 1
+        sceneTask?.cancel()
+        cityPhotoIDs = []
         analysisGeneration &+= 1
         analysisTask?.cancel()
         analysisTask = nil
@@ -161,6 +178,34 @@ final class PhotoLibraryViewModel: ObservableObject {
         let canReuseAnalysis = restoreAnalysis(from: snapshot)
         isLoading = false
         startColdLaunchAnalysisIfNeeded(requiresAnalysis: !canReuseAnalysis)
+        if canReuseAnalysis, let snapshot { startSceneAnalysis(result: snapshot.result) }
+    }
+
+    /// 场景扫描独立于清理分析，避免阻塞首页和改变清理建议。
+    private func startSceneAnalysis(result: MediaClassificationResult) {
+        sceneGeneration &+= 1
+        let generation = sceneGeneration
+        sceneTask?.cancel()
+        let excluded = result.suggestedCleanupIDs.union(result.screenshotIDs).union(result.livePhotoIDs)
+        let currentAssets = assets
+        sceneTask = Task { [weak self] in
+            guard let self else { return }
+            await classificationService.classifyScenes(assets: currentAssets, excludedIDs: excluded) { [weak self] city in
+                guard let self, self.sceneGeneration == generation else { return }
+                self.cityPhotoIDs = city
+            }
+        }
+    }
+
+    /// 其他照片排除已展示在首页任一照片分类中的资源，包括相似组的保留项。
+    func otherPhotoIDs(excluding result: MediaClassificationResult) -> [String] {
+        var covered = Set(result.similarImageIDs)
+        covered.formUnion(result.screenshotIDs)
+        covered.formUnion(result.livePhotoIDs)
+        covered.formUnion(cityPhotoIDs)
+        return assets.compactMap { asset in
+            asset.mediaType == .image && !covered.contains(asset.localIdentifier) ? asset.localIdentifier : nil
+        }
     }
 
     /// 请求相册读写授权，并在主线程更新授权状态和后续加载流程。
@@ -233,15 +278,23 @@ final class PhotoLibraryViewModel: ObservableObject {
         options.resizeMode = .fast
         options.isNetworkAccessAllowed = true
 
+        let cacheKey = thumbnailCacheKey(for: asset, targetSize: targetSize)
+        var receivedFinalImage = false
         return imageManager.requestImage(
             for: asset,
             targetSize: targetSize,
             contentMode: .aspectFill,
             options: options
-        ) { image, _ in
+        ) { image, info in
+            let isDegraded = (info?[PHImageResultIsDegradedKey] as? Bool) == true
+            let isCancelled = (info?[PHImageCancelledKey] as? Bool) == true
             Task { @MainActor in
-                if let image {
-                    self.thumbnailCache.setObject(image, forKey: asset.localIdentifier as NSString)
+                guard !isCancelled, let image, !(isDegraded && receivedFinalImage) else { return }
+                if !isDegraded {
+                    receivedFinalImage = true
+                    let cost = image.cgImage.map { $0.bytesPerRow * $0.height } ?? 0
+                    self.thumbnailCache.setObject(image, forKey: asset.localIdentifier as NSString, cost: cost)
+                    self.sizedThumbnailCache.setObject(image, forKey: cacheKey, cost: cost)
                 }
                 completion(image)
             }
@@ -256,6 +309,17 @@ final class PhotoLibraryViewModel: ObservableObject {
     /// 读取内存中已有的缩略图；未命中时返回 nil。
     func cachedThumbnail(for identifier: String) -> UIImage? {
         thumbnailCache.object(forKey: identifier as NSString)
+    }
+
+    /// 大图必须匹配请求尺寸和资源版本，不能复用小网格或编辑前的缩略图。
+    func cachedThumbnail(for identifier: String, targetSize: CGSize) -> UIImage? {
+        guard let asset = assetsByIdentifier[identifier] else { return nil }
+        return sizedThumbnailCache.object(forKey: thumbnailCacheKey(for: asset, targetSize: targetSize))
+    }
+
+    private func thumbnailCacheKey(for asset: PHAsset, targetSize: CGSize) -> NSString {
+        let version = asset.modificationDate?.timeIntervalSinceReferenceDate ?? 0
+        return "\(asset.localIdentifier)|\(Int(targetSize.width))x\(Int(targetSize.height))|\(version)" as NSString
     }
 
     /// 对仍在资源索引中的标识汇总估算大小；优先使用精确缓存，其余使用同类校准或回退值。
@@ -301,6 +365,7 @@ final class PhotoLibraryViewModel: ObservableObject {
 
     /// 返回单个资源的精确或估算大小；资源不在当前索引时返回零。
     func estimatedByteCount(for assetID: String) -> Int64 {
+        if let exact = exactByteCountsByIdentifier[assetID] { return exact }
         guard let asset = assetsByIdentifier[assetID] else { return 0 }
         return calibratedByteCount(for: asset, calibration: makeMediaSizeCalibration())
     }
@@ -441,7 +506,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         let assets = assetIDs.compactMap { assetsByIdentifier[$0] }
         guard !assets.isEmpty else { return }
         let options = PHImageRequestOptions()
-        options.deliveryMode = .fastFormat
+        options.deliveryMode = .opportunistic
         options.resizeMode = .fast
         options.isNetworkAccessAllowed = false
         imageManager.startCachingImages(
@@ -456,11 +521,15 @@ final class PhotoLibraryViewModel: ObservableObject {
     func stopCachingThumbnails(for assetIDs: ArraySlice<String>, targetSize: CGSize) {
         let assets = assetIDs.compactMap { assetsByIdentifier[$0] }
         guard !assets.isEmpty else { return }
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .opportunistic
+        options.resizeMode = .fast
+        options.isNetworkAccessAllowed = false
         imageManager.stopCachingImages(
             for: assets,
             targetSize: targetSize,
             contentMode: .aspectFill,
-            options: nil
+            options: options
         )
     }
 
@@ -554,6 +623,7 @@ final class PhotoLibraryViewModel: ObservableObject {
                     analysisState = .success(result)
                 }
                 persistAnalysisState()
+                startSceneAnalysis(result: result)
             } catch is CancellationError {
                 guard generation == analysisGeneration else { return }
                 analysisState = .cancelled
@@ -607,11 +677,16 @@ final class PhotoLibraryViewModel: ObservableObject {
             try await PHPhotoLibrary.shared().performChanges {
                 PHAssetChangeRequest.deleteAssets(fetchResult)
             }
+            sceneGeneration &+= 1
+            sceneTask?.cancel()
+            cityPhotoIDs.removeAll { deletedIDs.contains($0) }
             assets.removeAll { deletedIDs.contains($0.localIdentifier) }
             deletedIDs.forEach { exactByteCountsByIdentifier[$0] = nil }
             rebuildAssetIndex()
             scheduleMediaSizeIndexSave()
             updateAnalysisAfterDeleting(deletedIDs)
+            if case let .success(result) = analysisState { startSceneAnalysis(result: result) }
+            if case let .partialFailure(result) = analysisState { startSceneAnalysis(result: result) }
             persistAnalysisState()
             refreshStorageSnapshot()
             deletionState = .success(
@@ -672,6 +747,7 @@ final class PhotoLibraryViewModel: ObservableObject {
 
     /// 重建资源标识索引和资源库修订号，并移除不再存在资源的大小及名称缓存。
     private func rebuildAssetIndex() {
+        calibrationRevision = nil
         let interval = MediaPerformance.begin("Media Rebuild Index")
         defer { MediaPerformance.end("Media Rebuild Index", id: interval) }
         assetsByIdentifier = Dictionary(
@@ -735,6 +811,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     /// Uses medians so a single unusually compressible screenshot or high-bitrate video
     /// cannot distort every item in the same library group.
     private func makeMediaSizeCalibration() -> [String: Double] {
+        if calibrationRevision == mediaSizeRevision { return cachedCalibration }
         var samples: [String: [Double]] = [:]
         for (identifier, byteCount) in exactByteCountsByIdentifier {
             guard let asset = assetsByIdentifier[identifier] else { continue }
@@ -744,9 +821,11 @@ final class PhotoLibraryViewModel: ObservableObject {
                 .append(Double(byteCount) / denominator)
         }
 
-        return samples.compactMapValues { values in
+        cachedCalibration = samples.compactMapValues { values in
             MediaCalibrationMedianCandidate.preferredCoefficient(values)
         }
+        calibrationRevision = mediaSizeRevision
+        return cachedCalibration
     }
 
     /// 视频按时长、图片按像素数作为大小校准基数，避免零值。

@@ -42,6 +42,8 @@ nonisolated struct MediaDateSectionCacheCandidate: Sendable {
 
     private var key: Key?
     private var cachedSections: [MediaDateSection] = []
+    private(set) var orderedAssetIDs: [String] = []
+    private(set) var unsectioned: [MediaDateSection] = []
 
     /// `generation` must change when membership, IDs, creation dates, or their
     /// availability changes. Reusing a revision for different input is invalid.
@@ -62,6 +64,8 @@ nonisolated struct MediaDateSectionCacheCandidate: Sendable {
 
         let sections = MediaDateSectionBuilder.sections(from: assets(), calendar: calendar)
         cachedSections = sections
+        orderedAssetIDs = sections.flatMap(\.assetIDs)
+        unsectioned = [MediaDateSection(id: "all-media", day: nil, assetIDs: orderedAssetIDs)]
         key = requestedKey
         return sections
     }
@@ -71,6 +75,8 @@ nonisolated struct MediaDateSectionCacheCandidate: Sendable {
     mutating func invalidate() {
         key = nil
         cachedSections = []
+        orderedAssetIDs = []
+        unsectioned = []
     }
 }
 
@@ -81,6 +87,10 @@ final class MediaDateSectionStore: ObservableObject {
     private var assetIDs: [String] = []
     private var libraryRevision: UInt64?
     private var generation: UInt64 = 0
+
+    /// 与日期分组同步更新，避免每次选择或容量刷新都展开整个分类。
+    var orderedAssetIDs: [String] { cache.orderedAssetIDs }
+    var unsectioned: [MediaDateSection] { cache.unsectioned }
 
     /// 资源标识或相册修订号变化时推进代次；缓存命中时不调用资源构造闭包。
     func sections(assetIDs: [String], libraryRevision: UInt64,

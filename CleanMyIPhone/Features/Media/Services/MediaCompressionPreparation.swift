@@ -47,18 +47,16 @@ actor MediaCompressionPreparation {
         category: MediaCompressionCategory,
         assets: [PHAsset],
         exactSizes: [String: Int64],
-        classification: MediaClassificationResult?,
         preview: @Sendable ([MediaCompressionItem]) async -> Void
     ) async throws -> MediaCompressionCatalog {
         let interval = MediaPerformance.begin("Compression Prepare")
         defer { MediaPerformance.end("Compression Prepare", id: interval) }
         try Task.checkCancellation()
-        let photoIDs = Set(classification?.similarImageIDs ?? []).union(classification?.screenshotIDs ?? [])
         var firstItems: [MediaCompressionItem] = []
         // Publish a bounded first screen before calibrating or estimating the whole library.
         for asset in assets {
             try Task.checkCancellation()
-            guard includes(asset, category: category, photoIDs: photoIDs) else { continue }
+            guard category.includes(asset) else { continue }
             firstItems.append(item(asset, category: category, exactSizes: exactSizes, calibration: [:]))
             if firstItems.count == 60 { break }
         }
@@ -81,21 +79,11 @@ actor MediaCompressionPreparation {
         var items: [MediaCompressionItem] = []
         for asset in assets {
             try Task.checkCancellation()
-            guard includes(asset, category: category, photoIDs: photoIDs) else { continue }
+            guard category.includes(asset) else { continue }
             items.append(item(asset, category: category, exactSizes: exactSizes, calibration: calibration))
         }
         try Task.checkCancellation()
         return MediaCompressionCatalog(items: items)
-    }
-
-    /// 按当前分类筛选视频、Live Photo 或符合快速清理条件的图片。
-    private func includes(_ asset: PHAsset, category: MediaCompressionCategory, photoIDs: Set<String>) -> Bool {
-        switch category {
-        case .video: asset.mediaType == .video
-        case .live: asset.mediaSubtypes.contains(.photoLive)
-        case .image: asset.mediaType == .image && (asset.mediaSubtypes.contains(.photoLive)
-            || asset.mediaSubtypes.contains(.photoScreenshot) || photoIDs.contains(asset.localIdentifier))
-        }
     }
 
     /// 优先使用精确大小，其次使用同类校准系数，最后使用回退估算生成展示项。

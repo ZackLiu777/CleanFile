@@ -8,6 +8,7 @@
 //
 
 import Foundation
+import Photos
 import Testing
 @testable import CleanMyIPhone
 
@@ -15,6 +16,17 @@ import Testing
 @Suite("Media category batch compression")
 @MainActor
 struct MediaCompressionTests {
+    @Test("Image compression includes ordinary photos, screenshots, and Live Photos")
+    func imageCompressionIncludesAllPhotoTypes() {
+        #expect(MediaCompressionCategory.image.includes(mediaType: .image, subtypes: []))
+        #expect(MediaCompressionCategory.image.includes(mediaType: .image, subtypes: .photoScreenshot))
+        #expect(MediaCompressionCategory.image.includes(mediaType: .image, subtypes: .photoLive))
+        #expect(!MediaCompressionCategory.image.includes(mediaType: .video, subtypes: []))
+        #expect(MediaCompressionCategory.live.includes(mediaType: .image, subtypes: .photoLive))
+        #expect(!MediaCompressionCategory.live.includes(mediaType: .image, subtypes: []))
+        #expect(MediaCompressionCategory.video.includes(mediaType: .video, subtypes: []))
+    }
+
     /// 仅提出压缩请求或取消确认不能启动编码，保证操作由用户明确确认。
     @Test("A compression request and cancellation never invoke the encoder")
     func confirmationProtectsStart() async {

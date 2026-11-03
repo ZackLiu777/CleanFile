@@ -42,68 +42,75 @@ actor FileDeletionService {
         // Resolve filesystem aliases only while the original grants are active.
         let accessibleRoots = roots.filter { $0.startAccessingSecurityScopedResource() }
         defer { accessibleRoots.forEach { $0.stopAccessingSecurityScopedResource() } }
-        guard !roots.isEmpty,
-              files.allSatisfy({ file in
-                  roots.contains { Self.contains(file.url, root: $0) }
-              }) else {
-            #if DEBUG
-            debugPrint("Storage deletion rejected: canonical directory boundary mismatch")
-            debugPrint("Storage deletion grants: roots=\(roots.count), active=\(accessibleRoots.count), files=\(files.count)")
-            // Report only structural facts: provider paths and filenames can
-            // contain personal information and must not enter the console.
-            if let file = files.first(where: { file in
-                !roots.contains { Self.contains(file.url, root: $0) }
-            }) {
-                for root in roots.prefix(3) {
-                    let rawRoot = root.standardizedFileURL.pathComponents
-                    let rawFile = file.url.standardizedFileURL.pathComponents
-                    let resolvedRoot = root.resolvingSymlinksInPath().standardizedFileURL.pathComponents
-                    let resolvedFile = file.url.resolvingSymlinksInPath().standardizedFileURL.pathComponents
-                    debugPrint("Storage deletion boundary: fileURLs=\(root.isFileURL)/\(file.url.isFileURL), lexicalPrefix=\(rawFile.starts(with: rawRoot)), canonicalPrefix=\(resolvedFile.starts(with: resolvedRoot)), depths=\(rawRoot.count)/\(rawFile.count)/\(resolvedRoot.count)/\(resolvedFile.count), rootDirectoryHint=\(root.hasDirectoryPath), trailingSeparator=\(rawRoot.last == "/"), relativeDepth=\(file.relativePathComponents.count)")
+        guard !roots.isEmpty else { throw FileDeletionError.invalidSelection }
+
+        // 根路径只解析一次。按规范路径索引授权，避免 N 个目标与 R 个根逐对解析。
+        // 每个目标仍解析符号链接，并且必须先通过整批边界校验才开始删除。
+        let active = Set(accessibleRoots)
+        var rootAccess: [String: (isDirectory: Bool, accessible: Bool)] = [:]
+        for root in roots where root.isFileURL {
+            try Task.checkCancellation()
+            let resolved = root.resolvingSymlinksInPath().standardizedFileURL
+            let isDirectory = (try? resolved.resourceValues(forKeys: [.isDirectoryKey]).isDirectory)
+                ?? root.hasDirectoryPath
+            let prior = rootAccess[resolved.path]
+            rootAccess[resolved.path] = (isDirectory, active.contains(root) || prior?.accessible == true)
+        }
+        var permittedFiles: [ScannedFile] = []
+        var inaccessibleCount = 0
+        for file in files {
+            try Task.checkCancellation()
+            guard file.url.isFileURL else { throw FileDeletionError.invalidSelection }
+            var candidate = file.url.resolvingSymlinksInPath().standardizedFileURL
+            var isExact = true
+            var belongsToRoot = false
+            var canAccess = false
+            while true {
+                if let grant = rootAccess[candidate.path],
+                   isExact ? !grant.isDirectory : grant.isDirectory {
+                    belongsToRoot = true
+                    canAccess = canAccess || grant.accessible
                 }
+                let parent = candidate.deletingLastPathComponent()
+                if parent.path == candidate.path { break }
+                candidate = parent
+                isExact = false
             }
-            #endif
-            throw FileDeletionError.invalidSelection
+            guard belongsToRoot else { throw FileDeletionError.invalidSelection }
+            if canAccess {
+                permittedFiles.append(file)
+            } else {
+                inaccessibleCount += 1
+            }
         }
 
         var deletedURLs = Set<URL>()
-        var failedFileCount = 0
-        for root in roots {
-            let matchingFiles = files.filter {
-                !deletedURLs.contains($0.url) && Self.contains($0.url, root: root)
-            }
-            guard !matchingFiles.isEmpty else { continue }
-            guard accessibleRoots.contains(root) else {
-                failedFileCount += matchingFiles.count
-                continue
-            }
-
-            for file in matchingFiles where !deletedURLs.contains(file.url) {
-                do {
-                    try Task.checkCancellation()
-                    let coordinator = NSFileCoordinator()
-                    var coordinationError: NSError?
-                    var deletionError: Error?
-                    var didDelete = false
-                    coordinator.coordinate(writingItemAt: file.url, options: .forDeleting,
-                                           error: &coordinationError) { coordinatedURL in
-                        do {
-                            try Task.checkCancellation()
-                            try fileManager.removeItem(at: coordinatedURL)
-                            didDelete = true
-                        } catch {
-                            deletionError = error
-                        }
+        var failedFileCount = inaccessibleCount
+        for file in permittedFiles where !deletedURLs.contains(file.url) {
+            do {
+                try Task.checkCancellation()
+                let coordinator = NSFileCoordinator()
+                var coordinationError: NSError?
+                var deletionError: Error?
+                var didDelete = false
+                coordinator.coordinate(writingItemAt: file.url, options: .forDeleting,
+                                       error: &coordinationError) { coordinatedURL in
+                    do {
+                        try Task.checkCancellation()
+                        try fileManager.removeItem(at: coordinatedURL)
+                        didDelete = true
+                    } catch {
+                        deletionError = error
                     }
-                    if let deletionError { throw deletionError }
-                    if let coordinationError { throw coordinationError }
-                    guard didDelete else { throw FileDeletionError.deletionFailed }
-                    deletedURLs.insert(file.url)
-                } catch is CancellationError {
-                    throw CancellationError()
-                } catch {
-                    failedFileCount += 1
                 }
+                if let deletionError { throw deletionError }
+                if let coordinationError { throw coordinationError }
+                guard didDelete else { throw FileDeletionError.deletionFailed }
+                deletedURLs.insert(file.url)
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                failedFileCount += 1
             }
         }
 

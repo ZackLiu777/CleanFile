@@ -24,25 +24,23 @@ nonisolated enum MediaCompressionCategory: String, CaseIterable, Identifiable, S
     case .live: "livephoto"
     } }
 
+    /// 首页和压缩清单使用同一规则，避免普通照片在两个入口中数量不一致。
+    func includes(mediaType: PHAssetMediaType, subtypes: PHAssetMediaSubtype) -> Bool {
+        switch self {
+        case .video: mediaType == .video
+        case .image: mediaType == .image
+        case .live: subtypes.contains(.photoLive)
+        }
+    }
+
+    func includes(_ asset: PHAsset) -> Bool {
+        includes(mediaType: asset.mediaType, subtypes: asset.mediaSubtypes)
+    }
+
     @MainActor
-    /// 从当前资源快照筛选此分类的候选，图片分类也包含相关相似图、截图和 Live Photo。
+    /// 从已授权相册资源中筛选候选，图片分类包含普通图片和 Live Photo。
     func assets(in library: PhotoLibraryViewModel) -> [PHAsset] {
-        let result: MediaClassificationResult?
-        switch library.analysisState {
-        case .success(let value), .partialFailure(let value): result = value
-        default: result = nil
-        }
-        let photoIDs = Set(result?.similarImageIDs ?? []).union(result?.screenshotIDs ?? [])
-        return library.assets.filter { asset in
-            switch self {
-            case .video: asset.mediaType == .video
-            case .live: asset.mediaSubtypes.contains(.photoLive)
-            case .image:
-                asset.mediaType == .image
-                    && (asset.mediaSubtypes.contains(.photoLive) || photoIDs.contains(asset.localIdentifier)
-                        || asset.mediaSubtypes.contains(.photoScreenshot))
-            }
-        }
+        library.assets.filter { includes($0) }
     }
 }
 

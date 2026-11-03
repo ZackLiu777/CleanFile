@@ -102,6 +102,43 @@ struct FileDeletionEdgeCaseTests {
         #expect((receivedError as? FileDeletionError) == .invalidSelection)
     }
 
+    /// 重叠授权失败只计一次，不能随根目录数量放大失败数。
+    @Test("Overlapping unavailable grants count a target once")
+    func overlappingUnavailableGrants() async throws {
+        let root = URL(fileURLWithPath: "/tmp/StorageMissing-\(UUID().uuidString)", isDirectory: true)
+        let child = root.appendingPathComponent("Child", isDirectory: true)
+        let item = ScannedFile(
+            url: child.appendingPathComponent("missing.txt"),
+            name: "missing.txt",
+            relativePathComponents: ["Child", "missing.txt"],
+            category: .document,
+            byteCount: 1
+        )
+        let result = try await FileDeletionService().delete(
+            files: [item], selectedRoots: [root, child, root]
+        )
+        #expect(result.deletedURLs.isEmpty)
+        #expect(result.failedFileCount == 1)
+    }
+
+    /// 整批校验不能因找到一个有效授权就跳过后续越界目标。
+    @Test("Indexed authorization validates every target before deletion")
+    func mixedSelectionIsRejected() async {
+        let root = URL(fileURLWithPath: "/tmp/StorageMissing-\(UUID().uuidString)", isDirectory: true)
+        let files = [root.appendingPathComponent("inside.txt"),
+                     root.deletingLastPathComponent().appendingPathComponent("outside.txt")].map {
+            ScannedFile(url: $0, name: $0.lastPathComponent,
+                        relativePathComponents: [$0.lastPathComponent],
+                        category: .document, byteCount: 1)
+        }
+        do {
+            _ = try await FileDeletionService().delete(files: files, selectedRoots: [root])
+            Issue.record("Expected invalid selection")
+        } catch {
+            #expect((error as? FileDeletionError) == .invalidSelection)
+        }
+    }
+
     /// 上层需要同时保留已删除 URL 和失败数量，以正确更新部分成功的状态。
     @Test("Deletion result can represent complete and partial outcomes")
     func deletionResultRepresentsOutcomeShape() {

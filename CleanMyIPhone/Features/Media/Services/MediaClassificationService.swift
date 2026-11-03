@@ -990,3 +990,98 @@ private final class ContinuationGate<Value: Sendable>: @unchecked Sendable {
         return result
     }
 }
+
+/// 场景标签仅用于浏览分组，不表示照片可删除。
+nonisolated enum PhotoScene: String, Codable, Sendable {
+    case city
+    case other
+}
+
+nonisolated private struct PhotoSceneCacheEntry: Codable, Sendable {
+    let key: FeatureCacheKey
+    let scene: PhotoScene
+}
+
+/// 缓存只保存在本机；变更资源或模型版本会重新分析。
+private actor PhotoSceneCache {
+    private let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent("photo-scenes-v3.json")
+
+    func load() -> [String: PhotoSceneCacheEntry] {
+        guard let data = try? Data(contentsOf: url) else { return [:] }
+        return (try? JSONDecoder().decode([String: PhotoSceneCacheEntry].self, from: data)) ?? [:]
+    }
+
+    func save(_ entries: [String: PhotoSceneCacheEntry]) {
+        guard let data = try? JSONEncoder().encode(entries) else { return }
+        try? data.write(to: url, options: .atomic)
+    }
+}
+
+extension MediaClassificationService {
+    /// 使用系统支持的标签进行保守分类；未下载的资源保持未分类并在以后重试。
+    func classifyScenes(
+        assets: [PHAsset],
+        excludedIDs: Set<String>,
+        update: @MainActor ([String]) -> Void
+    ) async {
+        let supported = await Task.detached(priority: .utility) {
+            let request = VNClassifyImageRequest()
+            request.revision = VNClassifyImageRequestRevision1
+            return Set((try? request.supportedIdentifiers()) ?? [])
+        }.value
+        guard !Task.isCancelled else { return }
+        let cityLabels: Set<String> = ["cityscape", "urban", "street", "skyscraper"]
+        let citySupported = cityLabels.intersection(supported)
+        guard !citySupported.isEmpty else { return }
+        let cache = PhotoSceneCache()
+        var entries = await cache.load()
+        let images = assets.filter { $0.mediaType == .image && !excludedIDs.contains($0.localIdentifier) }
+        let validIDs = Set(images.map(\.localIdentifier))
+        entries = entries.filter { validIDs.contains($0.key) }
+        var city: [String] = []
+        for (index, asset) in images.enumerated() {
+            if Task.isCancelled { return }
+            let id = asset.localIdentifier
+            let key = FeatureCacheKey(modificationDate: asset.modificationDate,
+                                      pixelWidth: asset.pixelWidth, pixelHeight: asset.pixelHeight)
+            let scene: PhotoScene
+            if let entry = entries[id], entry.key == key {
+                scene = entry.scene
+            } else {
+                guard let image = try? await requestThumbnail(for: asset, targetPixelSize: 256), !Task.isCancelled else { continue }
+                let recognized = await Task.detached(priority: .utility) {
+                    Self.recognizeScene(image, cityLabels: citySupported)
+                }.value
+                guard let recognized else { continue }
+                scene = recognized
+                entries[id] = PhotoSceneCacheEntry(key: key, scene: scene)
+            }
+            if scene == .city { city.append(id) }
+            if index.isMultiple(of: 250) {
+                update(city)
+                await Task.yield()
+            }
+            if index > 0 && index.isMultiple(of: 5_000) {
+                await cache.save(entries)
+            }
+        }
+        guard !Task.isCancelled else { return }
+        update(city)
+        await cache.save(entries)
+    }
+
+    nonisolated private static func recognizeScene(_ image: CGImage, cityLabels: Set<String>) -> PhotoScene? {
+        let request = VNClassifyImageRequest()
+        request.revision = VNClassifyImageRequestRevision1
+        do {
+            try VNImageRequestHandler(cgImage: image, options: [:]).perform([request])
+            let confidence = (request.results ?? [])
+                .filter { cityLabels.contains($0.identifier) }
+                .map(\.confidence).max() ?? 0
+            return confidence >= 0.4 ? .city : .other
+        } catch {
+            return nil
+        }
+    }
+}

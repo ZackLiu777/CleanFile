@@ -69,15 +69,10 @@ final class MediaCompressionViewModel: ObservableObject {
             // Array/dictionary snapshots share immutable storage; do not enumerate on the main actor.
             let assets = library.assets
             let exactSizes = library.exactByteCountsByIdentifier
-            let classification: MediaClassificationResult?
-            switch library.analysisState {
-            case .success(let result), .partialFailure(let result): classification = result
-            default: classification = nil
-            }
             let category = category
             loader = { preview in
                 try await MediaCompressionPreparation().prepare(category: category, assets: assets,
-                    exactSizes: exactSizes, classification: classification, preview: preview)
+                    exactSizes: exactSizes, preview: preview)
             }
         } else { isPreparing = false; hasPrepared = true; return }
         do {

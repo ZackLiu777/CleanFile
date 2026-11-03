@@ -136,6 +136,7 @@ struct MediaQuickCleanView: View {
         .onChange(of: photoLibrary.analysisState) { _, _ in
             viewModel.refreshCategories()
         }
+        .onChange(of: photoLibrary.cityPhotoIDs) { _, _ in viewModel.refreshCategories() }
         .onChange(of: photoLibrary.mediaSizeRevision) { _, _ in
             viewModel.refreshSelectionIndex()
         }

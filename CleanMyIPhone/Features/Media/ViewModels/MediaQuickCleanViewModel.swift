@@ -23,6 +23,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
             case screenshots
             case videos
             case livePhotos
+            case cityPhotos
             case otherPhotos
             case screenRecordings
             case longVideos
@@ -146,6 +147,7 @@ final class MediaQuickCleanViewModel: ObservableObject {
             return
         }
 
+        let previousCategories = categories
         let similarDeletions = result.suggestedCleanupIDs
         let classifiedVideos = result.classifiedVideos
 
@@ -205,14 +207,24 @@ final class MediaQuickCleanViewModel: ObservableObject {
         ]
         .compactMap { $0 }
 
-        // Use the actual category coverage so ordinary photos and retained similar
-        // photos remain available for an explicit, independent selection.
-        let coveredIDs = categories.reduce(into: Set<String>()) { $0.formUnion($1.assetIDs) }
-        let otherIDs = Set(photoLibrary.assets.lazy.filter { $0.mediaType == .image }
-            .map(\.localIdentifier)).subtracting(coveredIDs)
+        for (id, title, icon, ids) in [
+            (Category.ID.cityPhotos, AppL10n.string("City Photos"), "building.2", Set(photoLibrary.cityPhotoIDs))
+        ] {
+            if let category = makeCategory(id: id, title: title, systemImage: icon, assetIDs: ids) {
+                categories.append(category)
+            }
+        }
+        // 首页和快速清理对“其他”采用同一范围，避免包含已在相似组中的保留项。
+        let otherIDs = Set(photoLibrary.otherPhotoIDs(excluding: result))
         if !otherIDs.isEmpty {
             categories.append(Category(id: .otherPhotos, title: AppL10n.string("Other Photos"),
                                        systemImage: "photo", assetIDs: otherIDs))
+        }
+        // A growing category must never silently add to an existing deletion selection.
+        for category in categories where selectedCategoryIDs.contains(category.id) {
+            if previousCategories.first(where: { $0.id == category.id })?.assetIDs != category.assetIDs {
+                selectedCategoryIDs.remove(category.id)
+            }
         }
         let availableIDs = Set(categories.map(\.id))
         selectedCategoryIDs.formIntersection(availableIDs)

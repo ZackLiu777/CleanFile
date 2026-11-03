@@ -356,7 +356,7 @@ final class FileScannerViewModel: ObservableObject {
 
     /// 重新校验权限、来源和当前扫描中的全部目标，再交给删除服务；失败和取消分别反馈。
     func deleteFiles(withURLs selectedURLs: Set<URL>) async {
-        guard canUseStorage() else { return }
+        guard canUseStorage(), !deletionState.isDeleting else { return }
         guard !selectedURLs.isEmpty else {
             deletionState = .failure(.noItemsSelected)
             return
@@ -366,8 +366,17 @@ final class FileScannerViewModel: ObservableObject {
             return
         }
 
-        let knownFiles = files.filter { selectedURLs.contains($0.url) }
-        guard knownFiles.count == selectedURLs.count else {
+        deletionState = .deleting(itemCount: selectedURLs.count)
+        let revision = filesRevision
+        let sourceFiles = files
+        let knownFiles = await Task.detached(priority: .userInitiated) {
+            sourceFiles.filter { selectedURLs.contains($0.url) }
+        }.value
+        guard !Task.isCancelled else {
+            deletionState = .idle
+            return
+        }
+        guard revision == filesRevision, knownFiles.count == selectedURLs.count else {
             #if DEBUG
             debugPrint("Storage deletion rejected: selection no longer matches current scan")
             #endif

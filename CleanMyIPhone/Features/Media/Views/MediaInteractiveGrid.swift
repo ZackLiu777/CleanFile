@@ -21,6 +21,7 @@ import SwiftUI
 /// 将支持交互式布局过渡的 UICollectionView 接入 SwiftUI 媒体详情页。
 struct MediaInteractiveGrid: UIViewRepresentable {
     @EnvironmentObject private var themeSettings: ThemeSettings
+    @Environment(\.locale) private var locale
     let sections: [MediaDateSection]
     let showsDateHeaders: Bool
     @Binding var selectedIDs: Set<String>
@@ -57,6 +58,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         collectionView.isDirectionalLockEnabled = true
         collectionView.contentInsetAdjustmentBehavior = .automatic
         collectionView.dataSource = context.coordinator
+        collectionView.prefetchDataSource = context.coordinator
         collectionView.delegate = context.coordinator
         collectionView.register(
             UICollectionViewCell.self,
@@ -71,26 +73,40 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         context.coordinator.installGestures(on: collectionView)
         context.coordinator.collectionView = collectionView
         deletionEffectController.renderer = context.coordinator
-        context.coordinator.sectionSignature = context.coordinator.makeSectionSignature(from: sections)
         return collectionView
     }
 
     /// 同步 SwiftUI 状态；资源结构改变时刷新数据，选择改变时只刷新可见单元格。
     func updateUIView(_ collectionView: UICollectionView, context: Context) {
-        context.coordinator.parent = self
-        deletionEffectController.renderer = context.coordinator
-        let newSignature = context.coordinator.makeSectionSignature(from: sections)
+        let coordinator = context.coordinator
+        let structureChanged = coordinator.parent.sections != sections
+        let selectionChanged = coordinator.lastSelectedIDs != selectedIDs || coordinator.lastSelecting != isSelecting
+        let appearanceChanged = coordinator.lastFontStyle != themeSettings.fontStyle
+            || coordinator.parent.accentColor != accentColor
+            || coordinator.parent.showsDateHeaders != showsDateHeaders
+            || coordinator.lastLocale != locale
+        coordinator.parent = self
+        coordinator.lastSelectedIDs = selectedIDs
+        coordinator.lastSelecting = isSelecting
+        coordinator.lastFontStyle = themeSettings.fontStyle
+        coordinator.lastLocale = locale
+        deletionEffectController.renderer = coordinator
         if let layout = collectionView.collectionViewLayout as? MediaDensityFlowLayout {
             layout.setShowsDateHeaders(showsDateHeaders)
         }
-
-        if newSignature != context.coordinator.sectionSignature {
-            context.coordinator.cancelLayoutTransitionIfNeeded()
-            context.coordinator.sectionSignature = newSignature
+        if structureChanged {
+            coordinator.stopPrefetching()
+            coordinator.cancelLayoutTransitionIfNeeded()
             collectionView.reloadData()
-        } else {
-            context.coordinator.refreshVisibleContent(in: collectionView)
+        } else if selectionChanged || appearanceChanged {
+            coordinator.refreshVisibleContent(in: collectionView)
         }
+    }
+
+    static func dismantleUIView(_ uiView: UICollectionView, coordinator: Coordinator) {
+        coordinator.stopPrefetching()
+        coordinator.cancelLayoutTransitionIfNeeded()
+        uiView.prefetchDataSource = nil
     }
 
     // MARK: - Coordinator
@@ -99,6 +115,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
     @MainActor
     final class Coordinator: NSObject,
         UICollectionViewDataSource,
+        UICollectionViewDataSourcePrefetching,
         UICollectionViewDelegate,
         UIGestureRecognizerDelegate,
         MediaDeletionEffectRendering
@@ -108,7 +125,12 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 
         var parent: MediaInteractiveGrid
         weak var collectionView: UICollectionView?
-        var sectionSignature = [String]()
+        var lastFontStyle: AppFontStyle
+        var lastLocale: Locale
+        var lastSelectedIDs: Set<String>
+        var lastSelecting: Bool
+        private var prefetchedIDs: [IndexPath: String] = [:]
+        private var prefetchSize = CGSize.zero
 
         private var density = MediaGridDensity.large
         private var targetDensity: MediaGridDensity?
@@ -131,6 +153,10 @@ struct MediaInteractiveGrid: UIViewRepresentable {
         /// 保存初始 SwiftUI 配置，后续由 updateUIView 持续替换为最新值。
         init(parent: MediaInteractiveGrid) {
             self.parent = parent
+            self.lastFontStyle = parent.themeSettings.fontStyle
+            self.lastLocale = parent.locale
+            self.lastSelectedIDs = parent.selectedIDs
+            self.lastSelecting = parent.isSelecting
         }
 
         /// 安装捏合、长按和独立方向批选手势，避免批选依赖滚动手势的内部状态。
@@ -166,11 +192,35 @@ struct MediaInteractiveGrid: UIViewRepresentable {
             self.batchSelectionPanGesture = batchSelectionPanGesture
         }
 
-        /// 生成只反映分区和资源顺序的签名，避免选择状态变化触发整表 reloadData。
-        func makeSectionSignature(from sections: [MediaDateSection]) -> [String] {
-            sections.flatMap { section in
-                [section.id] + section.assetIDs
+        /// PhotoKit 只预热滚动方向附近的有限项目，不下载云端原件。
+        func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+            let scale = collectionView.traitCollection.displayScale
+            let pixels = max(32, (140 * scale / 32).rounded(.up) * 32)
+            let size = CGSize(width: pixels, height: pixels)
+            if prefetchSize != size { stopPrefetching(); prefetchSize = size }
+            var added: [String] = []
+            for path in indexPaths where prefetchedIDs.count < 60 {
+                guard prefetchedIDs[path] == nil, let id = assetID(at: path) else { continue }
+                prefetchedIDs[path] = id
+                added.append(id)
             }
+            parent.viewModel.startCachingThumbnails(for: added[...], targetSize: size)
+        }
+
+        func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
+            let removed = indexPaths.compactMap { prefetchedIDs.removeValue(forKey: $0) }
+            parent.viewModel.stopCachingThumbnails(for: removed[...], targetSize: prefetchSize)
+        }
+
+        func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+            // Visible cells own their requests; free a slot for upcoming items.
+            self.collectionView(collectionView, cancelPrefetchingForItemsAt: [indexPath])
+        }
+
+        func stopPrefetching() {
+            let ids = Array(prefetchedIDs.values)
+            parent.viewModel.stopCachingThumbnails(for: ids[...], targetSize: prefetchSize)
+            prefetchedIDs.removeAll()
         }
 
         /// 终止尚未完成的布局过渡，避免数据刷新落在临时 TransitionLayout 上。
@@ -324,6 +374,7 @@ struct MediaInteractiveGrid: UIViewRepresentable {
                     viewModel: parent.viewModel,
                     accentColor: parent.accentColor
                 )
+                .id(assetID)
                 .fontDesign(parent.themeSettings.fontStyle.inheritedDesign)
                 .appFontFamily(parent.themeSettings.fontStyle.fontName)
             }
@@ -383,10 +434,8 @@ struct MediaInteractiveGrid: UIViewRepresentable {
 
         /// 根据资源标识查找当前 IndexPath，仅用于更新屏幕内受影响的单元格。
         private func indexPath(for assetID: String) -> IndexPath? {
-            for (sectionIndex, section) in parent.sections.enumerated() {
-                if let itemIndex = section.assetIDs.firstIndex(of: assetID) {
-                    return IndexPath(item: itemIndex, section: sectionIndex)
-                }
+            for indexPath in collectionView?.indexPathsForVisibleItems ?? [] {
+                if self.assetID(at: indexPath) == assetID { return indexPath }
             }
             return nil
         }
@@ -1051,9 +1100,6 @@ private struct MediaInteractiveGridCellContent: View {
                 endPoint: .bottom
             )
         )
-        .onAppear {
-            viewModel.requestExactByteCount(for: assetID)
-        }
     }
 
     private var byteCountText: String {

@@ -644,7 +644,12 @@ private struct ScannedFilesView: View {
     @EnvironmentObject private var tabBarVisibility: TabBarVisibilityCoordinator
     @ObservedObject var viewModel: FileScannerViewModel
     let category: FileCategory?
+    // 全选以反向集合表示；集合只记录例外，避免全选时创建数万个 URL。
     @State private var selectedURLs = Set<URL>()
+    @State private var selectsAll = false
+    @State private var totalKnownByteCount: Int64 = 0
+    @State private var isPreparingDeletion = false
+    @State private var rowText: [URL: StorageFileRowText] = [:]
     @State private var selectedKnownByteCount: Int64 = 0
     @State private var isDeleteConfirmationPresented = false
     @State private var displayedFiles: [ScannedFile] = []
@@ -673,11 +678,11 @@ private struct ScannedFilesView: View {
                         toggleSelection(of: file)
                     } label: {
                         HStack(spacing: 12) {
-                            Image(systemName: selectedURLs.contains(file.url)
+                            Image(systemName: isSelected(file.url)
                                 ? "checkmark.circle.fill"
                                 : "circle")
                                 .foregroundStyle(
-                                    selectedURLs.contains(file.url)
+                                    isSelected(file.url)
                                         ? theme.accentPrimary
                                         : .secondary
                                 )
@@ -686,21 +691,19 @@ private struct ScannedFilesView: View {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(file.name)
                                     .lineLimit(1)
-                                Text(file.relativePathComponents.dropLast().joined(separator: "/"))
+                                Text(rowText[file.url]?.parentPath ?? "")
                                     .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(1)
                             }
                             Spacer()
-                            Text(ByteCountFormatter.string(
-                                fromByteCount: file.byteCount,
-                                countStyle: .file
-                            ))
+                            Text(rowText[file.url]?.size ?? "")
                             .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
                             .foregroundStyle(.secondary)
                         }
                     }
                     .buttonStyle(.plain)
+                    .disabled(interactionLocked)
                     .listRowBackground(theme.cardSurface)
                 }
                 .scrollContentBackground(.hidden)
@@ -719,24 +722,18 @@ private struct ScannedFilesView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(selectedURLs.count == displayedFiles.count ? "Deselect All" : "Select All") {
-                    if selectedURLs.count == displayedFiles.count {
-                        selectedURLs.removeAll()
-                        selectedKnownByteCount = 0
-                    } else {
-                        selectedURLs = Set(displayedFiles.map(\.url))
-                        selectedKnownByteCount = displayedFiles.reduce(into: Int64.zero) {
-                            if $1.hasKnownByteCount { $0 += $1.byteCount }
-                        }
-                    }
+                Button(selectedCount == displayedFiles.count ? "Deselect All" : "Select All") {
+                    selectsAll = selectedCount != displayedFiles.count
+                    selectedURLs = []
+                    selectedKnownByteCount = selectsAll ? totalKnownByteCount : 0
                 }
-                .disabled(displayedFiles.isEmpty || viewModel.deletionState.isDeleting)
+                .disabled(displayedFiles.isEmpty || interactionLocked)
             }
         }
         .safeAreaInset(edge: .bottom) {
             HStack(spacing: 14) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(selectedURLs.count) selected")
+                    Text("\(selectedCount) selected")
                         .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
                     Text(selectedFileSizeText)
                         .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
@@ -748,7 +745,7 @@ private struct ScannedFilesView: View {
                 Button(role: .destructive) {
                     isDeleteConfirmationPresented = true
                 } label: {
-                    if viewModel.deletionState.isDeleting {
+                    if viewModel.deletionState.isDeleting || isPreparingDeletion {
                         ProgressView()
                     } else {
                         Label("Delete", systemImage: "trash")
@@ -756,7 +753,7 @@ private struct ScannedFilesView: View {
                 }
                 .appGlassButtonStyle()
                 .foregroundStyle(theme.negativeRed)
-                .disabled(selectedURLs.isEmpty || viewModel.deletionState.isDeleting)
+                .disabled(selectedCount == 0 || interactionLocked)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
@@ -764,15 +761,21 @@ private struct ScannedFilesView: View {
         .alert("Permanently delete selected files?", isPresented: $isDeleteConfirmationPresented) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
-                let urls = selectedURLs
+                let exceptions = selectedURLs
+                let all = selectsAll
+                let files = displayedFiles
+                isPreparingDeletion = true
                 Task {
+                    // 确认后才展开删除目标，后台生成快照，保持确认按钮即时响应。
+                    let urls = await Task.detached(priority: .userInitiated) {
+                        Set(files.lazy.filter { all != exceptions.contains($0.url) }.map(\.url))
+                    }.value
                     await viewModel.deleteFiles(withURLs: urls)
-                    selectedURLs.formIntersection(Set(viewModel.files.map(\.url)))
-                    recalculateSelectedKnownByteCount()
+                    isPreparingDeletion = false
                 }
             }
         } message: {
-            Text("These \(selectedURLs.count) file(s) may not be recoverable. This action cannot be undone in Filevra.")
+            Text("These \(selectedCount) file(s) may not be recoverable. This action cannot be undone in Filevra.")
         }
         .alert(
             deletionResultTitle ?? "",
@@ -822,6 +825,9 @@ private struct ScannedFilesView: View {
     private func prepareDisplayedFiles() async {
         let sourceFiles = viewModel.files
         let category = category
+        let selection = selectedURLs
+        let previousFiles = displayedFiles
+        let all = selectsAll
         isPreparingDisplayedFiles = true
 
         let worker = Task.detached(priority: .userInitiated) {
@@ -832,7 +838,30 @@ private struct ScannedFilesView: View {
             } else {
                 sourceFiles
             }
-            return FileDisplayOrder.bySizeDescending(filteredFiles)
+            let ordered = FileDisplayOrder.bySizeDescending(filteredFiles)
+            // 新扫描加入的文件不得继承此前的全选，避免扩大用户确认的范围。
+            let previousURLs = all ? Set(previousFiles.map(\.url)) : []
+            var text: [URL: StorageFileRowText] = [:]
+            var validSelection = Set<URL>()
+            var total: Int64 = 0
+            var selected: Int64 = 0
+            let formatter = ByteCountFormatter()
+            formatter.countStyle = .file
+            for file in ordered {
+                if Task.isCancelled { break }
+                text[file.url] = StorageFileRowText(
+                    parentPath: file.relativePathComponents.dropLast().joined(separator: "/"),
+                    size: formatter.string(fromByteCount: file.byteCount)
+                )
+                let isException = selection.contains(file.url)
+                    || (all && !previousURLs.contains(file.url))
+                if isException { validSelection.insert(file.url) }
+                if file.hasKnownByteCount {
+                    total += file.byteCount
+                    if all != isException { selected += file.byteCount }
+                }
+            }
+            return (ordered, text, validSelection, total, selected)
         }
         let preparedFiles = await withTaskCancellationHandler {
             await worker.value
@@ -841,32 +870,33 @@ private struct ScannedFilesView: View {
         }
 
         guard !Task.isCancelled else { return }
-        displayedFiles = preparedFiles
-        selectedURLs.formIntersection(Set(preparedFiles.map(\.url)))
-        recalculateSelectedKnownByteCount()
+        displayedFiles = preparedFiles.0
+        rowText = preparedFiles.1
+        selectedURLs = preparedFiles.2
+        totalKnownByteCount = preparedFiles.3
+        selectedKnownByteCount = preparedFiles.4
         isPreparingDisplayedFiles = false
     }
 
-    /// 切换单项选择，并仅对已知大小增量更新所选容量。
-    private func toggleSelection(of file: ScannedFile) {
-        if selectedURLs.remove(file.url) != nil {
-            if file.hasKnownByteCount {
-                selectedKnownByteCount -= file.byteCount
-            }
-        } else {
-            selectedURLs.insert(file.url)
-            if file.hasKnownByteCount {
-                selectedKnownByteCount += file.byteCount
-            }
-        }
+    private var interactionLocked: Bool {
+        isPreparingDisplayedFiles || isPreparingDeletion || viewModel.deletionState.isDeleting
     }
 
-    /// 只汇总已知大小的选中文件，未知大小不会被误报为已知容量。
-    private func recalculateSelectedKnownByteCount() {
-        selectedKnownByteCount = displayedFiles.reduce(into: Int64.zero) { total, file in
-            if selectedURLs.contains(file.url), file.hasKnownByteCount {
-                total += file.byteCount
-            }
+    private var selectedCount: Int {
+        selectsAll ? displayedFiles.count - selectedURLs.count : selectedURLs.count
+    }
+
+    private func isSelected(_ url: URL) -> Bool {
+        selectsAll != selectedURLs.contains(url)
+    }
+
+    /// 普通选择记录选中项，全选记录排除项；单项变化只更新一次容量。
+    private func toggleSelection(of file: ScannedFile) {
+        guard !interactionLocked else { return }
+        let wasSelected = isSelected(file.url)
+        if selectedURLs.remove(file.url) == nil { selectedURLs.insert(file.url) }
+        if file.hasKnownByteCount {
+            selectedKnownByteCount += wasSelected ? -file.byteCount : file.byteCount
         }
     }
 
@@ -906,4 +936,10 @@ private extension View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .appContentCard()
     }
+}
+
+/// 后台准备不可变显示文本，避免滚动和选择刷新反复创建格式化器。
+private struct StorageFileRowText: Sendable {
+    let parentPath: String
+    let size: String
 }

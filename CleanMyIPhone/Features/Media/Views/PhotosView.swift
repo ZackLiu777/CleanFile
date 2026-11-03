@@ -364,8 +364,7 @@ struct PhotosView: View {
                     } label: {
                         MediaCategoryCard(
                             title: NSLocalizedString(category.titleKey, comment: ""),
-                            detail: String(format: NSLocalizedString("compression.cardDetail", comment: ""), assets.count,
-                                           sizeText(Set(assets.map(\.localIdentifier)))),
+                            detail: String.localizedStringWithFormat(AppL10n.string("%lld items"), Int64(assets.count)),
                             representativeAssetID: assets.first?.localIdentifier,
                             systemImage: category.symbol,
                             aspectRatio: 3.0 / 4.0,
@@ -500,6 +499,8 @@ private struct MediaDashboardResultsView: View {
             + result.videoIDs.prefix(24)
             + result.screenshotIDs.prefix(24)
             + result.livePhotoIDs.prefix(24)
+            + viewModel.cityPhotoIDs.prefix(24)
+            + viewModel.otherPhotoIDs(excluding: result).prefix(24)
         ).filter { seen.insert($0).inserted }
     }
 
@@ -534,7 +535,9 @@ private struct MediaDashboardResultsView: View {
                 title: AppL10n.string("Live Photos"),
                 assetIDs: result.livePhotoIDs,
                 systemImage: "livephoto"
-            )
+            ),
+            MediaCategorySummary(title: AppL10n.string("City Photos"), assetIDs: viewModel.cityPhotoIDs, systemImage: "building.2"),
+            MediaCategorySummary(title: AppL10n.string("Other Photos"), assetIDs: viewModel.otherPhotoIDs(excluding: result), systemImage: "photo")
         ]
     }
 
@@ -553,7 +556,10 @@ private struct MediaDashboardResultsView: View {
         } label: {
             MediaCategoryCard(
                 title: category.title,
-                detail: categoryDetail(category.showsDateGroups ? category.assetIDs : category.assetIDs.filter { !result.protectedKeeperIDs.contains($0) }),
+                detail: String.localizedStringWithFormat(
+                    AppL10n.string("%lld items"),
+                    Int64(category.showsDateGroups ? category.assetIDs.count : category.assetIDs.filter { !result.protectedKeeperIDs.contains($0) }.count)
+                ),
                 representativeAssetID: category.assetIDs.first,
                 systemImage: category.systemImage,
                 viewModel: viewModel
@@ -563,21 +569,6 @@ private struct MediaDashboardResultsView: View {
         .disabled(category.assetIDs.isEmpty)
     }
 
-    /// 按照当前语言格式化资源数量。
-    private func itemCount(_ count: Int) -> String {
-        String.localizedStringWithFormat(AppL10n.string("%lld items"), Int64(count))
-    }
-
-    /// 组合分类的资源数量与估算大小。
-    private func categoryDetail(_ assetIDs: [String]) -> String {
-        "\(itemCount(assetIDs.count)) · \(estimatedSizeText(for: assetIDs))"
-    }
-
-    /// 按去重后的资源标识估算占用空间并格式化。
-    private func estimatedSizeText(for assetIDs: [String]) -> String {
-        let byteCount = viewModel.estimatedByteCount(for: Set(assetIDs))
-        return ByteCountFormatter.string(fromByteCount: byteCount, countStyle: .file)
-    }
 
 
 }
@@ -751,7 +742,7 @@ private struct MediaCategorySummary: Identifiable {
 /// 展示分类名称、摘要和代表性缩略图。
 private struct MediaCategoryCard: View {
     let title: String
-    let detail: String
+    let detail: String?
     let representativeAssetID: String?
     let systemImage: String
     var aspectRatio: CGFloat = 1
@@ -766,7 +757,8 @@ private struct MediaCategoryCard: View {
                     GeometryReader { proxy in
                         MediaAssetThumbnailView(
                             assetID: representativeAssetID,
-                            viewModel: viewModel
+                            viewModel: viewModel,
+                            targetSizeInPoints: proxy.size
                         )
                         .frame(width: proxy.size.width, height: proxy.size.height)
                     }
@@ -790,10 +782,12 @@ private struct MediaCategoryCard: View {
                         .foregroundStyle(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
-                    Text(detail)
-                        .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
-                        .foregroundStyle(.white.opacity(0.82))
-                        .lineLimit(1)
+                    if let detail {
+                        Text(detail)
+                            .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
+                            .foregroundStyle(.white.opacity(0.82))
+                            .lineLimit(1)
+                    }
                 }
                 .padding(12)
             }
@@ -971,7 +965,7 @@ private struct MediaCategoryDetailView: View {
     }
 
     private var visibleAssetIDs: [String] {
-        assetIDs.filter { viewModel.asset(withIdentifier: $0) != nil }
+        chronologicallySortedAssetIDs
     }
 
     private var dateSections: [MediaDateSection] {
@@ -984,18 +978,14 @@ private struct MediaCategoryDetailView: View {
     }
 
     private var chronologicallySortedAssetIDs: [String] {
-        dateSections.flatMap(\.assetIDs)
+        _ = dateSections
+        return dateSectionStore.orderedAssetIDs
     }
 
     private var displayedSections: [MediaDateSection] {
         guard !themeSettings.mediaDateHeadersEnabled else { return dateSections }
-        return [
-            MediaDateSection(
-                id: "all-media",
-                day: nil,
-                assetIDs: chronologicallySortedAssetIDs
-            )
-        ]
+        _ = dateSections
+        return dateSectionStore.unsectioned
     }
 
     private var preheatedAssetIDs: ArraySlice<String> {
@@ -1174,16 +1164,14 @@ private struct MediaCategoryDetailView: View {
                 isSelecting = true
                 selectedIDs = Set(visibleAssetIDs).subtracting(protectedAssetIDs)
             }
-            viewModel.startCachingThumbnails(
-                for: preheatedAssetIDs,
-                targetSize: thumbnailTargetSize
-            )
+            if showsSimilarGroups || showsDateGroups {
+                viewModel.startCachingThumbnails(for: preheatedAssetIDs, targetSize: thumbnailTargetSize)
+            }
         }
         .onDisappear {
-            viewModel.stopCachingThumbnails(
-                for: preheatedAssetIDs,
-                targetSize: thumbnailTargetSize
-            )
+            if showsSimilarGroups || showsDateGroups {
+                viewModel.stopCachingThumbnails(for: preheatedAssetIDs, targetSize: thumbnailTargetSize)
+            }
             viewModel.clearDeletionResult()
         }
         // 触觉挂在稳定页面层，确保回执首次插入时也能触发。
@@ -1277,9 +1265,24 @@ private struct MediaCategoryDetailView: View {
 struct MediaAssetThumbnailView: View {
     let assetID: String
     @ObservedObject var viewModel: PhotoLibraryViewModel
+    var targetSizeInPoints: CGSize? = nil
     @Environment(\.displayScale) private var displayScale
     @State private var image: UIImage?
     @State private var requestID: PHImageRequestID?
+    @State private var loadedAssetID: String?
+    @State private var requestToken = UUID()
+
+    private var targetPixelSize: CGSize {
+        let size = targetSizeInPoints ?? CGSize(width: 140, height: 140)
+        // Bucket nearby layout sizes to avoid a new request for fractional-point changes.
+        func pixels(_ value: CGFloat) -> CGFloat { max(32, (value * displayScale / 32).rounded(.up) * 32) }
+        return CGSize(width: pixels(size.width), height: pixels(size.height))
+    }
+
+    private struct LoadID: Equatable {
+        let assetID: String
+        let size: CGSize
+    }
 
     var body: some View {
         ZStack {
@@ -1296,29 +1299,32 @@ struct MediaAssetThumbnailView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
-        .task(id: assetID) {
+        .task(id: LoadID(assetID: assetID, size: targetPixelSize)) {
             loadImage()
         }
         .onDisappear {
-            if let requestID {
-                viewModel.cancelThumbnail(requestID)
-            }
+            requestToken = UUID()
+            if let requestID { viewModel.cancelThumbnail(requestID) }
+            requestID = nil
         }
     }
 
-    /// 先使用缓存缩略图，未命中时为当前资源请求适合屏幕倍率的图片。
+    /// 低清预览可先显示，只有同尺寸的最终结果可以直接作为缓存命中。
     private func loadImage() {
-        guard image == nil else { return }
-        if let cachedImage = viewModel.cachedThumbnail(for: assetID) {
+        if let requestID { viewModel.cancelThumbnail(requestID) }
+        requestID = nil
+        let token = UUID()
+        requestToken = token
+        if loadedAssetID != assetID { image = nil }
+        loadedAssetID = assetID
+        let targetSize = targetPixelSize
+        if let cachedImage = viewModel.cachedThumbnail(for: assetID, targetSize: targetSize) {
             image = cachedImage
             return
         }
         guard let asset = viewModel.asset(withIdentifier: assetID) else { return }
-
-        requestID = viewModel.requestThumbnail(
-            for: asset,
-            targetSize: CGSize(width: 140 * displayScale, height: 140 * displayScale)
-        ) { loadedImage in
+        requestID = viewModel.requestThumbnail(for: asset, targetSize: targetSize) { loadedImage in
+            guard requestToken == token else { return }
             image = loadedImage
         }
     }
