@@ -1,5 +1,5 @@
 "converter.title" = "Umbreyta";
-"converter.heading" = "Umbreyta miðlum";
+"converter.heading" = "Sniðbreyting";
 "conversion.home.image.title" = "Umbreyta myndum";
 "conversion.home.image.detail" = "JPG, PNG, HEIC og fleiri. Stilltu myndgæði og stærð.";
 "conversion.home.image.tagline" = "Umbreyting · HEIC formats · Remove GPS";
@@ -234,13 +234,13 @@
 "settings.background" = "Bakgrunnur";
 "color.transparent" = "Gegnsætt";
 "settings.background.detail" = "Á við um gagnsæja punkta og ferningafyllingu; það fjarlægir ekki bakgrunn myndarinnar. Gagnsæi er fáanlegt fyrir PNG og TIFF. Önnur snið endurstilla gagnsæi í hvítt.";
-"estimate.title" = "Áætluð stærð";
+"estimate.title" = "Stærð umbreytingar";
 "estimate.original" = "Upprunalegt";
 "estimate.output" = "Áætluð framleiðsla";
 "estimate.savings" = "Áætlaður sparnaður";
 "estimate.increase" = "Áætluð hækkun";
 "estimate.range" = "%@–%@";
-"estimate.change" = "%@ · um %d%%";
+"estimate.change" = "um %.0f%%";
 "estimate.disclaimer" = "Aðeins mat. Raunveruleg stærð fer eftir efni efnisins og kóðara.";
 "estimate.calculating" = "Áætlar úttakstærð...";
 "conversion.replace.button" = "Skipta út frumritum";

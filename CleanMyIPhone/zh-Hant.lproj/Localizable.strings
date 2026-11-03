@@ -102,7 +102,7 @@
 "Accent Color" = "強調色";
 "The brand accent is used for selection, progress, and primary actions." = "品牌強調色用於選擇、進度和主要操作。";
 "Videos" = "影片";
-"My Space" = "我的空間";
+"My Space" = "我的儲存空間";
 "System & Apps" = "系統與 App";
 "Available" = "可用";
 "%lld%% used · %@ of %@" = "裝置儲存空間已使用 %lld%%（%@ / %@）";
@@ -432,7 +432,7 @@
 "Display Options" = "顯示選項";
 "Interface Animations" = "介面動畫";
 "Show Media Dates" = "顯示媒體日期";
-"Control dashboard animations, compression card animations, and date headings in media detail grids." = "控制媒體「我的空間」、儲存旭日圖、轉換卡片動畫，以及媒體詳細網格中的日期標題。";
+"Control dashboard animations, compression card animations, and date headings in media detail grids." = "控制媒體「我的儲存空間」、儲存旭日圖、轉換卡片動畫，以及媒體詳細網格中的日期標題。";
 "Calculating size…" = "正在計算大小…";
 "Size unavailable" = "大小無法取得";
 "Quick Cleanup" = "快速清理";
@@ -563,7 +563,7 @@
 
 "Convert" = "轉換";
 
-"cleanup.space.title" = "可清理的空間大小為";
+"cleanup.space.title" = "建議清理的空間大小";
 
 
 "cleanup.action" = "一鍵清理";

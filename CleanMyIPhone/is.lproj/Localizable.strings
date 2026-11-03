@@ -97,7 +97,7 @@
 "Accent Color" = "Hreim litur";
 "The brand accent is used for selection, progress, and primary actions." = "Vörumerkjahreimurinn er notaður fyrir val, framfarir og aðalaðgerðir.";
 "Videos" = "Myndbönd";
-"My Space" = "Rýmið mitt";
+"My Space" = "Geymslan mín";
 "System & Apps" = "Kerfi og forrit";
 "Available" = "Í boði";
 "%lld%% used · %@ of %@" = "%lld%% notað · %@ af %@";
@@ -560,7 +560,7 @@
 
 "Convert" = "Umbreyta";
 
-"cleanup.space.title" = "Pláss sem hægt er að hreinsa";
+"cleanup.space.title" = "Ráðlagt pláss til hreinsunar";
 
 
 "cleanup.action" = "Fljótleg tiltekt";

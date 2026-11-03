@@ -1,5 +1,5 @@
 "converter.title" = "转换";
-"converter.heading" = "转换媒体";
+"converter.heading" = "格式转换";
 "conversion.home.image.title" = "转换图片";
 "conversion.home.image.detail" = "JPG、PNG、HEIC 等格式，可调整图片质量和尺寸。";
 "conversion.home.image.tagline" = "转换 · HEIC 格式 · 去 GPS";
@@ -234,13 +234,13 @@
 "settings.background" = "背景";
 "color.transparent" = "无色透明";
 "settings.background.detail" = "应用于透明区域与正方形留边，不会抠除图片原有背景。透明输出支持 PNG、TIFF；切换到其他格式时恢复白色。";
-"estimate.title" = "预计大小";
+"estimate.title" = "转换大小";
 "estimate.original" = "原始大小";
 "estimate.output" = "预计输出";
 "estimate.savings" = "预计节省";
 "estimate.increase" = "预计增加";
 "estimate.range" = "%@–%@";
-"estimate.change" = "%@ · 约 %d%%";
+"estimate.change" = "约 %.0f%%";
 "estimate.disclaimer" = "仅为估算值，实际大小取决于媒体内容和编码器。";
 "estimate.calculating" = "正在估算输出大小…";
 "conversion.replace.button" = "替换原文件";

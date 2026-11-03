@@ -1,5 +1,5 @@
 "converter.title" = "Converteren";
-"converter.heading" = "Media converteren";
+"converter.heading" = "Formaatconversie";
 "conversion.home.image.title" = "Afbeeldingen converteren";
 "conversion.home.image.detail" = "JPG, PNG, HEIC en meer. Pas kwaliteit en afmetingen aan.";
 "conversion.home.image.tagline" = "Conversie · HEIC-formaten · GPS verwijderen";
@@ -234,13 +234,13 @@
 "settings.background" = "Achtergrond";
 "color.transparent" = "Transparant";
 "settings.background.detail" = "Geldt voor transparante pixels en vierkante opvulling; de achtergrond van de afbeelding wordt niet verwijderd. Transparantie is beschikbaar voor PNG en TIFF. Andere formaten zetten de transparantie terug naar wit.";
-"estimate.title" = "Geschatte grootte";
+"estimate.title" = "Conversiegrootte";
 "estimate.original" = "Origineel";
 "estimate.output" = "Geschatte productie";
 "estimate.savings" = "Geschatte besparingen";
 "estimate.increase" = "Geschatte stijging";
 "estimate.range" = "%@–%@";
-"estimate.change" = "%@ · ongeveer %d%%";
+"estimate.change" = "ongeveer %.0f%%";
 "estimate.disclaimer" = "Alleen schatting. De werkelijke grootte is afhankelijk van de media-inhoud en de encoder.";
 "estimate.calculating" = "Uitvoergrootte schatten…";
 "conversion.replace.button" = "Originelen vervangen";

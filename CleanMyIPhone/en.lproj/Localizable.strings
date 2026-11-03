@@ -97,7 +97,7 @@
 "Accent Color" = "Accent Color";
 "The brand accent is used for selection, progress, and primary actions." = "The brand accent is used for selection, progress, and primary actions.";
 "Videos" = "Videos";
-"My Space" = "My Space";
+"My Space" = "My Storage";
 "System & Apps" = "System & Apps";
 "Available" = "Available";
 "%lld%% used · %@ of %@" = "%lld%% used · %@ of %@";
@@ -558,7 +558,7 @@
 
 "Convert" = "Convert";
 
-"cleanup.space.title" = "Space available to clean";
+"cleanup.space.title" = "Recommended space to clean";
 
 
 "cleanup.action" = "One-tap cleanup";

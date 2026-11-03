@@ -1,5 +1,5 @@
 "converter.title" = "Konvertera";
-"converter.heading" = "Konvertera medier";
+"converter.heading" = "Formatkonvertering";
 "conversion.home.image.title" = "Konvertera bilder";
 "conversion.home.image.detail" = "JPG, PNG, HEIC med flera. Anpassa bildkvalitet och mått.";
 "conversion.home.image.tagline" = "Konvertering · HEIC-format · Ta bort GPS";
@@ -234,13 +234,13 @@
 "settings.background" = "Bakgrund";
 "color.transparent" = "Transparent";
 "settings.background.detail" = "Gäller genomskinliga pixlar och fyrkantig stoppning; det tar inte bort bildbakgrunden. Transparens är tillgänglig för PNG och TIFF. Andra format återställer transparensen till vitt.";
-"estimate.title" = "Uppskattad storlek";
+"estimate.title" = "Konverteringsstorlek";
 "estimate.original" = "Original";
 "estimate.output" = "Beräknad produktion";
 "estimate.savings" = "Beräknad besparing";
 "estimate.increase" = "Beräknad ökning";
 "estimate.range" = "%@–%@";
-"estimate.change" = "%@ · ungefär %d%%";
+"estimate.change" = "ungefär %.0f%%";
 "estimate.disclaimer" = "Endast uppskattning. Den faktiska storleken beror på medieinnehållet och kodaren.";
 "estimate.calculating" = "Uppskattar utdatastorlek...";
 "conversion.replace.button" = "Ersätt original";

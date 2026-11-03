@@ -97,7 +97,7 @@
 "Accent Color" = "لون التمييز";
 "The brand accent is used for selection, progress, and primary actions." = "يتم استخدام لهجة العلامة التجارية للاختيار والتقدم والإجراءات الأساسية.";
 "Videos" = "مقاطع الفيديو";
-"My Space" = "مساحتي";
+"My Space" = "مساحة التخزين";
 "System & Apps" = "النظام والتطبيقات";
 "Available" = "متاح";
 "%lld%% used · %@ of %@" = "%lld%% used · %@ من %@";
@@ -560,7 +560,7 @@
 
 "Convert" = "تحويل";
 
-"cleanup.space.title" = "حجم المساحة القابلة للتنظيف";
+"cleanup.space.title" = "المساحة المقترحة للتنظيف";
 
 
 "cleanup.action" = "تنظيف سريع";

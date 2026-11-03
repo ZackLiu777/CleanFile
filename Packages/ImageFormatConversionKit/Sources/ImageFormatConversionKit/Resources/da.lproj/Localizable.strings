@@ -1,5 +1,5 @@
 "converter.title" = "Konvertér";
-"converter.heading" = "Konverter medier";
+"converter.heading" = "Formatkonvertering";
 "conversion.home.image.title" = "Konverter billeder";
 "conversion.home.image.detail" = "JPG, PNG, HEIC og flere. Tilpas billedkvalitet og mål.";
 "conversion.home.image.tagline" = "Konvertering · HEIC-formater · Fjern GPS";
@@ -234,13 +234,13 @@
 "settings.background" = "Baggrund";
 "color.transparent" = "Gennemsigtig";
 "settings.background.detail" = "Gælder for gennemsigtige pixels og firkantet polstring; det fjerner ikke billedbaggrunden. Gennemsigtighed er tilgængelig for PNG og TIFF. Andre formater nulstiller gennemsigtigheden til hvid.";
-"estimate.title" = "Anslået størrelse";
+"estimate.title" = "Konverteringsstørrelse";
 "estimate.original" = "Original";
 "estimate.output" = "Estimeret output";
 "estimate.savings" = "Estimeret besparelse";
 "estimate.increase" = "Estimeret stigning";
 "estimate.range" = "%@–%@";
-"estimate.change" = "%@ · omkring %d%%";
+"estimate.change" = "omkring %.0f%%";
 "estimate.disclaimer" = "Kun skøn. Den faktiske størrelse afhænger af medieindholdet og encoderen.";
 "estimate.calculating" = "Estimerer outputstørrelse...";
 "conversion.replace.button" = "Erstat originaler";

@@ -97,7 +97,7 @@
 "Accent Color" = "Акцентный цвет";
 "The brand accent is used for selection, progress, and primary actions." = "Акцент бренда используется для выбора, продвижения и основных действий.";
 "Videos" = "Видео";
-"My Space" = "Мое пространство";
+"My Space" = "Моё хранилище";
 "System & Apps" = "Система и приложения";
 "Available" = "Доступно";
 "%lld%% used · %@ of %@" = "%lld%% использовано · %@ из %@";
@@ -560,7 +560,7 @@
 
 "Convert" = "Конвертация";
 
-"cleanup.space.title" = "Объём доступного для очистки места";
+"cleanup.space.title" = "Рекомендуемый объём для очистки";
 
 
 "cleanup.action" = "Быстрая очистка";

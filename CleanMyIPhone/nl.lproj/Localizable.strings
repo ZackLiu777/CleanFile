@@ -97,7 +97,7 @@
 "Accent Color" = "Accentkleur";
 "The brand accent is used for selection, progress, and primary actions." = "Het merkaccent wordt gebruikt voor selectie, voortgang en primaire acties.";
 "Videos" = "Video's";
-"My Space" = "Mijn ruimte";
+"My Space" = "Mijn opslag";
 "System & Apps" = "Systeem & Apps";
 "Available" = "Beschikbaar";
 "%lld%% used · %@ of %@" = "%lld%% gebruikt · %@ van %@";
@@ -560,7 +560,7 @@
 
 "Convert" = "Converteren";
 
-"cleanup.space.title" = "Ruimte die je kunt opruimen";
+"cleanup.space.title" = "Aanbevolen ruimte om op te ruimen";
 
 
 "cleanup.action" = "Snel opruimen";

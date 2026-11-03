@@ -97,7 +97,7 @@
 "Accent Color" = "アクセントカラー";
 "The brand accent is used for selection, progress, and primary actions." = "ブランドのアクセントカラーは、選択、進行状況、主要操作に使用されます。";
 "Videos" = "ビデオ";
-"My Space" = "マイスペース";
+"My Space" = "マイストレージ";
 "System & Apps" = "システムとApp";
 "Available" = "空き容量";
 "%lld%% used · %@ of %@" = "%lld%% 使用済み · %@ / %@";
@@ -558,7 +558,7 @@
 
 "Convert" = "変換";
 
-"cleanup.space.title" = "クリーンアップできる容量";
+"cleanup.space.title" = "クリーンアップ推奨容量";
 
 
 "cleanup.action" = "ワンタップ整理";

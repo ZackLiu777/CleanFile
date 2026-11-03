@@ -1,5 +1,5 @@
 "converter.title" = "변환";
-"converter.heading" = "미디어 변환";
+"converter.heading" = "형식 변환";
 "conversion.home.image.title" = "이미지 변환";
 "conversion.home.image.detail" = "JPG, PNG, HEIC 등. 이미지 품질과 크기 조절.";
 "conversion.home.image.tagline" = "변환 · HEIC 형식 · GPS 제거";
@@ -234,13 +234,13 @@
 "settings.background" = "배경";
 "color.transparent" = "투명";
 "settings.background.detail" = "투명 영역과 정사각형 여백에 적용됩니다. 원래 배경을 제거하지 않습니다. 투명 출력은 PNG와 TIFF에서 지원되며 다른 형식으로 변경하면 흰색으로 돌아갑니다.";
-"estimate.title" = "예상 크기";
+"estimate.title" = "변환 크기";
 "estimate.original" = "원본 크기";
 "estimate.output" = "예상 출력";
 "estimate.savings" = "예상 절약";
 "estimate.increase" = "예상 증가";
 "estimate.range" = "%@~%@";
-"estimate.change" = "%@ · 약 %d%%";
+"estimate.change" = "약 %.0f%%";
 "estimate.disclaimer" = "예상치이며 실제 크기는 미디어 내용과 인코더에 따라 달라집니다.";
 "estimate.calculating" = "출력 크기 계산 중…";
 "conversion.replace.button" = "원본 대체";

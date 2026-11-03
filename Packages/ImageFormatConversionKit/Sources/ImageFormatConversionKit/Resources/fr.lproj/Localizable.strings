@@ -1,5 +1,5 @@
 "converter.title" = "Convertir";
-"converter.heading" = "Convertir des médias";
+"converter.heading" = "Conversion de formats";
 "conversion.home.image.title" = "Convertir des images";
 "conversion.home.image.detail" = "JPG, PNG, HEIC et plus. Réglez la qualité et les dimensions.";
 "conversion.home.image.tagline" = "Conversion · Formats HEIC · GPS retiré";
@@ -234,13 +234,13 @@
 "settings.background" = "Arrière-plan";
 "color.transparent" = "Transparent";
 "settings.background.detail" = "S’applique aux pixels transparents et aux marges carrées, sans supprimer le fond de l’image. La transparence est disponible en PNG et TIFF. Les autres formats rétablissent le blanc.";
-"estimate.title" = "Taille estimée";
+"estimate.title" = "Taille de conversion";
 "estimate.original" = "Taille d’origine";
 "estimate.output" = "Sortie estimée";
 "estimate.savings" = "Économie estimée";
 "estimate.increase" = "Augmentation estimée";
 "estimate.range" = "%@–%@";
-"estimate.change" = "%@ · environ %d %%";
+"estimate.change" = "environ %.0f %%";
 "estimate.disclaimer" = "Estimation uniquement. La taille réelle dépend du contenu et de l’encodeur.";
 "estimate.calculating" = "Estimation de la taille de sortie…";
 "conversion.replace.button" = "Remplacer les originaux";

@@ -1,5 +1,5 @@
 "converter.title" = "Muunna";
-"converter.heading" = "Muunna mediaa";
+"converter.heading" = "Muodon muunnos";
 "conversion.home.image.title" = "Muunna kuvia";
 "conversion.home.image.detail" = "JPG, PNG, HEIC ja muut. Säädä kuvan laatua ja mittoja.";
 "conversion.home.image.tagline" = "Muunnos · HEIC-muodot · Poista GPS";
@@ -234,13 +234,13 @@
 "settings.background" = "Tausta";
 "color.transparent" = "Läpinäkyvä";
 "settings.background.detail" = "Koskee läpinäkyviä pikseleitä ja neliömäisiä pehmusteita; se ei poista kuvan taustaa. Läpinäkyvyys on saatavilla PNG- ja TIFF-muodoissa. Muut muodot palauttavat läpinäkyvyyden valkoiseksi.";
-"estimate.title" = "Arvioitu koko";
+"estimate.title" = "Muunnoksen koko";
 "estimate.original" = "Alkuperäinen";
 "estimate.output" = "Arvioitu tuotanto";
 "estimate.savings" = "Arvioidut säästöt";
 "estimate.increase" = "Arvioitu kasvu";
 "estimate.range" = "%@–%@";
-"estimate.change" = "%@ · noin %d%%";
+"estimate.change" = "noin %.0f%%";
 "estimate.disclaimer" = "Vain arvio. Todellinen koko riippuu mediasisällöstä ja kooderista.";
 "estimate.calculating" = "Arvioitu tulostuskoko…";
 "conversion.replace.button" = "Korvaa alkuperäiset";

@@ -501,17 +501,6 @@ private enum ConversionHomeKind: String, CaseIterable, Identifiable, Hashable, S
         }
     }
 
-    var detail: String {
-        switch self {
-        case .image:
-            L10n.string("conversion.home.image.tagline")
-        case .video:
-            L10n.string("conversion.home.video.tagline")
-        case .audio:
-            L10n.string("conversion.home.audio.tagline")
-        }
-    }
-
     var symbol: String {
         switch self {
         case .image:
@@ -643,17 +632,9 @@ private struct ConversionHomeCard: View {
                     .frame(width: 54, height: 54)
                     .modifier(ConversionHomeInsetSurface(cornerRadius: 16))
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(kind.title)
-                        .appTypeface(.title3.weight(.semibold), size: 20, relativeTo: .title3, weight: .semibold)
-                        .foregroundStyle(theme.textPrimary)
-
-                    Text(kind.detail)
-                        .appTypeface(.footnote, size: 13, relativeTo: .footnote, weight: .regular)
-                        .foregroundStyle(theme.textSecondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.85)
-                }
+                Text(kind.title)
+                    .appTypeface(.title3.weight(.semibold), size: 20, relativeTo: .title3, weight: .semibold)
+                    .foregroundStyle(theme.textPrimary)
 
                 Spacer(minLength: 6)
 

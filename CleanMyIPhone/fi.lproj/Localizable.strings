@@ -97,7 +97,7 @@
 "Accent Color" = "Aksenttiväri";
 "The brand accent is used for selection, progress, and primary actions." = "Brändin korostusta käytetään valintaan, edistymiseen ja ensisijaisiin toimiin.";
 "Videos" = "Videot";
-"My Space" = "Minun Spaceni";
+"My Space" = "Oma tallennustila";
 "System & Apps" = "Järjestelmä ja sovellukset";
 "Available" = "Saatavilla";
 "%lld%% used · %@ of %@" = "%lld%% käytetty · %@ / %@";
@@ -560,7 +560,7 @@
 
 "Convert" = "Muunna";
 
-"cleanup.space.title" = "Siivottavan tilan määrä";
+"cleanup.space.title" = "Siivoukseen suositeltu tila";
 
 
 "cleanup.action" = "Pikasiivous";

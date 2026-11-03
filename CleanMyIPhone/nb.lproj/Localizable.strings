@@ -97,7 +97,7 @@
 "Accent Color" = "Aksentfarge";
 "The brand accent is used for selection, progress, and primary actions." = "Merkeaksenten brukes til valg, fremgang og primære handlinger.";
 "Videos" = "Videoer";
-"My Space" = "My Space";
+"My Space" = "Min lagring";
 "System & Apps" = "System og apper";
 "Available" = "Tilgjengelig";
 "%lld%% used · %@ of %@" = "%lld %% brukt · %@ av %@";
@@ -560,7 +560,7 @@
 
 "Convert" = "Konverter";
 
-"cleanup.space.title" = "Plass som kan ryddes";
+"cleanup.space.title" = "Anbefalt plass å rydde";
 
 
 "cleanup.action" = "Rask opprydding";

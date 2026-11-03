@@ -1,5 +1,5 @@
 "converter.title" = "轉換";
-"converter.heading" = "轉換媒體";
+"converter.heading" = "格式轉換";
 "conversion.home.image.title" = "轉換圖片";
 "conversion.home.image.detail" = "JPG、PNG、HEIC 等格式，可調整圖片品質和尺寸。";
 "conversion.home.image.tagline" = "轉換 · HEIC 格式 · 移除 GPS";
@@ -234,13 +234,13 @@
 "settings.background" = "背景";
 "color.transparent" = "無色透明";
 "settings.background.detail" = "套用於透明區域與正方形留邊，不會移除圖片原有背景。透明輸出支援 PNG、TIFF；切換至其他格式時恢復白色。";
-"estimate.title" = "預估大小";
+"estimate.title" = "轉換大小";
 "estimate.original" = "原始大小";
 "estimate.output" = "預估輸出";
 "estimate.savings" = "預估節省";
 "estimate.increase" = "預估增加";
 "estimate.range" = "%@–%@";
-"estimate.change" = "%@ · 約 %d%%";
+"estimate.change" = "約 %.0f%%";
 "estimate.disclaimer" = "僅為預估值，實際大小取決於媒體內容和編碼器。";
 "estimate.calculating" = "正在預估輸出大小…";
 "conversion.replace.button" = "取代原始檔";

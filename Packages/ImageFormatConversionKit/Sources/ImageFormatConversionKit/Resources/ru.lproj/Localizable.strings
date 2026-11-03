@@ -1,5 +1,5 @@
 "converter.title" = "Конвертация";
-"converter.heading" = "Конвертировать медиа";
+"converter.heading" = "Конвертация форматов";
 "conversion.home.image.title" = "Конвертировать изображения";
 "conversion.home.image.detail" = "JPG, PNG, HEIC и другие. Настройка качества и размеров.";
 "conversion.home.image.tagline" = "Конвертация · Форматы HEIC · Удаление GPS";
@@ -234,13 +234,13 @@
 "settings.background" = "Фон";
 "color.transparent" = "Прозрачный";
 "settings.background.detail" = "Применяется к прозрачным пикселям и квадратным полям; он не удаляет фон изображения. Прозрачность доступна для PNG и TIFF. Другие форматы сбрасывают прозрачность на белый цвет.";
-"estimate.title" = "Предполагаемый размер";
+"estimate.title" = "Размер конвертации";
 "estimate.original" = "Оригинал";
 "estimate.output" = "Предполагаемый результат";
 "estimate.savings" = "Предполагаемая экономия";
 "estimate.increase" = "Предполагаемое увеличение";
 "estimate.range" = "%@–%@";
-"estimate.change" = "%@ · около %d%%";
+"estimate.change" = "около %.0f%%";
 "estimate.disclaimer" = "Только оценить. Фактический размер зависит от медиаконтента и кодера.";
 "estimate.calculating" = "Оценка размера вывода…";
 "conversion.replace.button" = "Заменить оригиналы";

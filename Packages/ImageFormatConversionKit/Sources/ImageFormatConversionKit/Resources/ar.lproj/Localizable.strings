@@ -1,5 +1,5 @@
 "converter.title" = "تحويل";
-"converter.heading" = "تحويل الوسائط";
+"converter.heading" = "تحويل الصيغ";
 "conversion.home.image.title" = "تحويل الصور";
 "conversion.home.image.detail" = "JPG وPNG وHEIC وغيرها. اضبط جودة الصور وأبعادها.";
 "conversion.home.image.tagline" = "تحويل · تنسيقات HEIC · إزالة GPS";
@@ -234,13 +234,13 @@
 "settings.background" = "الخلفية";
 "color.transparent" = "شفاف";
 "settings.background.detail" = "ينطبق على وحدات البكسل الشفافة والحشو المربع؛ ولا يزيل خلفية الصورة. الشفافية متاحة لـ PNG وTIFF. تعمل التنسيقات الأخرى على إعادة تعيين الشفافية إلى اللون الأبيض.";
-"estimate.title" = "الحجم المقدر";
+"estimate.title" = "حجم التحويل";
 "estimate.original" = "أصلية";
 "estimate.output" = "المخرجات المقدرة";
 "estimate.savings" = "التوفيرات المقدرة";
 "estimate.increase" = "الزيادة المقدرة";
 "estimate.range" = "%@–%@";
-"estimate.change" = "%@ · حول %d%%";
+"estimate.change" = "حول %.0f%%";
 "estimate.disclaimer" = "تقدير فقط. يعتمد الحجم الفعلي على محتوى الوسائط وبرنامج التشفير.";
 "estimate.calculating" = "جارٍ تقدير حجم الإخراج…";
 "conversion.replace.button" = "استبدال الملفات الأصلية";

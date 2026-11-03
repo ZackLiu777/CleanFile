@@ -42,8 +42,7 @@ struct ConversionGuideLocalizedPreview: View {
                 ForEach(["video", "image", "audio"], id: \.self) { tool in
                     previewRow(
                         symbol: toolSymbol(tool),
-                        title: toolTitle(tool),
-                        detail: L10n.dynamicString("conversion.home.\(tool).tagline")
+                        title: toolTitle(tool)
                     )
                 }
             }
@@ -72,8 +71,8 @@ struct ConversionGuideLocalizedPreview: View {
         }
     }
 
-    /// 以图标、标题和说明组成预览行。
-    private func previewRow(symbol: String, title: String, detail: String) -> some View {
+    /// 以图标、标题和可选说明组成预览行。
+    private func previewRow(symbol: String, title: String, detail: String? = nil) -> some View {
         HStack(alignment: .top, spacing: 11) {
             Image(systemName: symbol)
                 .appTypeface(.system(size: 16, weight: .semibold), size: 16, relativeTo: .body, weight: .semibold)
@@ -85,10 +84,12 @@ struct ConversionGuideLocalizedPreview: View {
                 Text(title)
                     .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(detail)
-                    .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
-                    .foregroundStyle(theme.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                if let detail {
+                    Text(detail)
+                        .appTypeface(.caption, size: 12, relativeTo: .caption, weight: .regular)
+                        .foregroundStyle(theme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
     }

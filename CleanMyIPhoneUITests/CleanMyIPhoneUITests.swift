@@ -50,7 +50,7 @@ final class CleanMyIPhoneUITests: XCTestCase {
         XCTAssertTrue(app.buttons["media.quickClean.open"].exists)
         app.buttons["media.convert"].tap()
         XCTAssertTrue(app.buttons["conversion.home.video"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Convert Media"].exists)
+        XCTAssertTrue(app.staticTexts["Format Conversion"].exists)
         XCTAssertTrue(app.buttons["conversion.home.video"].label.contains("Convert Videos"))
         XCTAssertTrue(app.buttons["conversion.close"].exists)
         app.buttons["conversion.close"].tap()

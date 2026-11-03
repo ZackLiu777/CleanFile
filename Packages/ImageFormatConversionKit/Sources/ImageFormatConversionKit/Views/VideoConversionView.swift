@@ -276,9 +276,6 @@ struct VideoConversionView: View {
                     ),
                     title: L10n.string("video.settings.bitrate")
                 )
-                Text(L10n.string("video.settings.bitrate.help"))
-                    .appTypeface(.caption2, size: 11, relativeTo: .caption2)
-                    .foregroundStyle(.secondary)
             }
 
             Divider().opacity(0.4)

@@ -97,7 +97,7 @@
 "Accent Color" = "Kolor akcentu";
 "The brand accent is used for selection, progress, and primary actions." = "Kolor marki jest używany przy wyborze, postępie i głównych działaniach.";
 "Videos" = "Filmy";
-"My Space" = "Moja przestrzeń";
+"My Space" = "Moja pamięć";
 "System & Apps" = "System i aplikacje";
 "Available" = "Dostępne";
 "%lld%% used · %@ of %@" = "Wykorzystano %lld%% · %@ z %@";
@@ -558,7 +558,7 @@
 
 "Convert" = "Konwertuj";
 
-"cleanup.space.title" = "Miejsce możliwe do oczyszczenia";
+"cleanup.space.title" = "Zalecana ilość miejsca do oczyszczenia";
 
 
 "cleanup.action" = "Szybkie czyszczenie";

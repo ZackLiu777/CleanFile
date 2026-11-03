@@ -168,10 +168,6 @@ struct ConversionSizeEstimateView: View {
                     )
                 )
                 valueRow(changeTitle(estimate), changeValue(estimate))
-                Text(L10n.string("estimate.disclaimer"))
-                    .appTypeface(.caption2, size: 11, relativeTo: .caption2, weight: .regular)
-                    .foregroundStyle(.tertiary)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .accessibilityIdentifier("conversion.sizeEstimate")
         } else if isLoading {
@@ -202,12 +198,12 @@ struct ConversionSizeEstimateView: View {
             : L10n.string("estimate.increase")
     }
 
-    /// 计算字节差；源大小大于零时同时展示百分比。
+    /// 仅展示估算变化百分比；源大小为零时无法计算比例。
     private func changeValue(_ estimate: ConversionSizeEstimate) -> String {
+        guard estimate.originalBytes > 0 else { return "—" }
         let difference = abs(estimate.originalBytes - estimate.likelyBytes)
-        guard estimate.originalBytes > 0 else { return bytes(difference) }
-        let percentage = Int((Double(difference) / Double(estimate.originalBytes) * 100).rounded())
-        return L10n.format("estimate.change", bytes(difference), percentage)
+        let percentage = (Double(difference) / Double(estimate.originalBytes) * 100).rounded()
+        return L10n.format("estimate.change", percentage)
     }
 
     /// 使用系统文件大小格式化规则显示字节数。
