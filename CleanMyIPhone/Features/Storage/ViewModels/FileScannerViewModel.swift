@@ -238,7 +238,7 @@ final class FileScannerViewModel: ObservableObject {
 
     /// 取消旧扫描和恢复任务，记录单目录书签，清空旧结果并开始接收新扫描事件。
     func scan(directory: URL) {
-        guard canUseStorage() else { return }
+        guard canUseStorage(), !deletionState.isDeleting else { return }
         retainSourceAccess(to: [directory])
         hasAttemptedRestore = true
         restoreTask?.cancel()
@@ -276,7 +276,7 @@ final class FileScannerViewModel: ObservableObject {
 
     /// 去重用户选中的文件和文件夹并启动会话扫描；多来源不生成单目录持久化快照。
     func scan(sources: [URL]) {
-        guard canUseStorage() else { return }
+        guard canUseStorage(), !deletionState.isDeleting else { return }
         let uniqueSources = StorageSelectionAlgorithms.sources(sources)
         guard !uniqueSources.isEmpty else {
             reportSelectionFailure()
@@ -441,6 +441,7 @@ final class FileScannerViewModel: ObservableObject {
             ?? URL(fileURLWithPath: "/Selected Sources", isDirectory: true)
 
         let currentFiles = files
+        let revision = filesRevision
         let worker = Task.detached(priority: .userInitiated) {
             let interval = StoragePerformance.begin("Storage Deletion Rebuild")
             defer { StoragePerformance.end("Storage Deletion Rebuild", id: interval) }
@@ -455,7 +456,7 @@ final class FileScannerViewModel: ObservableObject {
         } onCancel: {
             worker.cancel()
         }
-        guard let prepared, !Task.isCancelled else {
+        guard let prepared, !Task.isCancelled, revision == filesRevision else {
             deletionState = .idle
             return
         }
@@ -465,8 +466,11 @@ final class FileScannerViewModel: ObservableObject {
         summary = prepared.summary
         fileTree = prepared.fileTree
         largestFiles = prepared.largestFiles
-        state = prepared.files.isEmpty ? .empty : .success(prepared.summary)
-        skippedFileCount = 0
+        if skippedFileCount > 0 {
+            state = .partialFailure(prepared.summary, skippedFileCount: skippedFileCount)
+        } else {
+            state = prepared.files.isEmpty ? .empty : .success(prepared.summary)
+        }
         persistStableState()
 
         if result.failedFileCount == 0 {

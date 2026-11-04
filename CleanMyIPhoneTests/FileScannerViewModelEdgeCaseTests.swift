@@ -105,6 +105,72 @@ struct FileScannerViewModelEdgeCaseTests {
         viewModel.cancelScan()
         #expect(viewModel.state == .cancelled)
     }
+    @Test("Deleting a scanned file preserves the skipped-source warning")
+    func deletionPreservesPartialScanWarning() async throws {
+        let workspace = try ViewModelScanWorkspace()
+        defer { workspace.remove() }
+        let existing = workspace.root.appending(path: "existing.txt")
+        let missing = workspace.root.appending(path: "missing.txt")
+        try Data([1]).write(to: existing)
+        let viewModel = FileScannerViewModel(
+            scanner: MetadataFileScanner(fileAccess: UnrestrictedFileAccess())
+        )
+        viewModel.scan(sources: [existing, missing])
+        try await waitUntilScanFinishes(viewModel)
+        guard case .partialFailure(_, let skippedBefore) = viewModel.state else {
+            Issue.record("Expected a partial scan result")
+            return
+        }
+        #expect(skippedBefore == 1)
+
+        await viewModel.deleteFiles(withURLs: [existing])
+
+        guard case .partialFailure(let summary, let skippedAfter) = viewModel.state else {
+            Issue.record("Expected the skipped-source warning after deletion")
+            return
+        }
+        #expect(skippedAfter == 1)
+        #expect(summary.fileCount == 0)
+        #expect(viewModel.deletionState == .success(deletedCount: 1))
+    }
+
+    @Test("Changing the source is rejected while deletion is active")
+    func cannotChangeSourceWhileDeleting() async throws {
+        let workspace = try ViewModelScanWorkspace()
+        defer { workspace.remove() }
+        let file = workspace.root.appending(path: "file.txt")
+        try Data([1]).write(to: file)
+        let viewModel = FileScannerViewModel(
+            scanner: MetadataFileScanner(fileAccess: UnrestrictedFileAccess())
+        )
+        viewModel.scan(directory: workspace.root)
+        try await waitUntilScanFinishes(viewModel)
+
+        let deletion = Task { await viewModel.deleteFiles(withURLs: [file]) }
+        for _ in 0..<100 where !viewModel.deletionState.isDeleting {
+            await Task.yield()
+        }
+        guard viewModel.deletionState.isDeleting else {
+            Issue.record("Deletion did not enter its active state")
+            await deletion.value
+            return
+        }
+        let revision = viewModel.filesRevision
+        viewModel.scan(directory: workspace.root.appending(path: "another", directoryHint: .isDirectory))
+        viewModel.scan(sources: [workspace.root])
+        #expect(viewModel.filesRevision == revision)
+        #expect(viewModel.selectedDirectoryName == workspace.root.lastPathComponent)
+        await deletion.value
+    }
+
+    private func waitUntilScanFinishes(_ viewModel: FileScannerViewModel) async throws {
+        for _ in 0..<500 {
+            if !viewModel.state.isScanning { return }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        Issue.record("Scan did not finish")
+    }
+
 }
 
 /// 为视图模型测试创建并清理独立的临时工作区。

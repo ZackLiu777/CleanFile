@@ -626,3 +626,129 @@ private struct LegacyPerformancePersistedFile: Encodable {
         modificationDate = file.modificationDate
     }
 }
+
+/// 合成大列表，单独记录后台准备、选择快照和真实服务的边界校验。
+@Suite("Storage large-list performance", .serialized)
+struct StorageLargeListPerformanceTests {
+    @Test("Prepare and select large synthetic file lists")
+    func listPreparation() {
+        for count in [10_000, 20_000, 100_000] {
+            let root = URL(fileURLWithPath: "/storage-performance", isDirectory: true)
+            let files = (0..<count).map { index in
+                let name = "file-\(index).dat"
+                return ScannedFile(
+                    url: root.appendingPathComponent("folder-\(index % 200)").appendingPathComponent(name),
+                    name: name, relativePathComponents: ["folder-\(index % 200)", name],
+                    category: .other, byteCount: Int64((index * 7_919) % 100_003),
+                    hasKnownByteCount: index % 17 != 0
+                )
+            }
+            for round in 0..<3 {
+                var start = DispatchTime.now().uptimeNanoseconds
+                let ordered = FileDisplayOrder.bySizeDescending(files)
+                let formatter = ByteCountFormatter()
+                formatter.countStyle = .file
+                var rows: [URL: (String, String)] = [:]
+                var total: Int64 = 0
+                for file in ordered {
+                    rows[file.url] = (file.relativePathComponents.dropLast().joined(separator: "/"),
+                                      formatter.string(fromByteCount: file.byteCount))
+                    if file.hasKnownByteCount { total += file.byteCount }
+                }
+                let prepare = ms(start)
+                start = DispatchTime.now().uptimeNanoseconds
+                let selected = Set(ordered.lazy.map(\.url))
+                let materialize = ms(start)
+                start = DispatchTime.now().uptimeNanoseconds
+                let selectedFiles = files.filter { selected.contains($0.url) }
+                let validate = ms(start)
+                print(String(format: "STORAGE_PERF count=%d round=%d prepare_ms=%.2f materialize_ms=%.2f validate_ms=%.2f",
+                             count, round, prepare, materialize, validate))
+                #expect(rows.count == count)
+                #expect(selectedFiles.count == count)
+                #expect(total > 0)
+            }
+        }
+    }
+
+    @Test("Validate large deletion selections with unavailable grants")
+    @MainActor func deletionValidation() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("StoragePerf-\(UUID().uuidString)", isDirectory: true)
+        // 未创建临时目录及授权；只衡量服务的边界校验，不删除任何文件。
+        let files = (0..<20_000).map { index in
+            let name = "file-\(index).dat"
+            return ScannedFile(url: root.appendingPathComponent(name), name: name,
+                               relativePathComponents: [name], category: .other, byteCount: 1)
+        }
+        for count in [10_000, 20_000] {
+            for round in 0..<3 {
+                let input = Array(files.prefix(count))
+                let start = DispatchTime.now().uptimeNanoseconds
+                let result = try await FileDeletionService().delete(files: input, selectedRoot: root)
+                print(String(format: "STORAGE_PERF count=%d round=%d deletion_validation_ms=%.2f",
+                             count, round, ms(start)))
+                #expect(result.deletedURLs.isEmpty)
+                #expect(result.failedFileCount == count)
+            }
+        }
+    }
+
+    private func ms(_ start: UInt64) -> Double {
+        Double(DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+    }
+}
+
+/// 使用独立临时文件衡量真实文件系统上的校验及协调删除成本。
+@Suite("Storage real-file deletion benchmark", .serialized)
+struct StorageRealFileDeletionPerformanceTests {
+    @Test("Measure validation and coordinated removal of temporary files")
+    @MainActor func realFileDeletion() async throws {
+        let manager = FileManager.default
+        for count in [10_000, 20_000] {
+            let root = manager.temporaryDirectory
+                .appendingPathComponent("StorageDeletionBench-\(UUID().uuidString)", isDirectory: true)
+            try manager.createDirectory(at: root, withIntermediateDirectories: true)
+            defer { try? manager.removeItem(at: root) }
+            var files: [ScannedFile] = []
+            for index in 0..<count {
+                let name = "file-\(index).dat"
+                let url = root.appendingPathComponent(name)
+                guard manager.createFile(atPath: url.path, contents: Data([1])) else {
+                    Issue.record("Could not create temporary file")
+                    return
+                }
+                files.append(ScannedFile(url: url, name: name, relativePathComponents: [name],
+                                         category: .other, byteCount: 1))
+            }
+
+            // 在末尾放一个越界目标，让真实服务完成前面的整批校验后拒绝删除。
+            let outside = ScannedFile(
+                url: manager.temporaryDirectory.appendingPathComponent("outside-\(UUID().uuidString)"),
+                name: "outside", relativePathComponents: ["outside"],
+                category: .other, byteCount: 1
+            )
+            var start = DispatchTime.now().uptimeNanoseconds
+            do {
+                _ = try await FileDeletionService().delete(files: files + [outside], selectedRoot: root)
+                Issue.record("Expected an invalid selection")
+            } catch {
+                #expect((error as? FileDeletionError) == .invalidSelection)
+            }
+            let validation = ms(start)
+
+            // 使用真实服务完成删除，目录只包含本测试创建的临时文件。
+            start = DispatchTime.now().uptimeNanoseconds
+            let result = try await FileDeletionService().delete(files: files, selectedRoot: root)
+            let total = ms(start)
+            print(String(format: "STORAGE_REAL count=%d validation_ms=%.2f full_delete_ms=%.2f deleted=%d failed=%d",
+                         count, validation, total, result.deletedURLs.count, result.failedFileCount))
+            #expect(result.deletedURLs.count == count)
+            #expect(result.failedFileCount == 0)
+        }
+    }
+
+    private func ms(_ start: UInt64) -> Double {
+        Double(DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+    }
+}

@@ -211,11 +211,11 @@ struct ThemePersistenceTests {
         settings.setPremiumAppearanceAllowed(false)
         #expect(settings.effectiveThemeID == .graphite)
         #expect(!settings.theme.liquidGlassCardsEnabled)
-        #expect(settings.selectedAccentPaletteID == .sky)
+        #expect(settings.selectedAccentPaletteID == .teal)
         #expect(settings.effectiveColorScheme == .dark)
         #expect(settings.interfaceAnimationsEnabled)
         #expect(settings.mediaDateHeadersEnabled)
-        #expect(defaults.string(forKey: "appAccentPalette") == "sky")
+        #expect(defaults.string(forKey: "appAccentPalette") == "teal")
     }
 
     /// 用户明确保存的浅色主题不会被新的默认值覆盖。
@@ -350,15 +350,15 @@ struct ThemePersistenceTests {
     }
 
     /// 无效强调色回退到默认色，并将规范值写回偏好。
-    @Test("Invalid accent palette is normalized to Sky")
+    @Test("Invalid accent palette is normalized to Teal")
     func invalidAccentPaletteIsNormalized() {
         let defaults = isolatedDefaults()
         defaults.set("unsupported", forKey: "appAccentPalette")
 
         let settings = ThemeSettings(userDefaults: defaults)
 
-        #expect(settings.selectedAccentPaletteID == .sky)
-        #expect(defaults.string(forKey: "appAccentPalette") == "sky")
+        #expect(settings.selectedAccentPaletteID == .teal)
+        #expect(defaults.string(forKey: "appAccentPalette") == "teal")
     }
 
     /// 切换强调色后无需等待其他操作即可持久化。

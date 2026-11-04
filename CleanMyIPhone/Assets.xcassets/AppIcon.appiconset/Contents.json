@@ -1,38 +1,38 @@
 {
-  "images": [
+  "images" : [
     {
-      "filename": "AppIcon_Light_NoAlpha_1024.png",
-      "idiom": "universal",
-      "platform": "ios",
-      "size": "1024x1024"
+      "filename" : "Any.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
     },
     {
-      "appearances": [
+      "appearances" : [
         {
-          "appearance": "luminosity",
-          "value": "dark"
+          "appearance" : "luminosity",
+          "value" : "dark"
         }
       ],
-      "filename": "AppIcon_Dark_NoAlpha_1024.png",
-      "idiom": "universal",
-      "platform": "ios",
-      "size": "1024x1024"
+      "filename" : "Dark.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
     },
     {
-      "appearances": [
+      "appearances" : [
         {
-          "appearance": "luminosity",
-          "value": "tinted"
+          "appearance" : "luminosity",
+          "value" : "tinted"
         }
       ],
-      "idiom": "universal",
-      "platform": "ios",
-      "size": "1024x1024",
-      "filename": "AppIcon_Tinted_NoAlpha_1024.png"
+      "filename" : "Tinted.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
     }
   ],
-  "info": {
-    "author": "xcode",
-    "version": 1
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
   }
 }

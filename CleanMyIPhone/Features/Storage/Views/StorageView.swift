@@ -103,6 +103,7 @@ struct StorageView: View {
                         Label("Add Files", systemImage: "plus")
                     }
                     .accessibilityIdentifier("storage.addSources.toolbar")
+                    .disabled(viewModel.deletionState.isDeleting)
 
                     Button {
                         chooseFolder()
@@ -110,6 +111,7 @@ struct StorageView: View {
                         Label("Choose Folder", systemImage: "folder.badge.plus")
                     }
                     .accessibilityIdentifier("storage.chooseFolder.toolbar")
+                    .disabled(viewModel.deletionState.isDeleting)
                 }
             }
             .toolbar(.visible, for: .navigationBar)
@@ -386,6 +388,7 @@ struct StorageView: View {
 
     /// 检查存储功能权限后打开目录选择器，否则展示高级功能页面。
     private func chooseFolder() {
+        guard !viewModel.deletionState.isDeleting else { return }
         guard !isStorageLocked else {
             showsPremium = true
             return
@@ -395,6 +398,7 @@ struct StorageView: View {
 
     /// 检查存储功能权限后打开来源选择器，否则展示高级功能页面。
     private func chooseSources() {
+        guard !viewModel.deletionState.isDeleting else { return }
         guard !isStorageLocked else {
             showsPremium = true
             return
@@ -524,7 +528,7 @@ struct StorageView: View {
 
     /// 处理单目录选择结果，将用户取消和选择失败交给扫描模型区分。
     private func handleImport(_ result: Result<[URL], Error>) {
-        guard !isStorageLocked else { return }
+        guard !isStorageLocked, !viewModel.deletionState.isDeleting else { return }
         switch result {
         case .success(let urls):
             guard let url = urls.first else {
@@ -539,7 +543,7 @@ struct StorageView: View {
 
     /// 处理多来源选择结果，并将实际选中的 URL 交给扫描模型。
     private func handleSourceImport(_ result: Result<[URL], Error>) {
-        guard !isStorageLocked else { return }
+        guard !isStorageLocked, !viewModel.deletionState.isDeleting else { return }
         switch result {
         case .success(let urls):
             guard !urls.isEmpty else {

@@ -1,6 +1,6 @@
 // 启动状态及高级功能入口的状态转换测试。
 //
-// 启动动画与权益检查可能以不同顺序完成；这些用例记录两者的协调方式、
+// 启动动画与权益检查可能以不同顺序完成；这些用例记录启动状态、
 // 失败后的恢复路径，以及进入内容后不重复覆盖界面的约束。
 // 同时验证媒体哈希缓存的编码往返和版本兼容性。
 
@@ -85,44 +85,29 @@ struct AppLaunchStateTests {
     }
 }
 
-/// 验证高级功能入口在启动阶段与根视图生命周期内的展示时机。
+/// 启动不再展示购买页，但功能权限仍随权益状态变化。
 @MainActor
-struct PremiumEntryPresentationTests {
-    /// 启动尚未完成时不消耗展示机会，完成后同一机会只能使用一次。
-    @Test("An early entitlement result waits for the opening transition without consuming the offer")
-    func waitsForOpening() {
-        var state = PremiumEntryPresentation()
-        let early = state.consumePresentation(for: .notEntitled, openingCompleted: false)
-        #expect(!early)
-        let ready = state.consumePresentation(for: .notEntitled, openingCompleted: true)
-        #expect(ready)
-        let repeated = state.consumePresentation(for: .notEntitled, openingCompleted: true)
-        #expect(!repeated)
+struct PremiumStartupAccessTests {
+    @Test("Unresolved access retains free features and restricts premium features")
+    func checkingAccess() {
+        let access = PremiumFeatureAccessStore(accessState: .checking)
+        #expect(access.allows(.media))
+        #expect(!access.allows(.storage))
     }
 
-    /// 未订阅用户在同一根视图生命周期内最多收到一次入口提示。
-    @Test("Free users see only one offer for the root lifetime")
-    func freeUserVisits() {
-        var state = PremiumEntryPresentation()
-        let presents1 = state.consumePresentation(for: .checking)
-        #expect(!presents1)
-        let presents2 = state.consumePresentation(for: .notEntitled)
-        #expect(presents2)
-        let presents3 = state.consumePresentation(for: .notEntitled)
-        #expect(!presents3)
-        let presents4 = state.consumePresentation(for: .notEntitled)
-        #expect(!presents4)
+    @Test("Free users retain free access without premium access")
+    func freeAccess() {
+        let access = PremiumFeatureAccessStore(accessState: .notEntitled)
+        #expect(access.allows(.videoConversion))
+        #expect(!access.allows(.storage))
     }
 
-    /// 已订阅或仍在检查权益时不展示购买提示。
-    @Test("Premium and unresolved access do not trigger an offer")
-    func premiumVisits() {
-        var state = PremiumEntryPresentation()
-        let presents5 = state.consumePresentation(for: .entitled)
-        #expect(!presents5)
-        let presents6 = state.consumePresentation(for: .checking)
-        #expect(!presents6)
-        let presents7 = state.consumePresentation(for: .entitled)
-        #expect(!presents7)
+    @Test("Verified premium access updates feature permissions")
+    func verifiedAccess() {
+        let access = PremiumFeatureAccessStore(accessState: .checking)
+        access.update(.entitled)
+        #expect(access.allows(.storage))
+        access.update(.notEntitled)
+        #expect(!access.allows(.storage))
     }
 }

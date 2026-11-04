@@ -1013,7 +1013,7 @@ final class ThemeSettings: ObservableObject {
         let storedAppearance = userDefaults.string(forKey: Self.appearanceKey)
             .flatMap(AppAppearance.init(rawValue:)) ?? .system
         let storedAccentPalette = userDefaults.string(forKey: Self.accentPaletteKey)
-            .flatMap(AppAccentPaletteID.init(rawValue:)) ?? .sky
+            .flatMap(AppAccentPaletteID.init(rawValue:)) ?? .teal
         let storedCustomAccentColor = Self.restoreColor(
             forKey: Self.customAccentColorKey,
             from: userDefaults,

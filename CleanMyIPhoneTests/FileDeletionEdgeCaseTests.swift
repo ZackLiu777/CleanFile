@@ -139,6 +139,51 @@ struct FileDeletionEdgeCaseTests {
         }
     }
 
+    /// 使用真实链接验证批量校验本身仍会拒绝逃离授权范围的目标。
+    @Test("Indexed deletion validation rejects symbolic links outside the root")
+    func indexedValidationRejectsEscapingLink() async throws {
+        let manager = FileManager.default
+        let workspace = manager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let root = workspace.appendingPathComponent("root", isDirectory: true)
+        let outside = workspace.appendingPathComponent("outside", isDirectory: true)
+        try manager.createDirectory(at: root, withIntermediateDirectories: true)
+        try manager.createDirectory(at: outside, withIntermediateDirectories: true)
+        defer { try? manager.removeItem(at: workspace) }
+        try Data([1]).write(to: outside.appendingPathComponent("file.txt"))
+        try manager.createSymbolicLink(at: root.appendingPathComponent("escape"), withDestinationURL: outside)
+        let target = root.appendingPathComponent("escape/file.txt")
+        let item = ScannedFile(url: target, name: "file.txt",
+                               relativePathComponents: ["escape", "file.txt"],
+                               category: .document, byteCount: 1)
+        do {
+            _ = try await FileDeletionService().delete(files: [item], selectedRoot: root)
+            Issue.record("Expected invalid selection")
+        } catch {
+            #expect((error as? FileDeletionError) == .invalidSelection)
+        }
+    }
+
+    /// 缺失文件不应阻止删除其他目标；仅清理本测试创建的临时目录。
+    @Test("A missing target does not erase a successful deletion result")
+    @MainActor func deletionReportsPartialFailure() async throws {
+        let manager = FileManager.default
+        let root = manager.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try manager.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? manager.removeItem(at: root) }
+        let existing = root.appendingPathComponent("existing.txt")
+        try Data([1]).write(to: existing)
+        let missing = root.appendingPathComponent("missing.txt")
+        let files = [existing, missing].map {
+            ScannedFile(url: $0, name: $0.lastPathComponent,
+                        relativePathComponents: [$0.lastPathComponent],
+                        category: .document, byteCount: 1)
+        }
+        let result = try await FileDeletionService().delete(files: files, selectedRoot: root)
+        #expect(result.deletedURLs == [existing])
+        #expect(result.failedFileCount == 1)
+        #expect(!manager.fileExists(atPath: existing.path))
+    }
+
     /// 上层需要同时保留已删除 URL 和失败数量，以正确更新部分成功的状态。
     @Test("Deletion result can represent complete and partial outcomes")
     func deletionResultRepresentsOutcomeShape() {

@@ -1,6 +1,6 @@
 // 应用入口和根场景的组装位置。
 // 在这里建立共享状态并选择启动目标；具体功能与文件操作由各自模块负责。
-// 根场景向下游注入主题、字体与权益对象，并依次组合开屏、首次介绍和应用主界面。
+// 根场景向下游注入主题、字体与权益对象，并组合首次介绍和应用主界面。
 // 启动时清理旧语言覆盖；调试构建中的启动参数仅用于重置状态或展示指定预览。
 
 //
@@ -66,10 +66,8 @@ struct CleanMyIPhoneApp: App {
 
     var body: some Scene {
         WindowGroup {
-            AppOpeningContainer(destination: launchDestination) {
-                FirstLaunchIntroductionContainer {
-                    rootView
-                }
+            FirstLaunchIntroductionContainer {
+                rootView
             }
             .environmentObject(themeSettings)
             .fontDesign(themeSettings.fontStyle.inheritedDesign)
@@ -80,11 +78,6 @@ struct CleanMyIPhoneApp: App {
             .tint(themeSettings.theme.accentPrimary)
             .foregroundStyle(themeSettings.theme.textPrimary)
         }
-    }
-
-    private var launchDestination: AppLaunchState.Destination {
-        // Free features are immediately available; StoreKit verification runs independently.
-        .ready
     }
 
     @ViewBuilder

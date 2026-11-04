@@ -122,7 +122,7 @@ struct ContentView: View {
         }
         .task {
             showPendingShareBatchIfNeeded()
-            // Begin loading underneath the opening animation; Media is always the app home.
+            // Start loading the Media home when its content appears.
             await mediaViewModel.loadIfNeeded()
         }
         .onChange(of: scenePhase) { _, phase in

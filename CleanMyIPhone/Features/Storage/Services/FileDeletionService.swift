@@ -56,25 +56,42 @@ actor FileDeletionService {
             let prior = rootAccess[resolved.path]
             rootAccess[resolved.path] = (isDirectory, active.contains(root) || prior?.accessible == true)
         }
+        // 单授权根目录是常见情况，直接比较组件即可，不必为每个文件构造各级路径。
+        let singleRoot = rootAccess.count == 1 ? rootAccess.first.map { entry in
+            (components: URL(fileURLWithPath: entry.key).pathComponents, grant: entry.value)
+        } : nil
         var permittedFiles: [ScannedFile] = []
         var inaccessibleCount = 0
         for file in files {
             try Task.checkCancellation()
             guard file.url.isFileURL else { throw FileDeletionError.invalidSelection }
-            var candidate = file.url.resolvingSymlinksInPath().standardizedFileURL
-            var isExact = true
+            // 有界遍历已解析的路径组件，避免 URL 反复构造及根路径处理异常。
+            let components = file.url.resolvingSymlinksInPath().standardizedFileURL.pathComponents
             var belongsToRoot = false
             var canAccess = false
-            while true {
-                if let grant = rootAccess[candidate.path],
-                   isExact ? !grant.isDirectory : grant.isDirectory {
-                    belongsToRoot = true
-                    canAccess = canAccess || grant.accessible
+            if let singleRoot {
+                let rootComponents = singleRoot.components
+                belongsToRoot = components.starts(with: rootComponents)
+                    && (components.count > rootComponents.count
+                        ? singleRoot.grant.isDirectory
+                        : !singleRoot.grant.isDirectory)
+                canAccess = belongsToRoot && singleRoot.grant.accessible
+            } else {
+                var candidate = ""
+                var candidates: [String] = []
+                for component in components {
+                    candidate = (candidate as NSString).appendingPathComponent(component)
+                    candidates.append(candidate)
                 }
-                let parent = candidate.deletingLastPathComponent()
-                if parent.path == candidate.path { break }
-                candidate = parent
-                isExact = false
+                var isExact = true
+                for path in candidates.reversed() {
+                    if let grant = rootAccess[path],
+                       isExact ? !grant.isDirectory : grant.isDirectory {
+                        belongsToRoot = true
+                        canAccess = canAccess || grant.accessible
+                    }
+                    isExact = false
+                }
             }
             guard belongsToRoot else { throw FileDeletionError.invalidSelection }
             if canAccess {
