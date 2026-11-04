@@ -18,6 +18,7 @@ struct PremiumStatusFailureTests {
     /// 已验证的有效试用应在状态查询失败时继续提供高级功能访问。
     @Test("Existing seven-day introductory trials unlock all premium features", arguments: ["LLL777", "LZQ777"])
     func activeSevenDayTrial(productID: String) async throws {
+        traceStoreKit("activeSevenDayTrial: creating test session for \(productID)")
         let session = try SKTestSession(configurationFileNamed: "File Cleaner & Media Converter")
         session.resetToDefaultState()
         session.disableDialogs = true
@@ -27,7 +28,9 @@ struct PremiumStatusFailureTests {
             session.resetToDefaultState()
         }
         _ = try await buyVisibleEntitlement(productID, in: session)
+        traceStoreKit("activeSevenDayTrial: querying latest transaction for \(productID)")
         let result = try #require(await Transaction.latest(for: productID))
+        traceStoreKit("activeSevenDayTrial: latest transaction query returned for \(productID)")
         guard case .verified(let transaction) = result else {
             Issue.record("The introductory trial must be verified")
             return
@@ -218,6 +221,7 @@ struct PremiumStatusFailureTests {
     /// 并发的启动和前台刷新应共享查询，避免重复请求及结果竞争。
     @Test("Overlapping startup and foreground refreshes share one StoreKit lookup")
     func overlappingRefreshesAreCoalesced() async throws {
+        traceStoreKit("overlappingRefreshesAreCoalesced: creating test session")
         let session = try SKTestSession(configurationFileNamed: "File Cleaner & Media Converter")
         session.disableDialogs = true
         session.clearTransactions()
@@ -228,7 +232,17 @@ struct PremiumStatusFailureTests {
             try await probe.lookup()
         })
         let first = Task { await store.refresh() }
-        await probe.waitForLookup()
+        defer {
+            first.cancel()
+            probe.failPendingLookups()
+        }
+        traceStoreKit("overlappingRefreshesAreCoalesced: waiting for the subscription status lookup")
+        let lookupStarted = try await probe.waitForLookup()
+        try #require(
+            lookupStarted,
+            "Entitlement refresh did not reach the subscription status lookup within 15 seconds"
+        )
+        traceStoreKit("overlappingRefreshesAreCoalesced: subscription status lookup entered")
         var second: Task<Void, Never>?
         await withCheckedContinuation { started in
             second = Task { @MainActor in
@@ -434,8 +448,11 @@ struct PremiumStatusFailureTests {
 
     /// 创建并完成测试交易，等待其出现在已验证权益中，再模拟重启场景。
     private func buyVisibleEntitlement(_ productID: String, in session: SKTestSession) async throws -> Transaction {
+        traceStoreKit("buyVisibleEntitlement: buying \(productID)")
         let purchased = try await session.buyProduct(identifier: productID)
+        traceStoreKit("buyVisibleEntitlement: purchase returned for \(productID), finishing transaction")
         await purchased.finish()
+        traceStoreKit("buyVisibleEntitlement: transaction finished for \(productID), checking current entitlements")
         // These scenarios model existing owners at relaunch, not a new purchase callback before StoreKit's cache catches up.
         var isVisible = false
         for _ in 0..<50 {
@@ -449,8 +466,13 @@ struct PremiumStatusFailureTests {
             try await Task.sleep(for: .milliseconds(100))
         }
         try #require(isVisible, "StoreKit must expose the new verified entitlement before simulating a relaunch")
+        traceStoreKit("buyVisibleEntitlement: current entitlement visible for \(productID)")
         return purchased
     }
+}
+
+private func traceStoreKit(_ message: String) {
+    FileHandle.standardError.write(Data("[PremiumStatusFailureTests] \(message)\n".utf8))
 }
 
 /// 可控暂停状态查询并集中注入离线错误，构造重叠刷新和失败时序。
@@ -459,21 +481,22 @@ private final class SuspendedStatusLookup {
     private(set) var callCount = 0
     private var released = false
     private var pending: [CheckedContinuation<[Product.SubscriptionInfo.Status], Error>] = []
-    private var entered: CheckedContinuation<Void, Never>?
 
     /// 记录查询并暂停；释放后发起的查询直接返回模拟离线错误。
     func lookup() async throws -> [Product.SubscriptionInfo.Status] {
         callCount += 1
-        entered?.resume()
-        entered = nil
         if released { throw URLError(.notConnectedToInternet) }
         return try await withCheckedThrowingContinuation { pending.append($0) }
     }
 
-    /// 等待至少一次查询进入替身，避免以时间延迟猜测执行顺序。
-    func waitForLookup() async {
-        if callCount > 0 { return }
-        await withCheckedContinuation { entered = $0 }
+    /// 如果刷新未进入替身，让测试报告失败并释放挂起的查询。
+    func waitForLookup() async throws -> Bool {
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: .seconds(15))
+        while callCount == 0, clock.now < deadline {
+            try await clock.sleep(until: min(clock.now.advanced(by: .milliseconds(50)), deadline))
+        }
+        return callCount > 0
     }
 
     /// 标记释放并以离线错误恢复全部等待中的查询。

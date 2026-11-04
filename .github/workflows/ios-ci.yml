@@ -5,69 +5,114 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+# Diagnostic mode: a newer commit must not cancel the run being investigated.
 concurrency:
   group: ios-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   PROJECT: CleanMyIPhone.xcodeproj
   SCHEME: CleanMyIPhone
   DESTINATION: platform=iOS Simulator,name=iPhone 18 Pro,OS=27.0
+  # Use the same Xcode minor version as the successful local test.
+  DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
 
 jobs:
   unit-tests:
     name: Build and Unit Tests
     runs-on: xcode-27
-    timeout-minutes: 90
+    timeout-minutes: 70
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Select Xcode
-        run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
-
-      - name: Show toolchain versions
+      - name: Record runner environment
         run: |
+          set -euo pipefail
+          echo "Runner: $RUNNER_NAME / $RUNNER_OS / $RUNNER_ARCH"
+          echo "Image: ${ImageOS:-unknown} ${ImageVersion:-unknown}"
+          if [[ ! -x "$DEVELOPER_DIR/usr/bin/xcodebuild" ]]; then
+            echo "Missing required Xcode at $DEVELOPER_DIR"
+            ls -d /Applications/Xcode*.app || true
+            exit 1
+          fi
+          sw_vers
           xcodebuild -version
           swift --version
+          sysctl -n hw.memsize
+          df -h "$RUNNER_TEMP"
+          xcrun simctl list devices available
 
       - name: Build unit tests
+        timeout-minutes: 30
         run: |
-          set -o pipefail
+          set -euo pipefail
           xcodebuild build-for-testing \
             -project "$PROJECT" \
             -scheme "$SCHEME" \
             -destination "$DESTINATION" \
+            -destination-timeout 120 \
             -only-testing:CleanMyIPhoneTests \
             -derivedDataPath "$RUNNER_TEMP/CleanFileUnitDerivedData" \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee "$RUNNER_TEMP/unit-build.log"
 
-      - name: Run unit tests
+      - name: Run all unit tests (diagnostic)
+        timeout-minutes: 25
         run: |
-          set -o pipefail
+          set -euo pipefail
+          # This disables Xcode's multi-runner testing; Swift Testing
+          # can still parallelize tests within a process.
           xcodebuild test-without-building \
             -project "$PROJECT" \
             -scheme "$SCHEME" \
             -destination "$DESTINATION" \
+            -destination-timeout 120 \
             -only-testing:CleanMyIPhoneTests \
             -derivedDataPath "$RUNNER_TEMP/CleanFileUnitDerivedData" \
             -resultBundlePath "$RUNNER_TEMP/CleanFileUnitTests.xcresult" \
-            CODE_SIGNING_ALLOWED=NO
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 600 \
+            -maximum-test-execution-time-allowance 900 \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee "$RUNNER_TEMP/unit-test.log"
 
-      - name: Upload unit-test results
-        if: failure()
+      - name: Summarize and archive unit-test diagnostics
+        if: always()
+        run: |
+          set -uo pipefail
+          echo '=== Remaining disk ==='
+          df -h "$RUNNER_TEMP" || true
+          if [[ -d "$RUNNER_TEMP/CleanFileUnitTests.xcresult" ]]; then
+            xcrun xcresulttool get test-results summary \
+              --path "$RUNNER_TEMP/CleanFileUnitTests.xcresult" \
+              > "$RUNNER_TEMP/unit-summary.json" || true
+            ditto -c -k --keepParent \
+              "$RUNNER_TEMP/CleanFileUnitTests.xcresult" \
+              "$RUNNER_TEMP/unit-tests.xcresult.zip" || true
+          fi
+
+      - name: Upload unit-test diagnostics
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: CleanFile-unit-test-results
-          path: ${{ runner.temp }}/CleanFileUnitTests.xcresult
-          if-no-files-found: ignore
+          name: CleanFile-unit-diagnostics
+          path: |
+            ${{ runner.temp }}/unit-build.log
+            ${{ runner.temp }}/unit-test.log
+            ${{ runner.temp }}/unit-summary.json
+            ${{ runner.temp }}/unit-tests.xcresult.zip
+          if-no-files-found: warn
           retention-days: 7
 
+  # UI tests remain separate and only run after the unit-test job succeeds.
   ui-tests:
     name: UI Tests
     runs-on: xcode-27
@@ -78,35 +123,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Select Xcode
-        run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+      - name: Verify Xcode
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          xcrun simctl list devices available
 
       - name: Prepare UI-test simulator
         run: |
           set -euo pipefail
-
           xcrun simctl shutdown all || true
-
           DEVICE_ID="$(
             xcrun simctl list devices available |
               sed -nE 's/^[[:space:]]*iPhone 18 Pro \(([0-9A-F-]{36})\).*/\1/p' |
               head -n 1
           )"
-
           if [[ -z "$DEVICE_ID" ]]; then
-            echo "No available iPhone 18 Pro simulator was found."
+            echo 'No available iPhone 18 Pro simulator.'
             xcrun simctl list devices available
             exit 1
           fi
-
           echo "Using UI-test simulator: $DEVICE_ID"
           xcrun simctl boot "$DEVICE_ID"
           xcrun simctl bootstatus "$DEVICE_ID" -b
           echo "UI_DESTINATION=platform=iOS Simulator,id=$DEVICE_ID" >> "$GITHUB_ENV"
 
       - name: Build UI tests
+        timeout-minutes: 20
         run: |
-          set -o pipefail
+          set -euo pipefail
           xcodebuild build-for-testing \
             -project "$PROJECT" \
             -scheme "$SCHEME" \
@@ -116,8 +161,9 @@ jobs:
             CODE_SIGNING_ALLOWED=NO
 
       - name: Run UI tests
+        timeout-minutes: 20
         run: |
-          set -o pipefail
+          set -euo pipefail
           xcodebuild test-without-building \
             -project "$PROJECT" \
             -scheme "$SCHEME" \
@@ -128,11 +174,20 @@ jobs:
             -parallel-testing-enabled NO \
             CODE_SIGNING_ALLOWED=NO
 
+      - name: Archive UI-test results
+        if: always()
+        run: |
+          if [[ -d "$RUNNER_TEMP/CleanFileUITests.xcresult" ]]; then
+            ditto -c -k --keepParent \
+              "$RUNNER_TEMP/CleanFileUITests.xcresult" \
+              "$RUNNER_TEMP/ui-tests.xcresult.zip"
+          fi
+
       - name: Upload UI-test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: CleanFile-ui-test-results
-          path: ${{ runner.temp }}/CleanFileUITests.xcresult
+          path: ${{ runner.temp }}/ui-tests.xcresult.zip
           if-no-files-found: ignore
           retention-days: 7
