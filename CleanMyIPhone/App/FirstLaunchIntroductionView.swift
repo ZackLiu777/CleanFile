@@ -68,13 +68,15 @@ private enum IntroductionPage: Int, CaseIterable {
 
 /// 介绍页使用同一组虚构数据，保证分类、总量和压缩结果彼此一致。
 private enum IntroductionSample {
-    static let similarPhotos: Int64 = 30_000_000_000
-    static let screenshots: Int64 = 20_000_000_000
-    static let videos: Int64 = 60_000_000_000
+    static let similarPhotos: Int64 = 8_000_000_000
+    static let screenshots: Int64 = 6_000_000_000
+    static let videos: Int64 = 140_000_000_000
     static let livePhotos: Int64 = 10_000_000_000
-    static let cleanupTotal = similarPhotos + screenshots + videos + livePhotos
-    static let compressionOriginal: Int64 = 100_000_000_000
-    static let compressionResult: Int64 = 50_000_000_000
+    // 宣传图中的照片总量为 54 GB，其余 30 GB 归入其他照片。
+    static let otherPhotos: Int64 = 30_000_000_000
+    static let cleanupTotal = similarPhotos + screenshots + videos + livePhotos + otherPhotos
+    static let compressionOriginal: Int64 = 23_700_000_000
+    static let compressionResult: Int64 = 4_140_000_000
     static let compressionSaved = compressionOriginal - compressionResult
 }
 
@@ -218,6 +220,7 @@ private struct IntroductionArtwork: View {
             sampleRow("Screenshots", symbol: "iphone", bytes: IntroductionSample.screenshots)
             sampleRow("Videos", symbol: "video.fill", bytes: IntroductionSample.videos)
             sampleRow("Live Photos", symbol: "livephoto", bytes: IntroductionSample.livePhotos)
+            sampleRow("Other Photos", symbol: "photo", bytes: IntroductionSample.otherPhotos)
         }
     }
 

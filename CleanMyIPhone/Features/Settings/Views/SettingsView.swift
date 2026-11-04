@@ -195,9 +195,6 @@ struct SettingsView: View {
                     VStack(spacing: 0) {
                         LabeledContent("Version", value: appVersion)
                             .frame(minHeight: 50)
-                        Divider()
-                        LabeledContent("Build", value: buildNumber)
-                            .frame(minHeight: 50)
                     }
                 }
                 .appListCard()
@@ -251,10 +248,6 @@ struct SettingsView: View {
 
     private var appVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
-    }
-
-    private var buildNumber: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"
     }
 
     private var feedbackEmailURL: URL? {

@@ -146,14 +146,32 @@ struct MediaCompressionView: View {
                             .foregroundStyle(.white, theme.accentPrimary)
                             .padding(8).background(.black.opacity(0.25), in: Circle()).padding(5)
                     }
+                    .overlay(alignment: .bottom) {
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.72)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(height: 100)
+                        .allowsHitTesting(false)
+                    }
                     .overlay(alignment: .bottomLeading) {
-                        Image(systemName: item.isLivePhoto ? "livephoto" : model.category.symbol).foregroundStyle(.white)
-                            .padding(7).background(.black.opacity(0.5), in: Capsule()).padding(6)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Image(systemName: item.isLivePhoto ? "livephoto" : model.category.symbol)
+                                .foregroundStyle(.white)
+                                .padding(7)
+                                .background(.black.opacity(0.5), in: Capsule())
+                            Text(sizeLabel(item))
+                                .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
+                                .foregroundStyle(.white)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.8)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 18))
-                Text(sizeLabel(item))
-                    .appTypeface(.body.weight(.semibold), size: 17, relativeTo: .body, weight: .semibold)
-                    .foregroundStyle(theme.textPrimary).fixedSize(horizontal: false, vertical: true)
                 if let state = model.states[item.id] { status(state) }
             }
             .frame(maxHeight: .infinity, alignment: .top)

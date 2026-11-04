@@ -136,6 +136,25 @@ final class PremiumFreeTierUITests: XCTestCase {
         }
     }
 
+    /// 标准字号下，常规竖屏应无需滚动即可选择三个方案及操作购买。
+    @MainActor
+    func testPremiumPlansFitAbovePurchaseActionsOnStandardScreen() {
+        let app = launchFreeApp()
+        tab(in: app, id: "tab.settings", label: "Settings").tap()
+        let premium = app.buttons["settings.premium"]
+        XCTAssertTrue(premium.waitForExistence(timeout: 5))
+        premium.tap()
+        let purchase = app.buttons["premium.purchase"]
+        XCTAssertTrue(purchase.waitForExistence(timeout: 5))
+        for id in ["premium.plan.annual", "premium.plan.monthly", "premium.plan.lifetime"] {
+            let plan = app.buttons[id]
+            XCTAssertTrue(plan.exists && plan.isHittable, "\(id) should be visible without scrolling")
+            XCTAssertLessThanOrEqual(plan.frame.maxY, purchase.frame.minY, "\(id) overlaps the purchase action")
+        }
+        XCTAssertTrue(app.buttons["premium.restore"].isHittable)
+        XCTAssertTrue(app.buttons["premium.continueFree"].isHittable)
+    }
+
     /// 检查固定操作区上方的方案和条款内容可通过滚动到达。
     @MainActor
     func testPremiumPlansAndTermsRemainReachableAboveTheFixedActions() {

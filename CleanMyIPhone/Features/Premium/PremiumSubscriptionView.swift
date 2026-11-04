@@ -6,11 +6,40 @@ import SwiftUI
 /// 展示订阅方案并将购买、恢复和核验重试交给状态对象处理。
 struct PremiumSubscriptionView: View {
     @Environment(\.appTheme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @EnvironmentObject private var entitlementStore: PremiumEntitlementStore
     @StateObject private var purchaseModel = PremiumPurchaseViewModel()
+
+    // 与用户当前选中的强调色保持同步，包括自定义颜色。
+    private var premiumMint: Color { theme.accentPrimary }
+    private var purchaseTextColor: Color {
+        AppThemeColor.resolved(from: theme.accentPrimary, fallback: .black).preferredForeground.color
+    }
+    // 明暗外观分别采用完整配色，强调色继续跟随用户的主题设置。
+    private var isLight: Bool { colorScheme == .light }
+    private var premiumBackground: Color {
+        isLight ? Color(red: 0.96, green: 0.97, blue: 0.96) : Color(red: 0.06, green: 0.07, blue: 0.07)
+    }
+    private var premiumText: Color { isLight ? Color(red: 0.08, green: 0.12, blue: 0.11) : .white }
+    private var premiumSecondaryText: Color {
+        isLight ? Color(red: 0.30, green: 0.34, blue: 0.33) : .white.opacity(0.7)
+    }
+    private var premiumSurface: Color { isLight ? .white : .white.opacity(0.06) }
+    private var premiumBorder: Color { isLight ? .black.opacity(0.14) : .white.opacity(0.12) }
+    private var readableAccent: Color {
+        let accent = AppThemeColor.resolved(from: theme.accentPrimary, fallback: .black)
+        let background = AppThemeColor.resolved(from: premiumBackground, fallback: isLight ? .white : .black)
+        guard accent.contrastRatio(with: background) < 4.5 else { return accent.color }
+        let target: AppThemeColor = isLight ? .black : .white
+        for step in 1...100 {
+            let candidate = accent.blended(toward: target, amount: Double(step) / 100)
+            if candidate.contrastRatio(with: background) >= 4.5 { return candidate.color }
+        }
+        return target.color
+    }
 
     let allowsDismiss: Bool
     let requiredFeature: PremiumFeature?
@@ -24,9 +53,9 @@ struct PremiumSubscriptionView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 10) {
                     if let requiredFeature { featureNotice(requiredFeature) }
-                    introduction
+                    hero
                     features
                     if entitlementStore.accessState == .checking {
                         verificationNotice
@@ -35,30 +64,19 @@ struct PremiumSubscriptionView: View {
                     if usesInlinePurchaseControls { purchaseControls }
                     legalLinks
                 }
-                .padding(24)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
                 .frame(maxWidth: 640)
                 .frame(maxWidth: .infinity)
             }
-            .background(AppBackground())
-            .foregroundStyle(theme.textPrimary)
+            .background(premiumBackdrop)
+            .foregroundStyle(premiumText)
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 if !usesInlinePurchaseControls { purchaseFooter }
             }
-            .navigationTitle("Filevra Premium")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                if allowsDismiss {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button { dismiss() } label: {
-                            Image(systemName: "xmark")
-                                .font(.body.weight(.semibold))
-                        }
-                        .frame(minWidth: 44, minHeight: 44)
-                        .tint(theme.accentPrimary)
-                        .accessibilityLabel(AppL10n.string("premium.close"))
-                        .accessibilityIdentifier("premium.close")
-                    }
-                }
+            .toolbar(.hidden, for: .navigationBar)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                premiumHeader
             }
         }
         .onAppear { purchaseModel.loadProducts() }
@@ -68,6 +86,41 @@ struct PremiumSubscriptionView: View {
         }
         .presentationDetents([.large])
         .accessibilityIdentifier("premium.screen")
+    }
+
+    private var premiumHeader: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "folder.fill")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(premiumMint)
+                .frame(width: 42, height: 42)
+                .background(Color(red: 0.96, green: 0.95, blue: 0.84), in: RoundedRectangle(cornerRadius: 12))
+                .accessibilityHidden(true)
+            (Text("Filevra ").foregroundStyle(premiumText) + Text("Premium").foregroundStyle(readableAccent))
+                .font(.system(.headline, design: .rounded, weight: .bold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .accessibilityLabel("Filevra Premium")
+            Spacer(minLength: 8)
+            if allowsDismiss {
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(premiumText)
+                        .frame(width: 44, height: 44)
+                        .background(isLight ? .black.opacity(0.07) : .white.opacity(0.1), in: Circle())
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(AppL10n.string("premium.close"))
+                .accessibilityIdentifier("premium.close")
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+        .frame(maxWidth: 640)
+        .frame(maxWidth: .infinity)
+        .background(premiumBackground.opacity(0.94))
     }
 
     // Large text and short windows need a scrollable action area instead of a footer
@@ -85,7 +138,7 @@ struct PremiumSubscriptionView: View {
     private func featureNotice(_ feature: PremiumFeature) -> some View {
         Label(AppL10n.string(feature.titleKey), systemImage: "lock.fill")
             .font(.headline)
-            .foregroundStyle(theme.accentPrimary)
+            .foregroundStyle(readableAccent)
             .frame(maxWidth: .infinity)
             .accessibilityIdentifier("premium.requiredFeature")
     }
@@ -94,7 +147,7 @@ struct PremiumSubscriptionView: View {
         VStack(spacing: 10) {
             Text(AppL10n.string("premium.entitlement.checking"))
                 .appTypeface(.footnote, size: 14, relativeTo: .footnote)
-                .foregroundStyle(theme.textSecondary)
+                .foregroundStyle(premiumSecondaryText)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             if entitlementStore.verificationUnavailable {
@@ -107,68 +160,120 @@ struct PremiumSubscriptionView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private var introduction: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "crown.fill")
-                .font(.largeTitle)
-                .foregroundStyle(theme.accentPrimary)
-                .accessibilityHidden(true)
-            Text(AppL10n.string("premium.title"))
-                .appTypeface(.title.bold(), size: 30, relativeTo: .title, weight: .bold)
+    /// 明确标示示例，避免把宣传数字误认为设备的实际扫描结果。
+    private var hero: some View {
+        VStack(spacing: 6) {
+            Text(AppL10n.string("premium.hero.title"))
+                .font(.system(size: 30, weight: .bold, design: .rounded))
+                .foregroundStyle(LinearGradient(colors: [premiumText, readableAccent], startPoint: .top, endPoint: .bottom))
+                .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
-            Text(AppL10n.string("premium.value.summary"))
-                .appTypeface(.body, size: 17, relativeTo: .body)
-                .foregroundStyle(theme.textSecondary)
+            Text(AppL10n.string("premium.hero.subtitle"))
+                .font(.system(.subheadline, design: .rounded))
+                .foregroundStyle(premiumSecondaryText)
+                .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
+            GeometryReader { proxy in
+                let width = min(proxy.size.width * 0.76, 300)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 27)
+                        .fill(premiumMint.opacity(0.12))
+                        .frame(width: width, height: 128)
+                        .rotationEffect(.degrees(-9))
+                        .offset(x: -15, y: 6)
+                    RoundedRectangle(cornerRadius: 27)
+                        .fill(LinearGradient(colors: [premiumMint.opacity(0.36), premiumMint.opacity(0.08)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 27)
+                                .stroke(premiumMint.opacity(0.6), lineWidth: 2)
+                        }
+                        .frame(width: width, height: 128)
+                        .rotationEffect(.degrees(5))
+                        .shadow(color: premiumMint.opacity(0.22), radius: 16, y: 8)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Label(AppL10n.string("intro.demo"), systemImage: "externaldrive.fill")
+                            .font(.system(.caption, design: .rounded, weight: .semibold))
+                            .foregroundStyle(premiumSecondaryText)
+                        Text("194 GB")
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .foregroundStyle(premiumText)
+                        HStack(spacing: 0) {
+                            premiumMint
+                            Color(red: 0.35, green: 0.61, blue: 0.9)
+                            Color(red: 0.95, green: 0.67, blue: 0.34)
+                            premiumText.opacity(0.25)
+                        }
+                        .frame(height: 13)
+                        .clipShape(Capsule())
+                    }
+                    .frame(width: width * 0.72, alignment: .leading)
+                    Image(systemName: "photo.fill")
+                        .font(.title3)
+                        .foregroundStyle(.white)
+                        .frame(width: 46, height: 46)
+                        .background(premiumMint.opacity(0.8), in: RoundedRectangle(cornerRadius: 13))
+                        .rotationEffect(.degrees(-12))
+                        .offset(x: -width * 0.5, y: 28)
+                    Image(systemName: "video.fill")
+                        .font(.title3)
+                        .foregroundStyle(.white)
+                        .frame(width: 46, height: 46)
+                        .background(Color.orange.opacity(0.85), in: RoundedRectangle(cornerRadius: 13))
+                        .rotationEffect(.degrees(12))
+                        .offset(x: width * 0.5, y: -27)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .frame(height: 150)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(AppL10n.string("intro.demo")): 194 GB")
         }
-        .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
-        .accessibilityIdentifier("premium.introduction")
     }
 
-    private var features: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            feature(title: AppL10n.string("Quick Cleanup"), detail: AppL10n.string("premium.quickClean.detail"), symbol: "sparkles")
-            feature(title: AppL10n.string("premium.storage.title"), detail: AppL10n.string("premium.storage.detail"), symbol: "folder")
-            feature(title: AppL10n.string("premium.feature.compression.title"), detail: AppL10n.string("premium.feature.compression.detail"), symbol: "arrow.triangle.2.circlepath")
-            feature(title: AppL10n.string("premium.feature.appearance.title"), detail: AppL10n.string("premium.feature.appearance.detail"), symbol: "paintpalette")
-            Divider()
-            Text(AppL10n.string("premium.free.summary"))
-                .font(.footnote)
-                .foregroundStyle(theme.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-
+    private var premiumBackdrop: some View {
+        ZStack {
+            premiumBackground
+            LinearGradient(
+                colors: [premiumMint.opacity(isLight ? 0.14 : 0.35), premiumBackground, isLight ? .white : .black],
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            )
+            RadialGradient(colors: [premiumMint.opacity(isLight ? 0.08 : 0.22), .clear], center: .topLeading, startRadius: 0, endRadius: 360)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .appContentCard(cornerRadius: 24)
+        .ignoresSafeArea()
+    }
+
+    /// 三列固定布局避免长文案触发整列纵向回退；文字可换行。
+    private var features: some View {
+        HStack(alignment: .top, spacing: 0) {
+            feature(title: AppL10n.string("Quick Cleanup") + " · " + AppL10n.string("premium.storage.title"), symbol: "sparkles")
+            feature(title: AppL10n.string("premium.feature.compression.title"), symbol: "arrow.triangle.2.circlepath")
+            feature(title: AppL10n.string("premium.feature.appearance.title"), symbol: "paintpalette")
+        }
+        .frame(maxWidth: .infinity)
         .accessibilityIdentifier("premium.features")
     }
 
-    /// 组合一项 Premium 功能说明，图标不重复进入无障碍朗读。
-    private func feature(title: String, detail: String, symbol: String) -> some View {
-        HStack(alignment: .top, spacing: 14) {
+    private func feature(title: String, symbol: String) -> some View {
+        VStack(spacing: 5) {
             Image(systemName: symbol)
-                .font(.title2)
-                .foregroundStyle(theme.accentPrimary)
-                .frame(width: 32)
+                .font(.system(size: 19, weight: .semibold))
+                .foregroundStyle(readableAccent)
+                .frame(height: 24)
                 .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 7) {
-                Text(title)
-                    .appTypeface(.title3.bold(), size: 20, relativeTo: .title3, weight: .bold)
-                Text(detail)
-                    .appTypeface(.subheadline, size: 15, relativeTo: .subheadline)
-                    .foregroundStyle(theme.textSecondary)
-                    .lineSpacing(3)
-            }
-            .fixedSize(horizontal: false, vertical: true)
+            Text(title)
+                .font(.system(.caption2, design: .rounded, weight: .medium))
+                .foregroundStyle(premiumText)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
+        .frame(maxWidth: .infinity, alignment: .top)
     }
 
     private var plans: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(AppL10n.string("premium.plans.title"))
                 .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                 .accessibilityAddTraits(.isHeader)
@@ -178,42 +283,34 @@ struct PremiumSubscriptionView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// 展示方案选择、StoreKit 价格和当前用户可用的试用说明。
+    /// 展示方案选择和 StoreKit 价格；所选方案的试用说明保留在购买按钮。
     private func planCard(_ plan: PremiumPlan) -> some View {
         let selected = purchaseModel.selectedPlan == plan
         return Button { purchaseModel.selectedPlan = plan } label: {
             HStack(alignment: .center, spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(plan.title)
-                        .appTypeface(.title3.bold(), size: 20, relativeTo: .title3, weight: .bold)
+                        .font(.system(.subheadline, design: .rounded, weight: .semibold))
                     Text(purchaseModel.priceDescription(for: plan) ?? AppL10n.string("premium.price.unavailable"))
-                        .appTypeface(.body.weight(.semibold), size: 17, relativeTo: .body, weight: .semibold)
-                        .foregroundStyle(theme.textPrimary)
-                    if let offer = purchaseModel.offerDescription(for: plan) {
-                        Text(offer)
-                            .appTypeface(.footnote, size: 14, relativeTo: .footnote)
-                            .foregroundStyle(theme.textSecondary)
-                    } else if plan == .lifetime {
-                        Text(AppL10n.string("premium.lifetime.detail"))
-                            .appTypeface(.footnote, size: 14, relativeTo: .footnote)
-                            .foregroundStyle(theme.textSecondary)
-                    }
+                        .font(.system(.footnote, design: .rounded, weight: .medium))
+                        .foregroundStyle(premiumSecondaryText)
                 }
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
-                    .foregroundStyle(selected ? theme.accentPrimary : theme.textTertiary)
+                    .foregroundStyle(selected ? readableAccent : premiumSecondaryText.opacity(0.7))
                     .accessibilityHidden(true)
             }
-            .padding(20)
-            .frame(maxWidth: .infinity, minHeight: 104, alignment: .leading)
-            .appContentCard(cornerRadius: 24)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
+            .background(selected ? premiumMint.opacity(isLight ? 0.12 : 0.16) : premiumSurface, in: RoundedRectangle(cornerRadius: 16))
             .overlay {
-                RoundedRectangle(cornerRadius: 24)
-                    .strokeBorder(selected ? theme.accentPrimary : .clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(selected ? readableAccent : premiumBorder, lineWidth: selected ? 2 : 1)
             }
-            .contentShape(RoundedRectangle(cornerRadius: 24))
+            .contentShape(RoundedRectangle(cornerRadius: 16))
         }
         .buttonStyle(.plain)
         .disabled(purchaseModel.isBusy)
@@ -229,12 +326,12 @@ struct PremiumSubscriptionView: View {
                 Text(AppL10n.string("premium.pricing.loading"))
                     .appTypeface(.footnote, size: 14, relativeTo: .footnote)
             }
-            .foregroundStyle(theme.textSecondary)
+            .foregroundStyle(premiumSecondaryText)
         } else if PremiumPlan.allCases.contains(where: { purchaseModel.products[$0] == nil }) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(AppL10n.string("premium.pricing.unavailable"))
                     .appTypeface(.footnote, size: 14, relativeTo: .footnote)
-                    .foregroundStyle(theme.textSecondary)
+                    .foregroundStyle(premiumSecondaryText)
                 Button(AppL10n.string("premium.retry")) { purchaseModel.retryProducts() }
                     .disabled(purchaseModel.isBusy)
                     .accessibilityIdentifier("premium.connection.retry")
@@ -250,7 +347,7 @@ struct PremiumSubscriptionView: View {
         .appTypeface(.footnote, size: 14, relativeTo: .footnote)
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
-        .tint(theme.textSecondary)
+        .tint(premiumSecondaryText)
     }
 
     @ViewBuilder
@@ -266,29 +363,32 @@ struct PremiumSubscriptionView: View {
     private var purchaseFooter: some View {
         purchaseControls
             .padding(.horizontal, 24)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
+            .padding(.top, 8)
+            .padding(.bottom, 6)
             .frame(maxWidth: 640)
             .frame(maxWidth: .infinity)
-            .background { AppBackground().ignoresSafeArea(edges: .bottom) }
+            .background { premiumBackground.ignoresSafeArea(edges: .bottom) }
     }
 
     private var purchaseControls: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 6) {
             if entitlementStore.accessState == .entitled {
                 Label(AppL10n.string("premium.active"), systemImage: "checkmark.seal.fill")
-                    .appTypeface(.headline, size: 18, relativeTo: .headline, weight: .semibold)
-                    .foregroundStyle(theme.accentPrimary)
+                    .font(.system(.headline, design: .rounded, weight: .semibold))
+                    .foregroundStyle(readableAccent)
                 if allowsDismiss {
                     Button(AppL10n.string("Done")) { dismiss() }
-                        .frame(maxWidth: .infinity, minHeight: 52)
-                        .appGlassButtonStyle()
+                        .font(.system(.headline, design: .rounded, weight: .semibold))
+                        .foregroundStyle(purchaseTextColor)
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                        .background(premiumMint, in: RoundedRectangle(cornerRadius: 24))
+                        .buttonStyle(.plain)
                 }
             } else {
                 if let feedback = purchaseModel.feedback {
                     Text(feedback)
                         .appTypeface(.footnote, size: 14, relativeTo: .footnote)
-                        .foregroundStyle(theme.textSecondary)
+                        .foregroundStyle(premiumSecondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("premium.purchase.feedback")
                 }
@@ -298,7 +398,7 @@ struct PremiumSubscriptionView: View {
                     Button { dismiss() } label: {
                         Text(AppL10n.string("premium.continue.free"))
                             .appTypeface(.subheadline.weight(.medium), size: 16, relativeTo: .subheadline, weight: .medium)
-                            .foregroundStyle(theme.textSecondary)
+                            .foregroundStyle(premiumSecondaryText)
                             .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, minHeight: 44)
                             .contentShape(Rectangle())
@@ -321,22 +421,22 @@ struct PremiumSubscriptionView: View {
             VStack(spacing: 5) {
                 HStack(spacing: 10) {
                     if purchaseModel.activity == .purchasing {
-                        ProgressView().tint(theme.textInverted)
+                        ProgressView().tint(purchaseTextColor)
                     }
                     Text(AppL10n.string("premium.purchase.continue"))
-                        .appTypeface(.headline, size: 18, relativeTo: .headline, weight: .semibold)
+                        .font(.system(.headline, design: .rounded, weight: .semibold))
                 }
                 if let price = purchaseModel.priceDescription(for: purchaseModel.selectedPlan) {
                     Text(purchaseModel.offerDescription(for: purchaseModel.selectedPlan) ?? price)
-                        .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
+                        .font(.system(.subheadline, design: .rounded, weight: .semibold))
                 }
             }
-            .foregroundStyle(theme.textInverted)
+            .foregroundStyle(purchaseTextColor)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .frame(maxWidth: .infinity, minHeight: 56)
-            .background(theme.buttonPrimaryBackground, in: RoundedRectangle(cornerRadius: 28))
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, minHeight: 52)
+            .background(premiumMint, in: RoundedRectangle(cornerRadius: 28))
             .contentShape(RoundedRectangle(cornerRadius: 28))
             .opacity(isPurchaseDisabled ? 0.55 : 1)
         }
@@ -354,14 +454,14 @@ struct PremiumSubscriptionView: View {
             HStack(spacing: 10) {
                 if purchaseModel.activity == .restoring { ProgressView().tint(theme.accentPrimary) }
                 Text(AppL10n.string("premium.restore"))
-                    .appTypeface(.headline, size: 18, relativeTo: .headline, weight: .semibold)
-                    .foregroundStyle(theme.textPrimary)
+                    .font(.system(.headline, design: .rounded, weight: .semibold))
+                    .foregroundStyle(premiumText)
             }
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .frame(maxWidth: .infinity, minHeight: 52)
-            .appContentCard(cornerRadius: 28)
+            .padding(.vertical, 7)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .background(isLight ? .black.opacity(0.06) : .white.opacity(0.07), in: RoundedRectangle(cornerRadius: 28))
             .contentShape(RoundedRectangle(cornerRadius: 28))
         }
         .buttonStyle(.plain)
