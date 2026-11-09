@@ -578,6 +578,7 @@
 "quick.compress.title" = "Komprimer";
 
 "quick.video" = "Komprimer videoer";
+"premium.feature.videoCompression" = "Komprimer videoer";
 
 "quick.image" = "Komprimer bilder";
 
@@ -593,9 +594,9 @@
 
 "quick.originals" = "Lager nye kopier og beholder originalene. Resultatet kan bli større; sammenlign før du erstatter.";
 
-"premium.free.summary" = "Gratis: gjennomgå og slett medier, komprimer og konverter videoer.";
+"premium.free.summary" = "Gratis: hurtig opprydding, gjennomgang og sletting av medier samt videokonvertering.";
 
-"premium.value.summary" = "Premium: rydd flere kategorier, konverter bilder og lyd, organiser mapper og tilpass utseendet.";
+"premium.value.summary" = "Premium: videokomprimering, konvertering av bilder og lyd, filopprydding og tilpasset utseende.";
 
 "quick.free" = "Gratis";
 
@@ -651,3 +652,22 @@
 
 "premium.hero.title" = "Frigjør mer plass";
 "premium.hero.subtitle" = "Lås opp rydde- og medieverktøy.";
+
+"intro.convert.title" = "Konverter formater enkelt";
+"intro.convert.detail" = "Konverter videoer og bilder til ønsket format.";
+
+"intro.storage.title" = "Skann og gjennomgå filer";
+"intro.storage.detail" = "Velg filer eller mapper, gjennomgå resultatet og bekreft hva du vil slette.";
+
+"intro.walk.media.1" = "Åpne en bildekategori på hjemskjermen";
+"intro.walk.media.2" = "Velg elementene som skal fjernes";
+"intro.walk.media.3" = "Se gjennom og bekreft sletting";
+"intro.walk.storage.1" = "Trykk på … på hjemskjermen og velg Lagring";
+"intro.walk.storage.2" = "Velg filer eller en mappe og se skanningen";
+"intro.walk.storage.3" = "Velg filer og bekreft sletting";
+"intro.walk.compress.1" = "Velg en komprimeringskategori på hjemskjermen";
+"intro.walk.compress.2" = "Velg elementer og trykk på Komprimer";
+"intro.walk.compress.3" = "Bekreft for å starte komprimering";
+"intro.walk.convert.1" = "Trykk på … på hjemskjermen og velg Formatkonvertering";
+"intro.walk.convert.2" = "Importer filer og velg format og bithastighet";
+"intro.walk.convert.3" = "Konverter, og lagre eller del";

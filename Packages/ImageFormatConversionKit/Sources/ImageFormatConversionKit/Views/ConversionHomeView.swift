@@ -289,7 +289,7 @@ public struct ConversionHomeView: View {
     private func receiveQuickCompressionIfNeeded() {
         guard isTabActive, let request = quickCompressionRequest,
               request.id != handledQuickRequestID else { return }
-        let kind: ConversionHomeKind = request.category == .video ? .video : .image
+        let kind: ConversionHomeKind = request.category == .video || request.category == .videoCompression ? .video : .image
         // Opening a shortcut does not start a batch or change professional settings.
         handledQuickRequestID = request.id
         isQuickCompression = true

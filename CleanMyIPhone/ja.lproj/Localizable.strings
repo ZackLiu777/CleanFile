@@ -576,6 +576,7 @@
 "quick.compress.title" = "圧縮";
 
 "quick.video" = "動画を圧縮";
+"premium.feature.videoCompression" = "動画を圧縮";
 
 "quick.image" = "写真を圧縮";
 
@@ -591,9 +592,9 @@
 
 "quick.originals" = "新しいコピーを作成し、元のファイルを保持します。大きくなる場合もあるため、置き換える前に比較してください。";
 
-"premium.free.summary" = "無料：メディアの確認と削除、動画の圧縮と変換。";
+"premium.free.summary" = "無料：クイッククリーン、メディアの確認と削除、動画の変換。";
 
-"premium.value.summary" = "Premium：カテゴリの一括整理、画像と音声の変換、フォルダの整理、外観のカスタマイズ。";
+"premium.value.summary" = "Premium：動画の圧縮、画像と音声の変換、ファイルの整理、外観のカスタマイズ。";
 
 "quick.free" = "無料";
 
@@ -649,3 +650,22 @@
 
 "premium.hero.title" = "もっと空き容量を";
 "premium.hero.subtitle" = "整理・メディアツールを利用できます。";
+
+"intro.convert.title" = "形式をかんたんに変換";
+"intro.convert.detail" = "動画や画像を用途に合った形式に変換できます。";
+
+"intro.storage.title" = "ファイルをスキャンして確認";
+"intro.storage.detail" = "ファイルやフォルダを選び、スキャン結果を確認してから削除します。";
+
+"intro.walk.media.1" = "ホームで写真の分類を開く";
+"intro.walk.media.2" = "削除する項目を選ぶ";
+"intro.walk.media.3" = "内容を確認して削除";
+"intro.walk.storage.1" = "ホームの … からストレージを選ぶ";
+"intro.walk.storage.2" = "ファイルかフォルダを選び結果を確認";
+"intro.walk.storage.3" = "ファイルを選び削除を確認";
+"intro.walk.compress.1" = "ホームで圧縮の分類を選ぶ";
+"intro.walk.compress.2" = "項目を選び圧縮をタップ";
+"intro.walk.compress.3" = "確認して圧縮を開始";
+"intro.walk.convert.1" = "ホームの … から形式変換を選ぶ";
+"intro.walk.convert.2" = "ファイルを読み込み、形式とビットレートを選ぶ";
+"intro.walk.convert.3" = "変換後に保存または共有";

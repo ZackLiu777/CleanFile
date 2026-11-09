@@ -578,6 +578,7 @@
 "quick.compress.title" = "Komprimer";
 
 "quick.video" = "Komprimér videoer";
+"premium.feature.videoCompression" = "Komprimér videoer";
 
 "quick.image" = "Komprimér fotos";
 
@@ -593,9 +594,9 @@
 
 "quick.originals" = "Opretter nye kopier og bevarer originaler. Resultatet kan være større; sammenlign før udskiftning.";
 
-"premium.free.summary" = "Gratis: gennemgå og slet medier, komprimér og konvertér videoer.";
+"premium.free.summary" = "Gratis: hurtig oprydning, gennemgang og sletning af medier samt videokonvertering.";
 
-"premium.value.summary" = "Premium: ryd op i flere kategorier, konvertér billeder og lyd, organisér mapper og tilpas udseendet.";
+"premium.value.summary" = "Premium: videokomprimering, konvertering af billeder og lyd, filoprydning og tilpasset udseende.";
 
 "quick.free" = "Gratis";
 
@@ -651,3 +652,22 @@
 
 "premium.hero.title" = "Frigør mere plads";
 "premium.hero.subtitle" = "Lås op for oprydnings- og medieværktøjer.";
+
+"intro.convert.title" = "Konverter formater nemt";
+"intro.convert.detail" = "Konverter videoer og billeder til det ønskede format.";
+
+"intro.storage.title" = "Scan og gennemgå filer";
+"intro.storage.detail" = "Vælg filer eller mapper, gennemgå resultatet, og bekræft det, du vil slette.";
+
+"intro.walk.media.1" = "Åbn en fotokategori på startsiden";
+"intro.walk.media.2" = "Vælg de elementer, du vil fjerne";
+"intro.walk.media.3" = "Gennemgå og bekræft sletning";
+"intro.walk.storage.1" = "Tryk på … på startsiden, og vælg Lager";
+"intro.walk.storage.2" = "Vælg filer eller en mappe, og se scanningen";
+"intro.walk.storage.3" = "Vælg filer, og bekræft sletning";
+"intro.walk.compress.1" = "Vælg en komprimeringskategori på startsiden";
+"intro.walk.compress.2" = "Vælg elementer, og tryk på Komprimer";
+"intro.walk.compress.3" = "Bekræft for at starte komprimering";
+"intro.walk.convert.1" = "Tryk på … på startsiden, og vælg Formatkonvertering";
+"intro.walk.convert.2" = "Importér filer, og vælg format og bithastighed";
+"intro.walk.convert.3" = "Konvertér, og gem eller del";

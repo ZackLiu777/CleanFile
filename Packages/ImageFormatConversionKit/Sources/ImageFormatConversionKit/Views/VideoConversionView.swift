@@ -58,7 +58,7 @@ struct VideoConversionView: View {
         .sheet(isPresented: Binding(
             get: { viewModel.isPremiumRequiredPresented },
             set: { viewModel.isPremiumRequiredPresented = $0 }
-        )) { usagePolicy.upgradeContent(.video) }
+        )) { usagePolicy.upgradeContent(isQuickCompression ? .videoCompression : .video) }
         .safeAreaInset(edge: .bottom) {
             if !shouldShowImportCard {
                 bottomActionBar

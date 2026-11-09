@@ -578,6 +578,7 @@
 "quick.compress.title" = "ضغط";
 
 "quick.video" = "ضغط الفيديو";
+"premium.feature.videoCompression" = "ضغط الفيديو";
 
 "quick.image" = "ضغط الصور";
 
@@ -593,9 +594,9 @@
 
 "quick.originals" = "ينشئ نسخًا جديدة ويحفظ الأصول. قد تكون النتيجة أكبر؛ قارن قبل الاستبدال.";
 
-"premium.free.summary" = "مجانًا: مراجعة الوسائط وحذفها وضغط الفيديو وتحويله.";
+"premium.free.summary" = "مجانًا: التنظيف السريع ومراجعة الوسائط وحذفها وتحويل الفيديو.";
 
-"premium.value.summary" = "Premium: تنظيف فئات معًا وتحويل الصور والصوت وتنظيم المجلدات وتخصيص المظهر.";
+"premium.value.summary" = "Premium: ضغط الفيديو وتحويل الصور والصوت وتنظيم المجلدات وتخصيص المظهر.";
 
 "quick.free" = "مجاني";
 
@@ -651,3 +652,22 @@
 
 "premium.hero.title" = "وفّر مساحة أكبر";
 "premium.hero.subtitle" = "افتح أدوات التنظيف والوسائط.";
+
+"intro.convert.title" = "حوّل التنسيقات بسهولة";
+"intro.convert.detail" = "حوّل الفيديوهات والصور إلى التنسيق المناسب لك.";
+
+"intro.storage.title" = "افحص الملفات وراجعها";
+"intro.storage.detail" = "اختر الملفات أو المجلدات، وراجع النتائج، ثم أكّد ما تريد حذفه.";
+
+"intro.walk.media.1" = "افتح فئة الصور من الصفحة الرئيسية";
+"intro.walk.media.2" = "اختر العناصر التي تريد إزالتها";
+"intro.walk.media.3" = "راجع العناصر وأكد الحذف";
+"intro.walk.storage.1" = "اضغط … في الصفحة الرئيسية واختر التخزين";
+"intro.walk.storage.2" = "اختر ملفات أو مجلداً وراجع نتائج الفحص";
+"intro.walk.storage.3" = "اختر الملفات وأكد الحذف";
+"intro.walk.compress.1" = "اختر فئة الضغط من الصفحة الرئيسية";
+"intro.walk.compress.2" = "حدد العناصر واضغط ضغط";
+"intro.walk.compress.3" = "أكد لبدء الضغط";
+"intro.walk.convert.1" = "اضغط … في الصفحة الرئيسية واختر تحويل التنسيق";
+"intro.walk.convert.2" = "استورد الملفات واختر التنسيق ومعدل البت";
+"intro.walk.convert.3" = "حوّل ثم احفظ أو شارك";

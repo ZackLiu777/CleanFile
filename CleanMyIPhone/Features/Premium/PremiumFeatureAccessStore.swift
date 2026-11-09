@@ -10,6 +10,7 @@ enum PremiumFeature: String, CaseIterable, Identifiable {
     case media
     case quickClean
     case videoConversion
+    case videoCompression
     case storage
     case imageConversion
     case audioConversion
@@ -20,8 +21,8 @@ enum PremiumFeature: String, CaseIterable, Identifiable {
 
     var requiresPremium: Bool {
         switch self {
-        case .media, .videoConversion, .darkAppearance: false
-        case .quickClean, .storage, .imageConversion, .audioConversion, .customColors: true
+        case .media, .quickClean, .videoConversion, .darkAppearance: false
+        case .videoCompression, .storage, .imageConversion, .audioConversion, .customColors: true
         }
     }
 
@@ -30,6 +31,7 @@ enum PremiumFeature: String, CaseIterable, Identifiable {
         case .media: "premium.feature.media"
         case .quickClean: "Quick Cleanup"
         case .videoConversion: "premium.feature.videoConversion"
+        case .videoCompression: "premium.feature.videoCompression"
         case .storage: "premium.feature.storage"
         case .imageConversion: "premium.feature.imageConversion"
         case .audioConversion: "premium.feature.audioConversion"
@@ -85,6 +87,7 @@ final class PremiumFeatureAccessStore: ObservableObject {
         switch category {
         case .images: .imageConversion
         case .video: .videoConversion
+        case .videoCompression: .videoCompression
         case .audio: .audioConversion
         }
     }

@@ -578,6 +578,7 @@
 "quick.compress.title" = "Þjappa";
 
 "quick.video" = "Þjappa myndskeiðum";
+"premium.feature.videoCompression" = "Þjappa myndskeiðum";
 
 "quick.image" = "Þjappa myndum";
 
@@ -593,9 +594,9 @@
 
 "quick.originals" = "Býr til ný afrit og varðveitir frumrit. Útkoman getur verið stærri; berðu saman áður en skipt er út.";
 
-"premium.free.summary" = "Ókeypis: skoða og eyða miðlum, þjappa og umbreyta myndskeiðum.";
+"premium.free.summary" = "Ókeypis: hraðhreinsun, yfirferð og eyðing miðla og umbreyting myndskeiða.";
 
-"premium.value.summary" = "Premium: hreinsa flokka saman, umbreyta myndum og hljóði, skipuleggja möppur og sérsníða útlit.";
+"premium.value.summary" = "Premium: þjöppun myndskeiða, umbreyting mynda og hljóðs, skráahreinsun og sérsniðið útlit.";
 
 "quick.free" = "Ókeypis";
 
@@ -651,3 +652,22 @@
 
 "premium.hero.title" = "Losaðu meira pláss";
 "premium.hero.subtitle" = "Opnaðu hreinsunar- og miðlunarverkfæri.";
+
+"intro.convert.title" = "Umbreyttu skráarsniðum";
+"intro.convert.detail" = "Umbreyttu myndskeiðum og myndum á hentugt snið.";
+
+"intro.storage.title" = "Skannaðu og yfirfarðu skrár";
+"intro.storage.detail" = "Veldu skrár eða möppur, skoðaðu niðurstöður og staðfestu eyðingu.";
+
+"intro.walk.media.1" = "Opnaðu myndaflokk á upphafsskjá";
+"intro.walk.media.2" = "Veldu atriði til að fjarlægja";
+"intro.walk.media.3" = "Farðu yfir og staðfestu eyðingu";
+"intro.walk.storage.1" = "Ýttu á … á upphafsskjá og veldu Geymsla";
+"intro.walk.storage.2" = "Veldu skrár eða möppu og skoðaðu skönnun";
+"intro.walk.storage.3" = "Veldu skrár og staðfestu eyðingu";
+"intro.walk.compress.1" = "Veldu þjöppunarflokk á upphafsskjá";
+"intro.walk.compress.2" = "Veldu atriði og ýttu á Þjappa";
+"intro.walk.compress.3" = "Staðfestu til að hefja þjöppun";
+"intro.walk.convert.1" = "Ýttu á … á upphafsskjá og veldu Sniðumbreyting";
+"intro.walk.convert.2" = "Flyttu inn skrár og veldu snið og bitahraða";
+"intro.walk.convert.3" = "Umbreyttu og vistaðu eða deildu";

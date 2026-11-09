@@ -576,6 +576,7 @@
 "quick.compress.title" = "Comprimir";
 
 "quick.video" = "Comprimir vídeos";
+"premium.feature.videoCompression" = "Comprimir vídeos";
 
 "quick.image" = "Comprimir fotos";
 
@@ -591,9 +592,9 @@
 
 "quick.originals" = "Cria novas cópias e mantém os originais. O resultado pode ser maior; compare antes de substituir.";
 
-"premium.free.summary" = "Grátis: revisar e apagar mídia, comprimir e converter vídeos.";
+"premium.free.summary" = "Grátis: limpeza rápida, revisão e exclusão de mídia e conversão de vídeos.";
 
-"premium.value.summary" = "Premium: limpar categorias juntas, converter imagens e áudio, organizar pastas e personalizar a aparência.";
+"premium.value.summary" = "Premium: compressão de vídeos, conversão de imagens e áudio, limpeza de arquivos e personalização.";
 
 "quick.free" = "Grátis";
 
@@ -649,3 +650,22 @@
 
 "premium.hero.title" = "Libere mais espaço";
 "premium.hero.subtitle" = "Desbloqueie ferramentas de limpeza e mídia.";
+
+"intro.convert.title" = "Converta formatos facilmente";
+"intro.convert.detail" = "Converta vídeos e imagens para o formato ideal.";
+
+"intro.storage.title" = "Analise e revise arquivos";
+"intro.storage.detail" = "Escolha arquivos ou pastas, revise os resultados e confirme o que excluir.";
+
+"intro.walk.media.1" = "Na tela inicial, abra uma categoria de fotos";
+"intro.walk.media.2" = "Selecione os itens para remover";
+"intro.walk.media.3" = "Revise e confirme a exclusão";
+"intro.walk.storage.1" = "Na tela inicial, toque em … e escolha Armazenamento";
+"intro.walk.storage.2" = "Escolha arquivos ou uma pasta e revise a análise";
+"intro.walk.storage.3" = "Selecione arquivos e confirme a exclusão";
+"intro.walk.compress.1" = "Na tela inicial, escolha uma categoria de compressão";
+"intro.walk.compress.2" = "Selecione os itens e toque em Comprimir";
+"intro.walk.compress.3" = "Confirme para iniciar a compressão";
+"intro.walk.convert.1" = "Na tela inicial, toque em … e escolha Conversão de formato";
+"intro.walk.convert.2" = "Importe arquivos e escolha o formato e a taxa de bits";
+"intro.walk.convert.3" = "Converta e salve ou compartilhe";

@@ -98,7 +98,7 @@ struct PremiumStatusFailureTests {
         try #require(store.accessState == .notEntitled)
         access.update(store.accessState)
         for feature in PremiumFeature.allCases {
-            #expect(access.allows(feature) == [.media, .videoConversion, .darkAppearance].contains(feature))
+            #expect(access.allows(feature) == [.media, .quickClean, .videoConversion, .darkAppearance].contains(feature))
         }
     }
 

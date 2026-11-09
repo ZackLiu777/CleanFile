@@ -655,7 +655,9 @@ final class PhotoLibraryViewModel: ObservableObject {
             deletionState = .failure(.noItemsSelected)
             return false
         }
+        authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
         guard authorizationStatus == .authorized || authorizationStatus == .limited else {
+            removeUnavailableAssets(Set(assetsByIdentifier.keys))
             deletionState = .failure(.photoAccessUnavailable)
             return false
         }
@@ -666,6 +668,8 @@ final class PhotoLibraryViewModel: ObservableObject {
         )
         // PhotoKit 可能在确认前移除部分资源；禁止把剩余资源静默当作完整批次删除。
         guard fetchResult.count == assetIDs.count else {
+            let availableIDs = Set((0..<fetchResult.count).map { fetchResult.object(at: $0).localIdentifier })
+            removeUnavailableAssets(assetIDs.subtracting(availableIDs))
             deletionState = .failure(.itemsUnavailable)
             return false
         }
@@ -707,6 +711,25 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
+    /// 缺失资源不代表本次删除成功；同步清理展示与缓存，但仍要求用户重新确认剩余选择。
+    private func removeUnavailableAssets(_ identifiers: Set<String>) {
+        guard !identifiers.isEmpty else { return }
+        // 初始加载和旧分析都可能仍持有缺失资源，先推进代次，防止迟到结果重新写回。
+        analysisGeneration &+= 1
+        initialLoadTask?.cancel()
+        analysisTask?.cancel()
+        analysisTask = nil
+        if analysisState.isAnalyzing { analysisState = .cancelled }
+        sceneGeneration &+= 1
+        sceneTask?.cancel()
+        cityPhotoIDs.removeAll { identifiers.contains($0) }
+        assets.removeAll { identifiers.contains($0.localIdentifier) }
+        rebuildAssetIndex()
+        updateAnalysisAfterDeleting(identifiers)
+        scheduleMediaSizeIndexSave()
+        persistAnalysisState()
+    }
+
     /// 仅在没有删除操作进行时清除上次删除结果。
     func clearDeletionResult() {
         guard !deletionState.isDeleting else { return }
@@ -740,6 +763,8 @@ final class PhotoLibraryViewModel: ObservableObject {
             fetchedAssets.append(asset)
         }
 
+        let availableIDs = Set(fetchedAssets.map(\.localIdentifier))
+        removeUnavailableAssets(Set(assetsByIdentifier.keys).subtracting(availableIDs))
         assets = fetchedAssets
         rebuildAssetIndex()
         isLoading = false

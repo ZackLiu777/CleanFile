@@ -576,6 +576,7 @@
 "quick.compress.title" = "Compresser";
 
 "quick.video" = "Compresser les vidéos";
+"premium.feature.videoCompression" = "Compresser les vidéos";
 
 "quick.image" = "Compresser les photos";
 
@@ -591,9 +592,9 @@
 
 "quick.originals" = "Crée de nouvelles copies et conserve les originaux. Le résultat peut être plus lourd ; comparez avant de remplacer.";
 
-"premium.free.summary" = "Gratuit : examiner et supprimer les médias, compresser et convertir les vidéos.";
+"premium.free.summary" = "Gratuit : nettoyage rapide, examen et suppression des médias, et conversion vidéo.";
 
-"premium.value.summary" = "Premium : nettoyer plusieurs catégories, convertir images et audio, organiser les dossiers et personnaliser l’apparence.";
+"premium.value.summary" = "Premium : compression vidéo, conversion des images et de l’audio, nettoyage des fichiers et personnalisation.";
 
 "quick.free" = "Gratuit";
 
@@ -649,3 +650,22 @@
 
 "premium.hero.title" = "Libérez plus d’espace";
 "premium.hero.subtitle" = "Débloquez les outils de nettoyage et multimédias.";
+
+"intro.convert.title" = "Convertissez vos formats";
+"intro.convert.detail" = "Convertissez vidéos et images dans le format adapté.";
+
+"intro.storage.title" = "Analysez et vérifiez vos fichiers";
+"intro.storage.detail" = "Choisissez des fichiers ou dossiers, vérifiez les résultats puis confirmez la suppression.";
+
+"intro.walk.media.1" = "Sur l’accueil, ouvrir une catégorie de photos";
+"intro.walk.media.2" = "Sélectionner les éléments à supprimer";
+"intro.walk.media.3" = "Vérifier et confirmer la suppression";
+"intro.walk.storage.1" = "Sur l’accueil, toucher … puis Stockage";
+"intro.walk.storage.2" = "Choisir des fichiers ou un dossier et vérifier l’analyse";
+"intro.walk.storage.3" = "Choisir les fichiers et confirmer leur suppression";
+"intro.walk.compress.1" = "Sur l’accueil, choisir une catégorie de compression";
+"intro.walk.compress.2" = "Sélectionner et toucher Compresser";
+"intro.walk.compress.3" = "Confirmer pour commencer la compression";
+"intro.walk.convert.1" = "Sur l’accueil, toucher … puis Conversion de format";
+"intro.walk.convert.2" = "Importer des fichiers, choisir le format et le débit";
+"intro.walk.convert.3" = "Convertir puis enregistrer ou partager";

@@ -66,17 +66,16 @@ struct CleanMyIPhoneApp: App {
 
     var body: some Scene {
         WindowGroup {
-            FirstLaunchIntroductionContainer {
-                rootView
+            AppThemeEnvironmentHost(settings: themeSettings) {
+                FirstLaunchIntroductionContainer {
+                    rootView
+                }
             }
             .environmentObject(themeSettings)
             .fontDesign(themeSettings.fontStyle.inheritedDesign)
             .appFontFamily(themeSettings.fontStyle.fontName)
             .environmentObject(premiumEntitlementStore)
-            .environment(\.appTheme, themeSettings.theme)
             .preferredColorScheme(themeSettings.effectiveColorScheme)
-            .tint(themeSettings.theme.accentPrimary)
-            .foregroundStyle(themeSettings.theme.textPrimary)
         }
     }
 
@@ -95,5 +94,20 @@ struct CleanMyIPhoneApp: App {
 #else
         PremiumAccessRootView(entitlementStore: premiumEntitlementStore)
 #endif
+    }
+}
+
+/// 使用当前场景实际外观解析系统主题，避免系统动态颜色在子页面之间出现混合。
+private struct AppThemeEnvironmentHost<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @ObservedObject var settings: ThemeSettings
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        let resolvedTheme = settings.theme(for: colorScheme)
+        content
+            .environment(\.appTheme, resolvedTheme)
+            .tint(resolvedTheme.accentPrimary)
+            .foregroundStyle(resolvedTheme.textPrimary)
     }
 }

@@ -578,6 +578,7 @@
 "quick.compress.title" = "Komprimieren";
 
 "quick.video" = "Videos komprimieren";
+"premium.feature.videoCompression" = "Videos komprimieren";
 
 "quick.image" = "Fotos komprimieren";
 
@@ -593,9 +594,9 @@
 
 "quick.originals" = "Erstellt neue Kopien. Originale bleiben erhalten. Ergebnisse können größer sein; vor dem Ersetzen vergleichen.";
 
-"premium.free.summary" = "Kostenlos: Medien prüfen und löschen, Videos komprimieren und konvertieren.";
+"premium.free.summary" = "Kostenlos: Schnellbereinigung, Medien prüfen und löschen sowie Videos konvertieren.";
 
-"premium.value.summary" = "Premium: Kategorien gemeinsam bereinigen, Bilder und Audio konvertieren, Ordner aufräumen und das Design anpassen.";
+"premium.value.summary" = "Premium: Videokomprimierung, Bild- und Audiokonvertierung, Dateibereinigung und individuelle Gestaltung.";
 
 "quick.free" = "Kostenlos";
 
@@ -651,3 +652,22 @@
 
 "premium.hero.title" = "Mehr Speicher freigeben";
 "premium.hero.subtitle" = "Schalte Bereinigungs- und Medienwerkzeuge frei.";
+
+"intro.convert.title" = "Formate einfach umwandeln";
+"intro.convert.detail" = "Wandle Videos und Bilder in passende Formate um.";
+
+"intro.storage.title" = "Dateien scannen und prüfen";
+"intro.storage.detail" = "Wähle Dateien oder Ordner, prüfe die Ergebnisse und bestätige das Löschen.";
+
+"intro.walk.media.1" = "Auf der Startseite eine Fotokategorie öffnen";
+"intro.walk.media.2" = "Zu entfernende Elemente auswählen";
+"intro.walk.media.3" = "Prüfen und Löschen bestätigen";
+"intro.walk.storage.1" = "Auf der Startseite … und Speicher wählen";
+"intro.walk.storage.2" = "Dateien oder Ordner wählen und Scan prüfen";
+"intro.walk.storage.3" = "Dateien auswählen und Löschen bestätigen";
+"intro.walk.compress.1" = "Auf der Startseite eine Komprimierungskategorie wählen";
+"intro.walk.compress.2" = "Elemente auswählen und komprimieren";
+"intro.walk.compress.3" = "Bestätigen und Komprimierung starten";
+"intro.walk.convert.1" = "Auf der Startseite … und Formatkonvertierung wählen";
+"intro.walk.convert.2" = "Dateien importieren, Format und Bitrate wählen";
+"intro.walk.convert.3" = "Konvertieren und speichern oder teilen";

@@ -9,6 +9,7 @@
 //
 
 import SwiftUI
+import ImageFormatConversionKit
 
 /// 呈现清理分类及选择汇总，通过确认流程将删除请求交给状态对象。
 struct MediaQuickCleanView: View {
@@ -172,10 +173,8 @@ struct MediaQuickCleanView: View {
             LazyVStack(spacing: 12) {
                 summaryCard
 
-                ForEach(presentedCategories) { category in
-                    categoryButton(category)
-                        .id(category.id)
-                }
+                categoryGroup("Photos", symbol: "photo", isVideo: false)
+                categoryGroup("Videos", symbol: "video.fill", isVideo: true)
 
                 Text("Sizes are approximate. Categories can overlap, and selected items are counted once.")
                     .appTypeface(.footnote, size: 13, relativeTo: .footnote, weight: .regular)
@@ -202,10 +201,50 @@ struct MediaQuickCleanView: View {
                 .accessibilityIdentifier("media.quickClean.totalSize")
             Text(selectedCountText)
                 .foregroundStyle(theme.textSecondary)
+            GeometryReader { proxy in
+                let selected = presentedCategories.filter { viewModel.isSelected($0) }.count
+                let fraction = presentedCategories.isEmpty ? 0 : CGFloat(selected) / CGFloat(presentedCategories.count)
+                Capsule().fill(theme.accentPrimary.opacity(0.15))
+                    .overlay(alignment: .leading) {
+                        Capsule().fill(theme.accentPrimary.opacity(0.8))
+                            .frame(width: proxy.size.width * fraction)
+                    }
+            }
+            .frame(height: 12)
+            .accessibilityHidden(true)
+            .padding(.top, 6)
         }
-        .padding(18)
+        .padding(.vertical, 12)
         .frame(maxWidth: .infinity)
-        .appContentCard()
+    }
+
+    private func categoryGroup(_ title: LocalizedStringKey, symbol: String, isVideo: Bool) -> some View {
+        let categories = presentedCategories.filter { category in
+            switch category.id {
+            case .videos, .screenRecordings, .longVideos, .fourKVideos, .slowMotionVideos: isVideo
+            default: !isVideo
+            }
+        }
+        return Group {
+            if !categories.isEmpty {
+                VStack(alignment: .leading, spacing: 0) {
+                    Label(title, systemImage: symbol)
+                        .appTypeface(.headline, size: 18, relativeTo: .headline, weight: .semibold)
+                        .foregroundStyle(theme.textPrimary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    VStack(spacing: 0) {
+                        ForEach(Array(categories.enumerated()), id: \.element.id) { index, category in
+                            if index > 0 { Divider().padding(.horizontal, 14) }
+                            categoryButton(category).id(category.id)
+                        }
+                    }
+                    .background(theme.cardSurface, in: RoundedRectangle(cornerRadius: 16))
+                }
+                .background(theme.cardElevated.opacity(0.65), in: RoundedRectangle(cornerRadius: 20))
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+            }
+        }
     }
 
     /// 展示分类及选择状态；正在处理删除的分类继续保留选中外观。
@@ -219,7 +258,7 @@ struct MediaQuickCleanView: View {
                 Image(systemName: category.systemImage)
                     .appTypeface(.title3.weight(.semibold), size: 20, relativeTo: .title3, weight: .semibold)
                     .foregroundStyle(isSelected ? theme.accentPrimary : theme.textSecondary)
-                    .frame(width: 44, height: 44)
+                    .frame(width: 38, height: 38)
                     .background(
                         isSelected ? theme.accentPrimary.opacity(0.16) : theme.cardElevated,
                         in: Circle()
@@ -229,28 +268,26 @@ struct MediaQuickCleanView: View {
                     Text(category.title)
                         .appTypeface(.headline, size: 17, relativeTo: .headline, weight: .semibold)
                         .foregroundStyle(theme.textPrimary)
-                    Text(categoryDetail(category))
+                    Text(String.localizedStringWithFormat(AppL10n.string("%lld items"), Int64(category.assetIDs.count)))
                         .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .regular)
                         .foregroundStyle(theme.textSecondary)
                 }
 
                 Spacer(minLength: 8)
-
+                Text(ByteCountFormatter.string(fromByteCount: viewModel.estimatedByteCount(for: category), countStyle: .file))
+                    .appTypeface(.subheadline, size: 15, relativeTo: .subheadline, weight: .semibold)
+                    .foregroundStyle(theme.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .appTypeface(.title2, size: 22, relativeTo: .title2, weight: .regular)
                     .foregroundStyle(isSelected ? theme.accentPrimary : theme.textTertiary)
                     .accessibilityHidden(true)
             }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .appContentCard(cornerRadius: 20)
-            .overlay {
-                if isSelected {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(theme.accentPrimary, lineWidth: 2)
-                }
-            }
-            .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
+            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
         .opacity(dissolvingCategoryIDs.contains(category.id) ? 0 : 1)
@@ -270,42 +307,65 @@ struct MediaQuickCleanView: View {
     }
 
     private var cleanupBar: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(selectedCountText)
-                    .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
-                    .foregroundStyle(theme.textPrimary)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                cleanupSelectionSummary
+                Spacer(minLength: 8)
+                cleanupButton
             }
-
-            Spacer(minLength: 8)
-
-            Button(role: .destructive) {
-                guard accessStore.allows(.quickClean) else {
-                    showsPremium = true
-                    return
-                }
-                isDeleteConfirmationPresented = true
-            } label: {
-                if photoLibrary.deletionState.isDeleting {
-                    ProgressView()
-                } else {
-                    Label("Clean Up", systemImage: "trash")
-                }
+            VStack(alignment: .leading, spacing: 10) {
+                cleanupSelectionSummary
+                cleanupButton.frame(maxWidth: .infinity, alignment: .trailing)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(theme.negativeRed)
-            .disabled(
-                viewModel.selectedAssetCount == 0
-                    || photoLibrary.deletionState.isDeleting
-                    || isAnimatingDeletion
-            )
-            .accessibilityIdentifier("media.quickClean.delete")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .appContentCard()
-        .padding(.horizontal, 12)
-        .padding(.bottom, 4)
+        .background(theme.cardSurface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(theme.textPrimary, lineWidth: 2.5)
+        }
+        .background {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(theme.textPrimary).offset(x: 4, y: 4)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
+    private var cleanupSelectionSummary: some View {
+        Text(selectedCountText)
+            .appTypeface(.subheadline.weight(.semibold), size: 15, relativeTo: .subheadline, weight: .semibold)
+            .foregroundStyle(theme.textPrimary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var cleanupButton: some View {
+        ConversionActionButton(
+            title: AppL10n.string("Clean Up"),
+            systemImage: "trash",
+            accentColor: theme.accentPrimary,
+            foregroundColor: theme.textPrimary
+        ) {
+            guard accessStore.allows(.quickClean) else {
+                showsPremium = true
+                return
+            }
+            isDeleteConfirmationPresented = true
+        }
+        .frame(minHeight: 44)
+        .overlay {
+            if photoLibrary.deletionState.isDeleting {
+                ProgressView().padding(6).background(theme.cardSurface, in: Circle())
+            }
+        }
+        .disabled(
+            viewModel.selectedAssetCount == 0
+                || photoLibrary.deletionState.isDeleting
+                || isAnimatingDeletion
+        )
+        .opacity(viewModel.selectedAssetCount == 0 ? 0.48 : 1)
+        .accessibilityIdentifier("media.quickClean.delete")
     }
 
     private var emptyContent: some View {

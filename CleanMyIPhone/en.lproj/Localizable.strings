@@ -576,6 +576,7 @@
 "quick.compress.title" = "Compress";
 
 "quick.video" = "Compress videos";
+"premium.feature.videoCompression" = "Compress videos";
 
 "quick.image" = "Compress photos";
 
@@ -591,9 +592,9 @@
 
 "quick.originals" = "Creates new copies. Originals stay untouched. Results may be larger; compare before replacing.";
 
-"premium.free.summary" = "Free: review and delete media, compress and convert videos.";
+"premium.free.summary" = "Free: quick cleanup, media review and deletion, and video conversion.";
 
-"premium.value.summary" = "Premium: clean categories together, convert images and audio, organize folders, and customize your look.";
+"premium.value.summary" = "Premium: compress videos, convert images and audio, clean up files, and customize your look.";
 
 "quick.free" = "Free";
 
@@ -649,3 +650,22 @@
 
 "premium.hero.title" = "Free Up More Space";
 "premium.hero.subtitle" = "Unlock cleanup and media tools.";
+
+"intro.convert.title" = "Convert formats with ease";
+"intro.convert.detail" = "Convert videos and images into formats that fit your needs.";
+
+"intro.storage.title" = "Scan and review files";
+"intro.storage.detail" = "Choose files or folders, review the scan, then confirm what to delete.";
+
+"intro.walk.media.1" = "On Home, open a photo category";
+"intro.walk.media.2" = "Select items to remove";
+"intro.walk.media.3" = "Review and confirm deletion";
+"intro.walk.storage.1" = "On Home, tap … then Storage";
+"intro.walk.storage.2" = "Choose files or a folder and review the scan";
+"intro.walk.storage.3" = "Select files and confirm deletion";
+"intro.walk.compress.1" = "On Home, choose a compression category";
+"intro.walk.compress.2" = "Select items and tap Compress";
+"intro.walk.compress.3" = "Confirm to start compression";
+"intro.walk.convert.1" = "On Home, tap … then Format Conversion";
+"intro.walk.convert.2" = "Import files, then choose format and bitrate";
+"intro.walk.convert.3" = "Convert, then save or share";

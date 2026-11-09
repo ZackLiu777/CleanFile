@@ -578,6 +578,7 @@
 "quick.compress.title" = "Komprimera";
 
 "quick.video" = "Komprimera videor";
+"premium.feature.videoCompression" = "Komprimera videor";
 
 "quick.image" = "Komprimera bilder";
 
@@ -593,9 +594,9 @@
 
 "quick.originals" = "Skapar nya kopior och behåller originalen. Resultatet kan bli större; jämför innan du ersätter.";
 
-"premium.free.summary" = "Gratis: granska och radera medier, komprimera och konvertera videor.";
+"premium.free.summary" = "Gratis: snabbstädning, granskning och radering av medier samt videokonvertering.";
 
-"premium.value.summary" = "Premium: städa flera kategorier, konvertera bilder och ljud, ordna mappar och anpassa utseendet.";
+"premium.value.summary" = "Premium: videokomprimering, konvertering av bilder och ljud, filstädning och anpassat utseende.";
 
 "quick.free" = "Gratis";
 
@@ -651,3 +652,22 @@
 
 "premium.hero.title" = "Frigör mer utrymme";
 "premium.hero.subtitle" = "Lås upp verktyg för rensning och media.";
+
+"intro.convert.title" = "Konvertera format enkelt";
+"intro.convert.detail" = "Konvertera videor och bilder till önskat format.";
+
+"intro.storage.title" = "Skanna och granska filer";
+"intro.storage.detail" = "Välj filer eller mappar, granska resultatet och bekräfta vad som ska raderas.";
+
+"intro.walk.media.1" = "Öppna en fotokategori på startsidan";
+"intro.walk.media.2" = "Välj objekt att ta bort";
+"intro.walk.media.3" = "Granska och bekräfta borttagning";
+"intro.walk.storage.1" = "Tryck på … på startsidan och välj Lagring";
+"intro.walk.storage.2" = "Välj filer eller en mapp och granska skanningen";
+"intro.walk.storage.3" = "Välj filer och bekräfta borttagning";
+"intro.walk.compress.1" = "Välj en komprimeringskategori på startsidan";
+"intro.walk.compress.2" = "Välj objekt och tryck på Komprimera";
+"intro.walk.compress.3" = "Bekräfta för att starta komprimeringen";
+"intro.walk.convert.1" = "Tryck på … på startsidan och välj Formatkonvertering";
+"intro.walk.convert.2" = "Importera filer och välj format och bithastighet";
+"intro.walk.convert.3" = "Konvertera och spara eller dela";

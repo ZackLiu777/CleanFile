@@ -260,31 +260,34 @@ final class PremiumFreeTierUITests: XCTestCase {
         XCTAssertTrue(chart.waitForExistence(timeout: 5))
     }
 
-    /// 验证快速清理的权益提示可关闭，关闭后仍可使用媒体页面。
+    /// 验证免费用户可以进入快速清理页面。
     @MainActor
-    func testQuickCleanupRequiresPremiumButCanBeDismissedWithoutBlockingMedia() {
+    func testQuickCleanupIsAvailableWithoutPremium() {
         let app = launchFreeApp()
+        let menu = app.buttons["media.more"]
+        XCTAssertTrue(menu.waitForExistence(timeout: 5))
+        menu.tap()
         let quickClean = app.buttons["media.quickClean.open"]
         XCTAssertTrue(quickClean.waitForExistence(timeout: 5))
         XCTAssertTrue(quickClean.isEnabled)
         quickClean.tap()
-        XCTAssertTrue(app.buttons["premium.close"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["premium.requiredFeature"].exists)
-        XCTAssertFalse(app.buttons["media.quickClean.delete"].exists)
-        app.buttons["premium.close"].tap()
+        XCTAssertTrue(app.navigationBars["Quick Cleanup"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["premium.close"].exists)
+        app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(app.buttons["media.settings"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["media.settings"].isEnabled)
         tab(in: app, id: "tab.convert", label: "Convert").tap()
         XCTAssertTrue(app.buttons["conversion.home.video"].waitForExistence(timeout: 5))
     }
 
-    /// 验证缺少高级权益和照片权限时仍可进入快速视频压缩分类。
+    /// 验证免费用户可预览视频压缩入口，且入口标注 Premium。
     @MainActor
-    func testQuickVideoCompressionOpensCategoryWithoutPremiumOrPhotoPermission() {
+    func testQuickVideoCompressionShowsPremiumAndAllowsEmptyPreview() {
         let app = launchFreeApp()
         let shortcut = app.buttons["media.compress.video"]
         for _ in 0..<6 where !shortcut.isHittable { app.swipeUp() }
         XCTAssertTrue(shortcut.waitForExistence(timeout: 5))
+        XCTAssertTrue(shortcut.staticTexts["Premium"].exists)
         shortcut.tap()
         XCTAssertTrue(app.navigationBars["Compress videos"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.descendants(matching: .any)["media.compression.empty"].exists)

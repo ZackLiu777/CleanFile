@@ -17,18 +17,18 @@ import Testing
 @Suite("Premium feature access")
 @MainActor
 struct PremiumFeatureAccessTests {
-    /// 遍历功能，确认未订阅时媒体、视频转换和深色外观可用。
+    /// 遍历功能，确认未订阅时快速清理、媒体、视频转换和深色外观可用。
     @Test("Free access is limited by feature, never by batch size", arguments: PremiumFeature.allCases)
     func freeFeatureMatrix(feature: PremiumFeature) {
         let access = PremiumFeatureAccessStore(accessState: .notEntitled)
-        #expect(access.allows(feature) == [.media, .videoConversion, .darkAppearance].contains(feature))
+        #expect(access.allows(feature) == [.media, .quickClean, .videoConversion, .darkAppearance].contains(feature))
     }
 
     /// 权益待验证时保留免费功能和已保存的高级外观。
     @Test("Pending verification keeps free features available", arguments: PremiumFeature.allCases)
     func pendingFeatureMatrix(feature: PremiumFeature) {
         let access = PremiumFeatureAccessStore()
-        #expect(access.allows(feature) == [.media, .videoConversion, .darkAppearance].contains(feature))
+        #expect(access.allows(feature) == [.media, .quickClean, .videoConversion, .darkAppearance].contains(feature))
         #expect(access.preservesPremiumAppearance)
     }
 
@@ -52,6 +52,7 @@ struct PremiumFeatureAccessTests {
         cancelled.finish()
         #expect(access.conversionPolicy.reserve(.video, 1_000) != nil)
         #expect(access.conversionPolicy.reserve(.images, 1) == nil)
+        #expect(access.conversionPolicy.reserve(.videoCompression, 1) == nil)
         #expect(access.conversionPolicy.reserve(.audio, 1) == nil)
         #expect(access.conversionPolicy.reserve(.video, 0) == nil)
         #expect(access.conversionPolicy.reserve(.video, -1) == nil)
@@ -65,7 +66,7 @@ struct PremiumFeatureAccessTests {
         #expect(!policy.allows(.images))
         #expect(policy.reserve(.images, 1) == nil)
         access.update(.entitled)
-        for category in [ConversionUsageCategory.images, .video, .audio] {
+        for category in [ConversionUsageCategory.images, .video, .videoCompression, .audio] {
             #expect(policy.allows(category))
             let permit = try #require(policy.reserve(category, 1_000))
             permit.recordSuccess(1_000)
@@ -75,6 +76,7 @@ struct PremiumFeatureAccessTests {
         #expect(!policy.allows(.images))
         #expect(policy.reserve(.images, 1) == nil)
         #expect(policy.reserve(.audio, 1) == nil)
+        #expect(policy.reserve(.videoCompression, 1) == nil)
         #expect(policy.reserve(.video, 1_000) != nil)
         #expect(access.allows(.media))
         #expect(!access.allows(.storage))
@@ -120,15 +122,15 @@ struct PremiumFeatureAccessTests {
         #expect(model.deletionState == .idle)
     }
 
-    /// 免费用户可浏览和选择候选，但执行清理仍需通过权限检查。
-    @Test("Free users can select quick cleanup items but execution still requires Premium")
+    /// 免费用户可以清理，同时保留执行时注入的权限检查。
+    @Test("Quick cleanup is free and still checks its execution policy")
     func quickCleanExecutionGate() async {
         let access = PremiumFeatureAccessStore(accessState: .notEntitled)
         let library = PhotoLibraryViewModel()
         var accessChecks = 0
         let model = MediaQuickCleanViewModel(photoLibrary: library, canUseQuickClean: {
             accessChecks += 1
-            return access.allows(.quickClean)
+            return false
         })
         let category = MediaQuickCleanViewModel.Category(
             id: .screenshots, title: "Screenshots", systemImage: "iphone", assetIDs: ["example"]
@@ -146,15 +148,13 @@ struct PremiumFeatureAccessTests {
         #expect(model.selectedCategoryIDs.isEmpty)
         model.toggleAllCategories()
         #expect(accessChecks == 1)
-        access.update(.entitled)
         model.toggle(category)
-        access.update(.notEntitled)
         let expired = await model.deleteSelection()
         #expect(!expired)
         #expect(model.selectedCategoryIDs == [.screenshots])
         #expect(library.deletionState == .idle)
         #expect(access.allows(.media))
-        #expect(!access.allows(.quickClean))
+        #expect(access.allows(.quickClean))
     }
 
     /// 解锁存储权限本身不会伪造选择的目录、汇总或文件树。

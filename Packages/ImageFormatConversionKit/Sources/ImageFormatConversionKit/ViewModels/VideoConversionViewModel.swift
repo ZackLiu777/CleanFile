@@ -244,7 +244,7 @@ public final class VideoConversionViewModel {
             default: false
             }
         }.count
-        guard let permit = usagePolicy.reserve(.video, count) else {
+        guard let permit = usagePolicy.reserve(usingQuickPreset ? .videoCompression : .video, count) else {
             isPremiumRequiredPresented = true
             return
         }

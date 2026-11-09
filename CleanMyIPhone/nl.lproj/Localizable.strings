@@ -578,6 +578,7 @@
 "quick.compress.title" = "Comprimeren";
 
 "quick.video" = "Video's comprimeren";
+"premium.feature.videoCompression" = "Video's comprimeren";
 
 "quick.image" = "Foto's comprimeren";
 
@@ -593,9 +594,9 @@
 
 "quick.originals" = "Maakt nieuwe kopieën en bewaart originelen. Het resultaat kan groter zijn; vergelijk vóór vervangen.";
 
-"premium.free.summary" = "Gratis: media bekijken en verwijderen, video's comprimeren en converteren.";
+"premium.free.summary" = "Gratis: snel opruimen, media bekijken en verwijderen en video converteren.";
 
-"premium.value.summary" = "Premium: categorieën samen opruimen, afbeeldingen en audio converteren, mappen ordenen en het uiterlijk aanpassen.";
+"premium.value.summary" = "Premium: video comprimeren, afbeeldingen en audio converteren, bestanden opruimen en het uiterlijk aanpassen.";
 
 "quick.free" = "Gratis";
 
@@ -651,3 +652,22 @@
 
 "premium.hero.title" = "Maak meer ruimte vrij";
 "premium.hero.subtitle" = "Ontgrendel opruim- en mediatools.";
+
+"intro.convert.title" = "Converteer eenvoudig formaten";
+"intro.convert.detail" = "Converteer video’s en afbeeldingen naar het gewenste formaat.";
+
+"intro.storage.title" = "Scan en bekijk bestanden";
+"intro.storage.detail" = "Kies bestanden of mappen, bekijk de resultaten en bevestig wat je wilt verwijderen.";
+
+"intro.walk.media.1" = "Open op het beginscherm een fotocategorie";
+"intro.walk.media.2" = "Selecteer te verwijderen onderdelen";
+"intro.walk.media.3" = "Controleer en bevestig het verwijderen";
+"intro.walk.storage.1" = "Tik op het beginscherm op … en kies Opslag";
+"intro.walk.storage.2" = "Kies bestanden of een map en bekijk de scan";
+"intro.walk.storage.3" = "Selecteer bestanden en bevestig verwijderen";
+"intro.walk.compress.1" = "Kies op het beginscherm een compressiecategorie";
+"intro.walk.compress.2" = "Selecteer onderdelen en tik op Comprimeren";
+"intro.walk.compress.3" = "Bevestig om de compressie te starten";
+"intro.walk.convert.1" = "Tik op het beginscherm op … en kies Formaatconversie";
+"intro.walk.convert.2" = "Importeer bestanden en kies formaat en bitsnelheid";
+"intro.walk.convert.3" = "Converteer en bewaar of deel";

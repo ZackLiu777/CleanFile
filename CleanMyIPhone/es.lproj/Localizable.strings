@@ -576,6 +576,7 @@
 "quick.compress.title" = "Comprimir";
 
 "quick.video" = "Comprimir vídeos";
+"premium.feature.videoCompression" = "Comprimir vídeos";
 
 "quick.image" = "Comprimir fotos";
 
@@ -591,9 +592,9 @@
 
 "quick.originals" = "Crea copias nuevas y conserva los originales. El resultado puede ser mayor; compara antes de reemplazar.";
 
-"premium.free.summary" = "Gratis: revisar y borrar contenido, comprimir y convertir vídeos.";
+"premium.free.summary" = "Gratis: limpieza rápida, revisión y eliminación de contenido y conversión de vídeo.";
 
-"premium.value.summary" = "Premium: limpiar categorías juntas, convertir imágenes y audio, organizar carpetas y personalizar el aspecto.";
+"premium.value.summary" = "Premium: compresión de vídeo, conversión de imágenes y audio, limpieza de archivos y personalización.";
 
 "quick.free" = "Gratis";
 
@@ -649,3 +650,22 @@
 
 "premium.hero.title" = "Libera más espacio";
 "premium.hero.subtitle" = "Desbloquea herramientas de limpieza y multimedia.";
+
+"intro.convert.title" = "Convierte formatos fácilmente";
+"intro.convert.detail" = "Convierte vídeos e imágenes al formato que necesitas.";
+
+"intro.storage.title" = "Analiza y revisa archivos";
+"intro.storage.detail" = "Elige archivos o carpetas, revisa los resultados y confirma qué eliminar.";
+
+"intro.walk.media.1" = "En Inicio, abre una categoría de fotos";
+"intro.walk.media.2" = "Selecciona los elementos que quieres eliminar";
+"intro.walk.media.3" = "Revisa y confirma la eliminación";
+"intro.walk.storage.1" = "En Inicio, pulsa … y elige Almacenamiento";
+"intro.walk.storage.2" = "Elige archivos o una carpeta y revisa el análisis";
+"intro.walk.storage.3" = "Selecciona archivos y confirma su eliminación";
+"intro.walk.compress.1" = "En Inicio, elige una categoría de compresión";
+"intro.walk.compress.2" = "Selecciona elementos y pulsa Comprimir";
+"intro.walk.compress.3" = "Confirma para empezar la compresión";
+"intro.walk.convert.1" = "En Inicio, pulsa … y elige Conversión de formato";
+"intro.walk.convert.2" = "Importa archivos y elige formato y tasa de bits";
+"intro.walk.convert.3" = "Convierte y guarda o comparte";

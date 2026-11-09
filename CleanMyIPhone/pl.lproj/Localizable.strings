@@ -576,6 +576,7 @@
 "quick.compress.title" = "Kompresuj";
 
 "quick.video" = "Kompresuj filmy";
+"premium.feature.videoCompression" = "Kompresuj filmy";
 
 "quick.image" = "Kompresuj zdjęcia";
 
@@ -591,9 +592,9 @@
 
 "quick.originals" = "Tworzy nowe kopie i zachowuje oryginały. Wynik może być większy; porównaj przed zastąpieniem.";
 
-"premium.free.summary" = "Bezpłatnie: przeglądaj i usuwaj multimedia, kompresuj i konwertuj filmy.";
+"premium.free.summary" = "Bezpłatnie: szybkie czyszczenie, przeglądanie i usuwanie multimediów oraz konwersja filmów.";
 
-"premium.value.summary" = "Premium: czyść wiele kategorii, konwertuj obrazy i dźwięk, porządkuj foldery i dostosuj wygląd.";
+"premium.value.summary" = "Premium: kompresja filmów, konwersja obrazów i dźwięku, czyszczenie plików i personalizacja wyglądu.";
 
 "quick.free" = "Bezpłatnie";
 
@@ -649,3 +650,22 @@
 
 "premium.hero.title" = "Zwolnij więcej miejsca";
 "premium.hero.subtitle" = "Odblokuj narzędzia do czyszczenia i multimediów.";
+
+"intro.convert.title" = "Łatwo konwertuj formaty";
+"intro.convert.detail" = "Konwertuj filmy i obrazy do odpowiednich formatów.";
+
+"intro.storage.title" = "Skanuj i przeglądaj pliki";
+"intro.storage.detail" = "Wybierz pliki lub foldery, przejrzyj wyniki i potwierdź usunięcie.";
+
+"intro.walk.media.1" = "Na ekranie głównym otwórz kategorię zdjęć";
+"intro.walk.media.2" = "Wybierz elementy do usunięcia";
+"intro.walk.media.3" = "Sprawdź i potwierdź usunięcie";
+"intro.walk.storage.1" = "Na ekranie głównym stuknij … i wybierz Pamięć";
+"intro.walk.storage.2" = "Wybierz pliki lub folder i sprawdź skanowanie";
+"intro.walk.storage.3" = "Wybierz pliki i potwierdź usunięcie";
+"intro.walk.compress.1" = "Na ekranie głównym wybierz kategorię kompresji";
+"intro.walk.compress.2" = "Wybierz elementy i stuknij Kompresuj";
+"intro.walk.compress.3" = "Potwierdź, aby rozpocząć kompresję";
+"intro.walk.convert.1" = "Na ekranie głównym stuknij … i wybierz Konwersja formatu";
+"intro.walk.convert.2" = "Importuj pliki, wybierz format i przepływność";
+"intro.walk.convert.3" = "Konwertuj, a potem zapisz lub udostępnij";

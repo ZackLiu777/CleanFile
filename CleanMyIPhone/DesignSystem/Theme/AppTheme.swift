@@ -532,6 +532,37 @@ struct Theme: Sendable {
         preferredColorScheme: nil
     )
 
+    /// 在 SwiftUI 已确定的明暗外观下固定系统语义色，确保页面和弹窗采用同一套颜色。
+    func resolvingSystemColors(for scheme: ColorScheme) -> Theme {
+        let traits = UITraitCollection(userInterfaceStyle: scheme == .dark ? .dark : .light)
+        func resolved(_ color: UIColor) -> Color { Color(uiColor: color.resolvedColor(with: traits)) }
+        return Theme(
+            background: .solid(resolved(.systemGroupedBackground)),
+            backgroundPrimary: resolved(.systemGroupedBackground),
+            backgroundSecondary: resolved(.secondarySystemGroupedBackground),
+            backgroundGrouped: resolved(.systemGroupedBackground),
+            cardSurface: resolved(.secondarySystemGroupedBackground),
+            cardElevated: resolved(.tertiarySystemGroupedBackground),
+            textPrimary: resolved(.label),
+            textSecondary: resolved(.secondaryLabel),
+            textTertiary: resolved(.tertiaryLabel),
+            textInverted: textInverted,
+            accentPrimary: accentPrimary,
+            accentSecondary: accentSecondary,
+            positiveGreen: positiveGreen,
+            negativeRed: negativeRed,
+            warningOrange: warningOrange,
+            divider: resolved(.separator),
+            navigationBackground: resolved(.systemGroupedBackground),
+            emptyStateIcon: resolved(.secondaryLabel),
+            buttonPrimaryBackground: buttonPrimaryBackground,
+            buttonDisabledForeground: resolved(.tertiaryLabel),
+            liquidGlassEnabled: liquidGlassEnabled,
+            liquidGlassCardsEnabled: liquidGlassCardsEnabled,
+            preferredColorScheme: nil
+        )
+    }
+
     static let porcelain = Theme(
         background: .solid(Color(red: 0.949, green: 0.965, blue: 0.969)),
         backgroundPrimary: Color(red: 0.949, green: 0.965, blue: 0.969),
@@ -963,6 +994,12 @@ final class ThemeSettings: ObservableObject {
         baseTheme
             .applyingAccent(selectedAccentColor)
             .applyingLiquidGlassCards(liquidGlassCardsEnabled)
+    }
+    /// 系统主题根据当前实际外观解析，固定主题和自定义背景沿用原有定义。
+    func theme(for scheme: ColorScheme) -> Theme {
+        let current = theme
+        guard effectiveThemeID == .system, !isUsingCustomBackground else { return current }
+        return current.resolvingSystemColors(for: scheme)
     }
     var effectiveColorScheme: ColorScheme? {
         theme.preferredColorScheme ?? appearance.colorScheme

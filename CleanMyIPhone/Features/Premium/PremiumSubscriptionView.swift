@@ -3,6 +3,33 @@
 // 大字号或紧凑窗口使用可滚动操作区，避免底部控件遮挡内容。
 import SwiftUI
 
+/// Premium 独立的浅色和深色界面配色，不依赖另一种外观的半透明颜色。
+private struct PremiumPalette {
+    let background: Color
+    let text: Color
+    let secondaryText: Color
+    let surface: Color
+    let border: Color
+    let controlSurface: Color
+
+    static let light = PremiumPalette(
+        background: Color(red: 0.96, green: 0.97, blue: 0.96),
+        text: Color(red: 0.08, green: 0.12, blue: 0.11),
+        secondaryText: Color(red: 0.30, green: 0.34, blue: 0.33),
+        surface: .white,
+        border: .black.opacity(0.14),
+        controlSurface: .black.opacity(0.06)
+    )
+    static let dark = PremiumPalette(
+        background: Color(red: 0.06, green: 0.07, blue: 0.07),
+        text: .white,
+        secondaryText: .white.opacity(0.7),
+        surface: .white.opacity(0.06),
+        border: .white.opacity(0.12),
+        controlSurface: .white.opacity(0.07)
+    )
+}
+
 /// 展示订阅方案并将购买、恢复和核验重试交给状态对象处理。
 struct PremiumSubscriptionView: View {
     @Environment(\.appTheme) private var theme
@@ -11,6 +38,7 @@ struct PremiumSubscriptionView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @EnvironmentObject private var entitlementStore: PremiumEntitlementStore
+    @EnvironmentObject private var themeSettings: ThemeSettings
     @StateObject private var purchaseModel = PremiumPurchaseViewModel()
 
     // 与用户当前选中的强调色保持同步，包括自定义颜色。
@@ -19,16 +47,14 @@ struct PremiumSubscriptionView: View {
         AppThemeColor.resolved(from: theme.accentPrimary, fallback: .black).preferredForeground.color
     }
     // 明暗外观分别采用完整配色，强调色继续跟随用户的主题设置。
-    private var isLight: Bool { colorScheme == .light }
-    private var premiumBackground: Color {
-        isLight ? Color(red: 0.96, green: 0.97, blue: 0.96) : Color(red: 0.06, green: 0.07, blue: 0.07)
-    }
-    private var premiumText: Color { isLight ? Color(red: 0.08, green: 0.12, blue: 0.11) : .white }
-    private var premiumSecondaryText: Color {
-        isLight ? Color(red: 0.30, green: 0.34, blue: 0.33) : .white.opacity(0.7)
-    }
-    private var premiumSurface: Color { isLight ? .white : .white.opacity(0.06) }
-    private var premiumBorder: Color { isLight ? .black.opacity(0.14) : .white.opacity(0.12) }
+    private var resolvedScheme: ColorScheme { themeSettings.effectiveColorScheme ?? colorScheme }
+    private var isLight: Bool { resolvedScheme == .light }
+    private var palette: PremiumPalette { isLight ? .light : .dark }
+    private var premiumBackground: Color { palette.background }
+    private var premiumText: Color { palette.text }
+    private var premiumSecondaryText: Color { palette.secondaryText }
+    private var premiumSurface: Color { palette.surface }
+    private var premiumBorder: Color { palette.border }
     private var readableAccent: Color {
         let accent = AppThemeColor.resolved(from: theme.accentPrimary, fallback: .black)
         let background = AppThemeColor.resolved(from: premiumBackground, fallback: isLight ? .white : .black)
@@ -85,6 +111,7 @@ struct PremiumSubscriptionView: View {
             if state == .entitled, allowsDismiss { dismiss() }
         }
         .presentationDetents([.large])
+        .preferredColorScheme(resolvedScheme)
         .accessibilityIdentifier("premium.screen")
     }
 
@@ -248,9 +275,9 @@ struct PremiumSubscriptionView: View {
     /// 三列固定布局避免长文案触发整列纵向回退；文字可换行。
     private var features: some View {
         HStack(alignment: .top, spacing: 0) {
-            feature(title: AppL10n.string("Quick Cleanup") + " · " + AppL10n.string("premium.storage.title"), symbol: "sparkles")
+            feature(title: AppL10n.string("premium.feature.videoCompression"), symbol: "video")
+            feature(title: AppL10n.string("premium.storage.title"), symbol: "folder")
             feature(title: AppL10n.string("premium.feature.compression.title"), symbol: "arrow.triangle.2.circlepath")
-            feature(title: AppL10n.string("premium.feature.appearance.title"), symbol: "paintpalette")
         }
         .frame(maxWidth: .infinity)
         .accessibilityIdentifier("premium.features")
@@ -377,12 +404,15 @@ struct PremiumSubscriptionView: View {
                     .font(.system(.headline, design: .rounded, weight: .semibold))
                     .foregroundStyle(readableAccent)
                 if allowsDismiss {
-                    Button(AppL10n.string("Done")) { dismiss() }
-                        .font(.system(.headline, design: .rounded, weight: .semibold))
-                        .foregroundStyle(purchaseTextColor)
-                        .frame(maxWidth: .infinity, minHeight: 48)
-                        .background(premiumMint, in: RoundedRectangle(cornerRadius: 24))
-                        .buttonStyle(.plain)
+                    Button { dismiss() } label: {
+                        Text(AppL10n.string("Done"))
+                            .font(.system(.headline, design: .rounded, weight: .semibold))
+                            .foregroundStyle(purchaseTextColor)
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .background(premiumMint, in: RoundedRectangle(cornerRadius: 24))
+                            .contentShape(RoundedRectangle(cornerRadius: 24))
+                    }
+                    .buttonStyle(.plain)
                 }
             } else {
                 if let feedback = purchaseModel.feedback {
@@ -461,7 +491,7 @@ struct PremiumSubscriptionView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 7)
             .frame(maxWidth: .infinity, minHeight: 44)
-            .background(isLight ? .black.opacity(0.06) : .white.opacity(0.07), in: RoundedRectangle(cornerRadius: 28))
+            .background(palette.controlSurface, in: RoundedRectangle(cornerRadius: 28))
             .contentShape(RoundedRectangle(cornerRadius: 28))
         }
         .buttonStyle(.plain)

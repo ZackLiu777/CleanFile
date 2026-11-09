@@ -20,6 +20,7 @@ struct SegmentedStreamSlider: View {
     private let step: Double
     private let totalSegments: Int
     private let title: String
+    private let pausesAnimation: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.conversionTheme) private var theme
@@ -30,13 +31,15 @@ struct SegmentedStreamSlider: View {
         in range: ClosedRange<Double> = 0.1 ... 1,
         step: Double = 0.1,
         totalSegments: Int = 10,
-        title: String = L10n.string("settings.quality")
+        title: String = L10n.string("settings.quality"),
+        pausesAnimation: Bool = false
     ) {
         _value = value
         self.range = range
         self.step = step
         self.totalSegments = max(totalSegments, 2)
         self.title = title
+        self.pausesAnimation = pausesAnimation
     }
 
     var body: some View {
@@ -55,8 +58,8 @@ struct SegmentedStreamSlider: View {
             }
 
             GeometryReader { geometry in
-                TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion)) { timeline in
-                    let streamOffset = reduceMotion ? 0 : streamOffset(at: timeline.date)
+                TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion || pausesAnimation)) { timeline in
+                    let streamOffset = (reduceMotion || pausesAnimation) ? 0 : streamOffset(at: timeline.date)
 
                     HStack(spacing: 4) {
                         ForEach(0 ..< totalSegments, id: \.self) { index in
@@ -120,7 +123,7 @@ struct SegmentedStreamSlider: View {
                             : AnyShapeStyle(theme.textSecondary.opacity(0.10))
                     )
 
-                if isActive, !reduceMotion {
+                if isActive, !reduceMotion, !pausesAnimation {
                     RoundedRectangle(cornerRadius: 6, style: .continuous)
                         .fill(
                             LinearGradient(
@@ -163,5 +166,29 @@ struct SegmentedStreamSlider: View {
         let clamped = min(max(newValue, range.lowerBound), range.upperBound)
         let stepped = ((clamped - range.lowerBound) / step).rounded() * step + range.lowerBound
         value = min(max(stepped, range.lowerBound), range.upperBound)
+    }
+}
+
+/// 供产品介绍复用的只读码率控件；不会更改实际转换设置。
+public struct ConversionBitrateDemonstration: View {
+    private let value: Double
+    private let theme: ConversionTheme
+    private let pausesAnimation: Bool
+
+    public init(value: Double, theme: ConversionTheme, pausesAnimation: Bool = false) {
+        self.value = value
+        self.theme = theme
+        self.pausesAnimation = pausesAnimation
+    }
+
+    public var body: some View {
+        SegmentedStreamSlider(
+            value: .constant(value),
+            title: L10n.string("video.settings.bitrate"),
+            pausesAnimation: pausesAnimation
+        )
+        .environment(\.conversionTheme, theme)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }

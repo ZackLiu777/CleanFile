@@ -13,6 +13,7 @@ import SwiftUI
 public enum ConversionUsageCategory: String, Identifiable, Sendable {
     case images
     case video
+    case videoCompression
     case audio
 
     public var id: Self { self }

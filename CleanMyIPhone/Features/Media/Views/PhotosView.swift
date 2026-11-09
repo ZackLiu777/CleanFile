@@ -371,7 +371,7 @@ struct PhotosView: View {
                             viewModel: viewModel
                         )
                         .overlay(alignment: .topTrailing) {
-                            if category != .video && !accessStore.allows(.imageConversion) {
+                            if !accessStore.allows(category == .video ? .videoCompression : .imageConversion) {
                                 Text("Premium").font(.caption.weight(.semibold)).foregroundStyle(.white)
                                     .padding(8).background(.black.opacity(0.5), in: Capsule()).padding(10)
                             }
@@ -964,6 +964,16 @@ private struct MediaCategoryDetailView: View {
         }
     }
 
+    private func reconcileSelection() {
+        // 即使列表已过滤缺失项，旧选择也可能仍持有它们，必须独立收缩选择集合。
+        let availableIDs = Set(visibleAssetIDs)
+        selectedIDs.formIntersection(availableIDs.subtracting(protectedAssetIDs))
+        isDeleteConfirmationPresented = false
+        if let previewAssetID, !availableIDs.contains(previewAssetID) {
+            self.previewAssetID = nil
+        }
+    }
+
     private var visibleAssetIDs: [String] {
         chronologicallySortedAssetIDs
     }
@@ -1173,6 +1183,12 @@ private struct MediaCategoryDetailView: View {
                 viewModel.stopCachingThumbnails(for: preheatedAssetIDs, targetSize: thumbnailTargetSize)
             }
             viewModel.clearDeletionResult()
+        }
+        .onChange(of: visibleAssetIDs) { _, _ in
+            reconcileSelection()
+        }
+        .onChange(of: viewModel.mediaAssetRevision) { _, _ in
+            reconcileSelection()
         }
         // 触觉挂在稳定页面层，确保回执首次插入时也能触发。
         .sensoryFeedback(.success, trigger: deletionSuccessTrigger)

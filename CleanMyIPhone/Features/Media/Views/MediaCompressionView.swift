@@ -16,6 +16,10 @@ struct MediaCompressionView: View {
     @State private var showsPremium = false
     @State private var preparationAttempt = 0
 
+    private var compressionFeature: PremiumFeature {
+        model.category == .video ? .videoCompression : .imageConversion
+    }
+
     /// 连接相册，并为当前媒体分类创建独立的压缩状态对象。
     init(category: MediaCompressionCategory, library: PhotoLibraryViewModel) {
         self.library = library
@@ -69,7 +73,7 @@ struct MediaCompressionView: View {
         .sheet(isPresented: $model.isConfirmationPresented, onDismiss: { model.cancelConfirmation() }) {
             compressionConfirmation
         }
-        .sheet(isPresented: $showsPremium) { PremiumSubscriptionView(requiredFeature: .imageConversion) }
+        .sheet(isPresented: $showsPremium) { PremiumSubscriptionView(requiredFeature: compressionFeature) }
         .onAppear { tabBarVisibility.setHidden(true, source: "media.compression", scope: .media) }
         .onDisappear {
             model.cancelConfirmation()
@@ -100,7 +104,7 @@ struct MediaCompressionView: View {
                 }
                 .accessibilityIdentifier("media.compression.confirm.cancel")
                 Button {
-                    if model.category == .video || accessStore.allows(.imageConversion) { model.confirmCompression() }
+                    if accessStore.allows(compressionFeature) { model.confirmCompression() }
                     else { model.cancelConfirmation(); showsPremium = true }
                 } label: {
                     Text("compression.confirm.action")
@@ -248,7 +252,7 @@ struct MediaCompressionView: View {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(theme.textPrimary).offset(x: 4, y: 4)
                 }
-                if model.category != .video && !accessStore.allows(.imageConversion) {
+                if !accessStore.allows(compressionFeature) {
                     Text("Premium").font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -274,7 +278,7 @@ struct MediaCompressionView: View {
             accentColor: theme.accentPrimary,
             foregroundColor: theme.textPrimary
         ) {
-            if model.category == .video || accessStore.allows(.imageConversion) { model.requestCompression() }
+            if accessStore.allows(compressionFeature) { model.requestCompression() }
             else { showsPremium = true }
         }
         .frame(minHeight: 44)

@@ -216,6 +216,24 @@ struct ThemeEdgeCaseTests {
 @MainActor
 @Suite("Theme settings edge cases")
 struct ThemeSettingsEdgeCaseTests {
+    @Test("System theme resolves background and text for the same appearance")
+    func systemThemeMatchesResolvedAppearance() {
+        let defaults = isolatedDefaults()
+        defaults.set(AppThemeID.system.rawValue, forKey: "appTheme")
+        let settings = ThemeSettings(userDefaults: defaults)
+        let light = settings.theme(for: .light)
+        let dark = settings.theme(for: .dark)
+        let lightBackground = AppThemeColor.resolved(from: light.backgroundPrimary, fallback: .black)
+        let lightText = AppThemeColor.resolved(from: light.textPrimary, fallback: .white)
+        let darkBackground = AppThemeColor.resolved(from: dark.backgroundPrimary, fallback: .white)
+        let darkText = AppThemeColor.resolved(from: dark.textPrimary, fallback: .black)
+
+        #expect(lightBackground.contrastRatio(with: lightText) >= 4.5)
+        #expect(darkBackground.contrastRatio(with: darkText) >= 4.5)
+        #expect(lightBackground.preferredForeground == .black)
+        #expect(darkBackground.preferredForeground == .white)
+    }
+
     /// 在隔离偏好域中保存材质选项，再由新设置实例恢复。
     @Test("Liquid Glass preference persists and restores")
     func liquidGlassPreferencePersists() {

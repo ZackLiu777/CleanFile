@@ -576,6 +576,7 @@
 "quick.compress.title" = "압축";
 
 "quick.video" = "동영상 압축";
+"premium.feature.videoCompression" = "동영상 압축";
 
 "quick.image" = "사진 압축";
 
@@ -591,9 +592,9 @@
 
 "quick.originals" = "새 사본을 만들고 원본을 보존합니다. 결과가 더 클 수 있으니 교체 전에 비교하세요.";
 
-"premium.free.summary" = "무료: 미디어 검토 및 삭제, 동영상 압축 및 변환.";
+"premium.free.summary" = "무료: 빠른 정리, 미디어 검토 및 삭제, 동영상 변환.";
 
-"premium.value.summary" = "Premium: 카테고리 일괄 정리, 이미지 및 오디오 변환, 폴더 정리, 외관 맞춤 설정.";
+"premium.value.summary" = "Premium: 동영상 압축, 이미지 및 오디오 변환, 파일 정리, 외관 맞춤 설정.";
 
 "quick.free" = "무료";
 
@@ -649,3 +650,22 @@
 
 "premium.hero.title" = "더 많은 공간 확보";
 "premium.hero.subtitle" = "정리 및 미디어 도구를 이용하세요.";
+
+"intro.convert.title" = "손쉬운 형식 변환";
+"intro.convert.detail" = "동영상과 이미지를 원하는 형식으로 변환하세요.";
+
+"intro.storage.title" = "파일 스캔 및 확인";
+"intro.storage.detail" = "파일이나 폴더를 선택하고 스캔 결과를 확인한 후 삭제하세요.";
+
+"intro.walk.media.1" = "홈에서 사진 분류 열기";
+"intro.walk.media.2" = "정리할 항목 선택";
+"intro.walk.media.3" = "검토 후 삭제 확인";
+"intro.walk.storage.1" = "홈에서 …을 눌러 저장 공간 선택";
+"intro.walk.storage.2" = "파일이나 폴더를 선택하고 스캔 결과 확인";
+"intro.walk.storage.3" = "파일을 선택하고 삭제 확인";
+"intro.walk.compress.1" = "홈에서 압축 분류 선택";
+"intro.walk.compress.2" = "항목 선택 후 압축 탭";
+"intro.walk.compress.3" = "확인 후 압축 시작";
+"intro.walk.convert.1" = "홈에서 …을 눌러 형식 변환 선택";
+"intro.walk.convert.2" = "파일을 가져오고 형식과 비트 전송률 선택";
+"intro.walk.convert.3" = "변환 후 저장 또는 공유";

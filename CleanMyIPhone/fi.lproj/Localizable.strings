@@ -578,6 +578,7 @@
 "quick.compress.title" = "Pakkaa";
 
 "quick.video" = "Pakkaa videot";
+"premium.feature.videoCompression" = "Pakkaa videot";
 
 "quick.image" = "Pakkaa kuvat";
 
@@ -593,9 +594,9 @@
 
 "quick.originals" = "Luo uudet kopiot ja säilyttää alkuperäiset. Tulos voi olla suurempi; vertaa ennen korvaamista.";
 
-"premium.free.summary" = "Ilmaiseksi: tarkista ja poista mediaa, pakkaa ja muunna videoita.";
+"premium.free.summary" = "Ilmaiseksi: pikasiivous, median tarkistus ja poisto sekä videoiden muunnos.";
 
-"premium.value.summary" = "Premium: siivoa useita luokkia, muunna kuvia ja ääntä, järjestä kansioita ja mukauta ulkoasua.";
+"premium.value.summary" = "Premium: videoiden pakkaus, kuvien ja äänen muunnos, tiedostojen siivous ja ulkoasun mukautus.";
 
 "quick.free" = "Ilmainen";
 
@@ -651,3 +652,22 @@
 
 "premium.hero.title" = "Vapauta lisää tilaa";
 "premium.hero.subtitle" = "Avaa siivous- ja mediatyökalut käyttöösi.";
+
+"intro.convert.title" = "Muunna tiedostomuodot helposti";
+"intro.convert.detail" = "Muunna videot ja kuvat tarpeisiisi sopivaan muotoon.";
+
+"intro.storage.title" = "Skannaa ja tarkista tiedostot";
+"intro.storage.detail" = "Valitse tiedostot tai kansiot, tarkista tulokset ja vahvista poistettavat kohteet.";
+
+"intro.walk.media.1" = "Avaa kuvien luokka aloitussivulla";
+"intro.walk.media.2" = "Valitse poistettavat kohteet";
+"intro.walk.media.3" = "Tarkista ja vahvista poisto";
+"intro.walk.storage.1" = "Napauta aloitussivulla … ja valitse Tallennustila";
+"intro.walk.storage.2" = "Valitse tiedostot tai kansio ja tarkista skannaus";
+"intro.walk.storage.3" = "Valitse tiedostot ja vahvista poisto";
+"intro.walk.compress.1" = "Valitse pakkausluokka aloitussivulla";
+"intro.walk.compress.2" = "Valitse kohteet ja napauta Pakkaa";
+"intro.walk.compress.3" = "Vahvista pakkauksen aloittaminen";
+"intro.walk.convert.1" = "Napauta aloitussivulla … ja valitse Muodonmuunnos";
+"intro.walk.convert.2" = "Tuo tiedostot ja valitse muoto ja bittinopeus";
+"intro.walk.convert.3" = "Muunna ja tallenna tai jaa";

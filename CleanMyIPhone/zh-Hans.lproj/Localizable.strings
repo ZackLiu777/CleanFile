@@ -581,6 +581,7 @@
 "quick.compress.title" = "压缩";
 
 "quick.video" = "压缩视频";
+"premium.feature.videoCompression" = "压缩视频";
 
 "quick.image" = "压缩图片";
 
@@ -596,9 +597,9 @@
 
 "quick.originals" = "生成新副本，保留原件。结果可能更大，请比较后再替换。";
 
-"premium.free.summary" = "免费：检查和删除媒体，压缩及转换视频。";
+"premium.free.summary" = "免费：快速清理、检查和删除媒体、转换视频。";
 
-"premium.value.summary" = "Premium：批量清理分类、转换图片和音频、整理文件夹、自定义外观。";
+"premium.value.summary" = "Premium：压缩视频、转换图片和音频、清理文件、自定义外观。";
 
 "quick.free" = "免费";
 
@@ -654,3 +655,22 @@
 
 "premium.hero.title" = "释放更多空间";
 "premium.hero.subtitle" = "解锁清理与媒体工具。";
+
+"intro.convert.title" = "轻松转换文件格式";
+"intro.convert.detail" = "转换视频和图片格式，选择适合你的输出。";
+
+"intro.storage.title" = "扫描并检查文件";
+"intro.storage.detail" = "选择文件或文件夹，查看扫描结果，确认后删除所需内容。";
+
+"intro.walk.media.1" = "在首页打开照片分类";
+"intro.walk.media.2" = "选择要清理的项目";
+"intro.walk.media.3" = "检查后确认删除";
+"intro.walk.storage.1" = "在首页点击 …，选择存储";
+"intro.walk.storage.2" = "选择文件或文件夹并查看扫描结果";
+"intro.walk.storage.3" = "选择文件并确认删除";
+"intro.walk.compress.1" = "在首页选择压缩分类";
+"intro.walk.compress.2" = "勾选项目并点击压缩";
+"intro.walk.compress.3" = "确认后开始压缩";
+"intro.walk.convert.1" = "在首页点击 …，选择格式转换";
+"intro.walk.convert.2" = "导入文件，选择格式和码率";
+"intro.walk.convert.3" = "转换后保存或分享";

@@ -581,6 +581,7 @@
 "quick.compress.title" = "壓縮";
 
 "quick.video" = "壓縮影片";
+"premium.feature.videoCompression" = "壓縮影片";
 
 "quick.image" = "壓縮圖片";
 
@@ -596,9 +597,9 @@
 
 "quick.originals" = "建立新副本並保留原件。結果可能更大，請比較後再取代。";
 
-"premium.free.summary" = "免費：檢查和刪除媒體，壓縮及轉換影片。";
+"premium.free.summary" = "免費：快速清理、檢查及刪除媒體、轉換影片。";
 
-"premium.value.summary" = "Premium：批次清理分類、轉換圖片和音訊、整理檔案夾、自訂外觀。";
+"premium.value.summary" = "Premium：壓縮影片、轉換圖片和音訊、清理檔案、自訂外觀。";
 
 "quick.free" = "免費";
 
@@ -654,3 +655,22 @@
 
 "premium.hero.title" = "釋放更多空間";
 "premium.hero.subtitle" = "解鎖清理與媒體工具。";
+
+"intro.convert.title" = "輕鬆轉換檔案格式";
+"intro.convert.detail" = "轉換影片與圖片格式，選擇適合你的輸出。";
+
+"intro.storage.title" = "掃描並檢查檔案";
+"intro.storage.detail" = "選擇檔案或資料夾，查看掃描結果，確認後刪除所需內容。";
+
+"intro.walk.media.1" = "在首頁開啟照片分類";
+"intro.walk.media.2" = "選擇要清理的項目";
+"intro.walk.media.3" = "檢查後確認刪除";
+"intro.walk.storage.1" = "在首頁點按 …，選擇儲存空間";
+"intro.walk.storage.2" = "選擇檔案或資料夾並查看掃描結果";
+"intro.walk.storage.3" = "選擇檔案並確認刪除";
+"intro.walk.compress.1" = "在首頁選擇壓縮分類";
+"intro.walk.compress.2" = "勾選項目並點按壓縮";
+"intro.walk.compress.3" = "確認後開始壓縮";
+"intro.walk.convert.1" = "在首頁點按 …，選擇格式轉換";
+"intro.walk.convert.2" = "匯入檔案，選擇格式和位元率";
+"intro.walk.convert.3" = "轉換後儲存或分享";
